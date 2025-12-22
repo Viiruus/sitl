@@ -1,0 +1,18 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --sitl-surface: theme('colors.brand.950');
+  }
+
+  html,
+  body {
+    @apply bg-brand-950 text-white;
+  }
+
+  body {
+    background-color: var(--sitl-surface);
+  }
+}

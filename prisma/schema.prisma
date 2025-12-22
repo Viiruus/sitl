@@ -1,0 +1,275 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+datasource db {
+  provider = "sqlite" // ou "postgresql"
+  url      = "file:./prisma/dev.db"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum UserRole {
+  CLIMBER
+  GUIDE
+  ADMIN
+}
+
+enum AventureFormule {
+  GRIMPE_SEULEMENT
+  IMMERSION_COMPLETE
+}
+
+enum AventureDiscipline {
+  FALAISE
+  GRANDE_VOIE
+  BLOC
+  TRAD
+}
+
+enum AventureSessionStatut {
+  BROUILLON
+  OUVERT
+  COMPLET
+  ANNULE
+}
+
+enum BookingStatut {
+  EN_ATTENTE
+  CONFIRMEE
+  ANNULEE
+}
+
+enum ImageKind {
+  COVER
+  GALLERY
+}
+
+model User {
+  id Int @id @default(autoincrement())
+
+  // Auth de base
+  email        String  @unique
+  passwordHash String?
+  googleId     String? @unique
+  facebookId   String? @unique
+
+  role UserRole @default(CLIMBER)
+
+  acquisitionSource String? // "direct", "landing", "google", "facebook", etc.
+
+  // Informations personnelles
+  firstName  String?
+  lastName   String?
+  birthDate  String?
+  department String? // ex: "38 - Isère"
+
+  // Pratique de l’escalade
+  /// typesOfClimbing: JSON pour stocker un tableau de strings
+  /// ex: ["bloc", "sport", "multi"]
+  typesOfClimbing Json?
+
+  /// climbsMainly: "lead", "toprope" ou null
+  climbsMainly String?
+
+  /// environments: JSON, ex: ["falaise","salle_privee","salle_asso"]
+  environments Json?
+
+  /// autonomy: JSON, ex: ["assur_tete","manip_haut_de_voie","relais_grande_voie"]
+  autonomy Json?
+
+  /// frequency: "moins_1", "1", "2_3", "plus_3"
+  frequency String?
+
+  // Niveau
+  /// gradeLevel: "sub_5a", "5a_5c", "6a_6c", "7_plus", "dont_know"
+  gradeLevel String?
+
+  // Vision du voyage / stage
+  /// tripStyles: JSON, ex: ["aventure","confort"]
+  tripStyles Json?
+
+  // Onboarding
+  onboarded      Boolean @default(false)
+  onboardingStep Int     @default(0)
+
+  // 👇 pour les moniteurs (facultatif)
+  guideProfile GuideProfile?
+  aventures    Aventure[]    @relation("GuideAventures")
+
+  // 👇 pour les grimpeurs qui réservent
+  bookings Booking[]
+  dateSuggestions AventureDateSuggestion[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model GuideProfile {
+  id     Int  @id @default(autoincrement())
+  userId Int  @unique
+  user   User @relation(fields: [userId], references: [id])
+
+  bio          String?
+  baseLocation String? // "Massif des Bauges"
+  instagramUrl String?
+  websiteUrl   String?
+
+  // ✅ Nouveau : image principale du moniteur
+  profileImageUrl String?
+
+  isPublic Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Aventure {
+  id   Int    @id @default(autoincrement())
+  slug String @unique
+
+  titre      String
+  sousTitre  String?
+  discipline AventureDiscipline
+  formule    AventureFormule    @default(GRIMPE_SEULEMENT)
+
+  // ✅ si tu veux pouvoir dire "petites + grandes voies"
+  disciplinesComplementaires Json?
+
+  lieuLabel String // "Presles, Vercors"
+  pays      String? @default("France")
+  region    String?
+
+  jours         Int
+  placesMax     Int
+  niveauMinimum String? // "5b", "6a", etc.
+  autonomieMini String? // "assur_tete", etc.
+
+  prixParPersonne Int
+  devise          String @default("EUR")
+
+  inclus       String? // "Encadrement + hébergement + repas"
+  nonInclus    String? // "Transport, matériel perso"
+  pointsLocaux String? // "Ferme X, fromagerie Y..."
+
+  // ✅ Nouvelles infos “fiche voyage”
+  descriptionCourte String?
+  descriptionLongue String?
+  objectifs         String?
+
+  prerequis        Json?
+  equipementRequis Json?
+  equipementFourni Json?
+
+  hebergementLabel   String?
+  hebergementDetails String?
+  repasLabel         String?
+  transportLabel     String?
+  pointRdv           String?
+  langues            Json?
+
+  ageMin Int?
+  ageMax Int?
+
+  // ✅ Images
+  coverImageUrl   String?
+  images          AventureImage[]
+  dateSuggestions AventureDateSuggestion[]
+
+  // ✅ Programme structuré
+  programmeJours AventureJour[]
+
+  guideId Int
+  guide   User @relation("GuideAventures", fields: [guideId], references: [id])
+
+  sessions AventureSession[]
+
+  estPublie Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model AventureImage {
+  id         Int      @id @default(autoincrement())
+  aventureId Int
+  aventure   Aventure @relation(fields: [aventureId], references: [id], onDelete: Cascade)
+
+  url      String
+  kind     ImageKind @default(GALLERY)
+  alt      String?
+  position Int?
+
+  createdAt DateTime @default(now())
+
+  @@index([aventureId])
+}
+
+model AventureSession {
+  id         Int      @id @default(autoincrement())
+  aventureId Int
+  aventure   Aventure @relation(fields: [aventureId], references: [id])
+
+  dateDebut DateTime
+  dateFin   DateTime
+
+  statut          AventureSessionStatut @default(OUVERT)
+  placesTotales   Int
+  placesReservees Int                   @default(0)
+
+  prixSpecifique Int?
+
+  reservations Booking[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model AventureDateSuggestion {
+  id         Int      @id @default(autoincrement())
+  aventureId Int
+  aventure   Aventure @relation(fields: [aventureId], references: [id], onDelete: Cascade)
+
+  userId Int
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  startDate DateTime
+  endDate   DateTime?
+  comment   String?
+
+  createdAt DateTime @default(now())
+
+  @@index([aventureId])
+  @@index([userId])
+}
+
+model AventureJour {
+  id         Int      @id @default(autoincrement())
+  aventureId Int
+  aventure   Aventure @relation(fields: [aventureId], references: [id], onDelete: Cascade)
+
+  ordre       Int
+  titre       String
+  description String?
+  lieuLabel   String?
+  discipline  AventureDiscipline?
+
+  @@unique([aventureId, ordre])
+  @@index([aventureId])
+}
+
+model Booking {
+  id        Int             @id @default(autoincrement())
+  sessionId Int
+  session   AventureSession @relation(fields: [sessionId], references: [id])
+
+  userId Int
+  user   User @relation(fields: [userId], references: [id])
+
+  statut       BookingStatut @default(EN_ATTENTE)
+  participants Int           @default(1)
+  montant      Int // montant total en €
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
