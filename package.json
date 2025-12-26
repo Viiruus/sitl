@@ -7,7 +7,8 @@
     "dev": "nuxt dev",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
-    "postinstall": "nuxt prepare && prisma generate"
+    "postinstall": "nuxt prepare && prisma generate",
+    "vercel-build": "node --input-type=module -e \"import { execSync } from 'node:child_process'; console.log('VERCEL_ENV=', process.env.VERCEL_ENV); execSync('npx prisma migrate deploy', { stdio: 'inherit' }); if (process.env.VERCEL_ENV === 'preview') { console.log('Preview -> seeding'); execSync('npx prisma db seed', { stdio: 'inherit' }); } else { console.log('Not preview -> skip seed'); }\" && nuxt build"
   },
   "dependencies": {
     "@heroicons/vue": "^2.2.0",

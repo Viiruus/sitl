@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+echo "=== RUNNING vercel-build.sh ==="
+echo "VERCEL_ENV=${VERCEL_ENV:-<empty>}"
+
 npx nuxt prepare
 npx prisma generate
 npx prisma migrate deploy
