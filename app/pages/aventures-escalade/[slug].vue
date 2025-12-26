@@ -182,13 +182,10 @@
 
               <div class="rounded-2xl bg-brand-900/80 p-4">
                 <p class="text-[11px] font-semibold uppercase tracking-[0.3em] text-brand-200">
-                  Niveau
+                  Niveau minimum
                 </p>
                 <p class="mt-2 text-2xl font-semibold text-white">
                   {{ stage.niveauMinimum || 'Tous niveaux' }}
-                </p>
-                <p v-if="stage.autonomieMini" class="mt-1 text-[11px] text-brand-100/80">
-                  Autonomie mini : {{ stage.autonomieMini }}
                 </p>
               </div>
 
@@ -432,38 +429,7 @@
 
                 <!-- Hébergement / Matériel / Transport -->
                 <div class="grid gap-4 lg:grid-cols-3">
-                  <!-- Hébergement -->
-                  <div class="space-y-2 rounded-2xl bg-brand-900/40 p-4 ring-1 ring-white/10">
-                    <h3 class="text-xs font-semibold uppercase tracking-wide text-white">
-                      Hébergement & repas
-                    </h3>
-                    <p
-                      v-if="stage.hebergementLabel || stage.hebergementDetails"
-                      class="text-xs text-brand-100/90 whitespace-pre-line"
-                    >
-                      <span
-                        v-if="stage.hebergementLabel"
-                        class="font-medium"
-                      >
-                        {{ stage.hebergementLabel }}<br />
-                      </span>
-                      <span v-if="stage.hebergementDetails">
-                        {{ stage.hebergementDetails }}
-                      </span>
-                    </p>
-                    <p
-                      v-else
-                      class="text-xs text-brand-100/80"
-                    >
-                      Hébergement et repas précisés par le guide en amont.
-                    </p>
-                    <p
-                      v-if="stage.repasLabel"
-                      class="text-xs text-brand-100/90 whitespace-pre-line"
-                    >
-                      {{ stage.repasLabel }}
-                    </p>
-                  </div>
+                  
 
                   <!-- Matériel -->
                   <div class="space-y-2 rounded-2xl bg-brand-900/40 p-4 ring-1 ring-white/10">
@@ -746,6 +712,9 @@
                   </button>
                 </div>
                 <div class="space-y-3 rounded-2xl border border-gray-200 bg-gray-50 p-4 text-sm text-gray-700" v-else>
+                  <p class="font-semibold text-gray-900">
+                    Aucune de ces dates ne colle ?
+                  </p>
                   <p class="text-xs text-gray-500">
                     Propose un créneau : on regroupe les grimpeurs dispo et on te recontacte.
                   </p>
