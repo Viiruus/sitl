@@ -24,9 +24,10 @@
     "zod": "^4.1.13"
   },
   "devDependencies": {
-    "prisma": "^7.0.1",
     "@nuxtjs/tailwindcss": "^6.14.0",
     "@types/node": "^24.10.1",
-    "baseline-browser-mapping": "^2.9.11"
+    "baseline-browser-mapping": "^2.9.11",
+    "prisma": "^7.0.1",
+    "tsx": "^4.21.0"
   }
 }
