@@ -28,13 +28,23 @@
  *   npx tsx prisma/seed.ts
  */
 
-import { PrismaClient, UserRole, AventureDiscipline, AventureFormule, AventureSessionStatut, BookingStatut, ImageKind } from "@prisma/client"
+import pkg from "@prisma/client"
 
 import { PrismaBetterSqlite3 } from '@prisma/adapter-better-sqlite3'
 
 const adapter = new PrismaBetterSqlite3({
   url: process.env.DATABASE_URL ?? 'file:./prisma/dev.db',
 })
+
+const {
+  PrismaClient,
+  UserRole,
+  AventureDiscipline,
+  AventureFormule,
+  AventureSessionStatut,
+  BookingStatut,
+  ImageKind,
+} = pkg
 
 const prisma = new PrismaClient({ adapter })
 
