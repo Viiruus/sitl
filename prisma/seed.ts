@@ -28,25 +28,30 @@
  *   npx tsx prisma/seed.ts
  */
 
-import pkg from "@prisma/client"
-
+import { PrismaClient } from '@prisma/client'
+import { createClient } from '@libsql/client'
+import { PrismaLibSql } from '@prisma/adapter-libsql'
 import { PrismaBetterSqlite3 } from '@prisma/adapter-better-sqlite3'
 
-const adapter = new PrismaBetterSqlite3({
-  url: process.env.DATABASE_URL ?? 'file:./prisma/dev.db',
-})
+import { PrismaClient, UserRole, AventureDiscipline, AventureFormule, AventureSessionStatut, BookingStatut, ImageKind } from '@prisma/client'
 
-const {
-  PrismaClient,
-  UserRole,
-  AventureDiscipline,
-  AventureFormule,
-  AventureSessionStatut,
-  BookingStatut,
-  ImageKind,
-} = pkg
 
-const prisma = new PrismaClient({ adapter })
+const libsqlUrl = process.env.TURSO_DATABASE_URL || process.env.LIBSQL_URL
+const libsqlToken = process.env.TURSO_AUTH_TOKEN || process.env.LIBSQL_AUTH_TOKEN
+
+let prisma: PrismaClient
+
+if (libsqlUrl) {
+  const libsql = createClient({ url: libsqlUrl, authToken: libsqlToken })
+  const adapter = new PrismaLibSql(libsql)
+  prisma = new PrismaClient({ adapter })
+} else {
+  const adapter = new PrismaBetterSqlite3({
+    url: process.env.DATABASE_URL || 'file:./prisma/dev.db',
+  })
+  prisma = new PrismaClient({ adapter })
+}
+
 
 
 // ---------- Helpers ----------

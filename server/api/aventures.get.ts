@@ -1,16 +1,10 @@
-import pkg from "@prisma/client"
-
-import { PrismaBetterSqlite3 } from '@prisma/adapter-better-sqlite3'
-
-const adapter = new PrismaBetterSqlite3({
-  url: process.env.DATABASE_URL ?? 'file:./prisma/dev.db',
-})
-
-const { PrismaClient } = pkg
-const prisma = new PrismaClient({ adapter })
+// server/api/aventures.get.ts
+import { prisma } from "../utils/prisma";
 
 export default defineEventHandler(async () => {
-  const aventures = await prisma.aventure.findMany({
+  const db = await prisma();
+
+  const aventures = await db.aventure.findMany({
     where: { estPublie: true },
     include: {
       guide: {
@@ -18,16 +12,14 @@ export default defineEventHandler(async () => {
           firstName: true,
           lastName: true,
           guideProfile: {
-            select: {
-              profileImageUrl: true,
-            },
+            select: { profileImageUrl: true },
           },
         },
       },
       sessions: true,
     },
-    orderBy: { createdAt: 'desc' },
-  })
+    orderBy: { createdAt: "desc" },
+  });
 
   return {
     aventures: aventures.map((a) => ({
@@ -41,10 +33,11 @@ export default defineEventHandler(async () => {
       jours: a.jours,
       prixParPersonne: a.prixParPersonne,
       coverImageUrl: a.coverImageUrl,
-      guideName: [a.guide?.firstName, a.guide?.lastName].filter(Boolean).join(' ') || null,
+      guideName: [a.guide?.firstName, a.guide?.lastName].filter(Boolean).join(" ") || null,
       guideImageUrl: a.guide?.guideProfile?.profileImageUrl || null,
       hasSessions: a.sessions.length > 0,
       nextSession: a.sessions.sort((s1, s2) => +s1.dateDebut - +s2.dateDebut)[0] ?? null,
     })),
-  }
-})
+  };
+});
+

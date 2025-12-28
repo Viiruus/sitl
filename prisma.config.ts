@@ -3,6 +3,8 @@
 import "dotenv/config";
 import { defineConfig, env } from "prisma/config";
 
+const isVercel = process.env.VERCEL === "1" || Boolean(process.env.VERCEL_ENV);
+
 export default defineConfig({
   schema: "prisma/schema.prisma",
   migrations: {
@@ -10,6 +12,8 @@ export default defineConfig({
     seed: "tsx prisma/seed.ts",
   },
   datasource: {
-    url: env("DATABASE_URL"),
+    // ✅ Local => DATABASE_URL
+    // ✅ Vercel => TURSO_DATABASE_URL
+    url: isVercel ? env("TURSO_DATABASE_URL") : env("DATABASE_URL"),
   },
 });
