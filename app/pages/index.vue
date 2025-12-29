@@ -14,11 +14,12 @@
           <div class="relative px-6 py-32 sm:py-40 lg:px-8 lg:py-40 lg:pr-0 2xl:py-56">
             <div class="mx-auto max-w-2xl lg:mx-0 lg:max-w-xl">
               <h1 class="text-5xl font-semibold tracking-tight text-pretty text-white sm:text-7xl">Vos aventures verticales commencent ici.</h1>
-              <p class="mt-8 text-lg font-medium text-pretty text-gray-400 sm:text-xl/8">Escalade outdoor encadrée par nos guides locaux passionnés</p>
+              <p class="mt-8 text-lg font-medium text-pretty text-gray-400 sm:text-xl/8">Escalade outdoor encadrée par nos moniteurs locaux passionnés</p>
               <div class="mt-10 flex items-center gap-x-6">
-                <a href="#" class="rounded-md bg-secondaryBrand-500 px-3.5 py-2.5 text-sm font-semibold text-white shadow-xs hover:bg-secondaryBrand-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500">Les prochains départs</a>
-                
-                <NuxtLink to="/moniteur-nicolas-guillemain" class="text-sm/6 font-semibold text-white">
+                <NuxtLink to="/aventures-escalade" class="rounded-md bg-secondaryBrand-500 px-3.5 py-2.5 text-sm font-semibold text-white shadow-xs hover:bg-secondaryBrand-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500">
+                  Les prochains départs
+                </NuxtLink>
+                <NuxtLink to="/login" class="text-sm/6 font-semibold text-white">
                   Rejoindre la communauté <span aria-hidden="true">→</span>
                 </NuxtLink>
               </div>
@@ -83,7 +84,7 @@
         L’escalade sous toutes ses formes
       </h2>
       <p class="mt-4 max-w-2xl text-base text-gray-600">
-        Chaque pratique a ses sensations. Choisis l’activité qui colle à ton envie du moment et laisse nos guides t’emmener jouer sur le rocher.
+        Chaque pratique a ses sensations. Choisis l’activité qui colle à ton envie du moment et laisse nos moniteurs t’emmener jouer sur le rocher.
       </p>
 
       <div class="mt-12 grid gap-6 lg:grid-cols-2">

@@ -99,9 +99,10 @@
             </div>
 
             <!-- Bloc Guide à droite -->
-            <div
+            <NuxtLink
               v-if="guideFullName"
-              class="space-y-3 rounded-3xl bg-brand-950/85 p-5 ring-1 ring-secondaryBrand-400/40 shadow-xl shadow-black/40"
+              to="#"
+              class="block space-y-3 rounded-3xl bg-brand-950/85 p-5 ring-1 ring-secondaryBrand-400/40 shadow-xl shadow-black/40 transition hover:ring-secondaryBrand-300/70 focus:outline-none focus-visible:ring-2 focus-visible:ring-secondaryBrand-300"
             >
               <p class="text-[11px] font-semibold uppercase tracking-[0.3em] text-secondaryBrand-200">
                 Moniteur de l’aventure
@@ -143,27 +144,7 @@
                 et d’ambiances conviviales, aux manettes de ta prochaine aventure.
               </p>
 
-              <div class="mt-2 flex flex-wrap gap-2 text-xs">
-                <a
-                  v-if="guideInstagramUrl"
-                  :href="guideInstagramUrl"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  class="inline-flex items-center gap-1 rounded-full bg-white/5 px-3 py-1 text-[11px] font-medium text-brand-100 ring-1 ring-white/10 hover:bg-white/10"
-                >
-                  Instagram
-                </a>
-                <a
-                  v-if="guideWebsiteUrl"
-                  :href="guideWebsiteUrl"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  class="inline-flex items-center gap-1 rounded-full bg-white/5 px-3 py-1 text-[11px] font-medium text-brand-100 ring-1 ring-white/10 hover:bg-white/10"
-                >
-                  En savoir plus sur le guide
-                </a>
-              </div>
-            </div>
+            </NuxtLink>
           </div>
 
           <!-- Stats compactes -->
@@ -246,75 +227,91 @@
                 v-if="activeTab === 'overview'"
                 class="space-y-8"
               >
-                <!-- En bref -->
-                <div class="space-y-3 rounded-2xl bg-brand-900/70 p-5 ring-1 ring-white/10">
-                  <h2 class="text-xs font-semibold uppercase tracking-wide text-white">En bref</h2>
-                  <p class="text-sm text-brand-100/90">
-                    {{ resumeCeQuiTattend || "Une aventure locale pour progresser en grimpe sans perdre le kif." }}
-                  </p>
-                  <ul class="mt-2 space-y-1 text-xs text-brand-100/90">
-                    <li class="flex gap-2">
-                      <span class="mt-1 h-1.5 w-1.5 rounded-full bg-secondaryBrand-400" />
-                      <span>{{ formatDisciplineLabel(stage.discipline) }} · {{ stage.jours }} jour{{ stage.jours > 1 ? 's' : '' }}</span>
-                    </li>
-                    <li v-if="stage.niveauMinimum" class="flex gap-2">
-                      <span class="mt-1 h-1.5 w-1.5 rounded-full bg-secondaryBrand-400" />
-                      <span>Niveau conseillé : {{ stage.niveauMinimum }}</span>
-                    </li>
-                  </ul>
-                </div>
-
-                <!-- Pour qui ? -->
-                <div
-                  class="space-y-3 rounded-2xl bg-brand-900/40 p-5 ring-1 ring-white/10"
-                >
-                  <h3 class="text-xs font-semibold uppercase tracking-wide text-white">Pour qui ?</h3>
-                  <p
-                    v-if="stage.descriptionCourte"
-                    class="text-sm text-brand-100/90"
-                  >
-                    {{ stage.descriptionCourte }}
-                  </p>
-                  <p
-                    v-else
-                    class="text-sm text-brand-100/80"
-                  >
-                    Grimpeur·euse motivé·e, avec envie de se faire plaisir sur le rocher
-                    en sécurité, dans une ambiance conviviale.
-                  </p>
-
-                  <ul
-                    v-if="prerequisList.length"
-                    class="mt-2 space-y-1 text-xs text-brand-100/90"
-                  >
-                    <li
-                      v-for="item in prerequisList"
-                      :key="item"
-                      class="flex gap-2"
-                    >
-                      <span class="mt-1 h-1.5 w-1.5 rounded-full bg-brand-400" />
-                      <span>{{ item }}</span>
-                    </li>
-                  </ul>
-
-                  <p v-if="ageRange" class="mt-2 text-[11px] text-brand-200">
-                    Âge conseillé : {{ ageRange }}
-                  </p>
-                </div>
-
-                <!-- Ce qui t’attend (détail en accordéon) -->
-                <div class="space-y-3">
-                  <details
-                    v-if="stage.descriptionLongue"
-                    class="mt-2 rounded-2xl bg-brand-900/40 p-3 text-sm text-brand-100/90 ring-1 ring-white/5"
-                  >
-                    <summary class="cursor-pointer text-[11px] font-semibold uppercase tracking-wide text-brand-200">
-                      Voir le descriptif détaillé
-                    </summary>
-                    <p class="mt-2 whitespace-pre-line">
-                      {{ stage.descriptionLongue }}
+                <div class="space-y-6">
+                  <div class="rounded-3xl bg-brand-900/70 p-6 ring-1 ring-white/10">
+                    <div class="flex flex-wrap items-center justify-between gap-4">
+                      <div>
+                        <p class="text-[11px] font-semibold uppercase tracking-[0.3em] text-brand-200">
+                          Vue d'ensemble
+                        </p>
+                        <h2 class="text-xl font-semibold text-white">
+                          En bref
+                        </h2>
+                      </div>
+                    </div>
+                    <p class="mt-3 text-sm text-brand-100/90">
+                      {{ resumeCeQuiTattend || "Une aventure locale pour progresser en grimpe sans perdre le kif." }}
                     </p>
-                  </details>
+                    <ul class="mt-4 space-y-2 text-xs text-brand-100/80">
+                      <li class="flex items-start gap-2">
+                        <span class="mt-1 h-1.5 w-1.5 rounded-full bg-secondaryBrand-400" />
+                        <span>Immersion de {{ stage.jours }} jour{{ stage.jours > 1 ? 's' : '' }} adaptée au groupe.</span>
+                      </li>
+                      <li
+                        v-if="stage.niveauMinimum"
+                        class="flex items-start gap-2"
+                      >
+                        <span class="mt-1 h-1.5 w-1.5 rounded-full bg-secondaryBrand-400" />
+                        <span>Niveau conseillé : {{ stage.niveauMinimum }}.</span>
+                      </li>
+                    </ul>
+                  </div>
+                  <div class="grid gap-6 lg:grid-cols-2">
+                    <div class="rounded-3xl bg-brand-900/50 p-6 ring-1 ring-white/10">
+                      <h3 class="text-xs font-semibold uppercase tracking-wide text-white">
+                        Pour qui ?
+                      </h3>
+                      <p
+                        v-if="stage.descriptionCourte"
+                        class="mt-2 text-sm text-brand-100/90"
+                      >
+                        {{ stage.descriptionCourte }}
+                      </p>
+                      <p
+                        v-else
+                        class="mt-2 text-sm text-brand-100/80"
+                      >
+                        Grimpeur·euse motivé·e, avec envie de se faire plaisir sur le rocher
+                        en sécurité, dans une ambiance conviviale.
+                      </p>
+                      <ul
+                        v-if="prerequisList.length"
+                        class="mt-4 space-y-2 text-xs text-brand-100/90"
+                      >
+                        <li
+                          v-for="item in prerequisList"
+                          :key="item"
+                          class="flex gap-2 rounded-2xl bg-brand-900/70 px-3 py-2"
+                        >
+                          <span class="mt-1 h-1.5 w-1.5 rounded-full bg-brand-400" />
+                          <span>{{ item }}</span>
+                        </li>
+                      </ul>
+                      <div class="mt-4 space-y-2 text-[11px] text-brand-200">
+                        <p v-if="ageRange">
+                          Âge conseillé : {{ ageRange }}
+                        </p>
+                      </div>
+                    </div>
+                    <div class="rounded-3xl bg-brand-900/50 p-6 ring-1 ring-white/10">
+                      <p class="text-[11px] font-semibold uppercase tracking-[0.3em] text-brand-200">
+                        Objectifs
+                      </p>
+                      <p
+                        v-if="stage.objectifs"
+                        class="mt-2 text-sm text-brand-100/90 whitespace-pre-line"
+                      >
+                        {{ stage.objectifs }}
+                      </p>
+                      <p
+                        v-else
+                        class="mt-2 text-sm text-brand-100/80"
+                      >
+                        Construire ton autonomie et ton plaisir en falaise / grande voie,
+                        sans pression.
+                      </p>
+                    </div>
+                  </div>
                 </div>
               </section>
 
@@ -329,6 +326,18 @@
                 <p class="text-xs text-brand-200">
                   Trame indicative : le guide adapte selon le groupe et les conditions.
                 </p>
+
+                <div
+                  v-if="stage.descriptionLongue"
+                  class="rounded-2xl bg-brand-900/40 p-4 text-sm text-brand-100/90 ring-1 ring-white/10"
+                >
+                  <p class="text-[11px] font-semibold uppercase tracking-wide text-brand-200">
+                    Descriptif détaillé
+                  </p>
+                  <p class="mt-2 whitespace-pre-line">
+                    {{ stage.descriptionLongue }}
+                  </p>
+                </div>
 
                 <div
                   v-if="programmeJours.length"
@@ -377,61 +386,8 @@
                 v-else-if="activeTab === 'infos'"
                 class="space-y-6"
               >
-                <!-- Objectifs + Inclus / Non inclus -->
-                <div class="grid gap-4 lg:grid-cols-3">
-                  <div
-                    class="space-y-2 rounded-2xl bg-brand-900/40 p-4 ring-1 ring-white/10"
-                  >
-                    <h3 class="text-xs font-semibold uppercase tracking-wide text-white">
-                      Objectifs
-                    </h3>
-                    <p
-                      v-if="stage.objectifs"
-                      class="text-xs text-brand-100/90 whitespace-pre-line"
-                    >
-                      {{ stage.objectifs }}
-                    </p>
-                    <p
-                      v-else
-                      class="text-xs text-brand-100/80"
-                    >
-                      Construire ton autonomie et ton plaisir en falaise / grande voie,
-                      sans pression.
-                    </p>
-                  </div>
-
-                  <div
-                    class="space-y-2 rounded-2xl bg-brand-900/40 p-4 ring-1 ring-white/10"
-                  >
-                    <h3 class="text-xs font-semibold uppercase tracking-wide text-white">
-                      Inclus
-                    </h3>
-                    <p
-                      class="text-xs text-brand-100/90 whitespace-pre-line"
-                    >
-                      {{ stage.inclus || 'Encadrement par un moniteur·rice diplômé·e, choix de secteurs adaptés, brief sécurité.' }}
-                    </p>
-                  </div>
-
-                  <div
-                    class="space-y-2 rounded-2xl bg-brand-900/40 p-4 ring-1 ring-white/10"
-                  >
-                    <h3 class="text-xs font-semibold uppercase tracking-wide text-white">
-                      Non inclus
-                    </h3>
-                    <p
-                      class="text-xs text-brand-100/90 whitespace-pre-line"
-                    >
-                      {{ stage.nonInclus || 'Transport, hébergement et repas selon les besoins du groupe.' }}
-                    </p>
-                  </div>
-                </div>
-
-                <!-- Hébergement / Matériel / Transport -->
-                <div class="grid gap-4 lg:grid-cols-3">
-                  
-
-                  <!-- Matériel -->
+                <!-- Matériel / Transport -->
+                <div class="grid gap-4 lg:grid-cols-2">
                   <div class="space-y-2 rounded-2xl bg-brand-900/40 p-4 ring-1 ring-white/10">
                     <h3 class="text-xs font-semibold uppercase tracking-wide text-white">
                       Matériel
@@ -478,7 +434,6 @@
                     </p>
                   </div>
 
-                  <!-- Transport -->
                   <div class="space-y-2 rounded-2xl bg-brand-900/40 p-4 ring-1 ring-white/10">
                     <h3 class="text-xs font-semibold uppercase tracking-wide text-white">
                       Transport & RDV
@@ -504,49 +459,105 @@
                     </p>
                   </div>
                 </div>
-              </section>
 
-              <!-- TAB : PHOTOS -->
-              <section
-                v-else-if="activeTab === 'photos'"
-                class="space-y-4"
-              >
-                <h3 class="text-xs font-semibold uppercase tracking-wide text-white">
-                  Photos de l’aventure
-                </h3>
-                <p class="text-xs text-brand-200">
-                  Pour te donner un avant-goût des ambiances, sans tout spoiler.
-                </p>
-
-                <div
-                  v-if="galerieImages.length"
-                  class="mt-4 grid gap-4 md:grid-cols-3 lg:grid-cols-4"
-                >
+                <!-- Inclus / Non inclus -->
+                <div class="grid gap-4 lg:grid-cols-2">
                   <div
-                    v-for="img in galerieImages"
-                    :key="img.id"
-                    class="group relative h-32 overflow-hidden rounded-2xl bg-brand-900/60 md:h-36 lg:h-40"
+                    class="space-y-2 rounded-2xl bg-brand-900/40 p-4 ring-1 ring-white/10"
                   >
-                    <img
-                      :src="img.url"
-                      :alt="img.alt || stage.titre"
-                      class="size-full object-cover transition duration-500 group-hover:scale-105"
-                    />
-                    <div
-                      class="pointer-events-none absolute inset-0 bg-gradient-to-t from-brand-950/60 via-transparent to-transparent"
-                    />
+                    <h3 class="text-xs font-semibold uppercase tracking-wide text-white">
+                      Inclus
+                    </h3>
+                    <p
+                      class="text-xs text-brand-100/90 whitespace-pre-line"
+                    >
+                      {{ stage.inclus || 'Encadrement par un moniteur·rice diplômé·e, choix de secteurs adaptés, brief sécurité.' }}
+                    </p>
+                  </div>
+
+                  <div
+                    class="space-y-2 rounded-2xl bg-brand-900/40 p-4 ring-1 ring-white/10"
+                  >
+                    <h3 class="text-xs font-semibold uppercase tracking-wide text-white">
+                      Non inclus
+                    </h3>
+                    <p
+                      class="text-xs text-brand-100/90 whitespace-pre-line"
+                    >
+                      {{ stage.nonInclus || 'Transport, hébergement et repas selon les besoins du groupe.' }}
+                    </p>
                   </div>
                 </div>
-
-                <p
-                  v-else
-                  class="mt-3 text-sm text-brand-100/80"
-                >
-                  Les premières images arrivent bientôt 🌄
-                </p>
               </section>
+
+              <section
+                v-if="galerieImages.length"
+                class="rounded-3xl bg-brand-900/40 p-6 ring-1 ring-white/10"
+              >
+                <div class="flex items-center justify-between gap-4">
+                  <div>
+                    <p class="text-[11px] font-semibold uppercase tracking-[0.3em] text-brand-200">
+                      Galerie
+                    </p>
+                    <h3 class="text-lg font-semibold text-white">
+                      Aperçu en images
+                    </h3>
+                  </div>
+                  <div class="flex gap-2">
+                    <button
+                      type="button"
+                      class="flex h-10 w-10 items-center justify-center rounded-full border border-white/20 text-white transition hover:border-white/40"
+                      @click="goToPrevImage"
+                      :aria-disabled="galerieImages.length < 2"
+                      :disabled="galerieImages.length < 2"
+                    >
+                      <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+                      </svg>
+                    </button>
+                    <button
+                      type="button"
+                      class="flex h-10 w-10 items-center justify-center rounded-full border border-white/20 text-white transition hover:border-white/40"
+                      @click="goToNextImage"
+                      :aria-disabled="galerieImages.length < 2"
+                      :disabled="galerieImages.length < 2"
+                    >
+                      <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+                <div class="mt-4">
+                  <div class="relative overflow-hidden rounded-2xl bg-brand-950/40 ring-1 ring-white/5">
+                    <img
+                      v-if="currentGalleryImage"
+                      :src="currentGalleryImage.url"
+                      :alt="currentGalleryImage.alt || stageTitle"
+                      class="h-64 w-full object-cover md:h-80"
+                    />
+                    <div v-else class="flex h-64 w-full items-center justify-center text-sm text-brand-200 md:h-80">
+                      Pas encore de photos.
+                    </div>
+                  </div>
+                  <div class="mt-4 flex gap-2 overflow-x-auto">
+                    <button
+                      v-for="(img, idx) in galerieImages"
+                      :key="img.id || idx"
+                      type="button"
+                      class="relative h-16 w-24 flex-shrink-0 overflow-hidden rounded-xl ring-2 transition"
+                      :class="idx === galleryIndex ? 'ring-secondaryBrand-400' : 'ring-transparent opacity-60 hover:opacity-100'"
+                      @click="selectGalleryImage(idx)"
+                    >
+                      <img :src="img.url" :alt="img.alt || stageTitle" class="size-full object-cover" />
+                    </button>
+                  </div>
+                </div>
+              </section>
+
             </div>
 
+            <div class="space-y-6">
             <!-- COLONNE DROITE : encart Réservation sticky -->
             <aside class="lg:sticky lg:top-32 lg:h-fit">
               <div
@@ -655,120 +666,91 @@
                     </p>
                   </template>-->
                 </div>
-                <div class="mt-8 space-y-3 rounded-2xl border border-gray-200 bg-gray-50 p-4 text-sm text-gray-700" v-if="hasSessions">
-                  <p class="font-semibold text-gray-900">
-                    Aucune de ces dates ne colle ?
-                  </p>
-                  <p class="text-xs text-gray-500">
-                    Propose un créneau : on regroupe les grimpeurs dispo et on te recontacte.
-                  </p>
-                  <div class="grid gap-3 sm:grid-cols-2">
+                <details
+                  class="mt-8 rounded-2xl border border-gray-200 bg-gray-50 p-4 text-sm text-gray-700"
+                  :open="suggestionDetailsOpen"
+                  @toggle="onSuggestionToggle"
+                >
+                  <summary class="flex cursor-pointer items-center justify-between gap-3 text-left">
                     <div>
-                      <label class="text-[11px] font-semibold uppercase tracking-[0.3em] text-gray-500">Premier jour</label>
-                      <input
-                        type="date"
-                        class="mt-1 w-full rounded-2xl border border-gray-300 bg-white px-3 py-2 text-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/40"
-                        v-model="customStartDate"
-                        :disabled="suggestionLoading"
-                      />
+                      <p class="font-semibold text-gray-900">
+                        Aucune de ces dates ne colle ?
+                      </p>
+                      <p class="text-xs text-gray-500">
+                        Propose un créneau : on regroupe les grimpeurs dispo et on te recontacte.
+                      </p>
                     </div>
-                    <div>
-                      <label class="text-[11px] font-semibold uppercase tracking-[0.3em] text-gray-500">Dernier jour (optionnel)</label>
-                      <input
-                        type="date"
-                        class="mt-1 w-full rounded-2xl border border-gray-300 bg-white px-3 py-2 text-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/40"
-                        v-model="customEndDate"
-                        :disabled="suggestionLoading"
-                      />
-                    </div>
-                  </div>
-                  <div>
-                    <label class="text-[11px] font-semibold uppercase tracking-[0.3em] text-gray-500">Message pour le moniteur</label>
-                    <textarea
-                      rows="3"
-                      class="mt-1 w-full rounded-2xl border border-gray-300 bg-white px-3 py-2 text-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/40"
-                      placeholder="Ex: dispo le week-end, on est déjà 3 personnes motivées..."
-                      v-model="customComment"
-                      :disabled="suggestionLoading"
-                    />
-                  </div>
-                  <p v-if="suggestionError" class="rounded-md bg-red-50 px-3 py-2 text-xs text-red-700">
-                    {{ suggestionError }}
-                  </p>
-                  <p v-if="suggestionSuccess" class="rounded-md bg-green-50 px-3 py-2 text-xs text-green-700">
-                    {{ suggestionSuccess }}
-                  </p>
-                  <button
-                    type="button"
-                    class="inline-flex w-full items-center justify-center gap-2 rounded-full bg-secondaryBrand-500/90 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-white shadow-lg shadow-secondaryBrand-900/30 transition hover:bg-secondaryBrand-400 disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-400"
-                    :disabled="suggestionLoading || !customStartDate"
-                    @click="handleSuggestionClick"
-                  >
-                    <span v-if="suggestionLoading">Envoi en cours...</span>
-                    <span v-else>Je propose ce créneau</span>
-                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M8 5l8 7-8 7" />
+                    <svg
+                      class="h-5 w-5 text-gray-500 transition"
+                      :class="suggestionDetailsOpen ? 'rotate-180' : ''"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.5"
+                    >
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M6 9l6 6 6-6" />
                     </svg>
-                  </button>
-                </div>
-                <div class="space-y-3 rounded-2xl border border-gray-200 bg-gray-50 p-4 text-sm text-gray-700" v-else>
-                  <p class="font-semibold text-gray-900">
-                    Aucune de ces dates ne colle ?
-                  </p>
-                  <p class="text-xs text-gray-500">
-                    Propose un créneau : on regroupe les grimpeurs dispo et on te recontacte.
-                  </p>
-                  <div class="grid gap-3 sm:grid-cols-2">
+                  </summary>
+
+                  <div v-show="suggestionDetailsOpen" class="mt-4 space-y-3">
                     <div>
-                      <label class="text-[11px] font-semibold uppercase tracking-[0.3em] text-gray-500">Premier jour</label>
-                      <input
-                        type="date"
+                      <label class="text-[11px] font-semibold uppercase tracking-[0.3em] text-gray-500">
+                        Intervalle de dates
+                      </label>
+                      <ClientOnly>
+                        <VueDatePicker
+                          v-model="datePickerModel"
+                          range
+                          :enable-time-picker="false"
+                          :min-date="new Date()"
+                          :locale="datePickerLocale"
+                          :formats="datePickerFormats"
+                          placeholder="JJ/MM/AAAA → JJ/MM/AAAA"
+                          :teleport="true"
+                          :disabled="suggestionLoading"
+                          class="mt-2"
+                          input-class-name="w-full rounded-2xl border border-gray-300 bg-white px-3 py-2 text-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/40"
+                        />
+                      </ClientOnly>
+                      <p class="text-[11px] text-gray-400">
+                        Choisis une date de début et, si besoin, une date de fin.
+                      </p>
+                    </div>
+                    <div>
+                      <label class="text-[11px] font-semibold uppercase tracking-[0.3em] text-gray-500">
+                        Message pour le moniteur
+                      </label>
+                      <textarea
+                        rows="3"
                         class="mt-1 w-full rounded-2xl border border-gray-300 bg-white px-3 py-2 text-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/40"
-                        v-model="customStartDate"
+                        placeholder="Ex: dispo le week-end, on est déjà 3 personnes motivées..."
+                        v-model="customComment"
                         :disabled="suggestionLoading"
                       />
                     </div>
-                    <div>
-                      <label class="text-[11px] font-semibold uppercase tracking-[0.3em] text-gray-500">Dernier jour (optionnel)</label>
-                      <input
-                        type="date"
-                        class="mt-1 w-full rounded-2xl border border-gray-300 bg-white px-3 py-2 text-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/40"
-                        v-model="customEndDate"
-                        :disabled="suggestionLoading"
-                      />
-                    </div>
+                    <p v-if="suggestionError" class="rounded-md bg-red-50 px-3 py-2 text-xs text-red-700">
+                      {{ suggestionError }}
+                    </p>
+                    <p v-if="suggestionSuccess" class="rounded-md bg-green-50 px-3 py-2 text-xs text-green-700">
+                      {{ suggestionSuccess }}
+                    </p>
+                    <button
+                      type="button"
+                      class="inline-flex w-full items-center justify-center gap-2 rounded-full bg-secondaryBrand-500/90 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-white shadow-lg shadow-secondaryBrand-900/30 transition hover:bg-secondaryBrand-400 disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-400"
+                      :disabled="suggestionLoading || !suggestionRange.start"
+                      @click="handleSuggestionClick"
+                    >
+                      <span v-if="suggestionLoading">Envoi en cours...</span>
+                      <span v-else>Je propose ce créneau</span>
+                      <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M8 5l8 7-8 7" />
+                      </svg>
+                    </button>
                   </div>
-                  <div>
-                    <label class="text-[11px] font-semibold uppercase tracking-[0.3em] text-gray-500">Message pour le moniteur</label>
-                    <textarea
-                      rows="3"
-                      class="mt-1 w-full rounded-2xl border border-gray-300 bg-white px-3 py-2 text-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/40"
-                      placeholder="Ex: dispo le week-end, on est déjà 3 personnes motivées..."
-                      v-model="customComment"
-                      :disabled="suggestionLoading"
-                    />
-                  </div>
-                  <p v-if="suggestionError" class="rounded-md bg-red-50 px-3 py-2 text-xs text-red-700">
-                    {{ suggestionError }}
-                  </p>
-                  <p v-if="suggestionSuccess" class="rounded-md bg-green-50 px-3 py-2 text-xs text-green-700">
-                    {{ suggestionSuccess }}
-                  </p>
-                  <button
-                    type="button"
-                    class="inline-flex w-full items-center justify-center gap-2 rounded-full bg-secondaryBrand-500/90 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-white shadow-lg shadow-secondaryBrand-900/30 transition hover:bg-secondaryBrand-400 disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-400"
-                    :disabled="suggestionLoading || !customStartDate"
-                    @click="handleSuggestionClick"
-                  >
-                    <span v-if="suggestionLoading">Envoi en cours...</span>
-                    <span v-else>Je propose ce créneau</span>
-                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M8 5l8 7-8 7" />
-                    </svg>
-                  </button>
-                </div>
+                </details>
               </div>
             </aside>
+            </div>
 
           </div>
         </div>
@@ -859,12 +841,16 @@
 </template>
 
 <script setup lang="ts">
+import { VueDatePicker } from '@vuepic/vue-datepicker'
+import { fr as dateFnsFr } from 'date-fns/locale'
+import '@vuepic/vue-datepicker/dist/main.css'
 const route = useRoute()
 const slug = route.params.slug as string
 
 const { data, pending, error } = await useFetch(`/api/aventures/${slug}`)
 
 const stage = computed(() => data.value?.aventure)
+const stageTitle = computed(() => stage.value?.titre || 'Aventure')
 const otherStages = computed(() => data.value?.autres ?? [])
 
 // Onglets
@@ -872,7 +858,6 @@ const tabs = [
   { id: 'overview', label: 'Vue d’ensemble' },
   { id: 'programme', label: 'Programme' },
   { id: 'infos', label: 'Infos pratiques' },
-  { id: 'photos', label: 'Photos' },
 ] as const
 
 const activeTab = ref<(typeof tabs)[number]['id']>('overview')
@@ -916,6 +901,39 @@ const programmeJours = computed(() => {
 })
 
 const galerieImages = computed(() => stage.value?.images || [])
+const galleryIndex = ref(0)
+watch(
+  galerieImages,
+  (images) => {
+    if (!images?.length) {
+      galleryIndex.value = 0
+      return
+    }
+    galleryIndex.value = Math.min(galleryIndex.value, images.length - 1)
+  },
+  { immediate: true },
+)
+const currentGalleryImage = computed(() => {
+  const images = galerieImages.value
+  if (!images.length) return null
+  const index = Math.min(Math.max(galleryIndex.value, 0), images.length - 1)
+  return images[index]
+})
+const goToPrevImage = () => {
+  const images = galerieImages.value
+  if (!images.length) return
+  galleryIndex.value =
+    (galleryIndex.value - 1 + images.length) % images.length
+}
+const goToNextImage = () => {
+  const images = galerieImages.value
+  if (!images.length) return
+  galleryIndex.value = (galleryIndex.value + 1) % images.length
+}
+const selectGalleryImage = (index: number) => {
+  if (index < 0 || index >= galerieImages.value.length) return
+  galleryIndex.value = index
+}
 
 // Résumé court de "ce qui t'attend"
 const resumeCeQuiTattend = computed(() => {
@@ -1004,6 +1022,7 @@ const formatSessionDate = (session: any) => {
   const formatter = new Intl.DateTimeFormat('fr-FR', {
     day: 'numeric',
     month: 'long',
+    year: 'numeric',
   })
   const start = formatter.format(new Date(session.dateDebut))
   const end = formatter.format(new Date(session.dateFin))
@@ -1016,9 +1035,27 @@ const router = useRouter()
 const bookingLoading = ref(false)
 const bookingError = ref<string | null>(null)
 const bookingSuccess = ref<string | null>(null)
-const customStartDate = ref('')
-const customEndDate = ref('')
 const customComment = ref('')
+const customDateRange = ref<[Date | null, Date | null]>([null, null])
+const datePickerModel = computed<[Date | null, Date | null] | null>({
+  get() {
+    const [start, end] = customDateRange.value
+    return start || end ? customDateRange.value : null
+  },
+  set(value) {
+    if (Array.isArray(value)) {
+      customDateRange.value = [value[0] ?? null, value[1] ?? null]
+      return
+    }
+    customDateRange.value = [value ?? null, null]
+  },
+})
+const datePickerLocale = dateFnsFr
+const datePickerFormats = {
+  input: 'dd/MM/yyyy',
+  preview: 'dd/MM/yyyy',
+}
+const suggestionDetailsOpen = ref(false)
 const suggestionLoading = ref(false)
 const suggestionError = ref<string | null>(null)
 const suggestionSuccess = ref<string | null>(null)
@@ -1035,11 +1072,62 @@ const selectedSessions = computed(() => {
   return sessions.filter((s: any) => ids.includes(String(s.id)))
 })
 
+const overviewHighlights = computed(() => {
+  const data = stage.value
+  if (!data) return []
+  const highlights: { label: string; value: string }[] = []
+  if (data.discipline) {
+    highlights.push({
+      label: 'Discipline',
+      value: formatDisciplineLabel(data.discipline),
+    })
+  }
+  if (data.jours) {
+    highlights.push({
+      label: 'Durée',
+      value: `${data.jours} jour${data.jours > 1 ? 's' : ''}`,
+    })
+  }
+  if (data.niveauMinimum) {
+    highlights.push({
+      label: 'Niveau',
+      value: data.niveauMinimum,
+    })
+  }
+  if (data.placesMax) {
+    highlights.push({
+      label: 'Places',
+      value: `${data.placesMax} max`,
+    })
+  }
+  if (data.prixParPersonne) {
+    highlights.push({
+      label: 'Tarif / pers',
+      value: `${data.prixParPersonne} €`,
+    })
+  }
+  return highlights
+})
+
 const allSelectedAlreadyInterested = computed(() => {
   if (!selectedSessionIds.value.length) return false
   if (!selectedSessions.value.length) return false
   return selectedSessions.value.every((s: any) => s?.userIsBooked)
 })
+
+const suggestionRange = computed(() => {
+  const [startDate, endDate] = customDateRange.value || [null, null]
+  const start = startDate ? formatInputDate(startDate) : ''
+  const end = endDate ? formatInputDate(endDate) : ''
+  return { start, end }
+})
+
+const formatInputDate = (value: Date) => {
+  const year = value.getFullYear()
+  const month = String(value.getMonth() + 1).padStart(2, '0')
+  const day = String(value.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
 
 // pré-sélection de la première session
 watch(
@@ -1049,6 +1137,11 @@ watch(
   },
   { immediate: true },
 )
+
+const onSuggestionToggle = (event: Event) => {
+  const target = event.target as HTMLDetailsElement | undefined
+  suggestionDetailsOpen.value = target?.open ?? false
+}
 
 const handleInterestClick = async () => {
   bookingError.value = null
@@ -1109,8 +1202,9 @@ const handleSuggestionClick = async () => {
   suggestionError.value = null
   suggestionSuccess.value = null
 
-  if (!customStartDate.value) {
-    suggestionError.value = 'Merci de sélectionner au moins une date de départ.'
+  const { start, end } = suggestionRange.value
+  if (!start) {
+    suggestionError.value = 'Merci de sélectionner au moins une date valide.'
     return
   }
 
@@ -1123,9 +1217,9 @@ const handleSuggestionClick = async () => {
   suggestionLoading.value = true
   try {
     const body: { startDate: string; endDate?: string; comment?: string } = {
-      startDate: customStartDate.value,
+      startDate: start,
     }
-    if (customEndDate.value) body.endDate = customEndDate.value
+    if (end) body.endDate = end
     if (customComment.value) body.comment = customComment.value
 
     const res = await $fetch<{
@@ -1138,8 +1232,7 @@ const handleSuggestionClick = async () => {
 
     suggestionSuccess.value =
       res.message || 'Merci ! Nous avons noté tes disponibilités.'
-    customStartDate.value = ''
-    customEndDate.value = ''
+    customDateRange.value = [null, null]
     customComment.value = ''
   } catch (err: any) {
     suggestionError.value =

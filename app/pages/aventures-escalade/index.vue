@@ -1,7 +1,14 @@
 <script setup lang="ts">
+import { VueDatePicker } from '@vuepic/vue-datepicker'
+import '@vuepic/vue-datepicker/dist/main.css'
 const { data, pending, error } = await useFetch('/api/aventures')
 
 const selectedDiscipline = ref<string | null>(null)
+const dateRangeFilter = ref<[Date | null, Date | null] | null>(null)
+const dateFilterFormats = {
+  input: 'dd/MM/yyyy',
+  preview: 'dd/MM/yyyy',
+}
 
 const disciplineLabels: Record<string, string> = {
   GRANDE_VOIE: 'Grandes voies',
@@ -67,8 +74,26 @@ const filteredAventures = computed(() => {
     )
   }
 
+  if (dateRangeFilter.value) {
+    const [start, end] = dateRangeFilter.value
+    const startTime = start ? new Date(start).setHours(0, 0, 0, 0) : null
+    const endTime = end ? new Date(end).setHours(23, 59, 59, 999) : null
+    if (startTime || endTime) {
+      adventures = adventures.filter((aventure) => {
+        const nextDate = aventure.nextSession?.dateDebut
+          ? new Date(aventure.nextSession.dateDebut).getTime()
+          : null
+        if (!nextDate) return false
+        if (startTime && nextDate < startTime) return false
+        if (endTime && nextDate > endTime) return false
+        return true
+      })
+    }
+  }
+
   return adventures
 })
+
 
 import IconBloc from '~/components/icons/IconBloc.vue'
 import IconCouenne from '~/components/icons/IconCouenne.vue'
@@ -116,57 +141,66 @@ import IconTrad from '~/components/icons/IconTrad.vue'
 
       <div v-else class="space-y-6">
         <section class="space-y-4 rounded-3xl border border-brand-800 bg-brand-900/70 p-4">
-          <div class="flex flex-wrap items-center justify-between gap-3">
-            <div>
-              <p class="text-xs uppercase tracking-[0.3em] text-brand-200/70">Filtrer par discipline</p>
-              <p class="text-sm text-brand-100/70">
-                Choisis le type d’aventure qui t’intéresse.
-              </p>
-              <!--<IconBloc class="h-20 w-20 text-secondaryBrand-400" />
-              <IconCouenne class="h-20 w-20 text-secondaryBrand-400" />
-              <IconGrandeVoie class="h-20 w-20 text-secondaryBrand-400" />
-              <IconTrad class="h-20 w-20 text-secondaryBrand-400" />
-              <img src="/icons/brigade_icon_1.png" alt="Escalade en bloc" class="h-24 w-16" />
-              <img src="/icons/brigade_icon_2.png" alt="Escalade en bloc" class="h-24 w-16" />
-              <img src="/icons/brigade_icon_3.png" alt="Escalade en bloc" class="h-24 w-16" />
-              <img src="/icons/brigade_icon_4.png" alt="Escalade en bloc" class="h-24 w-16" />
-              -->
+          <div class="grid gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(220px,1.2fr)]">
+            <div class="space-y-4 rounded-2xl bg-brand-950/40 p-4">
+              <div class="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <p class="text-xs uppercase tracking-[0.3em] text-brand-200/70">Filtrer par discipline</p>
+                  <p class="text-xs text-brand-200/60">
+                    Choisis le type d’aventure qui t’intéresse.
+                  </p>
+                </div>
+              </div>
+              <div class="flex flex-wrap gap-3">
+                <button
+                  v-for="option in disciplineOptions"
+                  :key="option.value"
+                  type="button"
+                  class="flex items-center gap-3 rounded-2xl border px-3 py-2 text-sm transition"
+                  :class="selectedDiscipline === option.value
+                    ? 'border-secondaryBrand-400 bg-secondaryBrand-500/20 text-white'
+                    : 'border-brand-800 bg-brand-900/80 text-brand-100'"
+                  @click="selectedDiscipline = option.value"
+                >
+                  <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-950/60">
+                    <img
+                      :src="iconForDiscipline(option.value)"
+                      :alt="option.label"
+                      class="h-8 w-8"
+                      loading="lazy"
+                    />
+                  </span>
+                  <span class="font-medium">{{ option.label }}</span>
+                </button>
+                <p v-if="!disciplineOptions.length" class="text-xs text-brand-200/70">
+                  Les disciplines apparaîtront dès que des aventures seront publiées.
+                </p>
+              </div>
             </div>
-            <button
-              v-if="selectedDiscipline"
-              type="button"
-              class="text-xs font-semibold text-secondaryBrand-200 hover:text-secondaryBrand-100"
-              @click="selectedDiscipline = null"
-            >
-              Réinitialiser
-            </button>
-          </div>
-          <div class="flex flex-wrap gap-3">
-            <button
-              v-for="option in disciplineOptions"
-              :key="option.value"
-              type="button"
-              class="flex items-center gap-3 rounded-2xl border px-3 py-2 text-sm transition"
-              :class="selectedDiscipline === option.value
-                ? 'border-secondaryBrand-400 bg-secondaryBrand-500/20 text-white'
-                : 'border-brand-800 bg-brand-900/80 text-brand-100'"
-              @click="selectedDiscipline = option.value"
-            >
-              <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-950/60">
-                <img
-                  :src="iconForDiscipline(option.value)"
-                  :alt="option.label"
-                  class="h-8 w-8"
-                  loading="lazy"
-                />
-              </span>
-              <span class="font-medium">{{ option.label }}</span>
-            </button>
-            <p v-if="!disciplineOptions.length" class="text-xs text-brand-200/70">
-              Les disciplines apparaîtront dès que des aventures seront publiées.
-            </p>
-          </div>
 
+            <div class="space-y-3 rounded-2xl bg-brand-950/40 p-4 text-sm text-brand-100">
+              <div class="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <p class="text-xs uppercase tracking-[0.3em] text-brand-200/70">Filtrer par dates</p>
+                  <p class="text-xs text-brand-200/60">
+                    Montre-moi les aventures ayant une session qui commence dans cet intervalle.
+                  </p>
+                </div>
+              </div>
+              <ClientOnly>
+                <VueDatePicker
+                  v-model="dateRangeFilter"
+                  range
+                  :enable-time-picker="false"
+                  :formats="dateFilterFormats"
+                  :teleport="true"
+                  placeholder="JJ/MM/AAAA → JJ/MM/AAAA"
+                  input-class-name="w-full rounded-2xl border border-white/20 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-white/60 focus:border-secondaryBrand-400 focus:outline-none focus:ring-2 focus:ring-secondaryBrand-400/40"
+                  :disabled="pending"
+                />
+              </ClientOnly>
+            </div>
+          </div>
         </section>
 
         <div class="grid gap-6 md:grid-cols-2">
@@ -184,40 +218,50 @@ import IconTrad from '~/components/icons/IconTrad.vue'
                 loading="lazy"
               />
               <div class="absolute inset-0 bg-gradient-to-t from-brand-950 via-brand-950/40 to-transparent"></div>
-              <div class="absolute inset-x-6 bottom-6 flex flex-col gap-3 text-white">
-                <div class="flex flex-wrap items-center gap-3 text-xs text-brand-100/90">
-                  <span class="inline-flex items-center rounded-full bg-brand-950/60 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.3em] ring-1 ring-white/20">
-                    {{ formatDisciplineLabel(a.discipline) }}
-                  </span>
-                  <span class="rounded-full border border-secondaryBrand-200/40 bg-secondaryBrand-500/30 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-secondaryBrand-100">
-                    {{ a.jours }} {{ a.jours > 1 ? 'jours' : 'jour' }}
-                  </span>
+              <div class="absolute inset-0 flex flex-col justify-between px-6 py-6 text-white">
+                <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                  <div class="flex flex-wrap items-center gap-3 text-xs text-brand-100/90">
+                    <span class="inline-flex items-center rounded-full bg-brand-950/60 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.3em] ring-1 ring-white/20">
+                      {{ formatDisciplineLabel(a.discipline) }}
+                    </span>
+                    <span class="rounded-full border border-secondaryBrand-200/40 bg-secondaryBrand-500/30 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-secondaryBrand-100">
+                      {{ a.jours }} {{ a.jours > 1 ? 'jours' : 'jour' }}
+                    </span>
+                  </div>
+                  <div
+                    class="mt-3 flex w-full max-w-[220px] items-center gap-3 rounded-full bg-brand-950/70 px-4 py-2 text-sm text-white shadow-lg shadow-black/40 ring-1 ring-white/20 sm:mt-0"
+                  >
+                    <img
+                      :src="a.guideImageUrl || iconForDiscipline(a.discipline)"
+                      :alt="a.guideName || 'Moniteur'"
+                      class="h-9 w-9 rounded-full border border-white/30 bg-brand-950/70 object-cover"
+                    />
+                    <div>
+                      <p class="text-[10px] uppercase tracking-[0.3em] text-white/70">
+                        Moniteur
+                      </p>
+                      <p class="text-base font-semibold leading-tight">
+                        {{ a.guideName || 'Moniteur local' }}
+                      </p>
+                    </div>
+                  </div>
                 </div>
-                <h2 class="text-2xl font-semibold">{{ a.titre }}</h2>
-                <p v-if="a.sousTitre" class="text-sm text-brand-100/80">{{ a.sousTitre }}</p>
-                <p class="flex items-center gap-2 text-sm text-brand-100/80">
-                  <svg class="h-4 w-4 text-secondaryBrand-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 21c-4-4-6-7-6-10a6 6 0 0 1 12 0c0 3-2 6-6 10Z" />
-                    <circle cx="12" cy="11" r="2.5" />
-                  </svg>
-                  {{ a.lieuLabel }}
-                </p>
+                <div class="flex flex-col gap-2">
+                  <h2 class="text-2xl font-semibold truncate">{{ a.titre }}</h2>
+                  <p v-if="a.sousTitre" class="text-sm text-brand-100/80">{{ a.sousTitre }}</p>
+                  <p class="flex items-center gap-2 text-sm text-brand-100/80">
+                    <svg class="h-4 w-4 text-secondaryBrand-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M12 21c-4-4-6-7-6-10a6 6 0 0 1 12 0c0 3-2 6-6 10Z" />
+                      <circle cx="12" cy="11" r="2.5" />
+                    </svg>
+                    {{ a.lieuLabel }}
+                  </p>
+                </div>
               </div>
             </div>
 
             <div class="space-y-6 p-6">
               <dl class="grid grid-cols-1 gap-4 text-sm text-brand-100">
-                <div class="rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
-                  <dt class="text-[10px] uppercase tracking-[0.3em] text-brand-200/80">Moniteur</dt>
-                  <dd class="mt-2 flex items-center gap-3 font-semibold text-white">
-                    <img
-                      :src="a.guideImageUrl || iconForDiscipline(a.discipline)"
-                      :alt="a.guideName || 'Moniteur'"
-                      class="h-8 w-8 rounded-full border border-white/20 bg-brand-950/70 object-cover"
-                    />
-                    {{ a.guideName || 'Moniteur local' }}
-                  </dd>
-                </div>
               </dl>
 
               <div class="flex flex-wrap items-center justify-between gap-3 text-sm">

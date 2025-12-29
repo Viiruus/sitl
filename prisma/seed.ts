@@ -28,28 +28,33 @@
  *   npx tsx prisma/seed.ts
  */
 
-import { PrismaClient } from '@prisma/client'
-import { createClient } from '@libsql/client'
-import { PrismaLibSql } from '@prisma/adapter-libsql'
-import { PrismaBetterSqlite3 } from '@prisma/adapter-better-sqlite3'
+import "dotenv/config";
+import pkg from "@prisma/client";
+import { PrismaLibSql } from "@prisma/adapter-libsql";
+import { PrismaBetterSqlite3 } from "@prisma/adapter-better-sqlite3";
 
-import { PrismaClient, UserRole, AventureDiscipline, AventureFormule, AventureSessionStatut, BookingStatut, ImageKind } from '@prisma/client'
+const { PrismaClient } = pkg;
 
+const tursoUrl = process.env.TURSO_DATABASE_URL || process.env.LIBSQL_URL;
+const tursoToken = process.env.TURSO_AUTH_TOKEN || process.env.LIBSQL_AUTH_TOKEN;
 
-const libsqlUrl = process.env.TURSO_DATABASE_URL || process.env.LIBSQL_URL
-const libsqlToken = process.env.TURSO_AUTH_TOKEN || process.env.LIBSQL_AUTH_TOKEN
+let prisma: InstanceType<typeof PrismaClient>;
 
-let prisma: PrismaClient
+if (tursoUrl) {
+  if (!tursoToken) throw new Error("TURSO_AUTH_TOKEN is missing (required for Turso).");
 
-if (libsqlUrl) {
-  const libsql = createClient({ url: libsqlUrl, authToken: libsqlToken })
-  const adapter = new PrismaLibSql(libsql)
-  prisma = new PrismaClient({ adapter })
+  const adapter = new PrismaLibSql({
+    url: tursoUrl,
+    authToken: tursoToken,
+  });
+
+  prisma = new PrismaClient({ adapter });
 } else {
   const adapter = new PrismaBetterSqlite3({
-    url: process.env.DATABASE_URL || 'file:./prisma/dev.db',
-  })
-  prisma = new PrismaClient({ adapter })
+    url: process.env.DATABASE_URL || "file:./prisma/dev.db",
+  });
+
+  prisma = new PrismaClient({ adapter });
 }
 
 
@@ -81,7 +86,7 @@ async function seedGuides() {
     await prisma.user.upsert({
       where: { email: 'nicolas@brigadedukif.dev' },
       update: {
-        role: UserRole.GUIDE,
+        role: "GUIDE",
         firstName: 'Nicolas',
         lastName: 'Guillemain',
         department: '73 - Savoie',
@@ -114,7 +119,7 @@ async function seedGuides() {
       },
       create: {
         email: 'nicolas@brigadedukif.dev',
-        role: UserRole.GUIDE,
+        role: "GUIDE",
         firstName: 'Nicolas',
         lastName: 'Guillemain',
         department: '73 - Savoie',
@@ -141,7 +146,7 @@ async function seedGuides() {
     await prisma.user.upsert({
       where: { email: 'emma.fontainebleau@guides.test' },
       update: {
-        role: UserRole.GUIDE,
+        role: "GUIDE",
         firstName: 'Emma',
         lastName: 'Laurent',
         department: '77 - Seine-et-Marne',
@@ -173,7 +178,7 @@ async function seedGuides() {
       },
       create: {
         email: 'emma.fontainebleau@guides.test',
-        role: UserRole.GUIDE,
+        role: "GUIDE",
         firstName: 'Emma',
         lastName: 'Laurent',
         department: '77 - Seine-et-Marne',
@@ -200,7 +205,7 @@ async function seedGuides() {
     await prisma.user.upsert({
       where: { email: 'yannis.trad@guides.test' },
       update: {
-        role: UserRole.GUIDE,
+        role: "GUIDE",
         firstName: 'Yannis',
         lastName: 'Martin',
         department: '64 - Pyrénées-Atlantiques',
@@ -232,7 +237,7 @@ async function seedGuides() {
       },
       create: {
         email: 'yannis.trad@guides.test',
-        role: UserRole.GUIDE,
+        role: "GUIDE",
         firstName: 'Yannis',
         lastName: 'Martin',
         department: '64 - Pyrénées-Atlantiques',
@@ -312,7 +317,7 @@ async function seedClimbers() {
       await prisma.user.upsert({
         where: { email: c.email },
         update: {
-          role: UserRole.CLIMBER,
+          role: "CLIMBER",
           firstName: c.firstName,
           lastName: c.lastName,
           department: c.department,
@@ -329,7 +334,7 @@ async function seedClimbers() {
         },
         create: {
           email: c.email,
-          role: UserRole.CLIMBER,
+          role: "CLIMBER",
           firstName: c.firstName,
           lastName: c.lastName,
           department: c.department,
@@ -423,8 +428,8 @@ async function seedAventures(guides: any[]) {
       titre: 'Orpierre : petites et grandes voies dans les Alpes du Sud',
       sousTitre:
         '4 jours pour enchaîner couennes et grandes voies en douceur, dans un village entièrement tourné vers la grimpe.',
-      discipline: AventureDiscipline.GRANDE_VOIE,
-      formule: AventureFormule.GRIMPE_SEULEMENT,
+      discipline: "GRANDE_VOIE",
+      formule: "GRIMPE_SEULEMENT",
       disciplinesComplementaires: ['FALAISE'],
       lieuLabel: 'Orpierre, Hautes-Alpes',
       region: 'Provence-Alpes-Côte d’Azur',
@@ -482,19 +487,19 @@ async function seedAventures(guides: any[]) {
         {
           url: '/images/falaise-Calanques2.jpg',
           alt: 'Grande paroi lumineuse style Orpierre',
-          kind: ImageKind.COVER,
+          kind: "COVER",
           position: 1,
         },
         {
           url: '/images/escalade-grande-voie-calanques.jpg',
           alt: 'Longueur en grande voie avec vue dégagée',
-          kind: ImageKind.GALLERY,
+          kind: "GALLERY",
           position: 2,
         },
         {
           url: '/images/falaise-escalade-beaufortain.jpg',
           alt: 'Couenne en dalle au soleil',
-          kind: ImageKind.GALLERY,
+          kind: "GALLERY",
           position: 3,
         },
       ],
@@ -505,7 +510,7 @@ async function seedAventures(guides: any[]) {
           description:
             'Accueil au village, vérification du matos, couennes en dalle pour reprendre ses marques en tête, ateliers vol et assurage dynamique.',
           lieuLabel: 'Secteurs écoles proches du village',
-          discipline: AventureDiscipline.FALAISE,
+          discipline: "FALAISE",
         },
         {
           ordre: 2,
@@ -513,7 +518,7 @@ async function seedAventures(guides: any[]) {
           description:
             'Choix d’un itinéraire adapté au groupe (4–6 longueurs). Travail sur la communication, les relais et la gestion de la longueur.',
           lieuLabel: 'Grande paroi dominante Orpierre',
-          discipline: AventureDiscipline.GRANDE_VOIE,
+          discipline: "GRANDE_VOIE",
         },
         {
           ordre: 3,
@@ -521,7 +526,7 @@ async function seedAventures(guides: any[]) {
           description:
             'Reprise des points de vigilance, variantes possibles selon les envies : couennes plus dures, 2ème grande voie plus engagée ou plus ludique.',
           lieuLabel: 'Secteurs au soleil ou à l’ombre selon les conditions.',
-          discipline: AventureDiscipline.GRANDE_VOIE,
+          discipline: "GRANDE_VOIE",
         },
         {
           ordre: 4,
@@ -529,7 +534,7 @@ async function seedAventures(guides: any[]) {
           description:
             'Matinée sur le rocher, puis temps de bilan : ce que tu emmènes chez toi pour la suite de ta pratique.',
           lieuLabel: 'Couennes ou mini grande voie selon l’énergie du groupe',
-          discipline: AventureDiscipline.FALAISE,
+          discipline: "FALAISE",
         },
       ],
       estPublie: true,
@@ -546,8 +551,8 @@ async function seedAventures(guides: any[]) {
       titre: 'Presles : autonomie grande voie en mode Brigade du kif',
       sousTitre:
         '2 jours pour oser se lancer en grande voie équipée, sans pression, avec un accompagnement pas à pas.',
-      discipline: AventureDiscipline.GRANDE_VOIE,
-      formule: AventureFormule.GRIMPE_SEULEMENT,
+      discipline: "GRANDE_VOIE",
+      formule: "GRIMPE_SEULEMENT",
       lieuLabel: 'Presles, Vercors',
       region: 'Auvergne-Rhône-Alpes',
       jours: 2,
@@ -600,13 +605,13 @@ async function seedAventures(guides: any[]) {
         {
           url: '/images/escalade-grande-voie-calanques.jpg',
           alt: 'Corde en grande voie avec vue sur la mer',
-          kind: ImageKind.COVER,
+          kind: "COVER",
           position: 1,
         },
         {
           url: '/images/falaise-escalade-beaufortain.jpg',
           alt: 'Relais confortable en falaise',
-          kind: ImageKind.GALLERY,
+          kind: "GALLERY",
           position: 2,
         },
       ],
@@ -617,7 +622,7 @@ async function seedAventures(guides: any[]) {
           description:
             'Grande voie école de 4–5 longueurs pour revoir toutes les manipulations en contexte réel.',
           lieuLabel: 'Paroi école de Presles',
-          discipline: AventureDiscipline.GRANDE_VOIE,
+          discipline: "GRANDE_VOIE",
         },
         {
           ordre: 2,
@@ -625,7 +630,7 @@ async function seedAventures(guides: any[]) {
           description:
             'On monte d’un cran ou on consolide selon le groupe. Débrief et plan pour la suite de ta pratique.',
           lieuLabel: 'Paroi lumineuse selon conditions météo',
-          discipline: AventureDiscipline.GRANDE_VOIE,
+          discipline: "GRANDE_VOIE",
         },
       ],
       estPublie: true,
@@ -642,8 +647,8 @@ async function seedAventures(guides: any[]) {
       titre: 'Les Bauges : falaise & terroir savoyard',
       sousTitre:
         'Grimpe en couenne le matin, bons produits locaux l’après-midi et couchers de soleil en montagne.',
-      discipline: AventureDiscipline.FALAISE,
-      formule: AventureFormule.GRIMPE_SEULEMENT,
+      discipline: "FALAISE",
+      formule: "GRIMPE_SEULEMENT",
       lieuLabel: 'Massif des Bauges',
       region: 'Auvergne-Rhône-Alpes',
       jours: 3,
@@ -694,7 +699,7 @@ async function seedAventures(guides: any[]) {
         {
           url: '/images/falaise-escalade-beaufortain.jpg',
           alt: 'Falaise en moyenne montagne dans les Bauges',
-          kind: ImageKind.COVER,
+          kind: "COVER",
           position: 1,
         },
       ],
@@ -705,7 +710,7 @@ async function seedAventures(guides: any[]) {
           description:
             'Grimpe sur un secteur école pour caler attentes et envies, premiers objectifs définis.',
           lieuLabel: 'Falaise école des Bauges',
-          discipline: AventureDiscipline.FALAISE,
+          discipline: "FALAISE",
         },
         {
           ordre: 2,
@@ -713,7 +718,7 @@ async function seedAventures(guides: any[]) {
           description:
             'Travail ciblé sur le clipage, la gestion du mental et les essais à la limite.',
           lieuLabel: 'Secteurs adaptés au groupe',
-          discipline: AventureDiscipline.FALAISE,
+          discipline: "FALAISE",
         },
         {
           ordre: 3,
@@ -721,7 +726,7 @@ async function seedAventures(guides: any[]) {
           description:
             'Tu essaies ta voie “rêve du week-end” ou tu consolides ce qui a été vu.',
           lieuLabel: 'Dernier spot sympa avec belle vue',
-          discipline: AventureDiscipline.FALAISE,
+          discipline: "FALAISE",
         },
       ],
       estPublie: true,
@@ -737,8 +742,8 @@ async function seedAventures(guides: any[]) {
       titre: 'Fontainebleau : passer du pan à la forêt',
       sousTitre:
         'Une journée pour apprivoiser le bloc extérieur, la lecture de ligne et la sécurité sur crashpads.',
-      discipline: AventureDiscipline.BLOC,
-      formule: AventureFormule.GRIMPE_SEULEMENT,
+      discipline: "BLOC",
+      formule: "GRIMPE_SEULEMENT",
       lieuLabel: 'Forêt de Fontainebleau',
       region: 'Île-de-France',
       jours: 1,
@@ -779,7 +784,7 @@ async function seedAventures(guides: any[]) {
         {
           url: '/images/bloc-Pays-Basque-Mondarrain.jpg',
           alt: 'Bloc sur rocher avec crashpads',
-          kind: ImageKind.COVER,
+          kind: "COVER",
           position: 1,
         },
       ],
@@ -790,7 +795,7 @@ async function seedAventures(guides: any[]) {
           description:
             'Accueil, échauffement collectif, ateliers placements de crashpads, grimpe encadrée sur un circuit adapté au groupe.',
           lieuLabel: 'Secteur choisi selon météo et affluence',
-          discipline: AventureDiscipline.BLOC,
+          discipline: "BLOC",
         },
       ],
       estPublie: true,
@@ -807,8 +812,8 @@ async function seedAventures(guides: any[]) {
       titre: 'Pays basque : initiation trad & fissures',
       sousTitre:
         'Découvrir le coinceur sans se crisper : fissures faciles, ateliers matériel et ambiance basque.',
-      discipline: AventureDiscipline.TRAD,
-      formule: AventureFormule.GRIMPE_SEULEMENT,
+      discipline: "TRAD",
+      formule: "GRIMPE_SEULEMENT",
       disciplinesComplementaires: ['FALAISE'],
       lieuLabel: 'Falaises du Pays basque',
       region: 'Nouvelle-Aquitaine',
@@ -862,7 +867,7 @@ async function seedAventures(guides: any[]) {
         {
           url: '/images/falaise-Calanques2.jpg',
           alt: 'Falaise avec fissures et lumière douce',
-          kind: ImageKind.COVER,
+          kind: "COVER",
           position: 1,
         },
       ],
@@ -873,7 +878,7 @@ async function seedAventures(guides: any[]) {
           description:
             'Beaucoup de pédagogie au sol, puis petites longueurs faciles pour tester les placements.',
           lieuLabel: 'Secteur école trad',
-          discipline: AventureDiscipline.TRAD,
+          discipline: "TRAD",
         },
         {
           ordre: 2,
@@ -881,7 +886,7 @@ async function seedAventures(guides: any[]) {
           description:
             'Mise en situation réelle sur une voie trad accessible, avec accompagnement rapproché.',
           lieuLabel: 'Falaise adaptée au groupe',
-          discipline: AventureDiscipline.TRAD,
+          discipline: "TRAD",
         },
       ],
       estPublie: true,
@@ -980,7 +985,7 @@ async function seedAventures(guides: any[]) {
             aventureId: aventure.id,
             url: img.url,
             alt: img.alt,
-            kind: img.kind ?? ImageKind.GALLERY,
+            kind: img.kind ?? "GALLERY",
             position: img.position ?? null,
           },
         })
@@ -1015,7 +1020,7 @@ async function seedAventures(guides: any[]) {
           aventureId: aventure.id,
           dateDebut,
           dateFin,
-          statut: AventureSessionStatut.OUVERT,
+          statut: "OUVERT",
           placesTotales: s.placesTotales,
           placesReservees: 0,
           prixSpecifique: null,
@@ -1029,7 +1034,7 @@ async function seedAventures(guides: any[]) {
 
 async function seedBookings() {
   const climbers = await prisma.user.findMany({
-    where: { role: UserRole.CLIMBER },
+    where: { role: "CLIMBER" },
   })
   if (!climbers.length) return
 
@@ -1044,14 +1049,14 @@ async function seedBookings() {
       climber: climbers[0],
       session: sessions[0],
       participants: 1,
-      statut: BookingStatut.CONFIRMEE,
+      statut: "CONFIRMEE",
     },
     sessions[1]
       ? {
           climber: climbers[1] ?? climbers[0],
           session: sessions[1],
           participants: 2,
-          statut: BookingStatut.EN_ATTENTE,
+          statut: "EN_ATTENTE",
         }
       : null,
     sessions[2]
@@ -1059,7 +1064,7 @@ async function seedBookings() {
           climber: climbers[2] ?? climbers[0],
           session: sessions[2],
           participants: 1,
-          statut: BookingStatut.CONFIRMEE,
+          statut: "CONFIRMEE",
         }
       : null,
   ].filter(Boolean) as {
