@@ -231,9 +231,6 @@
                   <div class="rounded-3xl bg-brand-900/70 p-6 ring-1 ring-white/10">
                     <div class="flex flex-wrap items-center justify-between gap-4">
                       <div>
-                        <p class="text-[11px] font-semibold uppercase tracking-[0.3em] text-brand-200">
-                          Vue d'ensemble
-                        </p>
                         <h2 class="text-xl font-semibold text-white">
                           En bref
                         </h2>

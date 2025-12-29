@@ -1,23 +1,7 @@
 <template>
-  <svg
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    stroke-width="1.5"
-    stroke-linecap="round"
-    stroke-linejoin="round"
-  >
-    <path d="M5 20 L9 5 L13 10 L16 4 L19 20 Z" />
-    <path
-      d="M9.5 18
-         L11 15
-         L10 13
-         L12 11
-         L11 9
-         L13 7"
-    />
-    <circle cx="11" cy="15" r="0.8" />
-    <circle cx="12" cy="11" r="0.8" />
-    <circle cx="13" cy="7" r="0.8" />
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M6 52 L24 20 L36 34 L50 14 L58 28 L44 52"/>
+    <path d="M24 20 L30 12 L36 20"/>
+    <path d="M36 34 L30 44"/>
   </svg>
 </template>

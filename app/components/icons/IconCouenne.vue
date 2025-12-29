@@ -1,19 +1,9 @@
 <template>
-  <svg
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    stroke-width="1.5"
-    stroke-linecap="round"
-    stroke-linejoin="round"
-  >
-    <path d="M7 4 L7 19 L13 18 L17 19 L17 5 Z" />
-    <circle cx="13.5" cy="6" r="0.9" />
-    <path
-      d="M13.5 6.8
-         C13 9 12 11.2 11 13
-         C10.3 14.2 9.8 15.5 9.6 16.7"
-    />
-    <circle cx="9.5" cy="17.8" r="1.1" />
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="14" y="14" width="36" height="10" rx="3"/>
+    <path d="M18 24 L14 44"/>
+    <path d="M46 24 L50 44"/>
+    <path d="M20 44 C20 36 44 36 44 44"/>
+    <path d="M26 44 C26 38 38 38 38 44"/>
   </svg>
 </template>

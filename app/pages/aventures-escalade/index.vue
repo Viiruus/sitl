@@ -36,20 +36,16 @@ const disciplineOptions = computed(() => {
   }, [])
 })
 
-const iconForDiscipline = (value: string) => {
-  const initial = (formatDisciplineLabel(value).charAt(0) || '?').toUpperCase()
-  const palette: Record<string, string> = {
-    GRANDE_VOIE: '#fbbf24',
-    FALAISE: '#34d399',
-    BLOC: '#60a5fa',
-    TRAD: '#f472b6',
-  }
-  const color = palette[value] ?? '#f97316'
-  const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 64 64'>
-    <rect width='64' height='64' rx='18' fill='${color}'/>
-    <text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' font-size='28' font-family='Inter, Arial' fill='#0f172a' font-weight='700'>${initial}</text>
-  </svg>`
-  return `data:image/svg+xml,${encodeURIComponent(svg)}`
+const disciplineIconMap: Record<string, string> = {
+  GRANDE_VOIE: '/images/grande-voie.png',
+  FALAISE: '/images/couenne.png',
+  BLOC: '/images/bloc.png',
+  TRAD: '/images/trad.png',
+}
+
+const iconPathForDiscipline = (value?: string | null) => {
+  if (!value) return disciplineIconMap.GRANDE_VOIE
+  return disciplineIconMap[value] ?? disciplineIconMap.GRANDE_VOIE
 }
 
 // ✅ Helper manquant pour la fallback image selon la discipline
@@ -150,6 +146,14 @@ import IconTrad from '~/components/icons/IconTrad.vue'
                     Choisis le type d’aventure qui t’intéresse.
                   </p>
                 </div>
+                <button
+                  v-if="selectedDiscipline"
+                  type="button"
+                  class="rounded-full border border-secondaryBrand-300 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.3em] text-secondaryBrand-100 transition hover:bg-secondaryBrand-500/20"
+                  @click="selectedDiscipline = null"
+                >
+                  Réinitialiser
+                </button>
               </div>
               <div class="flex flex-wrap gap-3">
                 <button
@@ -162,14 +166,14 @@ import IconTrad from '~/components/icons/IconTrad.vue'
                     : 'border-brand-800 bg-brand-900/80 text-brand-100'"
                   @click="selectedDiscipline = option.value"
                 >
-                  <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-950/60">
-                    <img
-                      :src="iconForDiscipline(option.value)"
-                      :alt="option.label"
-                      class="h-8 w-8"
-                      loading="lazy"
-                    />
-                  </span>
+              <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-secondaryBrand-400/80">
+                <img
+                  :src="iconPathForDiscipline(option.value)"
+                  :alt="option.label"
+                  class="h-8 w-8 object-contain"
+                  loading="lazy"
+                />
+              </span>
                   <span class="font-medium">{{ option.label }}</span>
                 </button>
                 <p v-if="!disciplineOptions.length" class="text-xs text-brand-200/70">
@@ -231,11 +235,22 @@ import IconTrad from '~/components/icons/IconTrad.vue'
                   <div
                     class="mt-3 flex w-full max-w-[220px] items-center gap-3 rounded-full bg-brand-950/70 px-4 py-2 text-sm text-white shadow-lg shadow-black/40 ring-1 ring-white/20 sm:mt-0"
                   >
-                    <img
-                      :src="a.guideImageUrl || iconForDiscipline(a.discipline)"
-                      :alt="a.guideName || 'Moniteur'"
-                      class="h-9 w-9 rounded-full border border-white/30 bg-brand-950/70 object-cover"
-                    />
+                    <div
+                      class="flex h-9 w-9 items-center justify-center rounded-full border border-white/30 bg-brand-950/70"
+                    >
+                      <img
+                        v-if="a.guideImageUrl"
+                        :src="a.guideImageUrl"
+                        :alt="a.guideName || 'Moniteur'"
+                        class="h-full w-full rounded-full object-cover"
+                      />
+                      <img
+                        v-else
+                        :src="iconPathForDiscipline(a.discipline)"
+                        :alt="formatDisciplineLabel(a.discipline)"
+                        class="h-5 w-5 object-contain"
+                      />
+                    </div>
                     <div>
                       <p class="text-[10px] uppercase tracking-[0.3em] text-white/70">
                         Moniteur

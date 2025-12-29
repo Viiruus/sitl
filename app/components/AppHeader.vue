@@ -1,11 +1,11 @@
 <template>
   <header class="absolute inset-x-0 top-0 z-50">
     <div class="mx-auto max-w-7xl">
-      <div :class="isHome ? 'px-6 pt-6 lg:max-w-2xl lg:pr-0 lg:pl-8' : 'px-6 pt-6'">
+      <div :class="isHome ? 'px-6 pt-10 lg:max-w-2xl lg:pr-0 lg:pl-8' : 'px-6 pt-10'">
         <nav class="flex items-center justify-between lg:justify-start" aria-label="Global">
           <NuxtLink to="/" class="-m-1.5 p-1.5">
             <span class="sr-only">Your Company</span>
-            <img alt="Your Company" class="h-28 w-auto" src="~/assets/images/brigade_du_kif_logo_amber400.png" />
+            <img alt="Your Company" class="h-10 w-auto" src="~/assets/images/brigade_du_kif.png" />
           </NuxtLink>
           <button type="button" class="-m-2.5 rounded-md p-2.5 text-gray-200 lg:hidden" @click="mobileMenuOpen = true">
             <span class="sr-only">Open main menu</span>
@@ -33,7 +33,7 @@
         <div class="flex items-center justify-between">
           <NuxtLink to="/" class="-m-1.5 p-1.5">
             <span class="sr-only">Your Company</span>
-            <img class="h-8 w-auto" src="~/assets/images/brigade_du_kif_logo_amber400.png" alt="" />
+            <img class="h-8 w-auto" src="~/assets/images/brigade_du_kif.png" alt="" />
           </NuxtLink>
           <button type="button" class="-m-2.5 rounded-md p-2.5 text-gray-200" @click="mobileMenuOpen = false">
             <span class="sr-only">Close menu</span>
