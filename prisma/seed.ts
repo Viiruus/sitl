@@ -59,18 +59,6 @@ if (tursoUrl) {
 }
 
 
-
-const alreadySeeded = await prisma.user.findFirst({
-  where: { email: "nicolas@brigadedukif.dev" },
-  select: { id: true },
-});
-
-if (alreadySeeded) {
-  console.log("🌱 Seed skipped: already seeded");
-  return;
-}
-
-
 // ---------- Helpers ----------
 
 function slugify(input: string): string {
@@ -87,6 +75,7 @@ function addDays(date: Date, days: number): Date {
   d.setDate(d.getDate() + days)
   return d
 }
+
 
 // ---------- Guides ----------
 
@@ -1113,19 +1102,29 @@ async function seedBookings() {
 // ---------- main ----------
 
 async function main() {
-  console.log('🌱 Seed Brigade du kif : guides, grimpeurs, aventures...')
+  console.log("🌱 Seed Brigade du kif : guides, grimpeurs, aventures...");
+
+  // ✅ Guard: skip if already seeded
+  const alreadySeeded = await prisma.user.findFirst({
+    where: { email: "nicolas@brigadedukif.dev" },
+    select: { id: true },
+  });
+
+  if (alreadySeeded) {
+    console.log("🌱 Seed skipped: already seeded");
+    return; // ✅ OK: inside a function
+  }
+
   const guides = await seedGuides()
   await seedClimbers()
   await seedAventures(guides)
   await seedBookings()
-  console.log('✅ Seed terminé.')
+  
+
+  console.log("✅ Seed terminé.");
 }
 
-main()
-  .catch((e) => {
-    console.error('❌ Seed failed:', e)
-    process.exit(1)
-  })
-  .finally(async () => {
-    await prisma.$disconnect()
-  })
+main().catch((e) => {
+  console.error("❌ Seed failed:", e);
+  process.exit(1);
+});
