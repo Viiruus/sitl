@@ -1104,16 +1104,20 @@ async function seedBookings() {
 async function main() {
   console.log("🌱 Seed Brigade du kif : guides, grimpeurs, aventures...");
 
-  // ✅ Guard: skip if already seeded
-  const alreadySeeded = await prisma.user.findFirst({
-    where: { email: "nicolas@brigadedukif.dev" },
-    select: { id: true },
-  });
+  const [userCount, aventureCount, sessionCount] = await prisma.$transaction([
+    prisma.user.count(),
+    prisma.aventure.count(),
+    prisma.aventureSession.count(),
+  ])
 
-  if (alreadySeeded) {
-    console.log("🌱 Seed skipped: already seeded");
-    return; // ✅ OK: inside a function
+  const hasData = userCount > 0 || aventureCount > 0 || sessionCount > 0
+
+  if (hasData) {
+    console.log(`🌱 Seed skipped: DB already has data (users=${userCount}, aventures=${aventureCount}, sessions=${sessionCount})`)
+    return
   }
+
+
 
   const guides = await seedGuides()
   await seedClimbers()
