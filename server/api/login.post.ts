@@ -1,15 +1,6 @@
 // server/api/login.post.ts
 import { z } from 'zod'
-import pkg from "@prisma/client"
-
-import { PrismaBetterSqlite3 } from '@prisma/adapter-better-sqlite3'
-
-const adapter = new PrismaBetterSqlite3({
-  url: process.env.DATABASE_URL ?? 'file:./prisma/dev.db',
-})
-
-const { PrismaClient } = pkg
-const prisma = new PrismaClient({ adapter })
+import { prisma } from '../utils/prisma'
 
 const bodySchema = z.object({
   email: z.string().email(),
@@ -17,12 +8,13 @@ const bodySchema = z.object({
 })
 
 export default defineEventHandler(async (event) => {
+  const db = await prisma()
   const body = await readBody(event)
   const { email, password } = bodySchema.parse(body)
 
   const normalizedEmail = email.trim().toLowerCase()
 
-  const user = await prisma.user.findUnique({
+  const user = await db.user.findUnique({
     where: { email: normalizedEmail },
   })
 

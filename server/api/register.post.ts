@@ -1,15 +1,6 @@
 // server/api/register.post.ts
 import { z } from 'zod'
-import pkg from "@prisma/client"
-
-import { PrismaBetterSqlite3 } from '@prisma/adapter-better-sqlite3'
-
-const adapter = new PrismaBetterSqlite3({
-  url: process.env.DATABASE_URL ?? 'file:./prisma/dev.db',
-})
-
-const { PrismaClient } = pkg
-const prisma = new PrismaClient({ adapter })
+import { prisma } from '../utils/prisma'
 
 const bodySchema = z.object({
   email: z.string().email(),
@@ -18,13 +9,14 @@ const bodySchema = z.object({
 })
 
 export default defineEventHandler(async (event) => {
+  const db = await prisma()
   const body = await readBody(event)
   const { email, password, source } = bodySchema.parse(body)
 
   const normalizedEmail = email.trim().toLowerCase()
 
   // Vérifier si l'utilisateur existe déjà
-  const existing = await prisma.user.findUnique({
+  const existing = await db.user.findUnique({
     where: { email: normalizedEmail },
   })
 
@@ -39,7 +31,7 @@ export default defineEventHandler(async (event) => {
   const passwordHash = await hashPassword(password)
 
   // Créer l'utilisateur
-  const user = await prisma.user.create({
+  const user = await db.user.create({
     data: {
       email: normalizedEmail,
       passwordHash,

@@ -1,16 +1,8 @@
 // server/api/me.get.ts
-import pkg from "@prisma/client"
-
-import { PrismaBetterSqlite3 } from '@prisma/adapter-better-sqlite3'
-
-const adapter = new PrismaBetterSqlite3({
-  url: process.env.DATABASE_URL ?? 'file:./prisma/dev.db',
-})
-
-const { PrismaClient } = pkg
-const prisma = new PrismaClient({ adapter })
+import { prisma } from '../utils/prisma'
 
 export default defineEventHandler(async (event) => {
+  const db = await prisma()
   const session = await getUserSession(event)
 
   if (!session?.user?.email) {
@@ -22,7 +14,7 @@ export default defineEventHandler(async (event) => {
 
   const normalizedEmail = session.user.email.toLowerCase()
 
-  const user = await prisma.user.findUnique({
+  const user = await db.user.findUnique({
     where: { email: normalizedEmail },
     include: {
       bookings: {

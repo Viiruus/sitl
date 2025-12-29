@@ -1,15 +1,7 @@
-import pkg from "@prisma/client"
-
-import { PrismaBetterSqlite3 } from '@prisma/adapter-better-sqlite3'
-
-const adapter = new PrismaBetterSqlite3({
-  url: process.env.DATABASE_URL ?? 'file:./prisma/dev.db',
-})
-
-const { PrismaClient } = pkg
-const prisma = new PrismaClient({ adapter })
+import { prisma } from '../../../utils/prisma'
 
 export default defineEventHandler(async (event) => {
+  const db = await prisma()
   const slug = event.context.params?.slug
   if (!slug || typeof slug !== 'string') {
     throw createError({
@@ -27,7 +19,7 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  const aventure = await prisma.aventure.findUnique({
+  const aventure = await db.aventure.findUnique({
     where: { slug },
     select: { id: true },
   })
@@ -71,7 +63,7 @@ export default defineEventHandler(async (event) => {
     }
   }
 
-  const userExists = await prisma.user.findUnique({
+  const userExists = await db.user.findUnique({
     where: { id: userId },
     select: { id: true },
   })
@@ -83,7 +75,7 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  const suggestion = await prisma.aventureDateSuggestion.create({
+  const suggestion = await db.aventureDateSuggestion.create({
     data: {
       aventure: { connect: { id: aventure.id } },
       user: { connect: { id: userId } },

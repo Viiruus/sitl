@@ -1,16 +1,8 @@
 // server/api/aventures/[slug].get.ts
-import pkg from "@prisma/client"
-
-import { PrismaBetterSqlite3 } from '@prisma/adapter-better-sqlite3'
-
-const adapter = new PrismaBetterSqlite3({
-  url: process.env.DATABASE_URL ?? 'file:./prisma/dev.db',
-})
-
-const { PrismaClient } = pkg
-const prisma = new PrismaClient({ adapter })
+import { prisma } from '../../utils/prisma'
 
 export default defineEventHandler(async (event) => {
+  const db = await prisma()
   const slug = event.context.params?.slug
 
   if (!slug || typeof slug !== 'string') {
@@ -22,7 +14,7 @@ export default defineEventHandler(async (event) => {
 
   const session = await getUserSession(event)
 
-  const aventure = await prisma.aventure.findUnique({
+  const aventure = await db.aventure.findUnique({
     where: { slug },
     include: {
       guide: {
@@ -59,7 +51,7 @@ export default defineEventHandler(async (event) => {
   if (session?.user) {
     const userId = Number(session.user.id)
     if (!Number.isNaN(userId)) {
-      const userBookings = await prisma.booking.findMany({
+      const userBookings = await db.booking.findMany({
         where: {
           userId,
           session: {
@@ -74,7 +66,7 @@ export default defineEventHandler(async (event) => {
     }
   }
 
-  const autres = await prisma.aventure.findMany({
+  const autres = await db.aventure.findMany({
     where: {
       estPublie: true,
       slug: { not: slug },

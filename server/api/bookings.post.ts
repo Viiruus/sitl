@@ -1,16 +1,8 @@
 // server/api/bookings.post.ts
-import pkg from "@prisma/client"
-
-import { PrismaBetterSqlite3 } from '@prisma/adapter-better-sqlite3'
-
-const adapter = new PrismaBetterSqlite3({
-  url: process.env.DATABASE_URL ?? 'file:./prisma/dev.db',
-})
-
-const { PrismaClient } = pkg
-const prisma = new PrismaClient({ adapter })
+import { prisma } from '../utils/prisma'
 
 export default defineEventHandler(async (event) => {
+  const db = await prisma()
   const sessionAuth = await getUserSession(event)
 
   if (!sessionAuth?.user) {
@@ -39,7 +31,7 @@ export default defineEventHandler(async (event) => {
   }
 
   // Vérifier que la session existe
-  const dbSession = await prisma.aventureSession.findUnique({
+  const dbSession = await db.aventureSession.findUnique({
     where: { id: sessionId },
     include: { aventure: true },
   })
@@ -59,7 +51,7 @@ export default defineEventHandler(async (event) => {
   }
 
   // Vérifier si l'utilisateur est déjà inscrit
-  const existing = await prisma.booking.findFirst({
+  const existing = await db.booking.findFirst({
     where: {
       userId,
       sessionId,
@@ -89,7 +81,7 @@ export default defineEventHandler(async (event) => {
   const montant =
     dbSession.prixSpecifique ?? dbSession.aventure.prixParPersonne
 
-  const booking = await prisma.booking.create({
+  const booking = await db.booking.create({
     data: {
       sessionId,
       userId,
@@ -100,7 +92,7 @@ export default defineEventHandler(async (event) => {
   })
 
   // Incrémenter le nombre de places réservées
-  await prisma.aventureSession.update({
+  await db.aventureSession.update({
     where: { id: sessionId },
     data: {
       placesReservees: {

@@ -1,15 +1,6 @@
 // server/api/onboarding.post.ts
 import { z } from 'zod'
-import pkg from "@prisma/client"
-
-import { PrismaBetterSqlite3 } from '@prisma/adapter-better-sqlite3'
-
-const adapter = new PrismaBetterSqlite3({
-  url: process.env.DATABASE_URL ?? 'file:./prisma/dev.db',
-})
-
-const { PrismaClient } = pkg
-const prisma = new PrismaClient({ adapter })
+import { prisma } from '../utils/prisma'
 
 // Schéma de validation/typage des données reçues du front
 const onboardingSchema = z.object({
@@ -42,6 +33,7 @@ const onboardingSchema = z.object({
 })
 
 export default defineEventHandler(async (event) => {
+  const db = await prisma()
   // 1) Vérifier qu'on a bien un utilisateur connecté
   const session = await getUserSession(event) // auto-import nuxt-auth-utils
 
@@ -57,7 +49,7 @@ export default defineEventHandler(async (event) => {
   const body = onboardingSchema.parse(rawBody)
 
   // 4) Mettre à jour l'utilisateur en BDD
-  const user = await prisma.user.update({
+  const user = await db.user.update({
     where: { id: Number(session.user.id) }, // au cas où l'id soit sérialisé en string
     data: {
       firstName: body.firstName || null,
