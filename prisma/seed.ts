@@ -28,6 +28,7 @@
  *   npx tsx prisma/seed.ts
  */
 
+
 import "dotenv/config";
 import pkg from "@prisma/client";
 import { PrismaLibSql } from "@prisma/adapter-libsql";
@@ -57,6 +58,17 @@ if (tursoUrl) {
   prisma = new PrismaClient({ adapter });
 }
 
+
+
+const alreadySeeded = await prisma.user.findFirst({
+  where: { email: "nicolas@brigadedukif.dev" },
+  select: { id: true },
+});
+
+if (alreadySeeded) {
+  console.log("🌱 Seed skipped: already seeded");
+  return;
+}
 
 
 // ---------- Helpers ----------
