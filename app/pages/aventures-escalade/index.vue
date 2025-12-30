@@ -12,8 +12,8 @@ const dateFilterFormats = {
 }
 
 const disciplineLabels: Record<string, string> = {
-  GRANDE_VOIE: 'Grandes voies',
-  FALAISE: 'Couenne',
+  GRANDE_VOIE: 'Grande voie',
+  FALAISE: 'Falaise',
   BLOC: 'Bloc',
   TRAD: 'Trad',
 }

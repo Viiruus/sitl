@@ -91,11 +91,11 @@
           class="rounded-3xl border border-gray-200 bg-white p-6 shadow-lg shadow-gray-200/40"
         >
           <div class="flex items-center gap-3">
-            <div class="flex h-12 w-12 items-center justify-center rounded-full bg-brand-50 text-2xl">
+            <div class="flex h-14 w-14 items-center justify-center rounded-full bg-brand-50 text-2xl">
               <img
                 :src="activity.picto"
                 :alt="activity.title"
-                class="h-8 w-8 object-contain"
+                class="h-10 w-10 object-contain"
                 loading="lazy"
               />
             </div>
@@ -151,19 +151,34 @@
             />
             <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent" />
             <div class="absolute inset-4 flex flex-col justify-between">
-              <div class="flex flex-wrap items-center gap-2">
+              <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                <div class="flex flex-wrap items-center gap-2">
+                  <span
+                    class="inline-flex items-center rounded-full bg-brand-950/60 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.3em] text-white ring-1 ring-white/20"
+                  >
+                    {{ formatDisciplineLabel(stage.discipline) }}
+                  </span>
+                  <span
+                    class="inline-flex items-center rounded-full border border-secondaryBrand-200/40 bg-secondaryBrand-500/30 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-secondaryBrand-100"
+                  >
+                    {{ stage.jours }} {{ stage.jours > 1 ? 'jours' : 'jour' }}
+                  </span>
+                </div>
                 <span
-                  class="inline-flex items-center rounded-full bg-brand-950/60 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.3em] text-white ring-1 ring-white/20"
+                  class="inline-flex items-center justify-center rounded-full bg-secondaryBrand-400/80 p-2 shadow-lg shadow-secondaryBrand-900/30"
                 >
-                  {{ formatDisciplineLabel(stage.discipline) }}
-                </span>
-                <span
-                  class="inline-flex items-center rounded-full border border-secondaryBrand-200/40 bg-secondaryBrand-500/30 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-secondaryBrand-100"
-                >
-                  {{ stage.jours }} {{ stage.jours > 1 ? 'jours' : 'jour' }}
+                  <img
+                    :src="iconPathForDiscipline(stage.discipline)"
+                    :alt="formatDisciplineLabel(stage.discipline)"
+                    class="h-10 w-10 object-contain"
+                  />
                 </span>
               </div>
-              <span class="text-sm font-semibold text-white">
+              <span class="inline-flex items-center gap-2 text-sm font-semibold text-white">
+                <svg class="h-4 w-4 text-secondaryBrand-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <rect x="3" y="4" width="18" height="16" rx="2" />
+                  <path d="M16 2v4M8 2v4M3 10h18" />
+                </svg>
                 {{ stage.nextSession ? formatSessionRange(stage.nextSession) : 'Date à confirmer' }}
               </span>
             </div>
@@ -363,6 +378,18 @@ const { data: aventuresData, pending: aventuresPending } = await useFetch('/api/
     const start = formatter.format(new Date(session.dateDebut))
     const end = formatter.format(new Date(session.dateFin))
     return start === end ? start : `${start} → ${end}`
+  }
+
+  const disciplineIconMap: Record<string, string> = {
+    GRANDE_VOIE: '/images/grande-voie.png',
+    FALAISE: '/images/couenne.png',
+    BLOC: '/images/bloc.png',
+    TRAD: '/images/trad.png',
+  }
+
+  const iconPathForDiscipline = (value?: string | null) => {
+    if (!value) return disciplineIconMap.GRANDE_VOIE
+    return disciplineIconMap[value] ?? disciplineIconMap.GRANDE_VOIE
   }
 
 </script>
