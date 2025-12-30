@@ -4,14 +4,14 @@
     <AppHeader />
 
     <!-- Hero Section -->
-    <div class="relative">
+    <div class="relative min-h-screen">
       <div class="mx-auto max-w-7xl">
-        <div class="relative z-10 pt-14 lg:w-full lg:max-w-2xl">
+        <div class="relative z-10 flex min-h-screen flex-col pt-14 lg:w-full lg:max-w-2xl">
           <svg class="absolute inset-y-0 right-8 hidden h-full w-80 translate-x-1/2 transform fill-brand-950 lg:block" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
             <polygon points="0,0 90,0 50,100 0,100" />
           </svg>
 
-          <div class="relative px-6 py-32 sm:py-40 lg:px-8 lg:py-40 lg:pr-0 2xl:py-56">
+          <div class="relative flex flex-1 flex-col justify-center px-6 py-20 sm:py-32 lg:px-8 lg:py-40 lg:pr-0 2xl:py-56">
             <div class="mx-auto max-w-2xl lg:mx-0 lg:max-w-xl">
               <h1 class="text-5xl font-semibold tracking-tight text-pretty text-white sm:text-7xl">Vos aventures verticales commencent ici.</h1>
               <p class="mt-8 text-lg font-medium text-pretty text-gray-400 sm:text-xl/8">Escalade outdoor encadrée par nos moniteurs locaux passionnés</p>
@@ -27,8 +27,8 @@
           </div>
         </div>
       </div>
-      <div class="bg-brand-950 lg:absolute lg:inset-y-0 lg:right-0 lg:w-1/2">
-        <img class="aspect-3/2 object-cover lg:aspect-auto lg:size-full" src="~/assets/images/escalade0.jpg" alt="" />
+      <div class="bg-brand-950 lg:absolute lg:inset-y-0 lg:right-0 lg:w-1/2 min-h-[50vh] lg:min-h-screen">
+        <img class="h-full w-full object-cover" src="~/assets/images/escalade0.jpg" alt="" />
       </div>
     </div>
   </div>
