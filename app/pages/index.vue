@@ -77,9 +77,6 @@
   <!-- Section Activités -->
   <section class="bg-white py-24 sm:py-32">
     <div class="mx-auto max-w-7xl px-6 lg:px-8">
-      <p class="text-xs uppercase tracking-[0.5em] text-brand-500">
-        L’escalade sous toutes ses formes
-      </p>
       <h2 class="mt-4 text-4xl font-semibold tracking-tight text-pretty text-gray-900 sm:text-5xl">
         L’escalade sous toutes ses formes
       </h2>
@@ -95,7 +92,12 @@
         >
           <div class="flex items-center gap-3">
             <div class="flex h-12 w-12 items-center justify-center rounded-full bg-brand-50 text-2xl">
-              {{ activity.emoji }}
+              <img
+                :src="activity.picto"
+                :alt="activity.title"
+                class="h-8 w-8 object-contain"
+                loading="lazy"
+              />
             </div>
             <h3 class="text-2xl font-semibold text-gray-900">
               {{ activity.title }}
@@ -145,24 +147,28 @@
             <img
               :src="stage.coverImageUrl || imageForDiscipline(stage.discipline)"
               :alt="stage.titre"
-              class="size-full object-cover transition duration-500 group-hover:scale-105"
+              class="size-full object-cover"
             />
             <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent" />
             <div class="absolute inset-4 flex flex-col justify-between">
-              <span
-                class="inline-flex items-center rounded-full bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.3em] text-white backdrop-blur"
-              >
-                {{ formatDisciplineLabel(stage.discipline) }}
-              </span>
+              <div class="flex flex-wrap items-center gap-2">
+                <span
+                  class="inline-flex items-center rounded-full bg-brand-950/60 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.3em] text-white ring-1 ring-white/20"
+                >
+                  {{ formatDisciplineLabel(stage.discipline) }}
+                </span>
+                <span
+                  class="inline-flex items-center rounded-full border border-secondaryBrand-200/40 bg-secondaryBrand-500/30 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-secondaryBrand-100"
+                >
+                  {{ stage.jours }} {{ stage.jours > 1 ? 'jours' : 'jour' }}
+                </span>
+              </div>
               <span class="text-sm font-semibold text-white">
                 {{ stage.nextSession ? formatSessionRange(stage.nextSession) : 'Date à confirmer' }}
               </span>
             </div>
           </div>
           <div class="flex flex-1 flex-col p-5">
-            <p class="text-sm font-semibold text-secondaryBrand-300">
-              {{ stage.jours }} jour{{ stage.jours > 1 ? 's' : '' }}
-            </p>
             <h3 class="mt-2 text-xl font-semibold text-white">
               {{ stage.titre }}
             </h3>
@@ -298,32 +304,32 @@ const { data: aventuresData, pending: aventuresPending } = await useFetch('/api/
       description:
         'Escalade d’une longueur aussi appelée “couenne” ou “escalade de difficulté” qui vise à gravir une paroi de 10m à 50m en s’assurant à l’aide de dégaines sur des points fixes.',
       cta: 'Les stages falaise',
-      href: '/escalade-sportive-couenne-falaise',
-      emoji: '🧗‍♀️',
+      href: '/aventures-escalade?discipline=FALAISE',
+      picto: '/images/couenne.png',
     },
     {
       title: 'Grande voie',
       description:
         'Enchaîne plusieurs longueurs (jusqu’à plusieurs centaines de mètres) encordé·e à 2 ou 3 personnes avec matériel et techniques spécifiques : relais, rappels, assurage…',
       cta: 'Les stages grande voie',
-      href: '/escalade-grande-voie',
-      emoji: '🗻',
+      href: '/aventures-escalade?discipline=GRANDE_VOIE',
+      picto: '/images/grande-voie.png',
     },
     {
       title: 'Trad',
       description:
         'En escalade traditionnelle, tu places toi-même tes protections dans les faiblesses du rocher à l’aide de coinceurs, friends, pitons ou sangles.',
       cta: 'Les stages trad',
-      href: '/escalade-trad',
-      emoji: '🛠️',
+      href: '/aventures-escalade?discipline=TRAD',
+      picto: '/images/trad.png',
     },
     {
       title: 'Bloc',
       description:
         'Sans corde et sur des blocs de moins de 5m, avec parade et crashpads pour amortir les chutes. Parfait pour travailler la gestuelle et la puissance.',
       cta: 'Les stages bloc',
-      href: '/escalade-bloc',
-      emoji: '🧱',
+      href: '/aventures-escalade?discipline=BLOC',
+      picto: '/images/bloc.png',
     },
   ];
 

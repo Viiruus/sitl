@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { VueDatePicker } from '@vuepic/vue-datepicker'
 import '@vuepic/vue-datepicker/dist/main.css'
+const route = useRoute()
 const { data, pending, error } = await useFetch('/api/aventures')
 
 const selectedDiscipline = ref<string | null>(null)
@@ -48,6 +49,11 @@ const iconPathForDiscipline = (value?: string | null) => {
   return disciplineIconMap[value] ?? disciplineIconMap.GRANDE_VOIE
 }
 
+const initialQueryDiscipline = route.query.discipline
+if (typeof initialQueryDiscipline === 'string') {
+  selectedDiscipline.value = initialQueryDiscipline.toUpperCase()
+}
+
 // ✅ Helper manquant pour la fallback image selon la discipline
 const disciplineImageMap: Record<string, string> = {
   GRANDE_VOIE: '/images/escalade-grande-voie-calanques.jpg',
@@ -90,11 +96,6 @@ const filteredAventures = computed(() => {
   return adventures
 })
 
-
-import IconBloc from '~/components/icons/IconBloc.vue'
-import IconCouenne from '~/components/icons/IconCouenne.vue'
-import IconGrandeVoie from '~/components/icons/IconGrandeVoie.vue'
-import IconTrad from '~/components/icons/IconTrad.vue'
 
 </script>
 
@@ -232,36 +233,17 @@ import IconTrad from '~/components/icons/IconTrad.vue'
                       {{ a.jours }} {{ a.jours > 1 ? 'jours' : 'jour' }}
                     </span>
                   </div>
-                  <div
-                    class="mt-3 flex w-full max-w-[220px] items-center gap-3 rounded-full bg-brand-950/70 px-4 py-2 text-sm text-white shadow-lg shadow-black/40 ring-1 ring-white/20 sm:mt-0"
+                  <span
+                    class="inline-flex items-center justify-center rounded-full bg-secondaryBrand-400/80 p-2 shadow-lg shadow-secondaryBrand-900/30"
                   >
-                    <div
-                      class="flex h-9 w-9 items-center justify-center rounded-full border border-white/30 bg-brand-950/70"
-                    >
-                      <img
-                        v-if="a.guideImageUrl"
-                        :src="a.guideImageUrl"
-                        :alt="a.guideName || 'Moniteur'"
-                        class="h-full w-full rounded-full object-cover"
-                      />
-                      <img
-                        v-else
-                        :src="iconPathForDiscipline(a.discipline)"
-                        :alt="formatDisciplineLabel(a.discipline)"
-                        class="h-5 w-5 object-contain"
-                      />
-                    </div>
-                    <div>
-                      <p class="text-[10px] uppercase tracking-[0.3em] text-white/70">
-                        Moniteur
-                      </p>
-                      <p class="text-base font-semibold leading-tight">
-                        {{ a.guideName || 'Moniteur local' }}
-                      </p>
-                    </div>
-                  </div>
+                    <img
+                      :src="iconPathForDiscipline(a.discipline)"
+                      :alt="formatDisciplineLabel(a.discipline)"
+                      class="h-10 w-10 object-contain"
+                    />
+                  </span>
                 </div>
-                <div class="flex flex-col gap-2">
+                <div class="flex flex-col gap-3">
                   <h2 class="text-2xl font-semibold truncate">{{ a.titre }}</h2>
                   <p v-if="a.sousTitre" class="text-sm text-brand-100/80">{{ a.sousTitre }}</p>
                   <p class="flex items-center gap-2 text-sm text-brand-100/80">
@@ -275,24 +257,41 @@ import IconTrad from '~/components/icons/IconTrad.vue'
               </div>
             </div>
 
-            <div class="space-y-6 p-6">
-              <dl class="grid grid-cols-1 gap-4 text-sm text-brand-100">
-              </dl>
-
-              <div class="flex flex-wrap items-center justify-between gap-3 text-sm">
+            <div class="p-6">
+              <div class="flex flex-wrap items-center justify-between text-sm">
                 <div class="text-brand-100">
-                  À partir de
                   <span class="font-semibold">{{ a.prixParPersonne }} €</span>
                   <span class="text-brand-200/70 text-xs"> / personne</span>
+                  max
                 </div>
-                <span
-                  class="inline-flex items-center gap-2 rounded-full bg-secondaryBrand-500/90 px-5 py-2 text-xs font-semibold uppercase tracking-wide text-white shadow-lg shadow-secondaryBrand-900/30 transition"
+                <div
+                  class="mt-4 mb-4 flex w-full items-center gap-3 rounded-2xl bg-brand-950/70 px-5 py-3 text-sm text-white shadow-lg shadow-black/40 ring-1 ring-white/20 sm:mt-0 sm:mb-0 sm:max-w-[240px] sm:self-end"
                 >
-                  Voir l’aventure
-                  <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M8 5l8 7-8 7" />
-                  </svg>
-                </span>
+                  <div
+                    class="flex h-9 w-9 items-center justify-center rounded-full border border-white/30 bg-brand-950/70"
+                  >
+                    <img
+                      v-if="a.guideImageUrl"
+                      :src="a.guideImageUrl"
+                      :alt="a.guideName || 'Moniteur'"
+                      class="h-full w-full rounded-full object-cover"
+                    />
+                    <img
+                      v-else
+                      :src="iconPathForDiscipline(a.discipline)"
+                      :alt="formatDisciplineLabel(a.discipline)"
+                      class="h-5 w-5 object-contain"
+                    />
+                  </div>
+                  <div>
+                    <p class="text-[10px] uppercase tracking-[0.3em] text-white/70">
+                      Moniteur
+                    </p>
+                    <p class="text-base font-semibold leading-tight">
+                      {{ a.guideName || 'Moniteur local' }}
+                    </p>
+                  </div>
+                </div>
               </div>
             </div>
           </NuxtLink>

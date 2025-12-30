@@ -48,11 +48,13 @@
             <!-- Titre + tags -->
             <div class="max-w-3xl space-y-6">
               <div class="flex flex-wrap items-center gap-3 text-xs">
-                <span
-                  class="inline-flex items-center rounded-full bg-white/10 px-3 py-1 font-semibold uppercase tracking-[0.3em] text-white/80"
-                >
-                  {{ formatDisciplineLabel(stage.discipline) }}
-                </span>
+              <span class="inline-flex items-center justify-center rounded-full bg-secondaryBrand-400/80 p-2 shadow-lg shadow-secondaryBrand-900/30">
+                <img
+                  :src="iconPathForDiscipline(stage.discipline)"
+                  :alt="formatDisciplineLabel(stage.discipline)"
+                  class="h-8 w-8 object-contain"
+                />
+              </span>
                 <span
                   class="inline-flex items-center gap-1.5 rounded-full bg-brand-900/70 px-3 py-1 text-[11px] font-medium text-brand-100"
                 >
@@ -1008,6 +1010,18 @@ const disciplineLabels: Record<string, string> = {
   FALAISE: 'Falaise',
   BLOC: 'Bloc',
   TRAD: 'Trad',
+}
+
+const disciplineIconMap: Record<string, string> = {
+  GRANDE_VOIE: '/images/grande-voie.png',
+  FALAISE: '/images/couenne.png',
+  BLOC: '/images/bloc.png',
+  TRAD: '/images/trad.png',
+}
+
+const iconPathForDiscipline = (value?: string | null) => {
+  if (!value) return disciplineIconMap.GRANDE_VOIE
+  return disciplineIconMap[value] ?? disciplineIconMap.GRANDE_VOIE
 }
 
 const formatDisciplineLabel = (value?: string | null) => {
