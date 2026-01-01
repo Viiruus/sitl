@@ -224,24 +224,26 @@ const filteredAventures = computed(() => {
               />
               <div class="absolute inset-0 bg-gradient-to-t from-brand-950 via-brand-950/40 to-transparent"></div>
               <div class="absolute inset-0 flex flex-col justify-between px-6 py-6 text-white">
-                <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                  <div class="flex flex-wrap items-center gap-3 text-xs text-brand-100/90">
-                    <span class="inline-flex items-center rounded-full bg-brand-950/60 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.3em] ring-1 ring-white/20">
+                <div class="flex flex-wrap items-center gap-3 text-xs text-brand-100/90 sm:flex-row sm:justify-between">
+                  <div class="flex flex-wrap items-center gap-3 flex-1">
+                    <span class="inline-flex max-w-[70%] items-center rounded-full bg-brand-950/60 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.3em] ring-1 ring-white/20">
                       {{ formatDisciplineLabel(a.discipline) }}
                     </span>
                     <span class="rounded-full border border-secondaryBrand-200/40 bg-secondaryBrand-500/30 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-secondaryBrand-100">
                       {{ a.jours }} {{ a.jours > 1 ? 'jours' : 'jour' }}
                     </span>
                   </div>
-                  <span
-                    class="inline-flex items-center justify-center rounded-full bg-secondaryBrand-400/80 p-2 shadow-lg shadow-secondaryBrand-900/30"
-                  >
-                    <img
-                      :src="iconPathForDiscipline(a.discipline)"
-                      :alt="formatDisciplineLabel(a.discipline)"
-                      class="h-10 w-10 object-contain"
-                    />
-                  </span>
+                  <div class="ml-auto">
+                    <span
+                      class="inline-flex h-12 w-12 items-center justify-center rounded-full bg-secondaryBrand-400/80 shadow-lg shadow-secondaryBrand-900/30 sm:h-14 sm:w-14"
+                    >
+                      <img
+                        :src="iconPathForDiscipline(a.discipline)"
+                        :alt="formatDisciplineLabel(a.discipline)"
+                        class="h-8 w-8 object-contain sm:h-10 sm:w-10"
+                      />
+                    </span>
+                  </div>
                 </div>
                 <div class="flex flex-col gap-3">
                   <h2 class="text-2xl font-semibold truncate">{{ a.titre }}</h2>

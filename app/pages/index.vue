@@ -151,10 +151,10 @@
             />
             <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent" />
             <div class="absolute inset-4 flex flex-col justify-between">
-              <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                <div class="flex flex-wrap items-center gap-2">
+              <div class="flex flex-wrap items-center gap-3 text-xs text-white sm:flex-row sm:justify-between">
+                <div class="flex flex-wrap items-center gap-2 flex-1">
                   <span
-                    class="inline-flex items-center rounded-full bg-brand-950/60 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.3em] text-white ring-1 ring-white/20"
+                    class="inline-flex max-w-[70%] items-center rounded-full bg-brand-950/60 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.3em] text-white ring-1 ring-white/20"
                   >
                     {{ formatDisciplineLabel(stage.discipline) }}
                   </span>
@@ -164,15 +164,17 @@
                     {{ stage.jours }} {{ stage.jours > 1 ? 'jours' : 'jour' }}
                   </span>
                 </div>
-                <span
-                  class="inline-flex items-center justify-center rounded-full bg-secondaryBrand-400/80 p-2 shadow-lg shadow-secondaryBrand-900/30"
-                >
-                  <img
-                    :src="iconPathForDiscipline(stage.discipline)"
-                    :alt="formatDisciplineLabel(stage.discipline)"
-                    class="h-10 w-10 object-contain"
-                  />
-                </span>
+                <div class="ml-auto">
+                  <span
+                    class="inline-flex h-12 w-12 items-center justify-center rounded-full bg-secondaryBrand-400/80 shadow-lg shadow-secondaryBrand-900/30 sm:h-14 sm:w-14"
+                  >
+                    <img
+                      :src="iconPathForDiscipline(stage.discipline)"
+                      :alt="formatDisciplineLabel(stage.discipline)"
+                      class="h-8 w-8 object-contain sm:h-10 sm:w-10"
+                    />
+                  </span>
+                </div>
               </div>
               <span class="inline-flex items-center gap-2 text-sm font-semibold text-white">
                 <svg class="h-4 w-4 text-secondaryBrand-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
