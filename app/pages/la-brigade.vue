@@ -7,8 +7,8 @@
     <!-- Hero Section -->
     <div class="mx-auto max-w-7xl px-6 pt-16 lg:px-8">
       <div class="mx-auto max-w-2xl sm:text-center">
-        <h2 class="text-4xl font-semibold tracking-tight text-balance text-white sm:text-5xl">Voici la brigade du kif</h2>
-        <p class="mt-6 text-lg/8 text-gray-400">We’re a dynamic group of individuals who are passionate about what we do and dedicated to delivering the best results for our clients.</p>
+        <h2 class="text-4xl font-semibold tracking-tight text-balance text-white sm:text-5xl">Rencontre la brigade du kif</h2>
+        <p class="mt-6 text-lg/8 text-gray-400">La brigade du kif est née pour te faire profiter de l’escalade en milieux naturels. Nos moniteurs connaissent leurs territoires et sauront te faire découvrir les meilleurs spots près de chez toi. Que ce soit pour t’initier, pour progresser ou pour te perfectionner, nos moniteurs diplômés d’Etat seront là pour toi.</p>
       </div>
       <div class="mx-auto mt-20 max-w-2xl lg:max-w-4xl xl:max-w-none">
         <div v-if="pending" class="grid grid-cols-1 gap-8 sm:grid-cols-2">
@@ -17,39 +17,51 @@
         <div v-else-if="moniteurs.length === 0" class="rounded-2xl border border-dashed border-white/20 p-10 text-center text-gray-400">
           Aucun moniteur n’est disponible pour le moment.
         </div>
-        <ul
-          v-else
-          role="list"
-          class="grid grid-cols-1 gap-x-6 gap-y-20 sm:grid-cols-2 lg:gap-x-8 xl:grid-cols-3"
-        >
-          <li v-for="moniteur in moniteurs" :key="moniteur.id">
-            <NuxtLink
-              :to="`/moniteurs/${moniteur.slug}`"
-              class="group flex h-full flex-col gap-6 rounded-2xl bg-white/5 p-6 ring-1 ring-white/10 transition hover:-translate-y-1 hover:bg-white/10"
-            >
-              <div class="relative aspect-[3/4] overflow-hidden rounded-2xl outline-1 -outline-offset-1 outline-white/10">
-                <img
-                  class="absolute inset-0 h-full w-full object-cover"
-                  :src="profileImageFor(moniteur)"
-                  :alt="moniteur.fullName"
-                />
-              </div>
-              <div class="flex flex-col gap-3">
-                <div>
-                  <h3 class="text-lg/8 font-semibold tracking-tight text-white group-hover:text-secondaryBrand-200">
-                    {{ moniteur.fullName }}
-                  </h3>
-                  <p class="text-sm font-medium uppercase tracking-[0.3em] text-secondaryBrand-200/80">
-                    {{ locationLabelFor(moniteur) }}
+        <div v-else>
+          <ul
+            role="list"
+            class="grid grid-cols-1 gap-x-6 gap-y-20 sm:grid-cols-2 lg:gap-x-8 xl:grid-cols-3"
+          >
+            <li v-for="moniteur in moniteurs" :key="moniteur.id">
+              <NuxtLink
+                :to="`/moniteurs/${moniteur.slug}`"
+                class="group flex h-full flex-col gap-6 rounded-2xl bg-white/5 p-6 ring-1 ring-white/10 transition hover:-translate-y-1 hover:bg-white/10"
+              >
+                <div class="relative aspect-[3/4] overflow-hidden rounded-2xl outline-1 -outline-offset-1 outline-white/10">
+                  <img
+                    class="absolute inset-0 h-full w-full object-cover"
+                    :src="profileImageFor(moniteur)"
+                    :alt="moniteur.fullName"
+                  />
+                </div>
+                <div class="flex flex-col gap-3">
+                  <div>
+                    <h3 class="text-lg/8 font-semibold tracking-tight text-white group-hover:text-secondaryBrand-200">
+                      {{ moniteur.fullName }}
+                    </h3>
+                    <p class="text-sm font-medium uppercase tracking-[0.3em] text-secondaryBrand-200/80">
+                      {{ locationLabelFor(moniteur) }}
+                    </p>
+                  </div>
+                  <p class="text-base/7 text-gray-300">
+                    {{ bioSnippet(moniteur.bio) }}
                   </p>
                 </div>
-                <p class="text-base/7 text-gray-300">
-                  {{ bioSnippet(moniteur.bio) }}
-                </p>
-              </div>
+              </NuxtLink>
+            </li>
+          </ul>
+          <div class="mt-16 flex justify-center">
+            <NuxtLink
+              to="/aventures-escalade"
+              class="inline-flex items-center gap-3 rounded-full bg-secondaryBrand-500/90 px-6 py-3 text-sm font-semibold uppercase tracking-[0.3em] text-brand-950 shadow-lg shadow-secondaryBrand-900/30 transition hover:bg-secondaryBrand-400"
+            >
+              Voir les aventures de la brigade
+              <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M8 5l8 7-8 7" />
+              </svg>
             </NuxtLink>
-          </li>
-        </ul>
+          </div>
+        </div>
       </div>
     </div>
   </div>
