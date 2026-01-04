@@ -80,6 +80,7 @@ export default defineEventHandler(async (event) => {
       firstName: user.firstName,
       lastName: user.lastName,
       onboarded: user.onboarded,
+      role: session.user.role ?? user.role,
     },
   })
 

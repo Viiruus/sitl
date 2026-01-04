@@ -1,6 +1,5 @@
-// server/api/login.post.ts
 import { z } from 'zod'
-import { prisma } from '../utils/prisma'
+import { prisma } from '../../utils/prisma'
 
 const bodySchema = z.object({
   email: z.string().email(),
@@ -18,7 +17,7 @@ export default defineEventHandler(async (event) => {
     where: { email: normalizedEmail },
   })
 
-  if (!user || !user.passwordHash) {
+  if (!user || user.role !== 'GUIDE' || !user.passwordHash) {
     throw createError({
       statusCode: 401,
       statusMessage: 'Identifiants invalides.',

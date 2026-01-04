@@ -30,6 +30,7 @@ export default defineOAuthGoogleEventHandler({
         firstName: dbUser.firstName,
         lastName: dbUser.lastName,
         onboarded: dbUser.onboarded,
+        role: dbUser.role,
       },
     })
 

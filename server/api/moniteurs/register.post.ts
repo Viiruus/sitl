@@ -1,21 +1,21 @@
-// server/api/register.post.ts
 import { z } from 'zod'
-import { prisma } from '../utils/prisma'
+import { prisma } from '../../utils/prisma'
 
 const bodySchema = z.object({
   email: z.string().email(),
   password: z.string().min(6),
-  source: z.string().max(50).optional(), // "landing", "direct", "google", etc.
+  firstName: z.string().min(1).max(100),
+  lastName: z.string().min(1).max(100),
+  baseLocation: z.string().max(160).optional().or(z.literal('')),
 })
 
 export default defineEventHandler(async (event) => {
   const db = await prisma()
   const body = await readBody(event)
-  const { email, password, source } = bodySchema.parse(body)
+  const { email, password, firstName, lastName, baseLocation } = bodySchema.parse(body)
 
   const normalizedEmail = email.trim().toLowerCase()
 
-  // Vérifier si l'utilisateur existe déjà
   const existing = await db.user.findUnique({
     where: { email: normalizedEmail },
   })
@@ -23,25 +23,37 @@ export default defineEventHandler(async (event) => {
   if (existing) {
     throw createError({
       statusCode: 409,
-      statusMessage: 'Un compte existe déjà avec cet email.',
+      statusMessage: `Un compte existe déjà avec cet email.`,
     })
   }
 
-  // Hasher le mot de passe
   const passwordHash = await hashPassword(password)
 
-  // Créer l'utilisateur
   const user = await db.user.create({
     data: {
       email: normalizedEmail,
       passwordHash,
-      acquisitionSource: source ?? null,
-      onboarded: false,
-      onboardingStep: 0,
+      firstName,
+      lastName,
+      role: 'GUIDE',
+      onboarded: true,
+      acquisitionSource: 'guide',
+      guideProfile: {
+        create: {
+          bio: '',
+          baseLocation: baseLocation || null,
+          instagramUrl: null,
+          websiteUrl: null,
+          profileImageUrl: null,
+          isPublic: true,
+        },
+      },
+    },
+    include: {
+      guideProfile: true,
     },
   })
 
-  // Créer la session utilisateur
   await setUserSession(event, {
     user: {
       id: user.id,

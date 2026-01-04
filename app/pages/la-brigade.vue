@@ -22,7 +22,7 @@
             role="list"
             class="grid grid-cols-1 gap-x-6 gap-y-20 sm:grid-cols-2 lg:gap-x-8 xl:grid-cols-3"
           >
-            <li v-for="moniteur in moniteurs" :key="moniteur.id">
+            <li v-for="moniteur in randomizedMoniteurs" :key="moniteur.id">
               <NuxtLink
                 :to="`/moniteurs/${moniteur.slug}`"
                 class="group flex h-full flex-col gap-6 rounded-2xl bg-white/5 p-6 ring-1 ring-white/10 transition hover:-translate-y-1 hover:bg-white/10"
@@ -73,30 +73,38 @@
 
 <script setup lang="ts">
 const { data, pending } = await useFetch('/api/moniteurs')
-const shuffledMoniteurs = useState<any[]>('la-brigade-moniteurs', () => [])
+const randomWeights = useState<Record<number, number>>('la-brigade-moniteurs-order', () => ({}))
 
-const moniteurs = computed(() => shuffledMoniteurs.value)
-
-const shuffleMoniteurs = (list: any[]) => {
-  const copy = [...list]
-  for (let i = copy.length - 1; i > 0; i -= 1) {
-    const j = Math.floor(Math.random() * (i + 1))
-    ;[copy[i], copy[j]] = [copy[j], copy[i]]
-  }
-  return copy
-}
+const moniteurs = computed(() => data.value?.moniteurs ?? [])
 
 watch(
-  () => data.value?.moniteurs,
-  (newList) => {
-    if (Array.isArray(newList)) {
-      shuffledMoniteurs.value = shuffleMoniteurs(newList)
-    } else {
-      shuffledMoniteurs.value = []
+  () => moniteurs.value,
+  (list) => {
+    if (!list.length) {
+      randomWeights.value = {}
+      return
     }
+    list.forEach((moniteur: any) => {
+      const key = moniteur.id
+      if (key == null) return
+      if (randomWeights.value[key] === undefined) {
+        randomWeights.value[key] = Math.random()
+      }
+    })
   },
-  { immediate: true },
+  { immediate: true, deep: true },
 )
+
+const randomizedMoniteurs = computed(() => {
+  const weights = randomWeights.value
+  return moniteurs.value
+    .slice()
+    .sort((a: any, b: any) => {
+      const wA = weights[a?.id] ?? 0
+      const wB = weights[b?.id] ?? 0
+      return wA - wB
+    })
+})
 
 const fallbackImage = '/images/escalade-grande-voie-calanques.jpg'
 

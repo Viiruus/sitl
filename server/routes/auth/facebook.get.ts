@@ -30,6 +30,7 @@ export default defineOAuthFacebookEventHandler({
         firstName: dbUser.firstName,
         lastName: dbUser.lastName,
         onboarded: dbUser.onboarded,
+        role: dbUser.role,
       },
     })
 
