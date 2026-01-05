@@ -10,6 +10,8 @@ const confirmPassword = ref('')
 const firstName = ref('')
 const lastName = ref('')
 const baseLocation = ref('')
+const phoneNumber = ref('')
+const whatsappOptIn = ref(true)
 
 const loading = ref(false)
 const error = ref<string | null>(null)
@@ -58,6 +60,8 @@ const submit = async () => {
           firstName: firstName.value,
           lastName: lastName.value,
           baseLocation: baseLocation.value,
+          phoneNumber: phoneNumber.value,
+          whatsappOptIn: whatsappOptIn.value,
         },
       })
     }
@@ -171,6 +175,20 @@ const logout = async () => {
           <div v-if="mode === 'register'" class="space-y-2">
             <label class="text-sm text-brand-100/80">Camp de base (facultatif)</label>
             <input v-model="baseLocation" type="text" class="w-full rounded-xl border border-brand-800 bg-brand-900/80 px-3 py-2 text-white focus:border-secondaryBrand-400 focus:outline-none" />
+          </div>
+
+          <div v-if="mode === 'register'" class="space-y-2">
+            <label class="text-sm text-brand-100/80">Téléphone (WhatsApp)</label>
+            <input
+              v-model="phoneNumber"
+              type="tel"
+              required
+              class="w-full rounded-xl border border-brand-800 bg-brand-900/80 px-3 py-2 text-white focus:border-secondaryBrand-400 focus:outline-none"
+              placeholder="+33 6 12 34 56 78"
+            />
+            <p class="text-xs text-brand-200/70">
+              Indispensable pour échanger rapidement avec les grimpeurs.
+            </p>
           </div>
 
           <div class="space-y-2">

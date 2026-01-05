@@ -25,6 +25,11 @@ export default defineEventHandler(async (event) => {
   const db = await prisma()
   const aventure = await db.aventure.findFirst({
     where: { slug, guideId: Number(session.user.id) },
+    include: {
+      images: {
+        orderBy: [{ position: 'asc' }, { id: 'asc' }],
+      },
+    },
   })
 
   if (!aventure) {
@@ -59,6 +64,12 @@ export default defineEventHandler(async (event) => {
       objectifs: aventure.objectifs || '',
       prerequis: toList(aventure.prerequis),
       repasLabel: aventure.repasLabel || '',
+      images: (aventure.images ?? []).map((img) => ({
+        id: img.id,
+        url: img.url,
+        alt: img.alt || '',
+        position: img.position ?? null,
+      })),
     },
   }
 })

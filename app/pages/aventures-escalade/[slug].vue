@@ -103,7 +103,7 @@
             <!-- Bloc Guide à droite -->
             <NuxtLink
               v-if="guideFullName"
-              to="#"
+              :to="guideProfileLink || '#'"
               class="block space-y-3 rounded-3xl bg-brand-950/85 p-5 ring-1 ring-secondaryBrand-400/40 shadow-xl shadow-black/40 transition hover:ring-secondaryBrand-300/70 focus:outline-none focus-visible:ring-2 focus-visible:ring-secondaryBrand-300"
             >
               <p class="text-[11px] font-semibold uppercase tracking-[0.3em] text-secondaryBrand-200">
@@ -588,82 +588,81 @@
 
                 <div class="mt-5 space-y-4">
                   <template v-if="hasSessions">
-                  <div class="space-y-3">
-                    <p class="text-xs font-medium text-gray-700">
-                      Dates disponibles
-                    </p>
                     <div class="space-y-3">
-                      <label
-                        v-for="session in stage.sessions"
-                        :key="session.id"
-                        class="flex items-start gap-3 rounded-2xl border border-gray-200 px-4 py-3 text-sm shadow-sm"
-                      >
-                        <input
-                          type="checkbox"
-                          class="mt-1 h-4 w-4 rounded border-gray-300 text-brand-600 focus:ring-brand-500"
-                          :value="String(session.id)"
-                          v-model="selectedSessionIds"
-                          :disabled="bookingLoading"
-                        />
-                        <div class="space-y-1">
-                          <p class="font-semibold text-gray-900">
-                            {{ formatSessionDate(session) }}
-                          </p>
-                          <p class="text-xs text-brand-600">
-                            {{ session.placesReservees || 0 }} personnes intéressées
-                          </p>
-                          <p
-                            v-if="session.userIsBooked"
-                            class="text-xs font-semibold text-emerald-600"
-                          >
-                            Tu t’es déjà positionné·e sur cette date
-                          </p>
-                        </div>
-                      </label>
+                      <p class="text-xs font-medium text-gray-700">
+                        Dates disponibles
+                      </p>
+                      <div class="space-y-3">
+                        <label
+                          v-for="session in stage.sessions"
+                          :key="session.id"
+                          class="flex items-start gap-3 rounded-2xl border border-gray-200 px-4 py-3 text-sm shadow-sm"
+                        >
+                          <input
+                            type="checkbox"
+                            class="mt-1 h-4 w-4 rounded border-gray-300 text-brand-600 focus:ring-brand-500"
+                            :value="String(session.id)"
+                            v-model="selectedSessionIds"
+                            :disabled="bookingLoading"
+                          />
+                          <div class="space-y-1">
+                            <p class="font-semibold text-gray-900">
+                              {{ formatSessionDate(session) }}
+                            </p>
+                            <p class="text-xs text-brand-600">
+                              {{ session.placesReservees || 0 }} personnes intéressées
+                            </p>
+                            <p
+                              v-if="session.userIsBooked"
+                              class="text-xs font-semibold text-emerald-600"
+                            >
+                              Tu t’es déjà positionné·e sur cette date
+                            </p>
+                          </div>
+                        </label>
+                      </div>
                     </div>
-                  </div>
 
-                  <button
-                    type="button"
-                    @click="handleInterestClick"
-                    :disabled="!selectedSessionIds.length || bookingLoading || allSelectedAlreadyInterested"
-                    :class="[
-                      'mt-2 inline-flex w-full items-center justify-center gap-2 rounded-full px-4 py-2 text-xs font-semibold uppercase tracking-wide shadow-md transition',
-                      (!selectedSessionIds.length || bookingLoading || allSelectedAlreadyInterested)
-                        ? 'cursor-not-allowed bg-gray-200 text-gray-400'
-                        : 'bg-brand-600 text-white hover:bg-brand-500',
-                    ]"
-                  >
-                    <span v-if="bookingLoading">
-                      Envoi en cours...
-                    </span>
-                    <span v-else-if="allSelectedAlreadyInterested">
-                      Déjà positionné·e dessus
-                    </span>
-                    <span v-else>
-                      Je suis intéressé·e par ces dates
-                    </span>
-                    <svg
-                      class="h-4 w-4"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="1.5"
+                    <button
+                      type="button"
+                      @click="handleInterestClick"
+                      :disabled="!selectedSessionIds.length || bookingLoading || allSelectedAlreadyInterested"
+                      :class="[
+                        'mt-2 inline-flex w-full items-center justify-center gap-2 rounded-full px-4 py-2 text-xs font-semibold uppercase tracking-wide shadow-md transition',
+                        (!selectedSessionIds.length || bookingLoading || allSelectedAlreadyInterested)
+                          ? 'cursor-not-allowed bg-gray-200 text-gray-400'
+                          : 'bg-brand-600 text-white hover:bg-brand-500',
+                      ]"
                     >
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        d="M8 5l8 7-8 7"
-                      />
-                    </svg>
-                  </button>
+                      <span v-if="bookingLoading">
+                        Envoi en cours...
+                      </span>
+                      <span v-else-if="allSelectedAlreadyInterested">
+                        Déjà positionné·e dessus
+                      </span>
+                      <span v-else>
+                        Je suis intéressé·e par ces dates
+                      </span>
+                      <svg
+                        class="h-4 w-4"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="1.5"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          d="M8 5l8 7-8 7"
+                        />
+                      </svg>
+                    </button>
                   </template>
-                  <!--<template v-else>
+                  <template v-else>
                     <p class="text-sm text-gray-500">
-                      Pas encore de dates planifiées. Écris à la Brigade du kif pour
-                      co-construire une date qui colle à ton groupe.
+                      Pas encore de dates planifiées. Propose-nous un créneau pour lequel tu serais disponible ci-dessous et on te recontacte !
                     </p>
-                  </template>-->
+                  </template>
                 </div>
                 <details
                   class="mt-8 rounded-2xl border border-gray-200 bg-gray-50 p-4 text-sm text-gray-700"
@@ -978,6 +977,12 @@ const heroImage = computed(() => {
 const guide = computed(() => stage.value?.guide || null)
 
 const guideFullName = computed(() => guide.value?.fullName || null)
+
+const guideSlug = computed(() => guide.value?.slug || null)
+
+const guideProfileLink = computed(() =>
+  guideSlug.value ? `/moniteurs/${guideSlug.value}` : null,
+)
 
 const guideImage = computed(
   () => guide.value?.profile?.profileImageUrl || null,

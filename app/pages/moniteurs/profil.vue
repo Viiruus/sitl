@@ -13,6 +13,8 @@ const guide = computed(() => data.value?.guide ?? null)
 const form = reactive({
   firstName: '',
   lastName: '',
+  phoneNumber: '',
+  whatsappOptIn: true,
   baseLocation: '',
   bio: '',
   instagramUrl: '',
@@ -26,6 +28,8 @@ watch(
     if (!value) return
     form.firstName = value.firstName || ''
     form.lastName = value.lastName || ''
+    form.phoneNumber = value.phoneNumber || ''
+    form.whatsappOptIn = Boolean(value.whatsappOptIn)
     form.baseLocation = value.baseLocation || ''
     form.bio = value.bio || ''
     form.instagramUrl = value.instagramUrl || ''
@@ -118,6 +122,20 @@ const logout = async () => {
                 <label class="text-sm text-brand-100/80">Nom</label>
                 <input v-model="form.lastName" type="text" class="w-full rounded-xl border border-brand-800 bg-brand-900/80 px-3 py-2 text-white focus:border-secondaryBrand-400 focus:outline-none" />
               </div>
+            </div>
+
+            <div class="space-y-2">
+              <label class="text-sm text-brand-100/80">Téléphone (WhatsApp)</label>
+              <input
+                v-model="form.phoneNumber"
+                type="tel"
+                required
+                class="w-full rounded-xl border border-brand-800 bg-brand-900/80 px-3 py-2 text-white focus:border-secondaryBrand-400 focus:outline-none"
+                placeholder="+33 6 12 34 56 78"
+              />
+              <p class="text-xs text-brand-200/70">
+                Obligatoire pour échanger rapidement avec les grimpeurs.
+              </p>
             </div>
 
             <div class="space-y-2">

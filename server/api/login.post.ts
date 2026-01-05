@@ -41,6 +41,8 @@ export default defineEventHandler(async (event) => {
       lastName: user.lastName,
       onboarded: user.onboarded,
       role: user.role,
+      phoneNumber: user.phoneNumber,
+      whatsappOptIn: user.whatsappOptIn,
     },
   })
 

@@ -43,51 +43,47 @@
                   <span
                     v-for="discipline in disciplineChips"
                     :key="discipline.value"
-                    class="inline-flex items-center gap-2 rounded-full bg-white/5 px-4 py-1.5 text-xs font-semibold uppercase tracking-wide text-secondaryBrand-100 ring-1 ring-white/10"
+                    class="inline-flex items-center gap-2 rounded-full bg-secondaryBrand-500/80 px-4 py-1.5 text-xs font-semibold uppercase tracking-wide text-secondaryBrand-100 ring-1 ring-secondaryBrand-300/40"
                   >
                     <img
                       :src="iconPathForDiscipline(discipline.value)"
                       :alt="discipline.label"
-                      class="h-5 w-5 object-contain"
+                      class="h-12 w-12 object-contain"
                     />
                     {{ discipline.label }}
                   </span>
                 </div>
+                <div class="mt-10 max-w-xl text-base/7 text-gray-300 lg:max-w-lg">
+                  <ul role="list" class="space-y-8 text-gray-300">
+                    <li
+                      v-for="feature in featureList"
+                      :key="feature.title"
+                      class="flex gap-x-3"
+                    >
+                      <component :is="feature.icon" class="mt-1 size-5 flex-none text-secondaryBrand-300" aria-hidden="true" />
+                      <span>
+                        <strong class="font-semibold text-white">{{ feature.title }}.</strong>
+                        {{ feature.description }}
+                      </span>
+                    </li>
+                  </ul>
+                  <p class="mt-8">
+                    {{ moniteurClosing }}
+                  </p>
+                  <h2 class="mt-16 text-2xl font-bold tracking-tight text-white">Les stages encadrés par {{ moniteurName || 'ton moniteur' }}</h2>
+                  <p class="mt-6">
+                    Découvre ci-dessous ses prochains stages et expériences escalade déjà imaginés pour les grimpeurs motivés.
+                  </p>
+                </div>
               </div>
             </div>
-          </div>
-          <div class="-mt-12 -ml-12 p-12 lg:sticky lg:top-4 lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:overflow-hidden">
-            <div class="rounded-3xl bg-white/5 p-6 shadow-2xl shadow-black/40 ring-1 ring-white/10">
-              <img
-                class="w-[36rem] max-w-none rounded-2xl bg-gray-800 object-cover"
-                :src="moniteurPortrait"
-                :alt="moniteurName || 'Portrait du moniteur'"
-              />
-            </div>
-          </div>
-          <div class="lg:col-span-2 lg:col-start-1 lg:row-start-2 lg:mx-auto lg:grid lg:w-full lg:max-w-7xl lg:grid-cols-2 lg:gap-x-8 lg:px-8">
-            <div class="lg:pr-4">
-              <div class="max-w-xl text-base/7 text-gray-300 lg:max-w-lg">
-                <ul role="list" class="mt-8 space-y-8 text-gray-300">
-                  <li
-                    v-for="feature in featureList"
-                    :key="feature.title"
-                    class="flex gap-x-3"
-                  >
-                    <component :is="feature.icon" class="mt-1 size-5 flex-none text-secondaryBrand-300" aria-hidden="true" />
-                    <span>
-                      <strong class="font-semibold text-white">{{ feature.title }}.</strong>
-                      {{ feature.description }}
-                    </span>
-                  </li>
-                </ul>
-                <p class="mt-8">
-                  {{ moniteurClosing }}
-                </p>
-                <h2 class="mt-16 text-2xl font-bold tracking-tight text-white">Les stages encadrés par {{ moniteurName || 'ton moniteur' }}</h2>
-                <p class="mt-6">
-                  Découvre ci-dessous ses prochains stages et expériences escalade déjà imaginés pour les grimpeurs motivés.
-                </p>
+            <div class="mt-8 lg:mt-0 lg:sticky lg:top-4 lg:justify-self-end">
+              <div class="rounded-3xl bg-white/5 p-6 shadow-2xl shadow-black/40 ring-1 ring-white/10 lg:max-w-[34rem] xl:max-w-[36rem]">
+                <img
+                  class="w-full rounded-2xl bg-gray-800 object-cover"
+                  :src="moniteurPortrait"
+                  :alt="moniteurName || 'Portrait du moniteur'"
+                />
               </div>
             </div>
           </div>

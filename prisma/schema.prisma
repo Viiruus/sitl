@@ -64,6 +64,8 @@ model User {
   lastName   String?
   birthDate  String?
   department String? // ex: "38 - Isère"
+  phoneNumber String?
+  whatsappOptIn Boolean @default(false)
 
   // Pratique de l’escalade
   /// typesOfClimbing: JSON pour stocker un tableau de strings

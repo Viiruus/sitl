@@ -122,6 +122,8 @@
   lastName: '',
   birthDate: '', // on laisse en string
   department: '',
+  phoneNumber: '',
+  whatsappOptIn: false,
 
   typesOfClimbing: [] as string[],
   climbsMainly: '' as '' | 'lead' | 'toprope',
@@ -160,6 +162,8 @@
       form.lastName = u.lastName || ''
       form.birthDate = u.birthDate || ''
       form.department = u.department || ''
+      form.phoneNumber = u.phoneNumber || ''
+      form.whatsappOptIn = Boolean(u.whatsappOptIn)
 
       form.typesOfClimbing = Array.isArray(u.typesOfClimbing) ? u.typesOfClimbing : []
       form.climbsMainly = u.climbsMainly || ''
@@ -496,6 +500,20 @@
                   </div>
                 </div>
 
+                <div class="space-y-2">
+                  <label class="block text-sm mb-1 text-brand-100/90">Téléphone (WhatsApp)</label>
+                  <input
+                    v-model="form.phoneNumber"
+                    type="tel"
+                    required
+                    class="w-full border border-brand-800 rounded-lg px-3 py-2 bg-brand-950/40 text-white placeholder:text-brand-200/50 focus:outline-none focus:ring-2 focus:ring-secondaryBrand-500 focus:border-secondaryBrand-500"
+                    placeholder="+33 6 12 34 56 78"
+                  />
+                  <p class="mt-1 text-xs text-brand-200/70">
+                    Indispensable pour créer les groupes avec les moniteurs.
+                  </p>
+                </div>
+
                 <div class="grid md:grid-cols-2 gap-4">
                   <div>
                     <label class="block text-sm mb-1 text-brand-100/90">Date de naissance</label>
@@ -800,3 +818,9 @@
     </div>
   </div>
 </template>
+
+<style scoped>
+:deep(input[type='date']::-webkit-calendar-picker-indicator) {
+  filter: invert(1);
+}
+</style>

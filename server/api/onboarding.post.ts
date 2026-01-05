@@ -9,6 +9,8 @@ const onboardingSchema = z.object({
   lastName: z.string().trim().min(1).optional().or(z.literal('')),
   birthDate: z.string().optional().or(z.literal('')), // string simple
   department: z.string().optional().or(z.literal('')),
+  phoneNumber: z.string().trim().min(6, 'Ajoute un numéro de téléphone.').max(30),
+  whatsappOptIn: z.boolean().optional(),
 
   // Pratique
   typesOfClimbing: z.array(z.string()).optional().default([]),
@@ -56,6 +58,8 @@ export default defineEventHandler(async (event) => {
       lastName: body.lastName || null,
       birthDate: body.birthDate || null,
       department: body.department || null,
+      phoneNumber: body.phoneNumber.trim(),
+      whatsappOptIn: body.whatsappOptIn ?? user.whatsappOptIn ?? false,
 
       typesOfClimbing: body.typesOfClimbing ?? [],
       climbsMainly: body.climbsMainly || null,
@@ -81,6 +85,8 @@ export default defineEventHandler(async (event) => {
       lastName: user.lastName,
       onboarded: user.onboarded,
       role: session.user.role ?? user.role,
+      phoneNumber: user.phoneNumber,
+      whatsappOptIn: user.whatsappOptIn,
     },
   })
 

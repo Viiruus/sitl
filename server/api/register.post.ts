@@ -6,12 +6,14 @@ const bodySchema = z.object({
   email: z.string().email(),
   password: z.string().min(6),
   source: z.string().max(50).optional(), // "landing", "direct", "google", etc.
+  phoneNumber: z.string().trim().min(6, 'Ajoute un numéro de téléphone').max(30),
+  whatsappOptIn: z.boolean().optional(),
 })
 
 export default defineEventHandler(async (event) => {
   const db = await prisma()
   const body = await readBody(event)
-  const { email, password, source } = bodySchema.parse(body)
+  const { email, password, source, phoneNumber, whatsappOptIn } = bodySchema.parse(body)
 
   const normalizedEmail = email.trim().toLowerCase()
 
@@ -35,6 +37,8 @@ export default defineEventHandler(async (event) => {
     data: {
       email: normalizedEmail,
       passwordHash,
+      phoneNumber: phoneNumber.trim(),
+      whatsappOptIn: whatsappOptIn ?? false,
       acquisitionSource: source ?? null,
       onboarded: false,
       onboardingStep: 0,
@@ -50,6 +54,8 @@ export default defineEventHandler(async (event) => {
       lastName: user.lastName,
       onboarded: user.onboarded,
       role: user.role,
+      phoneNumber: user.phoneNumber,
+      whatsappOptIn: user.whatsappOptIn,
     },
   })
 

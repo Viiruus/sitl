@@ -4,6 +4,8 @@ const mapGuide = (user: any) => ({
   id: user.id,
   email: user.email,
   role: user.role,
+  phoneNumber: user.phoneNumber,
+  whatsappOptIn: user.whatsappOptIn,
   firstName: user.firstName,
   lastName: user.lastName,
   fullName: [user.firstName, user.lastName].filter(Boolean).join(' ') || 'Moniteur',

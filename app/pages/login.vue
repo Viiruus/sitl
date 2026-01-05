@@ -8,6 +8,8 @@ const mode = ref<'login' | 'register'>('login')
 const email = ref('')
 const password = ref('')
 const confirmPassword = ref('')
+const phoneNumber = ref('')
+const whatsappOptIn = ref(true)
 
 const loading = ref(false)
 const error = ref<string | null>(null)
@@ -58,6 +60,8 @@ const submit = async () => {
           email: email.value,
           password: password.value,
           source: source.value,
+          phoneNumber: phoneNumber.value,
+          whatsappOptIn: whatsappOptIn.value,
         },
       })
     }
@@ -241,6 +245,22 @@ const logout = async () => {
               minlength="6"
               class="w-full border border-brand-700 rounded-lg px-3 py-2 text-sm bg-brand-950/50 text-white placeholder:text-brand-200/50 focus:outline-none focus:ring-2 focus:ring-secondaryBrand-500 focus:border-secondaryBrand-500"
             />
+          </div>
+
+          <div v-if="mode === 'register'" class="space-y-2">
+            <div class="space-y-1">
+              <label class="block text-xs font-medium text-brand-100/90">Téléphone (WhatsApp)</label>
+              <input
+                v-model="phoneNumber"
+                type="tel"
+                required
+                class="w-full border border-brand-700 rounded-lg px-3 py-2 text-sm bg-brand-950/50 text-white placeholder:text-brand-200/50 focus:outline-none focus:ring-2 focus:ring-secondaryBrand-500 focus:border-secondaryBrand-500"
+                placeholder="+33 6 12 34 56 78"
+              />
+              <p class="text-[11px] text-brand-200/70">
+                Indispensable pour que les moniteurs te contactent et créent les groupes WhatsApp.
+              </p>
+            </div>
           </div>
 
           <button

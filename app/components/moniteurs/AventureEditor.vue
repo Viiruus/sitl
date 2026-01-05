@@ -26,6 +26,7 @@ type AdventureData = {
   objectifs: string
   prerequis: string[]
   repasLabel: string
+  images: { url: string; alt?: string | null; position?: number | null }[]
 }
 
 const props = defineProps<{
@@ -88,6 +89,8 @@ const errorMessage = ref<string | null>(null)
 const uploadingCover = ref(false)
 const coverUploadError = ref<string | null>(null)
 const isClient = ref(false)
+const galleryImages = reactive<{ url: string; alt: string }[]>([{ url: '', alt: '' }])
+const galleryUploadStates = reactive<Record<number, { loading: boolean; error: string | null }>>({})
 
 onMounted(() => {
   isClient.value = true
@@ -130,6 +133,18 @@ watch(
     form.objectifs = value.objectifs || ''
     form.prerequis = createList(value.prerequis || null)
     form.repasLabel = value.repasLabel || ''
+    if (value.images?.length) {
+      galleryImages.splice(
+        0,
+        galleryImages.length,
+        ...value.images
+          .slice()
+          .sort((a, b) => (a.position ?? 0) - (b.position ?? 0))
+          .map((img) => ({ url: img.url || '', alt: img.alt || '' })),
+      )
+    } else {
+      galleryImages.splice(0, galleryImages.length, { url: '', alt: '' })
+    }
   },
   { immediate: true },
 )
@@ -144,6 +159,18 @@ const removeListItem = (list: string[], index: number) => {
     return
   }
   list.splice(index, 1)
+}
+
+const addGalleryImage = () => {
+  galleryImages.push({ url: '', alt: '' })
+}
+
+const removeGalleryImage = (index: number) => {
+  if (galleryImages.length === 1) {
+    galleryImages[0] = { url: '', alt: '' }
+    return
+  }
+  galleryImages.splice(index, 1)
 }
 
 const toListPayload = (list: string[]) => list.map((item) => item.trim()).filter(Boolean)
@@ -216,7 +243,7 @@ const buildPayload = (publish: boolean) => ({
   ageMin: parseNumberField(form.ageMin),
   ageMax: parseNumberField(form.ageMax),
   autonomieMini: form.autonomieMini.trim(),
-  coverImageUrl: form.coverImageUrl.trim(),
+  coverImageUrl: form.coverImageUrl.trim() || null,
   equipementRequis: toListPayload(form.equipementRequis),
   equipementFourni: toListPayload(form.equipementFourni),
   hebergementDetails: form.hebergementDetails.trim(),
@@ -226,6 +253,13 @@ const buildPayload = (publish: boolean) => ({
   prerequis: toListPayload(form.prerequis),
   repasLabel: form.repasLabel.trim(),
   estPublie: publish,
+  images: galleryImages
+    .map((img, index) => ({
+      url: img.url.trim(),
+      alt: img.alt.trim(),
+      position: index,
+    }))
+    .filter((img) => img.url),
 })
 
 const validatePublish = () => {
@@ -323,6 +357,30 @@ const uploadCoverImage = async (event: Event) => {
     target.value = ''
   }
 }
+
+const uploadGalleryImage = async (event: Event, index: number) => {
+  const target = event.target as HTMLInputElement
+  const file = target.files?.[0]
+  if (!file) return
+  galleryUploadStates[index] = galleryUploadStates[index] || { loading: false, error: null }
+  galleryUploadStates[index].error = null
+  galleryUploadStates[index].loading = true
+  try {
+    const formData = new FormData()
+    formData.append('file', file, file.name)
+    const response = await $fetch<{ url: string }>('/api/moniteurs/upload', {
+      method: 'POST',
+      body: formData,
+    })
+    galleryImages[index].url = response.url
+    successMessage.value = 'Photo ajoutée à la galerie.'
+  } catch (error: any) {
+    galleryUploadStates[index].error = error?.data?.message || 'Échec du téléversement.'
+  } finally {
+    galleryUploadStates[index].loading = false
+    target.value = ''
+  }
+}
 </script>
 
 <template>
@@ -346,10 +404,6 @@ const uploadCoverImage = async (event: Event) => {
         >
           {{ isPublished ? 'Publié' : 'Brouillon' }}
         </span>
-        <div class="text-xs text-brand-200/70">
-          Slug automatique :
-          <span class="font-mono text-white/80">{{ slugPreview || '...' }}</span>
-        </div>
       </div>
     </div>
 
@@ -694,6 +748,92 @@ const uploadCoverImage = async (event: Event) => {
             rows="3"
             class="w-full rounded-2xl border border-white/10 bg-brand-900/80 px-3 py-2 text-white focus:border-secondaryBrand-400 focus:outline-none"
           />
+        </div>
+      </section>
+
+      <section class="space-y-4 rounded-2xl bg-brand-900/50 p-6 ring-1 ring-white/5">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h2 class="text-xl font-semibold">Photos de l’aventure</h2>
+            <p class="text-sm text-brand-100/70">Ajoute quelques images pour illustrer le stage.</p>
+          </div>
+          <button
+            type="button"
+            class="inline-flex items-center gap-2 rounded-full border border-secondaryBrand-300/70 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-secondaryBrand-100 transition hover:border-secondaryBrand-200"
+            @click="addGalleryImage"
+          >
+            + Ajouter une photo
+          </button>
+        </div>
+
+        <div class="space-y-4">
+          <div
+            v-for="(image, index) in galleryImages"
+            :key="`gallery-${index}`"
+            class="space-y-3 rounded-2xl bg-brand-900/70 p-4 ring-1 ring-white/5"
+          >
+            <div class="flex items-center justify-between text-xs uppercase tracking-[0.3em] text-brand-200/70">
+              <span>Photo {{ index + 1 }}</span>
+              <button
+                type="button"
+                class="text-[10px] font-semibold text-red-200/80 hover:text-red-100"
+                @click="removeGalleryImage(index)"
+              >
+                Retirer
+              </button>
+            </div>
+            <div class="grid gap-3 md:grid-cols-[2fr_1fr] md:items-start">
+              <div class="space-y-2">
+                <label class="text-[11px] uppercase tracking-[0.3em] text-brand-200/70">URL de l’image</label>
+                <input
+                  v-model="image.url"
+                  type="text"
+                  class="w-full rounded-xl border border-white/10 bg-brand-900/80 px-3 py-2 text-white focus:border-secondaryBrand-400 focus:outline-none"
+                />
+                <div v-if="isClient" class="flex items-center gap-3 text-xs text-brand-200/70">
+                  <label class="inline-flex cursor-pointer items-center gap-2 rounded-full border border-white/20 px-3 py-1.5 text-xs font-semibold text-white/80 transition hover:bg-white/5">
+                    <span v-if="!galleryUploadStates[index]?.loading">Téléverser une image</span>
+                    <span v-else class="inline-flex items-center gap-2">
+                      <span class="h-3 w-3 animate-spin rounded-full border-2 border-white border-t-transparent"></span>
+                      Upload…
+                    </span>
+                    <input
+                      type="file"
+                      class="sr-only"
+                      accept="image/png,image/jpeg,image/webp"
+                      :disabled="galleryUploadStates[index]?.loading"
+                      @change="(event) => uploadGalleryImage(event, index)"
+                    />
+                  </label>
+                  <span v-if="galleryUploadStates[index]?.error" class="text-red-300">
+                    {{ galleryUploadStates[index]?.error }}
+                  </span>
+                </div>
+              </div>
+              <div class="space-y-2">
+                <label class="text-[11px] uppercase tracking-[0.3em] text-brand-200/70">Texte alternatif</label>
+                <input
+                  v-model="image.alt"
+                  type="text"
+                  class="w-full rounded-xl border border-white/10 bg-brand-900/80 px-3 py-2 text-white focus:border-secondaryBrand-400 focus:outline-none"
+                  placeholder="Ex: Voie en dalle au coucher du soleil"
+                />
+              </div>
+            </div>
+            <div class="rounded-2xl border border-white/10 bg-brand-900/60 p-3">
+              <div class="aspect-video overflow-hidden rounded-xl bg-brand-900/40">
+                <img
+                  v-if="image.url"
+                  :src="image.url"
+                  class="h-full w-full object-cover"
+                  alt="Aperçu"
+                />
+                <div v-else class="flex h-full items-center justify-center text-sm text-brand-300/70">
+                  Aucun visuel
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 

@@ -10,9 +10,8 @@ const emit = defineEmits<{
 
 const navLinks = [
   { label: 'Tableau de bord', to: '/moniteurs' },
-  { label: 'Profil guide', to: '/moniteurs/profil' },
+  { label: 'Profil moniteur', to: '/moniteurs/profil' },
   { label: 'Mes aventures', to: '/moniteurs/aventures' },
-  { label: 'Suggestions & bookings', to: '/moniteurs/aventures#demandes', disabled: true },
 ]
 
 const isActive = (link: string) => {
@@ -58,7 +57,7 @@ const isActive = (link: string) => {
       </nav>
       <NuxtLink
         to="/"
-        class="rounded-xl border border-white/20 px-3 py-2 text-sm text-white/80 transition hover:bg-white/5 text-center"
+        class="rounded-xl border border-white/20 px-3 py-2 mt-20 text-sm text-white/80 transition hover:bg-white/5 text-center"
       >
         Retourner sur la plateforme
       </NuxtLink>

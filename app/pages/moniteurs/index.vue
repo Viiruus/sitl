@@ -9,6 +9,8 @@ const { clear, fetch } = useUserSession()
 
 const { data, pending, refresh } = await useFetch('/api/guides/me')
 const guide = computed(() => data.value?.guide ?? null)
+const { data: aventuresData } = await useFetch('/api/guides/aventures')
+const aventures = computed(() => aventuresData.value?.aventures ?? [])
 const requiredProfileFields = computed(() => ['firstName', 'lastName', 'baseLocation', 'bio', 'profileImageUrl'] as const)
 const missingProfileFields = computed(() => {
   const g = guide.value
@@ -27,6 +29,14 @@ const profileComplete = computed(() => {
   if (!g) return false
   return missingProfileFields.value.length === 0
 })
+
+const hasPublishedAdventure = computed(() =>
+  aventures.value.some((a: any) => a?.estPublie),
+)
+
+const hasAnySession = computed(() =>
+  aventures.value.some((a: any) => (a?.sessions?.length ?? 0) > 0),
+)
 
 const formatFieldLabel = (key: (typeof requiredProfileFields.value)[number]) => {
   const labels: Record<(typeof requiredProfileFields.value)[number], string> = {
@@ -54,13 +64,13 @@ const logout = async () => {
       <main class="flex-1 space-y-8">
         <div class="rounded-3xl bg-white/5 p-8 ring-1 ring-white/10">
           <p class="text-sm uppercase tracking-[0.4em] text-secondaryBrand-300">
-            Tableau de bord guide
+            Tableau de bord moniteur
           </p>
           <h1 class="mt-4 text-3xl font-semibold">
             Salut {{ guide?.firstName || 'moniteur' }} 👋
           </h1>
           <p class="mt-2 text-brand-100/80">
-            Suis tes aventures et prépare tes prochains séjours.
+            Prépare tes prochains stages, suis tes aventures et gère les inscriptions.
           </p>
           <div class="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <div class="rounded-2xl bg-brand-900/60 p-5 ring-1 ring-white/10">
@@ -107,13 +117,20 @@ const logout = async () => {
           </div>
         </div>
 
-        <div class="rounded-3xl bg-white/5 p-8 ring-1 ring-white/10">
+        <div
+          v-if="!hasPublishedAdventure || !hasAnySession"
+          class="rounded-3xl bg-white/5 p-8 ring-1 ring-white/10"
+        >
           <p class="text-sm uppercase tracking-[0.3em] text-secondaryBrand-300">
             Prochaines étapes
           </p>
           <ul class="mt-4 space-y-4 text-brand-100/80">
-            <li>✅ Mets à jour ton <NuxtLink class="text-secondaryBrand-200 underline" to="/moniteurs/profil">profil public</NuxtLink>.</li>
-            <li>🔜 Publie tes aventures et dates dès que la section sera disponible.</li>
+            <li v-if="!hasPublishedAdventure">
+              ✅ Crée ta 1ère aventure et publie-la depuis <NuxtLink class="text-secondaryBrand-200 underline" to="/moniteurs/aventures">Mes aventures</NuxtLink>.
+            </li>
+            <li v-if="!hasAnySession">
+              ✅ Planifie une session sur une aventure publiée.
+            </li>
           </ul>
         </div>
       </main>

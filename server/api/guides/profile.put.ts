@@ -4,6 +4,8 @@ import { prisma } from '../../utils/prisma'
 const bodySchema = z.object({
   firstName: z.string().trim().max(100).optional(),
   lastName: z.string().trim().max(100).optional(),
+  phoneNumber: z.string().trim().min(6, 'Ajoute un numéro de téléphone').max(30),
+  whatsappOptIn: z.boolean().optional(),
   baseLocation: z.string().trim().max(160).optional().or(z.literal('')),
   bio: z.string().trim().max(2000).optional().or(z.literal('')),
   instagramUrl: z.string().url().optional().or(z.literal('')),
@@ -41,6 +43,10 @@ export default defineEventHandler(async (event) => {
       ...(body.lastName !== undefined
         ? { lastName: body.lastName || null }
         : {}),
+      phoneNumber: body.phoneNumber.trim(),
+      ...(body.whatsappOptIn !== undefined
+        ? { whatsappOptIn: body.whatsappOptIn }
+        : {}),
       guideProfile: {
         upsert: {
           update: {
@@ -73,6 +79,8 @@ export default defineEventHandler(async (event) => {
       lastName: user.lastName,
       role: user.role,
       onboarded: user.onboarded,
+      phoneNumber: user.phoneNumber,
+      whatsappOptIn: user.whatsappOptIn,
     },
   })
 
@@ -81,6 +89,8 @@ export default defineEventHandler(async (event) => {
       id: user.id,
       firstName: user.firstName,
       lastName: user.lastName,
+      phoneNumber: user.phoneNumber,
+      whatsappOptIn: user.whatsappOptIn,
       baseLocation: user.guideProfile?.baseLocation || null,
       bio: user.guideProfile?.bio || null,
       instagramUrl: user.guideProfile?.instagramUrl || null,

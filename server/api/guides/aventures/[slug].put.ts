@@ -3,12 +3,11 @@ import { prisma } from '../../../utils/prisma'
 
 const stringListSchema = z.array(z.string().trim().min(1)).optional()
 
-const coverImageSchema = z
+const imageUrlSchema = z
   .string()
   .trim()
-  .optional()
   .refine((value) => {
-    if (!value) return true
+    if (!value) return false
     if (value.startsWith('/')) return true
     try {
       const url = new URL(value)
@@ -16,7 +15,15 @@ const coverImageSchema = z
     } catch {
       return false
     }
-  }, { message: 'URL de couverture invalide' })
+  }, { message: 'URL d’image invalide' })
+
+const coverImageSchema = imageUrlSchema.or(z.literal(null)).optional()
+
+const galleryImageSchema = z.object({
+  url: imageUrlSchema,
+  alt: z.string().trim().optional(),
+  position: z.number().int().min(0).optional(),
+})
 
 const bodySchema = z
   .object({
@@ -44,6 +51,7 @@ const bodySchema = z
     prerequis: stringListSchema,
     repasLabel: z.string().trim().optional(),
     estPublie: z.boolean().optional(),
+    images: z.array(galleryImageSchema).optional(),
   })
   .superRefine((data, ctx) => {
     if (!data.estPublie) {
@@ -122,38 +130,57 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 404, statusMessage: 'Aventure introuvable' })
   }
 
-  const updated = await db.aventure.update({
-    where: { id: existing.id },
-    data: {
-      titre: body.titre,
-      discipline: body.discipline,
-      lieuLabel: body.lieuLabel,
-      prixParPersonne: body.prixParPersonne,
-      jours: body.jours,
-      placesMax: body.placesMax,
-      sousTitre: valueOrNull(body.sousTitre ?? null),
-      transportLabel: valueOrNull(body.transportLabel ?? null),
-      niveauMinimum: valueOrNull(body.niveauMinimum ?? null),
-      descriptionCourte: valueOrNull(body.descriptionCourte ?? null),
-      descriptionLongue: valueOrNull(body.descriptionLongue ?? null),
-      ageMin: body.ageMin ?? null,
-      ageMax: body.ageMax ?? null,
-      autonomieMini: valueOrNull(body.autonomieMini ?? null),
-      coverImageUrl: body.coverImageUrl?.trim() || null,
-      equipementRequis: listOrNull(body.equipementRequis ?? null),
-      equipementFourni: listOrNull(body.equipementFourni ?? null),
-      hebergementDetails: valueOrNull(body.hebergementDetails ?? null),
-      inclus: valueOrNull(body.inclus ?? null),
-      nonInclus: valueOrNull(body.nonInclus ?? null),
-      objectifs: valueOrNull(body.objectifs ?? null),
-      prerequis: listOrNull(body.prerequis ?? null),
-      repasLabel: valueOrNull(body.repasLabel ?? null),
-      estPublie: body.estPublie ?? false,
-    },
-    select: {
-      slug: true,
-      estPublie: true,
-    },
+  const updated = await db.$transaction(async (tx) => {
+    const updatedAventure = await tx.aventure.update({
+      where: { id: existing.id },
+      data: {
+        titre: body.titre,
+        discipline: body.discipline,
+        lieuLabel: body.lieuLabel,
+        prixParPersonne: body.prixParPersonne,
+        jours: body.jours,
+        placesMax: body.placesMax,
+        sousTitre: valueOrNull(body.sousTitre ?? null),
+        transportLabel: valueOrNull(body.transportLabel ?? null),
+        niveauMinimum: valueOrNull(body.niveauMinimum ?? null),
+        descriptionCourte: valueOrNull(body.descriptionCourte ?? null),
+        descriptionLongue: valueOrNull(body.descriptionLongue ?? null),
+        ageMin: body.ageMin ?? null,
+        ageMax: body.ageMax ?? null,
+        autonomieMini: valueOrNull(body.autonomieMini ?? null),
+        coverImageUrl: body.coverImageUrl?.trim() || null,
+        equipementRequis: listOrNull(body.equipementRequis ?? null),
+        equipementFourni: listOrNull(body.equipementFourni ?? null),
+        hebergementDetails: valueOrNull(body.hebergementDetails ?? null),
+        inclus: valueOrNull(body.inclus ?? null),
+        nonInclus: valueOrNull(body.nonInclus ?? null),
+        objectifs: valueOrNull(body.objectifs ?? null),
+        prerequis: listOrNull(body.prerequis ?? null),
+        repasLabel: valueOrNull(body.repasLabel ?? null),
+        estPublie: body.estPublie ?? false,
+      },
+      select: {
+        id: true,
+        slug: true,
+        estPublie: true,
+      },
+    })
+
+    if (body.images) {
+      await tx.aventureImage.deleteMany({ where: { aventureId: existing.id } })
+      if (body.images.length) {
+        await tx.aventureImage.createMany({
+          data: body.images.map((img, index) => ({
+            aventureId: existing.id,
+            url: img.url.trim(),
+            alt: valueOrNull(img.alt ?? null),
+            position: img.position ?? index,
+          })),
+        })
+      }
+    }
+
+    return updatedAventure
   })
 
   return { slug: updated.slug, estPublie: updated.estPublie }
