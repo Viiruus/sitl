@@ -1,0 +1,725 @@
+<script setup lang="ts">
+
+type AdventureData = {
+  slug: string
+  estPublie: boolean
+  titre: string
+  discipline: 'FALAISE' | 'GRANDE_VOIE' | 'BLOC' | 'TRAD'
+  lieuLabel: string
+  prixParPersonne: number
+  jours: number
+  placesMax: number
+  sousTitre: string
+  transportLabel: string
+  niveauMinimum: string
+  descriptionCourte: string
+  descriptionLongue: string
+  ageMin: number | null
+  ageMax: number | null
+  autonomieMini: string
+  coverImageUrl: string
+  equipementRequis: string[]
+  equipementFourni: string[]
+  hebergementDetails: string
+  inclus: string
+  nonInclus: string
+  objectifs: string
+  prerequis: string[]
+  repasLabel: string
+}
+
+const props = defineProps<{
+  mode: 'create' | 'edit'
+  initialData?: AdventureData | null
+}>()
+
+const emit = defineEmits<{
+  (e: 'created', slug: string): void
+}>()
+
+const generatingSlug = (title: string) =>
+  title
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/\p{Diacritic}/gu, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 140)
+
+const createList = (list?: string[] | null, atLeastOne = false) => {
+  if (list && list.length) {
+    return [...list]
+  }
+  return atLeastOne ? [''] : ['']
+}
+
+const form = reactive({
+  titre: '',
+  discipline: 'FALAISE',
+  lieuLabel: '',
+  prixParPersonne: 90,
+  jours: 2,
+  placesMax: 6,
+  sousTitre: '',
+  transportLabel: '',
+  niveauMinimum: '',
+  descriptionCourte: '',
+  descriptionLongue: '',
+  ageMin: '',
+  ageMax: '',
+  autonomieMini: '',
+  coverImageUrl: '',
+  equipementRequis: [''],
+  equipementFourni: [''],
+  hebergementDetails: '',
+  inclus: '',
+  nonInclus: '',
+  objectifs: '',
+  prerequis: [''],
+  repasLabel: '',
+})
+
+const currentSlug = ref(props.initialData?.slug || '')
+const isPublished = ref(props.initialData?.estPublie ?? false)
+const saving = ref(false)
+const publishing = ref(false)
+const successMessage = ref<string | null>(null)
+const errorMessage = ref<string | null>(null)
+const uploadingCover = ref(false)
+const coverUploadError = ref<string | null>(null)
+const isClient = ref(false)
+
+onMounted(() => {
+  isClient.value = true
+})
+
+const slugPreview = computed(() => currentSlug.value || generatingSlug(form.titre))
+
+const resetListIfEmpty = (list: string[]) => {
+  if (!list.length) {
+    list.push('')
+  }
+}
+
+watch(
+  () => props.initialData,
+  (value) => {
+    if (!value) return
+    currentSlug.value = value.slug
+    isPublished.value = value.estPublie
+    form.titre = value.titre
+    form.discipline = value.discipline
+    form.lieuLabel = value.lieuLabel
+    form.prixParPersonne = value.prixParPersonne
+    form.jours = value.jours
+    form.placesMax = value.placesMax
+    form.sousTitre = value.sousTitre || ''
+    form.transportLabel = value.transportLabel || ''
+    form.niveauMinimum = value.niveauMinimum || ''
+    form.descriptionCourte = value.descriptionCourte || ''
+    form.descriptionLongue = value.descriptionLongue || ''
+    form.ageMin = value.ageMin != null ? String(value.ageMin) : ''
+    form.ageMax = value.ageMax != null ? String(value.ageMax) : ''
+    form.autonomieMini = value.autonomieMini || ''
+    form.coverImageUrl = value.coverImageUrl || ''
+    form.equipementRequis = createList(value.equipementRequis, true)
+    form.equipementFourni = createList(value.equipementFourni || null)
+    form.hebergementDetails = value.hebergementDetails || ''
+    form.inclus = value.inclus || ''
+    form.nonInclus = value.nonInclus || ''
+    form.objectifs = value.objectifs || ''
+    form.prerequis = createList(value.prerequis || null)
+    form.repasLabel = value.repasLabel || ''
+  },
+  { immediate: true },
+)
+
+const addListItem = (list: string[]) => {
+  list.push('')
+}
+
+const removeListItem = (list: string[], index: number) => {
+  if (list.length === 1) {
+    list[0] = ''
+    return
+  }
+  list.splice(index, 1)
+}
+
+const toListPayload = (list: string[]) => list.map((item) => item.trim()).filter(Boolean)
+
+const parseNumberField = (value: string | number) => {
+  if (typeof value === 'number') return value
+  if (!value) return null
+  const parsed = Number(value)
+  return Number.isFinite(parsed) ? parsed : null
+}
+
+const validateBaseFields = () => {
+  if (!form.titre.trim()) {
+    throw new Error('Ajoute un titre pour créer ton aventure.')
+  }
+  if (!form.lieuLabel.trim()) {
+    throw new Error('Ajoute un lieu.')
+  }
+  if (!form.prixParPersonne || form.prixParPersonne < 0) {
+    throw new Error('Indique un prix par personne.')
+  }
+  if (!form.jours || form.jours < 1) {
+    throw new Error('Indique le nombre de jours.')
+  }
+  if (!form.placesMax || form.placesMax < 1) {
+    throw new Error('Indique le nombre de places.')
+  }
+}
+
+const ensureAdventureExists = async () => {
+  if (currentSlug.value) {
+    return currentSlug.value
+  }
+  validateBaseFields()
+  const slugValue = slugPreview.value
+  if (!slugValue) {
+    throw new Error('Impossible de générer un slug. Vérifie ton titre.')
+  }
+
+  const result = await $fetch('/api/guides/aventures', {
+    method: 'POST',
+    body: {
+      titre: form.titre.trim(),
+      slug: slugValue,
+      discipline: form.discipline,
+      lieuLabel: form.lieuLabel.trim(),
+      prixParPersonne: Number(form.prixParPersonne),
+      jours: Number(form.jours),
+      placesMax: Number(form.placesMax),
+    },
+  })
+  currentSlug.value = result.aventure.slug
+  isPublished.value = result.aventure.estPublie ?? false
+  emit('created', result.aventure.slug)
+  return currentSlug.value
+}
+
+const buildPayload = (publish: boolean) => ({
+  titre: form.titre.trim(),
+  discipline: form.discipline as AdventureData['discipline'],
+  lieuLabel: form.lieuLabel.trim(),
+  prixParPersonne: Number(form.prixParPersonne),
+  jours: Number(form.jours),
+  placesMax: Number(form.placesMax),
+  sousTitre: form.sousTitre.trim(),
+  transportLabel: form.transportLabel.trim(),
+  niveauMinimum: form.niveauMinimum.trim(),
+  descriptionCourte: form.descriptionCourte.trim(),
+  descriptionLongue: form.descriptionLongue.trim(),
+  ageMin: parseNumberField(form.ageMin),
+  ageMax: parseNumberField(form.ageMax),
+  autonomieMini: form.autonomieMini.trim(),
+  coverImageUrl: form.coverImageUrl.trim(),
+  equipementRequis: toListPayload(form.equipementRequis),
+  equipementFourni: toListPayload(form.equipementFourni),
+  hebergementDetails: form.hebergementDetails.trim(),
+  inclus: form.inclus.trim(),
+  nonInclus: form.nonInclus.trim(),
+  objectifs: form.objectifs.trim(),
+  prerequis: toListPayload(form.prerequis),
+  repasLabel: form.repasLabel.trim(),
+  estPublie: publish,
+})
+
+const validatePublish = () => {
+  const missing: string[] = []
+  if (!form.sousTitre.trim()) missing.push('Sous-titre')
+  if (!form.niveauMinimum.trim()) missing.push('Niveau minimum')
+  if (!form.descriptionCourte.trim() || form.descriptionCourte.trim().length < 10) missing.push('Description courte')
+  if (!form.coverImageUrl.trim()) missing.push('Image de couverture')
+  if (!toListPayload(form.equipementRequis).length) missing.push('Équipement requis')
+  if (!form.inclus.trim()) missing.push('Inclus')
+  if (!form.nonInclus.trim()) missing.push('Non inclus')
+
+  if (missing.length) {
+    errorMessage.value = `Complète ces champs avant de publier : ${missing.join(', ')}.`
+    return false
+  }
+  return true
+}
+
+const saveDraft = async () => {
+  errorMessage.value = null
+  successMessage.value = null
+  saving.value = true
+  try {
+    validateBaseFields()
+    const slug = await ensureAdventureExists()
+    const payload = buildPayload(isPublished.value)
+    const result = await $fetch(`/api/guides/aventures/${slug}`, {
+      method: 'PUT',
+      body: payload,
+    })
+    isPublished.value = payload.estPublie
+    successMessage.value = payload.estPublie ? 'Aventure mise à jour.' : 'Brouillon sauvegardé.'
+    if (result?.slug && !currentSlug.value) {
+      currentSlug.value = result.slug
+    }
+  } catch (error: any) {
+    errorMessage.value = error?.data?.message || error?.message || 'Impossible de sauvegarder.'
+  } finally {
+    saving.value = false
+  }
+}
+
+const publishAdventure = async () => {
+  errorMessage.value = null
+  successMessage.value = null
+  if (!validatePublish()) {
+    return
+  }
+  try {
+    validateBaseFields()
+  } catch (error: any) {
+    errorMessage.value = error?.message || 'Complète les informations principales.'
+    return
+  }
+  publishing.value = true
+  try {
+    const slug = await ensureAdventureExists()
+    const payload = buildPayload(true)
+    const result = await $fetch(`/api/guides/aventures/${slug}`, {
+      method: 'PUT',
+      body: payload,
+    })
+    isPublished.value = true
+    successMessage.value = 'Aventure publiée 🎉'
+    if (result?.slug) {
+      currentSlug.value = result.slug
+    }
+  } catch (error: any) {
+    errorMessage.value = error?.data?.message || error?.message || 'Impossible de publier.'
+  } finally {
+    publishing.value = false
+  }
+}
+
+const uploadCoverImage = async (event: Event) => {
+  const target = event.target as HTMLInputElement
+  const file = target.files?.[0]
+  if (!file) return
+  coverUploadError.value = null
+  uploadingCover.value = true
+  try {
+    const formData = new FormData()
+    formData.append('file', file, file.name)
+    const response = await $fetch<{ url: string }>('/api/moniteurs/upload', {
+      method: 'POST',
+      body: formData,
+    })
+    form.coverImageUrl = response.url
+    successMessage.value = 'Image de couverture mise à jour.'
+  } catch (error: any) {
+    coverUploadError.value = error?.data?.message || 'Échec du téléversement.'
+  } finally {
+    uploadingCover.value = false
+    target.value = ''
+  }
+}
+</script>
+
+<template>
+  <div>
+    <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+      <div>
+        <p class="text-xs uppercase tracking-[0.3em] text-secondaryBrand-300">
+          {{ mode === 'create' ? 'Création d’une aventure' : 'Éditeur d’aventure' }}
+        </p>
+        <h1 class="text-3xl font-semibold">
+          {{ form.titre || 'Nouvelle aventure' }}
+        </h1>
+        <p class="text-sm text-brand-100/70">
+          Complète toutes les infos pour rendre ton stage irrésistible.
+        </p>
+      </div>
+      <div class="flex items-center gap-3">
+        <span
+          class="inline-flex items-center rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-wide"
+          :class="isPublished ? 'border-secondaryBrand-400 text-secondaryBrand-200' : 'border-yellow-400/60 text-yellow-200'"
+        >
+          {{ isPublished ? 'Publié' : 'Brouillon' }}
+        </span>
+        <div class="text-xs text-brand-200/70">
+          Slug automatique :
+          <span class="font-mono text-white/80">{{ slugPreview || '...' }}</span>
+        </div>
+      </div>
+    </div>
+
+    <form class="mt-8 space-y-8" @submit.prevent="saveDraft">
+      <section class="space-y-4 rounded-2xl bg-brand-900/50 p-6 ring-1 ring-white/5">
+        <h2 class="text-xl font-semibold">Informations principales</h2>
+        <div class="grid gap-4 md:grid-cols-2">
+          <div class="space-y-2">
+            <label class="text-xs uppercase tracking-[0.3em] text-brand-200/70">Titre</label>
+            <input
+              v-model="form.titre"
+              type="text"
+              class="w-full rounded-xl border border-white/10 bg-brand-900/80 px-3 py-2 text-white focus:border-secondaryBrand-400 focus:outline-none"
+            />
+          </div>
+          <div class="space-y-2">
+            <label class="text-xs uppercase tracking-[0.3em] text-brand-200/70">Discipline</label>
+            <select
+              v-model="form.discipline"
+              class="w-full rounded-xl border border-white/10 bg-brand-900/80 px-3 py-2 text-white focus:border-secondaryBrand-400 focus:outline-none"
+            >
+              <option value="FALAISE">Falaise</option>
+              <option value="GRANDE_VOIE">Grande voie</option>
+              <option value="BLOC">Bloc</option>
+              <option value="TRAD">Trad</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid gap-4 md:grid-cols-2">
+          <div class="space-y-2">
+            <label class="text-xs uppercase tracking-[0.3em] text-brand-200/70">Lieu</label>
+            <input
+              v-model="form.lieuLabel"
+              type="text"
+              class="w-full rounded-xl border border-white/10 bg-brand-900/80 px-3 py-2 text-white focus:border-secondaryBrand-400 focus:outline-none"
+            />
+          </div>
+          <div class="space-y-2">
+            <label class="text-xs uppercase tracking-[0.3em] text-brand-200/70">Prix par personne (€)</label>
+            <input
+              v-model.number="form.prixParPersonne"
+              min="0"
+              type="number"
+              class="w-full rounded-xl border border-white/10 bg-brand-900/80 px-3 py-2 text-white focus:border-secondaryBrand-400 focus:outline-none"
+            />
+          </div>
+        </div>
+
+        <div class="grid gap-4 md:grid-cols-2">
+          <div class="space-y-2">
+            <label class="text-xs uppercase tracking-[0.3em] text-brand-200/70">Durée (jours)</label>
+            <input
+              v-model.number="form.jours"
+              min="1"
+              max="30"
+              type="number"
+              class="w-full rounded-xl border border-white/10 bg-brand-900/80 px-3 py-2 text-white focus:border-secondaryBrand-400 focus:outline-none"
+            />
+          </div>
+          <div class="space-y-2">
+            <label class="text-xs uppercase tracking-[0.3em] text-brand-200/70">Places max</label>
+            <input
+              v-model.number="form.placesMax"
+              min="1"
+              max="20"
+              type="number"
+              class="w-full rounded-xl border border-white/10 bg-brand-900/80 px-3 py-2 text-white focus:border-secondaryBrand-400 focus:outline-none"
+            />
+          </div>
+        </div>
+      </section>
+
+      <section class="space-y-4 rounded-2xl bg-brand-900/50 p-6 ring-1 ring-white/5">
+        <h2 class="text-xl font-semibold">Présentation</h2>
+        <div class="grid gap-4 md:grid-cols-2">
+          <div class="space-y-2">
+            <div class="flex flex-wrap items-center gap-2 text-xs uppercase tracking-[0.3em] text-brand-200/70">
+              <label>Sous-titre</label>
+              <span class="text-[10px] text-secondaryBrand-200">Requis pour publier</span>
+            </div>
+            <input
+              v-model="form.sousTitre"
+              type="text"
+              class="w-full rounded-xl border border-white/10 bg-brand-900/80 px-3 py-2 text-white focus:border-secondaryBrand-400 focus:outline-none"
+            />
+          </div>
+          <div class="space-y-2">
+            <label class="text-xs uppercase tracking-[0.3em] text-brand-200/70">Transport</label>
+            <input
+              v-model="form.transportLabel"
+              type="text"
+              class="w-full rounded-xl border border-white/10 bg-brand-900/80 px-3 py-2 text-white focus:border-secondaryBrand-400 focus:outline-none"
+            />
+          </div>
+        </div>
+
+        <div class="grid gap-4 md:grid-cols-2">
+          <div class="space-y-2">
+            <div class="flex flex-wrap items-center gap-2 text-xs uppercase tracking-[0.3em] text-brand-200/70">
+              <label>Niveau minimum</label>
+              <span class="text-[10px] text-secondaryBrand-200">Requis pour publier</span>
+            </div>
+            <input
+              v-model="form.niveauMinimum"
+              type="text"
+              class="w-full rounded-xl border border-white/10 bg-brand-900/80 px-3 py-2 text-white focus:border-secondaryBrand-400 focus:outline-none"
+            />
+          </div>
+          <div class="grid gap-4 sm:grid-cols-2">
+            <div class="space-y-2">
+              <label class="text-xs uppercase tracking-[0.3em] text-brand-200/70">Âge min</label>
+              <input
+                v-model="form.ageMin"
+                type="number"
+                min="0"
+                class="w-full rounded-xl border border-white/10 bg-brand-900/80 px-3 py-2 text-white focus:border-secondaryBrand-400 focus:outline-none"
+              />
+            </div>
+            <div class="space-y-2">
+              <label class="text-xs uppercase tracking-[0.3em] text-brand-200/70">Âge max</label>
+              <input
+                v-model="form.ageMax"
+                type="number"
+                min="0"
+                class="w-full rounded-xl border border-white/10 bg-brand-900/80 px-3 py-2 text-white focus:border-secondaryBrand-400 focus:outline-none"
+              />
+            </div>
+          </div>
+        </div>
+
+        <div class="grid gap-6 lg:grid-cols-2">
+          <div class="space-y-2">
+            <label class="text-xs uppercase tracking-[0.3em] text-brand-200/70">Autonomie</label>
+            <input
+              v-model="form.autonomieMini"
+              type="text"
+              class="w-full rounded-xl border border-white/10 bg-brand-900/80 px-3 py-2 text-white focus:border-secondaryBrand-400 focus:outline-none"
+            />
+          </div>
+          <div class="space-y-3">
+            <div class="flex flex-wrap items-center gap-2 text-xs uppercase tracking-[0.3em] text-brand-200/70">
+              <label>Cover image URL</label>
+              <span class="text-[10px] text-secondaryBrand-200">Requis pour publier</span>
+            </div>
+            <input
+              v-model="form.coverImageUrl"
+              type="text"
+              class="w-full rounded-xl border border-white/10 bg-brand-900/80 px-3 py-2 text-white focus:border-secondaryBrand-400 focus:outline-none"
+            />
+            <p class="text-xs text-brand-200/70">
+              Colle l’URL d’une photo ou téléverse une image de couverture en haute résolution.
+            </p>
+            <div v-if="isClient" class="space-y-2">
+              <label class="inline-flex cursor-pointer items-center gap-3 rounded-full border border-white/20 px-4 py-2 text-sm font-semibold text-white/80 transition hover:bg-white/5">
+                <span v-if="!uploadingCover">Téléverser une image</span>
+                <span v-else class="inline-flex items-center gap-2">
+                  <span class="h-3 w-3 animate-spin rounded-full border-2 border-white border-t-transparent"></span>
+                  Upload en cours…
+                </span>
+                <input
+                  type="file"
+                  class="sr-only"
+                  accept="image/png,image/jpeg,image/webp"
+                  :disabled="uploadingCover"
+                  @change="uploadCoverImage"
+                />
+              </label>
+              <p v-if="coverUploadError" class="text-xs text-red-400">
+                {{ coverUploadError }}
+              </p>
+            </div>
+            <p v-else class="text-xs text-brand-200/60">
+              Téléversement disponible après chargement complet de la page.
+            </p>
+            <div class="space-y-2">
+              <p class="text-xs uppercase tracking-[0.3em] text-brand-200/70">Aperçu</p>
+              <div class="relative aspect-video overflow-hidden rounded-2xl border border-white/10 bg-brand-900/60">
+                <img
+                  v-if="form.coverImageUrl"
+                  :src="form.coverImageUrl"
+                  alt="Image de couverture"
+                  class="absolute inset-0 h-full w-full object-cover"
+                />
+                <div v-else class="absolute inset-0 flex items-center justify-center text-sm text-brand-300/70">
+                  Aucune image
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="space-y-4 rounded-2xl bg-brand-900/50 p-6 ring-1 ring-white/5">
+        <h2 class="text-xl font-semibold">Descriptions</h2>
+        <div class="space-y-2">
+          <div class="flex flex-wrap items-center gap-2 text-xs uppercase tracking-[0.3em] text-brand-200/70">
+            <label>Description courte</label>
+            <span class="text-[10px] text-secondaryBrand-200">Requis pour publier</span>
+          </div>
+          <textarea
+            v-model="form.descriptionCourte"
+            rows="3"
+            class="w-full rounded-2xl border border-white/10 bg-brand-900/80 px-3 py-2 text-white focus:border-secondaryBrand-400 focus:outline-none"
+          />
+        </div>
+        <div class="space-y-2">
+          <label class="text-xs uppercase tracking-[0.3em] text-brand-200/70">Description longue</label>
+          <textarea
+            v-model="form.descriptionLongue"
+            rows="6"
+            class="w-full rounded-2xl border border-white/10 bg-brand-900/80 px-3 py-2 text-white focus:border-secondaryBrand-400 focus:outline-none"
+          />
+        </div>
+        <div class="space-y-2">
+          <label class="text-xs uppercase tracking-[0.3em] text-brand-200/70">Objectifs</label>
+          <textarea
+            v-model="form.objectifs"
+            rows="3"
+            class="w-full rounded-2xl border border-white/10 bg-brand-900/80 px-3 py-2 text-white focus:border-secondaryBrand-400 focus:outline-none"
+          />
+        </div>
+      </section>
+
+      <section class="space-y-4 rounded-2xl bg-brand-900/50 p-6 ring-1 ring-white/5">
+        <h2 class="text-xl font-semibold">Pré-requis & équipement</h2>
+
+        <div class="grid gap-4 md:grid-cols-2">
+          <div class="space-y-3">
+            <div class="flex items-center justify-between text-xs uppercase tracking-[0.3em] text-brand-200/70">
+              <span>Équipement requis</span>
+              <span class="text-[10px] uppercase tracking-[0.3em] text-secondaryBrand-200">Requis pour publier</span>
+              <button type="button" class="text-[10px] font-semibold text-secondaryBrand-300" @click="addListItem(form.equipementRequis)">
+                + Ajouter
+              </button>
+            </div>
+            <div class="space-y-2">
+              <div
+                v-for="(item, index) in form.equipementRequis"
+                :key="`req-${index}`"
+                class="flex items-center gap-2"
+              >
+                <input
+                  v-model="form.equipementRequis[index]"
+                  type="text"
+                  class="w-full rounded-xl border border-white/10 bg-brand-900/80 px-3 py-2 text-white focus:border-secondaryBrand-400 focus:outline-none"
+                  @blur="resetListIfEmpty(form.equipementRequis)"
+                />
+                <button type="button" class="text-xs text-brand-300 hover:text-red-300" @click="removeListItem(form.equipementRequis, index)">×</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="space-y-3">
+            <div class="flex items-center justify-between text-xs uppercase tracking-[0.3em] text-brand-200/70">
+              <span>Équipement fourni</span>
+              <button type="button" class="text-[10px] font-semibold text-secondaryBrand-300" @click="addListItem(form.equipementFourni)">
+                + Ajouter
+              </button>
+            </div>
+            <div class="space-y-2">
+              <div
+                v-for="(item, index) in form.equipementFourni"
+                :key="`four-${index}`"
+                class="flex items-center gap-2"
+              >
+                <input
+                  v-model="form.equipementFourni[index]"
+                  type="text"
+                  class="w-full rounded-xl border border-white/10 bg-brand-900/80 px-3 py-2 text-white focus:border-secondaryBrand-400 focus:outline-none"
+                  @blur="resetListIfEmpty(form.equipementFourni)"
+                />
+                <button type="button" class="text-xs text-brand-300 hover:text-red-300" @click="removeListItem(form.equipementFourni, index)">×</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="space-y-3">
+          <div class="flex items-center justify-between text-xs uppercase tracking-[0.3em] text-brand-200/70">
+            <span>Pré-requis</span>
+            <button type="button" class="text-[10px] font-semibold text-secondaryBrand-300" @click="addListItem(form.prerequis)">
+              + Ajouter
+            </button>
+          </div>
+          <div class="space-y-2">
+            <div
+              v-for="(item, index) in form.prerequis"
+              :key="`pre-${index}`"
+              class="flex items-center gap-2"
+            >
+              <input
+                v-model="form.prerequis[index]"
+                type="text"
+                class="w-full rounded-xl border border-white/10 bg-brand-900/80 px-3 py-2 text-white focus:border-secondaryBrand-400 focus:outline-none"
+                @blur="resetListIfEmpty(form.prerequis)"
+              />
+              <button type="button" class="text-xs text-brand-300 hover:text-red-300" @click="removeListItem(form.prerequis, index)">×</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="space-y-4 rounded-2xl bg-brand-900/50 p-6 ring-1 ring-white/5">
+        <h2 class="text-xl font-semibold">Vie sur place</h2>
+        <div class="grid gap-4 md:grid-cols-2">
+          <div class="space-y-2">
+            <label class="text-xs uppercase tracking-[0.3em] text-brand-200/70">Hébergement / détails</label>
+            <textarea
+              v-model="form.hebergementDetails"
+              rows="3"
+              class="w-full rounded-2xl border border-white/10 bg-brand-900/80 px-3 py-2 text-white focus:border-secondaryBrand-400 focus:outline-none"
+            />
+          </div>
+          <div class="space-y-2">
+            <label class="text-xs uppercase tracking-[0.3em] text-brand-200/70">Repas / restauration</label>
+            <textarea
+              v-model="form.repasLabel"
+              rows="3"
+              class="w-full rounded-2xl border border-white/10 bg-brand-900/80 px-3 py-2 text-white focus:border-secondaryBrand-400 focus:outline-none"
+            />
+          </div>
+        </div>
+        <div class="space-y-2">
+          <div class="flex flex-wrap items-center gap-2 text-xs uppercase tracking-[0.3em] text-brand-200/70">
+            <label>Inclus</label>
+            <span class="text-[10px] text-secondaryBrand-200">Requis pour publier</span>
+          </div>
+          <textarea
+            v-model="form.inclus"
+            rows="3"
+            class="w-full rounded-2xl border border-white/10 bg-brand-900/80 px-3 py-2 text-white focus:border-secondaryBrand-400 focus:outline-none"
+          />
+        </div>
+        <div class="space-y-2">
+          <div class="flex flex-wrap items-center gap-2 text-xs uppercase tracking-[0.3em] text-brand-200/70">
+            <label>Non inclus</label>
+            <span class="text-[10px] text-secondaryBrand-200">Requis pour publier</span>
+          </div>
+          <textarea
+            v-model="form.nonInclus"
+            rows="3"
+            class="w-full rounded-2xl border border-white/10 bg-brand-900/80 px-3 py-2 text-white focus:border-secondaryBrand-400 focus:outline-none"
+          />
+        </div>
+      </section>
+
+      <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-6">
+        <button
+          type="submit"
+          class="inline-flex items-center gap-2 rounded-2xl bg-secondaryBrand-500/90 px-6 py-3 text-sm font-semibold text-brand-950 shadow-lg shadow-secondaryBrand-900/30 transition hover:bg-secondaryBrand-400 disabled:opacity-50"
+          :disabled="saving || publishing"
+        >
+          <span v-if="saving" class="h-4 w-4 animate-spin rounded-full border-2 border-brand-900 border-t-transparent" />
+          <span>Enregistrer</span>
+        </button>
+        <button
+          v-if="!isPublished"
+          type="button"
+          class="inline-flex items-center gap-2 rounded-2xl border border-secondaryBrand-400/70 px-6 py-3 text-sm font-semibold text-secondaryBrand-200 transition hover:border-secondaryBrand-200 disabled:opacity-50"
+          :disabled="publishing || saving"
+          @click="publishAdventure"
+        >
+          <span v-if="publishing" class="h-4 w-4 animate-spin rounded-full border-2 border-secondaryBrand-200 border-t-transparent" />
+          <span>Publier l’aventure</span>
+        </button>
+      </div>
+
+      <p v-if="successMessage" class="text-sm text-secondaryBrand-200">{{ successMessage }}</p>
+      <p v-if="errorMessage" class="text-sm text-red-400">{{ errorMessage }}</p>
+    </form>
+  </div>
+</template>

@@ -11,9 +11,14 @@ const emit = defineEmits<{
 const navLinks = [
   { label: 'Tableau de bord', to: '/moniteurs' },
   { label: 'Profil guide', to: '/moniteurs/profil' },
-  { label: 'Mes aventures', to: '/moniteurs/aventures', disabled: true },
-  { label: 'Suggestions & bookings', to: '/moniteurs/suggestions', disabled: true },
+  { label: 'Mes aventures', to: '/moniteurs/aventures' },
+  { label: 'Suggestions & bookings', to: '/moniteurs/aventures#demandes', disabled: true },
 ]
+
+const isActive = (link: string) => {
+  const basePath = link.split('#')[0]
+  return basePath === props.currentPath
+}
 </script>
 
 <template>
@@ -39,7 +44,7 @@ const navLinks = [
             'rounded-xl px-3 py-2 transition',
             item.disabled
               ? 'cursor-not-allowed text-brand-500/60'
-              : (item.to === currentPath
+              : (isActive(item.to)
                   ? 'bg-secondaryBrand-500/90 text-brand-950'
                   : 'text-brand-100/80 hover:bg-white/5'),
           ]"

@@ -1,0 +1,53 @@
+import { z } from 'zod'
+import { prisma } from '../../utils/prisma'
+
+const createSchema = z.object({
+  titre: z.string().trim().min(3).max(120),
+  slug: z
+    .string()
+    .trim()
+    .min(3)
+    .max(140)
+    .regex(/^[a-z0-9-]+$/),
+  discipline: z.enum(['FALAISE', 'GRANDE_VOIE', 'BLOC', 'TRAD']),
+  lieuLabel: z.string().trim().min(3),
+  prixParPersonne: z.number().int().min(0),
+  jours: z.number().int().min(1).max(30),
+  placesMax: z.number().int().min(1).max(20),
+})
+
+export default defineEventHandler(async (event) => {
+  const session = await getUserSession(event)
+  if (!session?.user?.id) {
+    throw createError({ statusCode: 401, statusMessage: 'Non authentifié' })
+  }
+  if (session.user.role !== 'GUIDE') {
+    throw createError({ statusCode: 403, statusMessage: 'Réservé aux moniteurs' })
+  }
+
+  const db = await prisma()
+  const body = createSchema.parse(await readBody(event))
+
+  // Validate unique slug
+  const existing = await db.aventure.findUnique({
+    where: { slug: body.slug },
+  })
+  if (existing) {
+    throw createError({ statusCode: 409, statusMessage: 'Slug déjà utilisé. Choisis-en un autre.' })
+  }
+
+  const aventure = await db.aventure.create({
+    data: {
+      titre: body.titre,
+      slug: body.slug,
+      discipline: body.discipline,
+      lieuLabel: body.lieuLabel,
+      prixParPersonne: body.prixParPersonne,
+      jours: body.jours,
+      placesMax: body.placesMax,
+      guideId: Number(session.user.id),
+    },
+  })
+
+  return { aventure }
+})

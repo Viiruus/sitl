@@ -1,0 +1,58 @@
+import { prisma } from '../../utils/prisma'
+
+const mapSession = (session: any) => ({
+  id: session.id,
+  dateDebut: session.dateDebut,
+  dateFin: session.dateFin,
+  statut: session.statut,
+  placesTotales: session.placesTotales,
+  placesReservees: session.placesReservees,
+  bookings: session.reservations?.length || 0,
+})
+
+export default defineEventHandler(async (event) => {
+  const session = await getUserSession(event)
+  if (!session?.user?.id) {
+    throw createError({ statusCode: 401, statusMessage: 'Non authentifié' })
+  }
+  if (session.user.role !== 'GUIDE') {
+    throw createError({ statusCode: 403, statusMessage: 'Accès réservé aux moniteurs' })
+  }
+
+  const db = await prisma()
+  const guideId = Number(session.user.id)
+
+  const adventures = await db.aventure.findMany({
+    where: { guideId },
+    include: {
+      sessions: {
+        include: {
+          reservations: true,
+        },
+        orderBy: { dateDebut: 'asc' },
+      },
+    },
+    orderBy: { createdAt: 'desc' },
+  })
+
+  return {
+    aventures: adventures.map((a) => {
+      const upcoming = (a.sessions ?? []).find((s) => new Date(s.dateFin || s.dateDebut) >= new Date())
+      return {
+        id: a.id,
+        titre: a.titre,
+        slug: a.slug,
+        discipline: a.discipline,
+        lieuLabel: a.lieuLabel,
+        estPublie: a.estPublie,
+        prixParPersonne: a.prixParPersonne,
+        sessions: (a.sessions ?? []).map(mapSession),
+        bookingsCount: (a.sessions ?? []).reduce(
+          (total, session) => total + (session.reservations?.length || 0),
+          0,
+        ),
+        prochainSession: upcoming ? mapSession(upcoming) : null,
+      }
+    }),
+  }
+})
