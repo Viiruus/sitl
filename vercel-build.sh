@@ -22,8 +22,20 @@ if [ -n "${TURSO_DATABASE_URL:-}" ]; then
       CLEAN_URL="libsql://${CLEAN_URL#libsqls://}"
       ;;
   esac
-  export TURSO_DATABASE_URL="$CLEAN_URL"
-  export DATABASE_URL="$CLEAN_URL" # prisma CLI may still look for DATABASE_URL
+  # add authToken to the URL for Prisma migrate CLI (adapter token isn't used there)
+  if [ -n "${TURSO_AUTH_TOKEN:-}" ]; then
+    TOKENIZED_URL="${CLEAN_URL}"
+    if echo "$TOKENIZED_URL" | grep -q '?'; then
+      TOKENIZED_URL="${TOKENIZED_URL}&authToken=${TURSO_AUTH_TOKEN}"
+    else
+      TOKENIZED_URL="${TOKENIZED_URL}?authToken=${TURSO_AUTH_TOKEN}"
+    fi
+  else
+    TOKENIZED_URL="$CLEAN_URL"
+  fi
+
+  export TURSO_DATABASE_URL="$TOKENIZED_URL"
+  export DATABASE_URL="$TOKENIZED_URL" # prisma CLI may still look for DATABASE_URL
   echo "Normalized TURSO_DATABASE_URL -> $(printf '%s' "$TURSO_DATABASE_URL" | sed 's#://.*#://***#')"
 fi
 
