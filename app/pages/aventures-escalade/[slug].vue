@@ -256,23 +256,13 @@
                     </ul>
                   </div>
                   <div class="grid gap-6 lg:grid-cols-2">
-                    <div class="rounded-3xl bg-brand-900/50 p-6 ring-1 ring-white/10">
+                    <div
+                      v-if="hasPrerequisSection"
+                      class="rounded-3xl bg-brand-900/50 p-6 ring-1 ring-white/10"
+                    >
                       <h3 class="text-xs font-semibold uppercase tracking-wide text-white">
-                        Pour qui ?
+                        Pre-requis
                       </h3>
-                      <p
-                        v-if="stage.descriptionCourte"
-                        class="mt-2 text-sm text-brand-100/90"
-                      >
-                        {{ stage.descriptionCourte }}
-                      </p>
-                      <p
-                        v-else
-                        class="mt-2 text-sm text-brand-100/80"
-                      >
-                        Grimpeur·euse motivé·e, avec envie de se faire plaisir sur le rocher
-                        en sécurité, dans une ambiance conviviale.
-                      </p>
                       <ul
                         v-if="prerequisList.length"
                         class="mt-4 space-y-2 text-xs text-brand-100/90"
@@ -292,22 +282,18 @@
                         </p>
                       </div>
                     </div>
-                    <div class="rounded-3xl bg-brand-900/50 p-6 ring-1 ring-white/10">
-                      <p class="text-[11px] font-semibold uppercase tracking-[0.3em] text-brand-200">
+                    <div
+                      v-if="hasObjectifsSection"
+                      class="rounded-3xl bg-brand-900/50 p-6 ring-1 ring-white/10"
+                    >
+                      <h3 class="text-xs font-semibold uppercase tracking-wide text-white">
                         Objectifs
-                      </p>
+                      </h3>
                       <p
-                        v-if="stage.objectifs"
+                        v-if="objectifsText"
                         class="mt-2 text-sm text-brand-100/90 whitespace-pre-line"
                       >
-                        {{ stage.objectifs }}
-                      </p>
-                      <p
-                        v-else
-                        class="mt-2 text-sm text-brand-100/80"
-                      >
-                        Construire ton autonomie et ton plaisir en falaise / grande voie,
-                        sans pression.
+                        {{ objectifsText }}
                       </p>
                     </div>
                   </div>
@@ -319,13 +305,6 @@
                 v-else-if="activeTab === 'programme'"
                 class="space-y-4"
               >
-                <h3 class="text-xs font-semibold uppercase tracking-wide text-white">
-                  Programme jour par jour
-                </h3>
-                <p class="text-xs text-brand-200">
-                  Trame indicative : le guide adapte selon le groupe et les conditions.
-                </p>
-
                 <div
                   v-if="stage.descriptionLongue"
                   class="rounded-2xl bg-brand-900/40 p-4 text-sm text-brand-100/90 ring-1 ring-white/10"
@@ -337,6 +316,16 @@
                     {{ stage.descriptionLongue }}
                   </p>
                 </div>
+
+                <h3 class="text-xs font-semibold uppercase tracking-wide text-white">
+                  Programme jour par jour
+                </h3>
+                <p
+                  v-if="hasProgramme"
+                  class="text-xs text-brand-200"
+                >
+                  Trame indicative : le moniteur adapte selon le groupe et les conditions.
+                </p>
 
                 <div
                   v-if="programmeJours.length"
@@ -376,7 +365,7 @@
                   v-else
                   class="mt-3 text-sm text-brand-100/80"
                 >
-                  Le programme détaillé sera partagé par le guide avant le départ.
+                  Le programme détaillé sera partagé par le moniteur avant le départ.
                 </p>
               </section>
 
@@ -456,6 +445,12 @@
                     >
                       {{ stage.pointsLocaux }}
                     </p>
+                    <p
+                      v-if="!hasTransport"
+                      class="text-xs text-brand-100/90 whitespace-pre-line"
+                    >
+                      L'organisation pour le transport et le point de rendez-vous seront envoyés par le moniteur après l'inscription.
+                    </p>
                   </div>
                 </div>
 
@@ -488,269 +483,268 @@
                   </div>
                 </div>
               </section>
-
-              <section
-                v-if="galerieImages.length"
-                class="rounded-3xl bg-brand-900/40 p-6 ring-1 ring-white/10"
-              >
-                <div class="flex items-center justify-between gap-4">
-                  <div>
-                    <p class="text-[11px] font-semibold uppercase tracking-[0.3em] text-brand-200">
-                      Galerie
-                    </p>
-                    <h3 class="text-lg font-semibold text-white">
-                      Aperçu en images
-                    </h3>
-                  </div>
-                  <div class="flex gap-2">
-                    <button
-                      type="button"
-                      class="flex h-10 w-10 items-center justify-center rounded-full border border-white/20 text-white transition hover:border-white/40"
-                      @click="goToPrevImage"
-                      :aria-disabled="galerieImages.length < 2"
-                      :disabled="galerieImages.length < 2"
-                    >
-                      <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
-                      </svg>
-                    </button>
-                    <button
-                      type="button"
-                      class="flex h-10 w-10 items-center justify-center rounded-full border border-white/20 text-white transition hover:border-white/40"
-                      @click="goToNextImage"
-                      :aria-disabled="galerieImages.length < 2"
-                      :disabled="galerieImages.length < 2"
-                    >
-                      <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
-                      </svg>
-                    </button>
-                  </div>
-                </div>
-                <div class="mt-4">
-                  <div class="relative overflow-hidden rounded-2xl bg-brand-950/40 ring-1 ring-white/5">
-                    <img
-                      v-if="currentGalleryImage"
-                      :src="currentGalleryImage.url"
-                      :alt="currentGalleryImage.alt || stageTitle"
-                      class="h-64 w-full object-cover md:h-80"
-                    />
-                    <div v-else class="flex h-64 w-full items-center justify-center text-sm text-brand-200 md:h-80">
-                      Pas encore de photos.
-                    </div>
-                  </div>
-                  <div class="mt-4 flex gap-2 overflow-x-auto">
-                    <button
-                      v-for="(img, idx) in galerieImages"
-                      :key="img.id || idx"
-                      type="button"
-                      class="relative h-16 w-24 flex-shrink-0 overflow-hidden rounded-xl ring-2 transition"
-                      :class="idx === galleryIndex ? 'ring-secondaryBrand-400' : 'ring-transparent opacity-60 hover:opacity-100'"
-                      @click="selectGalleryImage(idx)"
-                    >
-                      <img :src="img.url" :alt="img.alt || stageTitle" class="size-full object-cover" />
-                    </button>
-                  </div>
-                </div>
-              </section>
-
             </div>
 
             <div class="space-y-6">
-            <!-- COLONNE DROITE : encart Réservation sticky -->
-            <aside class="lg:sticky lg:top-32 lg:h-fit">
-              <div
-                class="rounded-3xl bg-white p-6 text-gray-900 shadow-2xl shadow-black/30 ring-1 ring-gray-900/10"
-              >
-                <p class="text-[11px] font-semibold uppercase tracking-[0.3em] text-gray-500">
-                  Réservation
-                </p>
-                <h3 class="mt-2 text-lg font-semibold text-gray-900">
-                  Choisis ta ou tes dates
-                </h3>
-                <p class="mt-1 text-xs text-gray-500" v-if="hasSessions">
-                  Indique-nous les dates qui t’intéressent. Le moniteur te recontactera pour regrouper les motivé·es.
-                </p>
-
-                <!-- Messages -->
-                <p
-                  v-if="bookingError"
-                  class="mt-3 rounded-md bg-red-50 px-3 py-2 text-xs text-red-700"
+              <!-- COLONNE DROITE : encart Réservation sticky -->
+              <aside class="lg:sticky lg:top-32 lg:h-fit">
+                <div
+                  class="rounded-3xl bg-white p-6 text-gray-900 shadow-2xl shadow-black/30 ring-1 ring-gray-900/10"
                 >
-                  {{ bookingError }}
-                </p>
-                <p
-                  v-if="bookingSuccess"
-                  class="mt-3 rounded-md bg-green-50 px-3 py-2 text-xs text-green-700"
-                >
-                  {{ bookingSuccess }}
-                </p>
+                  <p class="text-[11px] font-semibold uppercase tracking-[0.3em] text-gray-500">
+                    Réservation
+                  </p>
+                  <h3 class="mt-2 text-lg font-semibold text-gray-900">
+                    Choisis ta ou tes dates
+                  </h3>
+                  <p class="mt-1 text-xs text-gray-500" v-if="hasSessions">
+                    Indique-nous les dates qui t’intéressent. Le moniteur te recontactera pour regrouper les motivé·es.
+                  </p>
 
-                <div class="mt-5 space-y-4">
-                  <template v-if="hasSessions">
-                    <div class="space-y-3">
-                      <p class="text-xs font-medium text-gray-700">
-                        Dates disponibles
-                      </p>
+                  <!-- Messages -->
+                  <p
+                    v-if="bookingError"
+                    class="mt-3 rounded-md bg-red-50 px-3 py-2 text-xs text-red-700"
+                  >
+                    {{ bookingError }}
+                  </p>
+                  <p
+                    v-if="bookingSuccess"
+                    class="mt-3 rounded-md bg-green-50 px-3 py-2 text-xs text-green-700"
+                  >
+                    {{ bookingSuccess }}
+                  </p>
+
+                  <div class="mt-5 space-y-4">
+                    <template v-if="hasSessions">
                       <div class="space-y-3">
-                        <label
-                          v-for="session in stage.sessions"
-                          :key="session.id"
-                          class="flex items-start gap-3 rounded-2xl border border-gray-200 px-4 py-3 text-sm shadow-sm"
-                        >
-                          <input
-                            type="checkbox"
-                            class="mt-1 h-4 w-4 rounded border-gray-300 text-brand-600 focus:ring-brand-500"
-                            :value="String(session.id)"
-                            v-model="selectedSessionIds"
-                            :disabled="bookingLoading"
-                          />
-                          <div class="space-y-1">
-                            <p class="font-semibold text-gray-900">
-                              {{ formatSessionDate(session) }}
-                            </p>
-                            <p class="text-xs text-brand-600">
-                              {{ session.placesReservees || 0 }} personnes intéressées
-                            </p>
-                            <p
-                              v-if="session.userIsBooked"
-                              class="text-xs font-semibold text-emerald-600"
-                            >
-                              Tu t’es déjà positionné·e sur cette date
-                            </p>
-                          </div>
-                        </label>
+                        <p class="text-xs font-medium text-gray-700">
+                          Dates disponibles
+                        </p>
+                        <div class="space-y-3">
+                          <label
+                            v-for="session in stage.sessions"
+                            :key="session.id"
+                            class="flex items-start gap-3 rounded-2xl border border-gray-200 px-4 py-3 text-sm shadow-sm"
+                          >
+                            <input
+                              type="checkbox"
+                              class="mt-1 h-4 w-4 rounded border-gray-300 text-brand-600 focus:ring-brand-500"
+                              :value="String(session.id)"
+                              v-model="selectedSessionIds"
+                              :disabled="bookingLoading"
+                            />
+                            <div class="space-y-1">
+                              <p class="font-semibold text-gray-900">
+                                {{ formatSessionDate(session) }}
+                              </p>
+                              <p class="text-xs text-brand-600">
+                                {{ session.placesReservees || 0 }} personnes intéressées
+                              </p>
+                              <p
+                                v-if="session.userIsBooked"
+                                class="text-xs font-semibold text-emerald-600"
+                              >
+                                Tu t’es déjà positionné·e sur cette date
+                              </p>
+                            </div>
+                          </label>
+                        </div>
                       </div>
-                    </div>
 
-                    <button
-                      type="button"
-                      @click="handleInterestClick"
-                      :disabled="!selectedSessionIds.length || bookingLoading || allSelectedAlreadyInterested"
-                      :class="[
-                        'mt-2 inline-flex w-full items-center justify-center gap-2 rounded-full px-4 py-2 text-xs font-semibold uppercase tracking-wide shadow-md transition',
-                        (!selectedSessionIds.length || bookingLoading || allSelectedAlreadyInterested)
-                          ? 'cursor-not-allowed bg-gray-200 text-gray-400'
-                          : 'bg-brand-600 text-white hover:bg-brand-500',
-                      ]"
-                    >
-                      <span v-if="bookingLoading">
-                        Envoi en cours...
-                      </span>
-                      <span v-else-if="allSelectedAlreadyInterested">
-                        Déjà positionné·e dessus
-                      </span>
-                      <span v-else>
-                        Je suis intéressé·e par ces dates
-                      </span>
+                      <button
+                        type="button"
+                        @click="handleInterestClick"
+                        :disabled="!selectedSessionIds.length || bookingLoading || allSelectedAlreadyInterested"
+                        :class="[
+                          'mt-2 inline-flex w-full items-center justify-center gap-2 rounded-full px-4 py-2 text-xs font-semibold uppercase tracking-wide shadow-md transition',
+                          (!selectedSessionIds.length || bookingLoading || allSelectedAlreadyInterested)
+                            ? 'cursor-not-allowed bg-gray-200 text-gray-400'
+                            : 'bg-brand-600 text-white hover:bg-brand-500',
+                        ]"
+                      >
+                        <span v-if="bookingLoading">
+                          Envoi en cours...
+                        </span>
+                        <span v-else-if="allSelectedAlreadyInterested">
+                          Déjà positionné·e dessus
+                        </span>
+                        <span v-else>
+                          Je suis intéressé·e par ces dates
+                        </span>
+                        <svg
+                          class="h-4 w-4"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="1.5"
+                        >
+                          <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            d="M8 5l8 7-8 7"
+                          />
+                        </svg>
+                      </button>
+                    </template>
+                    <template v-else>
+                      <p class="text-sm text-gray-500">
+                        Pas encore de dates planifiées. Propose-nous un créneau pour lequel tu serais disponible ci-dessous et on te recontacte !
+                      </p>
+                    </template>
+                  </div>
+                  <details
+                    class="mt-8 rounded-2xl border border-gray-200 bg-gray-50 p-4 text-sm text-gray-700"
+                    :open="suggestionDetailsOpen"
+                    @toggle="onSuggestionToggle"
+                  >
+                    <summary class="flex cursor-pointer items-center justify-between gap-3 text-left">
+                      <div>
+                        <p class="font-semibold text-gray-900">
+                          Aucune de ces dates ne colle ?
+                        </p>
+                        <p class="text-xs text-gray-500">
+                          Propose un créneau : on regroupe les grimpeurs dispo et on te recontacte.
+                        </p>
+                      </div>
                       <svg
-                        class="h-4 w-4"
+                        class="h-5 w-5 text-gray-500 transition"
+                        :class="suggestionDetailsOpen ? 'rotate-180' : ''"
                         viewBox="0 0 24 24"
                         fill="none"
                         stroke="currentColor"
                         stroke-width="1.5"
                       >
-                        <path
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                          d="M8 5l8 7-8 7"
-                        />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 9l6 6 6-6" />
                       </svg>
-                    </button>
-                  </template>
-                  <template v-else>
-                    <p class="text-sm text-gray-500">
-                      Pas encore de dates planifiées. Propose-nous un créneau pour lequel tu serais disponible ci-dessous et on te recontacte !
-                    </p>
-                  </template>
-                </div>
-                <details
-                  class="mt-8 rounded-2xl border border-gray-200 bg-gray-50 p-4 text-sm text-gray-700"
-                  :open="suggestionDetailsOpen"
-                  @toggle="onSuggestionToggle"
-                >
-                  <summary class="flex cursor-pointer items-center justify-between gap-3 text-left">
-                    <div>
-                      <p class="font-semibold text-gray-900">
-                        Aucune de ces dates ne colle ?
-                      </p>
-                      <p class="text-xs text-gray-500">
-                        Propose un créneau : on regroupe les grimpeurs dispo et on te recontacte.
-                      </p>
-                    </div>
-                    <svg
-                      class="h-5 w-5 text-gray-500 transition"
-                      :class="suggestionDetailsOpen ? 'rotate-180' : ''"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="1.5"
-                    >
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M6 9l6 6 6-6" />
-                    </svg>
-                  </summary>
+                    </summary>
 
-                  <div v-show="suggestionDetailsOpen" class="mt-4 space-y-3">
-                    <div>
-                      <label class="text-[11px] font-semibold uppercase tracking-[0.3em] text-gray-500">
-                        Intervalle de dates
-                      </label>
-                      <ClientOnly>
-                        <VueDatePicker
-                          v-model="datePickerModel"
-                          range
-                          :enable-time-picker="false"
-                          :min-date="new Date()"
-                          :locale="datePickerLocale"
-                          :formats="datePickerFormats"
-                          placeholder="JJ/MM/AAAA → JJ/MM/AAAA"
-                          :teleport="true"
+                    <div v-show="suggestionDetailsOpen" class="mt-4 space-y-3">
+                      <div>
+                        <label class="text-[11px] font-semibold uppercase tracking-[0.3em] text-gray-500">
+                          Intervalle de dates
+                        </label>
+                        <ClientOnly>
+                          <VueDatePicker
+                            v-model="datePickerModel"
+                            range
+                            :enable-time-picker="false"
+                            :min-date="new Date()"
+                            :locale="datePickerLocale"
+                            :formats="datePickerFormats"
+                            placeholder="JJ/MM/AAAA → JJ/MM/AAAA"
+                            :teleport="true"
+                            :disabled="suggestionLoading"
+                            class="mt-2"
+                            input-class-name="w-full rounded-2xl border border-gray-300 bg-white px-3 py-2 text-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/40"
+                          />
+                        </ClientOnly>
+                        <p class="text-[11px] text-gray-400">
+                          Choisis une date de début et, si besoin, une date de fin.
+                        </p>
+                      </div>
+                      <div>
+                        <label class="text-[11px] font-semibold uppercase tracking-[0.3em] text-gray-500">
+                          Message pour le moniteur
+                        </label>
+                        <textarea
+                          rows="3"
+                          class="mt-1 w-full rounded-2xl border border-gray-300 bg-white px-3 py-2 text-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/40"
+                          placeholder="Ex: dispo le week-end, on est déjà 3 personnes motivées..."
+                          v-model="customComment"
                           :disabled="suggestionLoading"
-                          class="mt-2"
-                          input-class-name="w-full rounded-2xl border border-gray-300 bg-white px-3 py-2 text-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/40"
                         />
-                      </ClientOnly>
-                      <p class="text-[11px] text-gray-400">
-                        Choisis une date de début et, si besoin, une date de fin.
+                      </div>
+                      <p v-if="suggestionError" class="rounded-md bg-red-50 px-3 py-2 text-xs text-red-700">
+                        {{ suggestionError }}
                       </p>
+                      <p v-if="suggestionSuccess" class="rounded-md bg-green-50 px-3 py-2 text-xs text-green-700">
+                        {{ suggestionSuccess }}
+                      </p>
+                      <button
+                        type="button"
+                        class="inline-flex w-full items-center justify-center gap-2 rounded-full bg-secondaryBrand-500/90 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-white shadow-lg shadow-secondaryBrand-900/30 transition hover:bg-secondaryBrand-400 disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-400"
+                        :disabled="suggestionLoading || !suggestionRange.start"
+                        @click="handleSuggestionClick"
+                      >
+                        <span v-if="suggestionLoading">Envoi en cours...</span>
+                        <span v-else>Je propose ce créneau</span>
+                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M8 5l8 7-8 7" />
+                        </svg>
+                      </button>
                     </div>
-                    <div>
-                      <label class="text-[11px] font-semibold uppercase tracking-[0.3em] text-gray-500">
-                        Message pour le moniteur
-                      </label>
-                      <textarea
-                        rows="3"
-                        class="mt-1 w-full rounded-2xl border border-gray-300 bg-white px-3 py-2 text-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/40"
-                        placeholder="Ex: dispo le week-end, on est déjà 3 personnes motivées..."
-                        v-model="customComment"
-                        :disabled="suggestionLoading"
-                      />
-                    </div>
-                    <p v-if="suggestionError" class="rounded-md bg-red-50 px-3 py-2 text-xs text-red-700">
-                      {{ suggestionError }}
-                    </p>
-                    <p v-if="suggestionSuccess" class="rounded-md bg-green-50 px-3 py-2 text-xs text-green-700">
-                      {{ suggestionSuccess }}
-                    </p>
-                    <button
-                      type="button"
-                      class="inline-flex w-full items-center justify-center gap-2 rounded-full bg-secondaryBrand-500/90 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-white shadow-lg shadow-secondaryBrand-900/30 transition hover:bg-secondaryBrand-400 disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-400"
-                      :disabled="suggestionLoading || !suggestionRange.start"
-                      @click="handleSuggestionClick"
-                    >
-                      <span v-if="suggestionLoading">Envoi en cours...</span>
-                      <span v-else>Je propose ce créneau</span>
-                      <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M8 5l8 7-8 7" />
-                      </svg>
-                    </button>
-                  </div>
-                </details>
-              </div>
-            </aside>
+                  </details>
+                </div>
+              </aside>
             </div>
 
           </div>
+
+          <section
+            v-if="galerieImages.length"
+            class="mt-8 rounded-3xl bg-brand-900/40 p-6 ring-1 ring-white/10"
+          >
+            <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+              <div>
+                <p class="text-[11px] font-semibold uppercase tracking-[0.3em] text-brand-200">
+                  Galerie
+                </p>
+                <h3 class="text-lg font-semibold text-white">
+                  Aperçu en images
+                </h3>
+              </div>
+              <div class="flex gap-2">
+                <button
+                  type="button"
+                  class="flex h-10 w-10 items-center justify-center rounded-full border border-white/20 text-white transition hover:border-white/40"
+                  @click="goToPrevImage"
+                  :aria-disabled="galerieImages.length < 2"
+                  :disabled="galerieImages.length < 2"
+                >
+                  <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+                  </svg>
+                </button>
+                <button
+                  type="button"
+                  class="flex h-10 w-10 items-center justify-center rounded-full border border-white/20 text-white transition hover:border-white/40"
+                  @click="goToNextImage"
+                  :aria-disabled="galerieImages.length < 2"
+                  :disabled="galerieImages.length < 2"
+                >
+                  <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+            <div class="mt-4">
+              <div class="relative overflow-hidden rounded-2xl bg-brand-950/40 ring-1 ring-white/5">
+                <img
+                  v-if="currentGalleryImage"
+                  :src="currentGalleryImage.url"
+                  :alt="currentGalleryImage.alt || stageTitle"
+                  class="h-64 w-full object-cover md:h-96"
+                />
+                <div v-else class="flex h-64 w-full items-center justify-center text-sm text-brand-200 md:h-96">
+                  Pas encore de photos.
+                </div>
+              </div>
+              <div class="mt-4 flex gap-2 overflow-x-auto">
+                <button
+                  v-for="(img, idx) in galerieImages"
+                  :key="img.id || idx"
+                  type="button"
+                  class="relative h-16 w-24 flex-shrink-0 overflow-hidden rounded-xl ring-2 transition"
+                  :class="idx === galleryIndex ? 'ring-secondaryBrand-400' : 'ring-transparent opacity-60 hover:opacity-100'"
+                  @click="selectGalleryImage(idx)"
+                >
+                  <img :src="img.url" :alt="img.alt || stageTitle" class="size-full object-cover" />
+                </button>
+              </div>
+            </div>
+          </section>
         </div>
       </main>
 
@@ -872,6 +866,9 @@ const toStringArray = (value: any): string[] => {
 const prerequisList = computed(() =>
   toStringArray(stage.value?.prerequis ?? []),
 )
+const hasPrerequisSection = computed(
+  () => prerequisList.value.length > 0 || Boolean(ageRange.value),
+)
 const equipementRequisList = computed(() =>
   toStringArray(stage.value?.equipementRequis ?? []),
 )
@@ -890,6 +887,9 @@ const ageRange = computed(() => {
   if (s.ageMax) return `Jusqu’à ${s.ageMax} ans`
   return ''
 })
+
+const objectifsText = computed(() => (stage.value?.objectifs || '').trim())
+const hasObjectifsSection = computed(() => objectifsText.value.length > 0)
 
 const programmeJours = computed(() => {
   const jours = stage.value?.programmeJours || []
