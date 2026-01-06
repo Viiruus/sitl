@@ -118,6 +118,8 @@ const form = reactive({
   lastName: '',
   birthDate: '',
   department: '',
+  phoneNumber: '',
+  whatsappOptIn: true,
 
   // Pratique
   typesOfClimbing: [] as string[], // ['bloc', 'sport', 'multi']
@@ -334,6 +336,15 @@ const submit = async () => {
                   {{ d }}
                 </option>
               </select>
+            </div>
+            <div class="space-y-1">
+              <label class="block text-xs font-medium text-brand-100/90">Téléphone (WhatsApp)</label>
+              <input
+                v-model="form.phoneNumber"
+                type="tel"
+                class="w-full border border-brand-700 rounded-lg px-3 py-2 text-sm bg-brand-950/50 text-white placeholder:text-brand-200/50 focus:outline-none focus:ring-2 focus:ring-secondaryBrand-500 focus:border-secondaryBrand-500"
+                placeholder="+33..."
+              />
             </div>
           </div>
         </section>

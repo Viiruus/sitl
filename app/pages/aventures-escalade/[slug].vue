@@ -150,42 +150,42 @@
           </div>
 
           <!-- Stats compactes -->
-          <div class="mt-10">
+          <div class="mt-6">
             <div
-              class="grid gap-4 rounded-3xl bg-brand-950/85 p-4 shadow-2xl shadow-black/40 ring-1 ring-white/10 backdrop-blur sm:grid-cols-2 lg:grid-cols-4"
+              class="grid gap-12 rounded-3xl bg-brand-950/70 p-2 shadow-xl shadow-black/30 ring-1 ring-white/10 backdrop-blur sm:grid-cols-2 lg:grid-cols-4"
             >
-              <div class="rounded-2xl bg-brand-900/80 p-4">
-                <p class="text-[11px] font-semibold uppercase tracking-[0.3em] text-brand-200">
+              <div class="flex items-center justify-between rounded-2xl bg-brand-900/70 px-12 py-2">
+                <p class="text-[10px] font-semibold uppercase tracking-[0.22em] text-brand-200">
                   Durée
                 </p>
-                <p class="mt-2 text-2xl font-semibold text-white">
+                <p class="text-base font-semibold text-white">
                   {{ stage.jours }} {{ stage.jours > 1 ? 'jours' : 'jour' }}
                 </p>
               </div>
 
-              <div class="rounded-2xl bg-brand-900/80 p-4">
-                <p class="text-[11px] font-semibold uppercase tracking-[0.3em] text-brand-200">
-                  Niveau minimum
+              <div class="flex items-center justify-between rounded-2xl bg-brand-900/70 px-12 py-2">
+                <p class="text-[10px] font-semibold uppercase tracking-[0.22em] text-brand-200">
+                  Niveau
                 </p>
-                <p class="mt-2 text-2xl font-semibold text-white">
+                <p class="text-base font-semibold text-white">
                   {{ stage.niveauMinimum || 'Tous niveaux' }}
                 </p>
               </div>
 
-              <div class="rounded-2xl bg-brand-900/80 p-4">
-                <p class="text-[11px] font-semibold uppercase tracking-[0.3em] text-brand-200">
+              <div class="flex items-center justify-between rounded-2xl bg-brand-900/70 px-12 py-2">
+                <p class="text-[10px] font-semibold uppercase tracking-[0.22em] text-brand-200">
                   Places max
                 </p>
-                <p class="mt-2 text-2xl font-semibold text-white">
+                <p class="text-base font-semibold text-white">
                   {{ stage.placesMax }}
                 </p>
               </div>
 
-              <div class="rounded-2xl bg-brand-900/80 p-4">
-                <p class="text-[11px] font-semibold uppercase tracking-[0.3em] text-brand-200">
+              <div class="flex items-center justify-between rounded-2xl bg-brand-900/70 px-12 py-2">
+                <p class="text-[10px] font-semibold uppercase tracking-[0.22em] text-brand-200">
                   Tarif / pers
                 </p>
-                <p class="mt-2 text-2xl font-semibold text-white">
+                <p class="text-base font-semibold text-white">
                   {{ stage.prixParPersonne }} €
                 </p>
               </div>
