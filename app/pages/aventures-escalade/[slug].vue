@@ -449,7 +449,7 @@
                       v-if="!hasTransport"
                       class="text-xs text-brand-100/90 whitespace-pre-line"
                     >
-                      L'organisation pour le transport et le point de rendez-vous seront envoyés par le moniteur après l'inscription.
+                      L'organisation pour le transport sera communiquée par le moniteur après l'inscription.
                     </p>
                   </div>
                 </div>
