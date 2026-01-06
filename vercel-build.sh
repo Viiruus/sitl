@@ -8,9 +8,22 @@ echo "TURSO_DATABASE_URL is set? $([ -n "${TURSO_DATABASE_URL:-}" ] && echo yes 
 echo "TURSO_AUTH_TOKEN is set? $([ -n "${TURSO_AUTH_TOKEN:-}" ] && echo yes || echo no)"
 
 # Normalize Turso URL for Prisma (needs libsql:// scheme, not https://)
-if [ -n "${TURSO_DATABASE_URL:-}" ] && echo "$TURSO_DATABASE_URL" | grep -q '^https://'; then
-  export TURSO_DATABASE_URL="libsql://$(echo "$TURSO_DATABASE_URL" | sed 's#^https://##')"
-  echo "Normalized TURSO_DATABASE_URL to libsql:// scheme for Prisma"
+if [ -n "${TURSO_DATABASE_URL:-}" ]; then
+  # trim whitespace/newlines just in case
+  CLEAN_URL="$(printf '%s' "$TURSO_DATABASE_URL" | tr -d '[:space:]')"
+  case "$CLEAN_URL" in
+    https://*)
+      CLEAN_URL="libsql://${CLEAN_URL#https://}"
+      ;;
+    http://*)
+      CLEAN_URL="libsql://${CLEAN_URL#http://}"
+      ;;
+    libsqls://*)
+      CLEAN_URL="libsql://${CLEAN_URL#libsqls://}"
+      ;;
+  esac
+  export TURSO_DATABASE_URL="$CLEAN_URL"
+  echo "Normalized TURSO_DATABASE_URL scheme -> $(printf '%s' "$TURSO_DATABASE_URL" | sed 's#://.*#://***#')"
 fi
 
 npx nuxt prepare
