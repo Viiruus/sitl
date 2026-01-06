@@ -10,6 +10,8 @@ echo "TURSO_AUTH_TOKEN is set? $([ -n "${TURSO_AUTH_TOKEN:-}" ] && echo yes || e
 
 npx nuxt prepare
 npx prisma generate
+# ✅ Apply migrations so new columns (phone/WhatsApp, etc.) exist before seeding/using the DB
+npx prisma migrate deploy
 
 if [ "${VERCEL_ENV:-}" = "preview" ]; then
   echo "Preview -> seeding Turso"
