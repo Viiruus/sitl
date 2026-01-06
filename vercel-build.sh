@@ -42,8 +42,8 @@ fi
 
 npx nuxt prepare
 npx prisma generate
-# ✅ Apply migrations so new columns (phone/WhatsApp, etc.) exist before seeding/using the DB
-npx prisma migrate deploy
+# Prisma migrate CLI cannot use libsql:// with sqlite provider, so ensure needed columns manually.
+npx tsx prisma/scripts/ensure-phone-columns.ts
 
 if [ "${VERCEL_ENV:-}" = "preview" ]; then
   echo "Preview -> seeding Turso"

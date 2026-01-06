@@ -2,8 +2,8 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 datasource db {
-  // libsql provider to work with Turso (remote) and local file URLs
-  provider = "libsql"
+  // Use SQLite provider; runtime connections go through the libsql adapter in code.
+  provider = "sqlite"
   // Prisma 7: l'URL est dans prisma.config.ts via DATABASE_URL / TURSO_DATABASE_URL
 }
 
