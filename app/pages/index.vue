@@ -154,12 +154,12 @@
               <div class="flex flex-wrap items-center gap-3 text-xs text-white sm:flex-row sm:justify-between">
                 <div class="flex flex-wrap items-center gap-2 flex-1">
                   <span
-                    class="inline-flex max-w-[70%] items-center rounded-full bg-brand-950/60 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.3em] text-white ring-1 ring-white/20"
+                    class="inline-flex max-w-[70%] items-center rounded-full bg-secondaryBrand-400/80 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.3em] text-secondaryBrand-100 ring-1 ring-white/20"
                   >
                     {{ formatDisciplineLabel(stage.discipline) }}
                   </span>
                   <span
-                    class="inline-flex items-center rounded-full border border-secondaryBrand-200/40 bg-secondaryBrand-500/30 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-secondaryBrand-100"
+                    class="inline-flex items-center rounded-full border border-brand-200/40 bg-brand-950/60 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-white"
                   >
                     {{ stage.jours }} {{ stage.jours > 1 ? 'jours' : 'jour' }}
                   </span>
@@ -176,13 +176,22 @@
                   </span>
                 </div>
               </div>
-              <span class="inline-flex items-center gap-2 text-sm font-semibold text-white">
-                <svg class="h-4 w-4 text-secondaryBrand-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                  <rect x="3" y="4" width="18" height="16" rx="2" />
-                  <path d="M16 2v4M8 2v4M3 10h18" />
-                </svg>
-                {{ stage.nextSession ? formatSessionRange(stage.nextSession) : 'Date à confirmer' }}
-              </span>
+              <div class="flex flex-col gap-1 text-sm text-white">
+                <span class="inline-flex items-center gap-2 font-semibold text-xs text-white">
+                  <svg class="h-4 w-4 text-secondaryBrand-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <rect x="3" y="4" width="18" height="16" rx="2" />
+                    <path d="M16 2v4M8 2v4M3 10h18" />
+                  </svg>
+                  {{ stage.nextSession ? formatSessionRange(stage.nextSession) : 'Date à confirmer' }}
+                </span>
+                <span class="inline-flex items-center gap-2 font-semibold text-xs text-white">
+                  <svg class="h-4 w-4 text-secondaryBrand-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 21c-4-4-6-7-6-10a6 6 0 0 1 12 0c0 3-2 6-6 10Z" />
+                    <circle cx="12" cy="11" r="2.3" />
+                  </svg>
+                  {{ stage.lieuLabel }}
+                </span>
+              </div>
             </div>
           </div>
           <div class="flex flex-1 flex-col p-5">
@@ -192,37 +201,24 @@
             <p class="mt-1 line-clamp-2 text-sm text-brand-100/80">
               {{ stage.sousTitre }}
             </p>
-            <p class="mt-3 flex items-center gap-2 text-sm text-brand-100/70">
-              <svg class="h-4 w-4 text-secondaryBrand-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 21c-4-4-6-7-6-10a6 6 0 1 1 12 0c0 3-2 6-6 10Z" />
-                <circle cx="12" cy="11" r="2.3" />
-              </svg>
-              {{ stage.lieuLabel }}
-            </p>
-            <div class="mt-4 flex items-center gap-3 text-sm text-brand-100/80">
-              <img
-                :src="stage.guideImageUrl || imageForDiscipline(stage.discipline)"
-                :alt="stage.guideName || 'Moniteur'"
-                class="h-10 w-10 rounded-full border border-white/20 bg-brand-900 object-cover"
-              />
-              <div>
-                <p class="text-xs uppercase tracking-[0.3em] text-brand-200/70">
-                  Moniteur
-                </p>
-                <p class="font-semibold text-white">
-                  {{ stage.guideName || 'Moniteur local' }}
-                </p>
-              </div>
-            </div>
             <div class="mt-6 flex items-center justify-between text-sm text-white">
-              <span class="font-semibold">
+              <div class="flex items-center gap-3 text-sm text-brand-100/80">
+                <img
+                  :src="stage.guideImageUrl || imageForDiscipline(stage.discipline)"
+                  :alt="stage.guideName || 'Moniteur'"
+                  class="h-10 w-10 rounded-full border border-white/20 bg-brand-900 object-cover"
+                />
+                <div>
+                  <p class="text-xs uppercase tracking-[0.3em] text-brand-200/70">
+                    Moniteur
+                  </p>
+                  <p class="font-semibold text-white">
+                    {{ stage.guideName || 'Moniteur local' }}
+                  </p>
+                </div>
+              </div>
+              <span class="font-semibold text-right">
                 {{ stage.prixParPersonne }} € <span class="text-brand-200 text-xs">/ pers</span>
-              </span>
-              <span class="inline-flex items-center gap-2 text-secondaryBrand-300">
-                Voir l’aventure
-                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M8 5l8 7-8 7" />
-                </svg>
               </span>
             </div>
           </div>
@@ -376,7 +372,7 @@ const { data: aventuresData, pending: aventuresPending } = await useFetch('/api/
 
   const formatSessionRange = (session: any) => {
     if (!session?.dateDebut || !session?.dateFin) return ''
-    const formatter = new Intl.DateTimeFormat('fr-FR', { day: 'numeric', month: 'long' })
+    const formatter = new Intl.DateTimeFormat('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })
     const start = formatter.format(new Date(session.dateDebut))
     const end = formatter.format(new Date(session.dateFin))
     return start === end ? start : `${start} → ${end}`
