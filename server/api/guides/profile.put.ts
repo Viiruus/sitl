@@ -13,6 +13,7 @@ const bodySchema = z.object({
   profileImageUrl: z.union([
     z.string().trim().url(),
     z.string().trim().startsWith('/uploads/'),
+    z.string().trim().startsWith('/api/moniteurs/uploads/'),
     z.literal(''),
   ]).optional(),
 })
