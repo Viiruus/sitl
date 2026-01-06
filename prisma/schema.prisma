@@ -2,8 +2,9 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 datasource db {
-  provider = "sqlite" // ou "postgresql"
-  // Prisma 7: l'URL est dans prisma.config.ts via DATABASE_URL
+  // libsql provider to work with Turso (remote) and local file URLs
+  provider = "libsql"
+  // Prisma 7: l'URL est dans prisma.config.ts via DATABASE_URL / TURSO_DATABASE_URL
 }
 
 generator client {
