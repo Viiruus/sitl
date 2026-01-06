@@ -16,8 +16,13 @@ const client = createClient({ url, authToken: token })
 
 async function ensureMigrationsTable() {
   // Matches Prisma's _prisma_migrations structure for SQLite
-  await client.executeMultiple(`
-    PRAGMA journal_mode=WAL;
+  // PRAGMA may not be allowed remotely; ignore failures.
+  try {
+    await client.execute(`PRAGMA journal_mode=WAL;`)
+  } catch (err) {
+    console.warn('apply-migrations: PRAGMA skipped', err)
+  }
+  await client.execute(`
     CREATE TABLE IF NOT EXISTS "_prisma_migrations" (
       "id" TEXT PRIMARY KEY NOT NULL,
       "checksum" TEXT NOT NULL,
