@@ -32,16 +32,22 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 415, statusMessage: 'Format non supporté' })
   }
 
-  const targetDir = isVercel ? TMP_UPLOAD_DIR : PUBLIC_UPLOAD_DIR
+  // On Vercel, use a data URL to avoid filesystem persistence issues (serverless /tmp is ephemeral).
+  if (isVercel) {
+    const mime = filePart.type || 'image/jpeg'
+    const base64 = Buffer.from(filePart.data).toString('base64')
+    const dataUrl = `data:${mime};base64,${base64}`
+    return { url: dataUrl }
+  }
+
+  const targetDir = PUBLIC_UPLOAD_DIR
   await fs.mkdir(targetDir, { recursive: true })
   const extension = filePart.type ? extname(filePart.filename || '').toLowerCase() || guessExtension(filePart.type) : ''
   const filename = `${session.user.id}-${randomUUID()}${extension || '.jpg'}`
   const filepath = join(targetDir, filename)
   await fs.writeFile(filepath, filePart.data)
 
-  const publicPath = isVercel
-    ? `/api/moniteurs/uploads/${filename}`
-    : `/uploads/moniteurs/${filename}`
+  const publicPath = `/uploads/moniteurs/${filename}`
   return { url: publicPath }
 })
 

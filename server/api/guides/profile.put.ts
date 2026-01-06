@@ -14,6 +14,7 @@ const bodySchema = z.object({
     z.string().trim().url(),
     z.string().trim().startsWith('/uploads/'),
     z.string().trim().startsWith('/api/moniteurs/uploads/'),
+    z.string().trim().startsWith('data:'),
     z.literal(''),
   ]).optional(),
 })
