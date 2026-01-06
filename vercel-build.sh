@@ -23,12 +23,13 @@ if [ -n "${TURSO_DATABASE_URL:-}" ]; then
       ;;
   esac
   # add authToken to the URL for Prisma migrate CLI (adapter token isn't used there)
+  ENCODED_TOKEN="$(node -e "process.stdout.write(encodeURIComponent(process.env.TURSO_AUTH_TOKEN||''))")"
   if [ -n "${TURSO_AUTH_TOKEN:-}" ]; then
     TOKENIZED_URL="${CLEAN_URL}"
     if echo "$TOKENIZED_URL" | grep -q '?'; then
-      TOKENIZED_URL="${TOKENIZED_URL}&authToken=${TURSO_AUTH_TOKEN}"
+      TOKENIZED_URL="${TOKENIZED_URL}&authToken=${ENCODED_TOKEN}"
     else
-      TOKENIZED_URL="${TOKENIZED_URL}?authToken=${TURSO_AUTH_TOKEN}"
+      TOKENIZED_URL="${TOKENIZED_URL}?authToken=${ENCODED_TOKEN}"
     fi
   else
     TOKENIZED_URL="$CLEAN_URL"
