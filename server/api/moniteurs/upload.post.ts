@@ -6,6 +6,7 @@ import { readMultipartFormData } from 'h3'
 
 const ALLOWED_MIME = ['image/jpeg', 'image/png', 'image/webp']
 const UPLOAD_DIR = join(process.cwd(), 'public', 'uploads', 'moniteurs')
+const isVercel = process.env.VERCEL === '1' || Boolean(process.env.VERCEL_ENV)
 
 export default defineEventHandler(async (event) => {
   const session = await getUserSession(event)
@@ -28,6 +29,14 @@ export default defineEventHandler(async (event) => {
 
   if (filePart.type && !ALLOWED_MIME.includes(filePart.type)) {
     throw createError({ statusCode: 415, statusMessage: 'Format non supporté' })
+  }
+
+  // Vercel filesystem is read-only; fallback to data URL in preview/production there.
+  if (isVercel) {
+    const mime = filePart.type || 'image/jpeg'
+    const base64 = Buffer.from(filePart.data).toString('base64')
+    const dataUrl = `data:${mime};base64,${base64}`
+    return { url: dataUrl }
   }
 
   await fs.mkdir(UPLOAD_DIR, { recursive: true })
