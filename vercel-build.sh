@@ -23,7 +23,8 @@ if [ -n "${TURSO_DATABASE_URL:-}" ]; then
       ;;
   esac
   export TURSO_DATABASE_URL="$CLEAN_URL"
-  echo "Normalized TURSO_DATABASE_URL scheme -> $(printf '%s' "$TURSO_DATABASE_URL" | sed 's#://.*#://***#')"
+  export DATABASE_URL="$CLEAN_URL" # prisma CLI may still look for DATABASE_URL
+  echo "Normalized TURSO_DATABASE_URL -> $(printf '%s' "$TURSO_DATABASE_URL" | sed 's#://.*#://***#')"
 fi
 
 npx nuxt prepare
