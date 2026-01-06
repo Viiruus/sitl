@@ -42,8 +42,8 @@ fi
 
 npx nuxt prepare
 npx prisma generate
-# Prisma migrate CLI cannot use libsql:// with sqlite provider, so ensure needed columns manually.
-npx tsx prisma/scripts/ensure-phone-columns.ts
+# Apply Prisma migration SQLs to Turso (libsql) without using Prisma migrate CLI
+npx tsx prisma/scripts/apply-migrations.ts
 
 if [ "${VERCEL_ENV:-}" = "preview" ]; then
   echo "Preview -> seeding Turso"
