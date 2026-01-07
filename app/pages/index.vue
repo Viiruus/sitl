@@ -149,9 +149,9 @@
             <img
               :src="stage.coverImageUrl || imageForDiscipline(stage.discipline)"
               :alt="stage.titre"
-              class="size-full object-cover"
+              class="size-full object-cover transition duration-500 hover:scale-105"
             />
-            <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent" />
+            <div class="absolute inset-0 bg-gradient-to-t from-brand-950 via-brand-950/40 to-transparent"></div>
             <div class="absolute inset-4 flex flex-col justify-between">
               <div class="flex flex-wrap items-center gap-3 text-xs text-white sm:flex-row sm:justify-between">
                 <div class="flex flex-wrap items-center gap-2 flex-1">

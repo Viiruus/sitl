@@ -67,6 +67,14 @@ const imageForDiscipline = (value?: string | null) => {
   return disciplineImageMap[value] ?? '/images/escalade-grande-voie-calanques.jpg'
 }
 
+const formatSessionRange = (session: any) => {
+  if (!session?.dateDebut || !session?.dateFin) return ''
+  const formatter = new Intl.DateTimeFormat('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })
+  const start = formatter.format(new Date(session.dateDebut))
+  const end = formatter.format(new Date(session.dateFin))
+  return start === end ? start : `${start} → ${end}`
+}
+
 const filteredAventures = computed(() => {
   let adventures = data.value?.aventures ?? []
 
@@ -215,7 +223,7 @@ const filteredAventures = computed(() => {
             :to="`/aventures-escalade/${a.slug}`"
             class="block rounded-3xl border border-white/10 bg-white/5 shadow-2xl shadow-black/30 backdrop-blur focus:outline-none focus-visible:ring-2 focus-visible:ring-secondaryBrand-400"
           >
-            <div class="relative h-64 w-full overflow-hidden">
+            <div class="relative h-72 w-full overflow-hidden">
               <img
                 :src="a.coverImageUrl || imageForDiscipline(a.discipline)"
                 :alt="a.titre"
@@ -224,12 +232,12 @@ const filteredAventures = computed(() => {
               />
               <div class="absolute inset-0 bg-gradient-to-t from-brand-950 via-brand-950/40 to-transparent"></div>
               <div class="absolute inset-0 flex flex-col justify-between px-6 py-6 text-white">
-                <div class="flex flex-wrap items-center gap-3 text-xs text-brand-100/90 sm:flex-row sm:justify-between">
+                <div class="flex flex-wrap items-center gap-3 text-xs text-white sm:flex-row sm:justify-between">
                   <div class="flex flex-wrap items-center gap-3 flex-1">
-                    <span class="inline-flex max-w-[70%] items-center rounded-full bg-brand-950/60 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.3em] ring-1 ring-white/20">
+                    <span class="inline-flex max-w-[70%] items-center rounded-full bg-secondaryBrand-400/80 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.3em] text-secondaryBrand-100 ring-1 ring-white/20">
                       {{ formatDisciplineLabel(a.discipline) }}
                     </span>
-                    <span class="rounded-full border border-secondaryBrand-200/40 bg-secondaryBrand-500/30 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-secondaryBrand-100">
+                    <span class="inline-flex items-center rounded-full border border-brand-200/40 bg-brand-950/60 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-white">
                       {{ a.jours }} {{ a.jours > 1 ? 'jours' : 'jour' }}
                     </span>
                   </div>
@@ -245,55 +253,49 @@ const filteredAventures = computed(() => {
                     </span>
                   </div>
                 </div>
+
                 <div class="flex flex-col gap-3">
                   <h2 class="text-2xl font-semibold truncate">{{ a.titre }}</h2>
                   <p v-if="a.sousTitre" class="text-sm text-brand-100/80">{{ a.sousTitre }}</p>
-                  <p class="flex items-center gap-2 text-sm text-brand-100/80">
+                </div>
+                <div class="flex flex-col gap-1 text-sm text-white">
+                  <span class="inline-flex items-center gap-2 font-semibold text-xs text-white">
+                    <svg class="h-4 w-4 text-secondaryBrand-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                      <rect x="3" y="4" width="18" height="16" rx="2" />
+                      <path d="M16 2v4M8 2v4M3 10h18" />
+                    </svg>
+                    {{ a.nextSession ? formatSessionRange(a.nextSession) : 'Date à confirmer' }}
+                  </span>
+                  <span class="inline-flex items-center gap-2 font-semibold text-xs text-white">
                     <svg class="h-4 w-4 text-secondaryBrand-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
                       <path stroke-linecap="round" stroke-linejoin="round" d="M12 21c-4-4-6-7-6-10a6 6 0 0 1 12 0c0 3-2 6-6 10Z" />
-                      <circle cx="12" cy="11" r="2.5" />
+                      <circle cx="12" cy="11" r="2.3" />
                     </svg>
                     {{ a.lieuLabel }}
-                  </p>
+                  </span>
                 </div>
               </div>
             </div>
-
-            <div class="p-6">
-              <div class="flex flex-wrap items-center justify-between text-sm">
-                <div class="text-brand-100">
-                  <span class="font-semibold">{{ a.prixParPersonne }} €</span>
-                  <span class="text-brand-200/70 text-xs"> / personne</span>
-                  max
-                </div>
-                <div
-                  class="mt-4 mb-4 flex w-full items-center gap-3 rounded-2xl bg-brand-950/70 px-5 py-3 text-sm text-white shadow-lg shadow-black/40 ring-1 ring-white/20 sm:mt-0 sm:mb-0 sm:max-w-[240px] sm:self-end"
-                >
-                  <div
-                    class="flex h-9 w-9 items-center justify-center rounded-full border border-white/30 bg-brand-950/70"
-                  >
-                    <img
-                      v-if="a.guideImageUrl"
-                      :src="a.guideImageUrl"
-                      :alt="a.guideName || 'Moniteur'"
-                      class="h-full w-full rounded-full object-cover"
-                    />
-                    <img
-                      v-else
-                      :src="iconPathForDiscipline(a.discipline)"
-                      :alt="formatDisciplineLabel(a.discipline)"
-                      class="h-5 w-5 object-contain"
-                    />
-                  </div>
+            <div class="flex flex-1 flex-col p-5">
+              <div class="flex items-center justify-between text-sm text-white">
+                <div class="flex items-center gap-3 text-sm text-brand-100/80">
+                  <img
+                    :src="a.guideImageUrl || imageForDiscipline(a.discipline)"
+                    :alt="a.guideName || 'Moniteur'"
+                    class="h-10 w-10 rounded-full border border-white/20 bg-brand-900 object-cover"
+                  />
                   <div>
-                    <p class="text-[10px] uppercase tracking-[0.3em] text-white/70">
+                    <p class="text-xs uppercase tracking-[0.3em] text-brand-200/70">
                       Moniteur
                     </p>
-                    <p class="text-base font-semibold leading-tight">
+                    <p class="font-semibold text-white">
                       {{ a.guideName || 'Moniteur local' }}
                     </p>
                   </div>
                 </div>
+                <span class="font-semibold text-right">
+                  {{ a.prixParPersonne }} € <span class="text-brand-200 text-xs">/ pers</span>
+                </span>
               </div>
             </div>
           </NuxtLink>

@@ -2,10 +2,10 @@
   <footer class="bg-white">
     <div class="mx-auto max-w-7xl px-6 pt-16 pb-8 sm:pt-24 lg:px-8 lg:pt-32">
       <div class="xl:grid xl:grid-cols-3 xl:gap-8">
-        <div class="space-y-8">
-          <img class="h-28" src="~/assets/images/brigade_du_kif_logo_noir.png" alt="Company name" />
-          <p class="text-sm/6 text-balance text-gray-600">Grimpe et aventures sans limites.</p>
-          <div class="flex gap-x-6">
+        <div class="space-y-8 text-center">
+          <img class="h-16 mx-auto" src="~/assets/images/brigade-du-kif_black-logo.png" alt="Company name" />
+          <p class="text-sm/6 text-balance text-gray-600">Vos aventures verticales commencent ici.</p>
+          <div class="flex justify-center gap-x-6">
             <a v-for="item in footerNavigation.social" :key="item.name" :href="item.href" class="text-gray-600 hover:text-gray-800">
               <span class="sr-only">{{ item.name }}</span>
               <component :is="item.icon" class="size-6" aria-hidden="true" />
