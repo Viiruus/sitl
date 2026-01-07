@@ -8,7 +8,8 @@ const imageUrlSchema = z
   .trim()
   .refine((value) => {
     if (!value) return false
-    if (value.startsWith('/')) return true
+    if (value.startsWith('/uploads/') || value.startsWith('/api/moniteurs/uploads/')) return true
+    if (value.startsWith('data:')) return true
     try {
       const url = new URL(value)
       return ['http:', 'https:'].includes(url.protocol)
