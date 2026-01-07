@@ -96,6 +96,33 @@ onMounted(() => {
   isClient.value = true
 })
 
+const resizeForUpload = async (file: File, maxWidth = 1400, maxHeight = 900) => {
+  // reduce payload size to avoid 413 on server (esp. data URLs on Vercel)
+  return new Promise<File>((resolve) => {
+    const img = new Image()
+    img.onload = () => {
+      const ratio = Math.min(1, maxWidth / img.width, maxHeight / img.height)
+      if (ratio >= 1) return resolve(file)
+      const canvas = document.createElement('canvas')
+      canvas.width = Math.round(img.width * ratio)
+      canvas.height = Math.round(img.height * ratio)
+      const ctx = canvas.getContext('2d')
+      if (!ctx) return resolve(file)
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
+      canvas.toBlob(
+        (blob) => {
+          if (!blob) return resolve(file)
+          resolve(new File([blob], file.name.replace(/\.[^.]+$/, '') + '.jpg', { type: 'image/jpeg' }))
+        },
+        'image/jpeg',
+        0.82,
+      )
+    }
+    img.onerror = () => resolve(file)
+    img.src = URL.createObjectURL(file)
+  })
+}
+
 const slugPreview = computed(() => currentSlug.value || generatingSlug(form.titre))
 
 const resetListIfEmpty = (list: string[]) => {
@@ -342,8 +369,9 @@ const uploadCoverImage = async (event: Event) => {
   coverUploadError.value = null
   uploadingCover.value = true
   try {
+    const resized = await resizeForUpload(file)
     const formData = new FormData()
-    formData.append('file', file, file.name)
+    formData.append('file', resized, resized.name)
     const response = await $fetch<{ url: string }>('/api/moniteurs/upload', {
       method: 'POST',
       body: formData,
@@ -366,8 +394,9 @@ const uploadGalleryImage = async (event: Event, index: number) => {
   galleryUploadStates[index].error = null
   galleryUploadStates[index].loading = true
   try {
+    const resized = await resizeForUpload(file)
     const formData = new FormData()
-    formData.append('file', file, file.name)
+    formData.append('file', resized, resized.name)
     const response = await $fetch<{ url: string }>('/api/moniteurs/upload', {
       method: 'POST',
       body: formData,
