@@ -27,7 +27,7 @@
           </div>
         </div>
       </div>
-      <div class="bg-brand-950 lg:absolute lg:inset-y-0 lg:right-0 lg:w-1/2 min-h-[50vh] lg:min-h-screen">
+      <div class="hidden bg-brand-950 lg:absolute lg:inset-y-0 lg:right-0 lg:block lg:w-1/2 min-h-[50vh] lg:min-h-screen">
         <img class="h-full w-full object-cover" src="~/assets/images/escalade0.jpg" alt="" />
       </div>
     </div>
@@ -51,24 +51,26 @@
         <article
           v-for="benefit in benefits"
           :key="benefit.title"
-          class="rounded-3xl border border-white/10 bg-white/5 p-6 shadow-xl shadow-black/30 ring-1 ring-white/10"
+          class="group relative isolate h-96 overflow-hidden rounded-3xl border border-white/10 bg-white/5 shadow-2xl shadow-black/30 ring-1 ring-white/10"
         >
-          <div class="flex items-center gap-3 text-secondaryBrand-200">
-            <div class="flex h-12 w-12 items-center justify-center rounded-full bg-secondaryBrand-500/10 text-2xl">
-              {{ benefit.emoji }}
-            </div>
-            <div>
-              <p class="text-xs uppercase tracking-[0.4em] text-secondaryBrand-200/90">
-                {{ benefit.kicker }}
-              </p>
-              <h3 class="text-xl font-semibold text-white">
-                {{ benefit.title }}
-              </h3>
-            </div>
+          <img
+            :src="benefit.image"
+            :alt="benefit.title"
+            class="absolute inset-0 size-full object-cover transition duration-700 group-hover:scale-105"
+            loading="lazy"
+          />
+          <div class="absolute inset-0 bg-gradient-to-t from-black/75 via-black/45 to-transparent" />
+          <div class="absolute inset-0 flex flex-col justify-end gap-2 p-5">
+            <p class="text-[11px] uppercase tracking-[0.4em] text-secondaryBrand-200/90">
+              {{ benefit.kicker }}
+            </p>
+            <h3 class="text-lg font-semibold text-white">
+              {{ benefit.title }}
+            </h3>
+            <p class="text-sm text-brand-100/85 leading-relaxed">
+              {{ benefit.description }}
+            </p>
           </div>
-          <p class="mt-4 text-sm text-brand-100/80">
-            {{ benefit.description }}
-          </p>
         </article>
       </div>
     </div>
@@ -286,28 +288,28 @@ const { data: aventuresData, pending: aventuresPending } = await useFetch('/api/
       title: 'Reconnecte avec le milieu naturel',
       description:
         'Découvre les milliers de spots de nos territoires en pratiquant dehors. Au soleil ou à l’ombre selon la saison, apprends à jouer avec la météo pour vivre des moments inoubliables en falaise.',
-      emoji: '🌞',
+      image: '/images/reconnecte3.jpg',
     },
     {
       kicker: 'Progression',
       title: 'Émulation garantie & moniteurs diplômés',
       description:
         'Notre objectif est de te faire prendre goût à l’escalade en milieu naturel, mais surtout de te faire progresser et t’accompagner vers l’autonomie.',
-      emoji: '📈',
+      image: '/images/emulation2.jpeg',
     },
     {
       kicker: 'Club',
       title: 'Rencontre tes futurs partenaires',
       description:
         'Pas toujours simple de trouver les bonnes personnes avec qui grimper. Pendant nos stages, tu rencontres des grimpeurs et grimpeuses motivé·es pour partager la corde.',
-      emoji: '🤝',
+      image: '/images/rencontre3.jpeg',
     },
     {
       kicker: 'Authenticité',
       title: 'Moniteurs locaux passionnés',
       description:
         'Nos Moniteurs aiment leur territoire et vous font découvrir les joyaux de leurs régions : plus belles voies, meilleures adresses pour manger ou dormir… tu es entre de bonnes mains.',
-      emoji: '🧭',
+      image: '/images/passion5.jpeg',
     },
   ];
 
