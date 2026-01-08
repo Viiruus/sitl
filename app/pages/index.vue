@@ -225,6 +225,17 @@
             </div>
           </div>
         </NuxtLink>
+        <div class="md:col-span-3 flex justify-center">
+          <NuxtLink
+            to="/aventures-escalade"
+            class="mt-12 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-5 py-3 text-sm font-semibold text-white transition hover:border-white/40 hover:bg-white/10"
+          >
+            Voir tous les stages
+            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M8 5l8 7-8 7" />
+            </svg>
+          </NuxtLink>
+        </div>
       </div>
     </div>
   </section>

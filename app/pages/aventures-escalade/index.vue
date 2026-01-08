@@ -221,7 +221,7 @@ const filteredAventures = computed(() => {
             v-for="a in filteredAventures"
             :key="a.id"
             :to="`/aventures-escalade/${a.slug}`"
-            class="block rounded-3xl border border-white/10 bg-white/5 shadow-2xl shadow-black/30 backdrop-blur focus:outline-none focus-visible:ring-2 focus-visible:ring-secondaryBrand-400"
+            class="block overflow-hidden rounded-3xl border border-white/10 bg-white/5 shadow-2xl shadow-black/30 backdrop-blur focus:outline-none focus-visible:ring-2 focus-visible:ring-secondaryBrand-400"
           >
             <div class="relative h-72 w-full overflow-hidden">
               <img
