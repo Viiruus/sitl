@@ -29,9 +29,9 @@
       <main class="flex-1">
         <section class="px-6 py-24 sm:py-20 lg:px-0">
 
-        <div class="mx-auto grid max-w-2xl grid-cols-1 gap-x-8 gap-y-16 lg:mx-0 lg:max-w-none lg:grid-cols-2 lg:items-start lg:gap-y-10">
-          <div class="lg:col-span-2 lg:col-start-1 lg:row-start-1 lg:mx-auto lg:grid lg:w-full lg:max-w-7xl lg:grid-cols-2 lg:gap-x-8 lg:px-8">
-            <div class="lg:pr-4">
+          <div class="mx-auto grid max-w-2xl grid-cols-1 gap-x-8 gap-y-16 lg:mx-0 lg:max-w-none lg:grid-cols-2 lg:items-start lg:gap-y-10">
+          <div class="grid grid-cols-1 gap-10 lg:col-span-2 lg:col-start-1 lg:row-start-1 lg:mx-auto lg:w-full lg:max-w-7xl lg:grid-cols-2 lg:gap-x-8 lg:px-8">
+            <div class="order-2 lg:order-1 lg:pr-4">
               <div class="lg:max-w-lg">
                 <h1 class="mt-2 text-4xl font-semibold tracking-tight text-pretty text-white sm:text-5xl">
                   {{ moniteurName || 'Moniteur local' }}
@@ -77,7 +77,7 @@
                 </div>
               </div>
             </div>
-            <div class="mt-8 lg:mt-0 lg:sticky lg:top-4 lg:justify-self-end">
+            <div class="order-1 lg:order-2 mt-8 lg:mt-0 lg:sticky lg:top-4 lg:justify-self-end">
               <div class="rounded-3xl bg-white/5 p-6 shadow-2xl shadow-black/40 ring-1 ring-white/10 lg:max-w-[34rem] xl:max-w-[36rem]">
                 <img
                   class="w-full rounded-2xl bg-gray-800 object-cover"
@@ -113,60 +113,86 @@
             <div v-for="n in 2" :key="n" class="h-64 animate-pulse rounded-3xl bg-white/5" />
           </div>
 
-          <div v-else-if="aventures.length" class="mt-12 grid gap-8 lg:grid-cols-2">
+          <div v-else-if="aventures.length" class="mt-12 grid gap-6 lg:grid-cols-2">
             <NuxtLink
               v-for="aventure in aventures"
               :key="aventure.id"
               :to="`/aventures-escalade/${aventure.slug}`"
-              class="flex flex-col overflow-hidden rounded-3xl bg-white/5 ring-1 ring-white/10 transition hover:-translate-y-1 hover:bg-white/10"
+              class="group flex flex-col overflow-hidden rounded-3xl border border-white/10 bg-white/5 shadow-2xl shadow-black/40 ring-1 ring-white/10 transition hover:-translate-y-1 backdrop-blur focus:outline-none focus-visible:ring-2 focus-visible:ring-secondaryBrand-400"
             >
-              <div class="relative">
+              <div class="relative h-72 w-full overflow-hidden">
                 <img
                   :src="aventure.coverImageUrl || fallbackImageForDiscipline(aventure.discipline)"
                   :alt="aventure.titre"
-                  class="h-60 w-full object-cover"
+                  class="size-full object-cover transition duration-500 hover:scale-105"
+                  loading="lazy"
                 />
-                <span
-                  class="absolute right-4 top-4 inline-flex h-12 w-12 items-center justify-center rounded-full bg-secondaryBrand-400/80 shadow-lg shadow-secondaryBrand-900/40"
-                >
-                  <img
-                    :src="iconPathForDiscipline(aventure.discipline)"
-                    :alt="formatDisciplineLabel(aventure.discipline)"
-                    class="h-7 w-7 object-contain"
-                  />
-                </span>
+                <div class="absolute inset-0 bg-gradient-to-t from-brand-950 via-brand-950/40 to-transparent"></div>
+                <div class="absolute inset-0 flex flex-col justify-between px-6 py-6 text-white">
+                  <div class="flex flex-wrap items-center gap-3 text-xs text-white sm:flex-row sm:justify-between">
+                    <div class="flex flex-wrap items-center gap-3 flex-1">
+                      <span class="inline-flex max-w-[70%] items-center rounded-full bg-secondaryBrand-400/80 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.3em] text-secondaryBrand-100 ring-1 ring-white/20">
+                        {{ formatDisciplineLabel(aventure.discipline) }}
+                      </span>
+                      <span class="inline-flex items-center rounded-full border border-brand-200/40 bg-brand-950/60 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-white">
+                        {{ aventure.jours }} {{ aventure.jours > 1 ? 'jours' : 'jour' }}
+                      </span>
+                    </div>
+                    <div class="ml-auto">
+                      <span
+                        class="inline-flex h-12 w-12 items-center justify-center rounded-full bg-secondaryBrand-400/80 shadow-lg shadow-secondaryBrand-900/30 sm:h-14 sm:w-14"
+                      >
+                        <img
+                          :src="iconPathForDiscipline(aventure.discipline)"
+                          :alt="formatDisciplineLabel(aventure.discipline)"
+                          class="h-8 w-8 object-contain sm:h-10 sm:w-10"
+                        />
+                      </span>
+                    </div>
+                  </div>
+
+                  <div class="flex flex-col gap-3">
+                    <h2 class="text-2xl font-semibold truncate">{{ aventure.titre }}</h2>
+                    <p v-if="aventure.sousTitre" class="text-sm text-brand-100/80">{{ aventure.sousTitre }}</p>
+                  </div>
+
+                  <div class="flex flex-col gap-1 text-sm text-white">
+                    <span class="inline-flex items-center gap-2 font-semibold text-xs text-white">
+                      <svg class="h-4 w-4 text-secondaryBrand-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <rect x="3" y="4" width="18" height="16" rx="2" />
+                        <path d="M16 2v4M8 2v4M3 10h18" />
+                      </svg>
+                      {{ aventure.nextSession ? formatSessionRange(aventure.nextSession) : 'Date à confirmer' }}
+                    </span>
+                    <span class="inline-flex items-center gap-2 font-semibold text-xs text-white">
+                      <svg class="h-4 w-4 text-secondaryBrand-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 21c-4-4-6-7-6-10a6 6 0 0 1 12 0c0 3-2 6-6 10Z" />
+                        <circle cx="12" cy="11" r="2.3" />
+                      </svg>
+                      {{ aventure.lieuLabel }}
+                    </span>
+                  </div>
+                </div>
               </div>
-              <div class="flex flex-1 flex-col gap-4 p-6">
-                <div class="flex flex-wrap items-center gap-3 text-[11px] font-semibold uppercase tracking-[0.3em] text-white/70">
-                  <span class="rounded-full bg-brand-900/80 px-3 py-1">
-                    {{ formatDisciplineLabel(aventure.discipline) }}
-                  </span>
-                  <span class="rounded-full border border-secondaryBrand-200/40 bg-secondaryBrand-500/20 px-3 py-1 tracking-wide text-secondaryBrand-100">
-                    {{ aventure.jours }} {{ aventure.jours > 1 ? 'jours' : 'jour' }}
-                  </span>
-                </div>
-                <div>
-                  <p class="text-sm uppercase tracking-[0.3em] text-white/60">
-                    {{ aventure.lieuLabel }}
-                  </p>
-                  <h3 class="mt-2 text-2xl font-semibold text-white">
-                    {{ aventure.titre }}
-                  </h3>
-                  <p class="mt-2 text-base text-gray-300">
-                    {{ aventure.sousTitre }}
-                  </p>
-                </div>
-                <div class="mt-auto flex items-center justify-between text-sm text-white">
-                  <span class="inline-flex items-center gap-2">
-                    <svg class="h-4 w-4 text-secondaryBrand-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V5a4 4 0 1 1 8 0v2" />
-                      <rect x="5" y="7" width="14" height="12" rx="2" />
-                      <path stroke-linecap="round" d="M8 11h8" />
-                    </svg>
-                    {{ formatSessionRange(aventure.nextSession) }}
-                  </span>
-                  <span class="text-base font-semibold">
-                    {{ formatPrice(aventure.prixParPersonne) }}
+              <div class="flex flex-1 flex-col p-5">
+                <div class="flex items-center justify-between text-sm text-white">
+                  <div class="flex items-center gap-3 text-sm text-brand-100/80">
+                    <img
+                      :src="moniteurPortrait || fallbackImageForDiscipline(aventure.discipline)"
+                      :alt="moniteurName || 'Moniteur'"
+                      class="h-10 w-10 rounded-full border border-white/20 bg-brand-900 object-cover"
+                    />
+                    <div>
+                      <p class="text-xs uppercase tracking-[0.3em] text-brand-200/70">
+                        Moniteur
+                      </p>
+                      <p class="font-semibold text-white">
+                        {{ moniteurName || 'Moniteur local' }}
+                      </p>
+                    </div>
+                  </div>
+                  <span class="font-semibold text-right">
+                    {{ aventure.prixParPersonne }} € <span class="text-brand-200 text-xs">/ pers</span>
                   </span>
                 </div>
               </div>
