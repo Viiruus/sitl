@@ -43,18 +43,18 @@
         <div class="mx-auto max-w-7xl px-6 lg:px-8">
           <!-- Titre + Guide côte à côte -->
           <div
-            class="grid items-start gap-8 lg:grid-cols-[minmax(0,1.8fr)_minmax(0,1.1fr)]"
+            class="grid items-start gap-8 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1.4fr)]"
           >
             <!-- Titre + tags -->
             <div class="max-w-3xl space-y-6">
               <div class="flex flex-wrap items-center gap-3 text-xs">
-              <span class="inline-flex items-center justify-center rounded-full bg-secondaryBrand-400/80 p-2 shadow-lg shadow-secondaryBrand-900/30">
-                <img
-                  :src="iconPathForDiscipline(stage.discipline)"
-                  :alt="formatDisciplineLabel(stage.discipline)"
-                  class="h-8 w-8 object-contain"
-                />
-              </span>
+                <span class="inline-flex items-center justify-center rounded-full bg-secondaryBrand-400/80 p-2 shadow-lg shadow-secondaryBrand-900/30">
+                  <img
+                    :src="iconPathForDiscipline(stage.discipline)"
+                    :alt="formatDisciplineLabel(stage.discipline)"
+                    class="h-8 w-8 object-contain"
+                  />
+                </span>
                 <span
                   class="inline-flex items-center gap-1.5 rounded-full bg-brand-900/70 px-3 py-1 text-[11px] font-medium text-brand-100"
                 >
@@ -72,7 +72,7 @@
                     />
                     <circle cx="12" cy="11" r="2.3" />
                   </svg>
-                  <span>
+                  <span class="text-sm">
                     {{ stage.lieuLabel }}
                     <span v-if="stage.region" class="ml-1">· {{ stage.region }}</span>
                   </span>
@@ -91,113 +91,101 @@
                 >
                   {{ stage.sousTitre }}
                 </p>
+
+                <!-- STATS SECTION -->
+                <div class="pt-4 flex flex-wrap gap-3">
+                  <div class="inline-flex items-center gap-2 rounded-full bg-brand-900/70 px-3 py-2 text-sm text-white ring-1 ring-white/10">
+                    <span class="text-[10px] uppercase tracking-[0.25em] text-secondaryBrand-200/90">Durée</span>
+                    <span class="font-semibold">{{ stage.jours }} {{ stage.jours > 1 ? 'jours' : 'jour' }}</span>
+                  </div>
+                  <div class="inline-flex items-center gap-2 rounded-full bg-brand-900/70 px-3 py-2 text-sm text-white ring-1 ring-white/10">
+                    <span class="text-[10px] uppercase tracking-[0.25em] text-secondaryBrand-200/90">Niveau</span>
+                    <span class="font-semibold">{{ stage.niveauMinimum || 'Tous niveaux' }}</span>
+                  </div>
+                  <div class="inline-flex items-center gap-2 rounded-full bg-brand-900/70 px-3 py-2 text-sm text-white ring-1 ring-white/10">
+                    <span class="text-[10px] uppercase tracking-[0.25em] text-secondaryBrand-200/90">Places max</span>
+                    <span class="font-semibold">{{ stage.placesMax }}</span>
+                  </div>
+                  <div class="inline-flex items-center gap-2 rounded-full bg-brand-900/70 px-3 py-2 text-sm text-white ring-1 ring-white/10">
+                    <span class="text-[10px] uppercase tracking-[0.25em] text-secondaryBrand-200/90">Tarif / pers</span>
+                    <span class="font-semibold">{{ stage.prixParPersonne }} €</span>
+                  </div>
+                </div>
+
+
+              </div>
+            </div>
+
+            <!-- Bloc Guide + mini galerie à droite -->
+            <div class="space-y-12 lg:sticky lg:top-24">
+              <NuxtLink
+                v-if="guideFullName"
+                :to="guideProfileLink || '#'"
+                class="block space-y-3 rounded-3xl bg-brand-950/85 p-5 ring-1 ring-secondaryBrand-400/40 shadow-xl shadow-black/40 transition hover:ring-secondaryBrand-300/70 focus:outline-none focus-visible:ring-2 focus-visible:ring-secondaryBrand-300"
+              >
+                <p class="text-[11px] font-semibold uppercase tracking-[0.3em] text-secondaryBrand-200">
+                  Moniteur de l’aventure
+                </p>
+                <div class="flex items-center gap-4">
+                  <div
+                    class="h-20 w-20 flex-shrink-0 overflow-hidden rounded-full border-2 border-secondaryBrand-400 bg-brand-900"
+                  >
+                    <img
+                      v-if="guideImage"
+                      :src="guideImage"
+                      :alt="guideFullName"
+                      class="size-full object-cover"
+                    />
+                  </div>
+                  <div class="space-y-1">
+                    <p class="text-sm font-semibold text-white">
+                      {{ guideFullName }}
+                    </p>
+                    <p v-if="guideBaseLocation" class="text-xs text-brand-200">
+                      Basé·e à {{ guideBaseLocation }}
+                    </p>
+                    <p v-if="languesList.length" class="text-[11px] text-brand-300">
+                      Langues : {{ languesList.join(', ') }}
+                    </p>
+                  </div>
+                </div>
                 <p
-                  v-else-if="resumeCeQuiTattend"
-                  class="text-sm text-brand-100/85 sm:text-base"
+                  v-if="guideBioShort"
+                  class="text-xs text-brand-100/90"
                 >
-                  {{ resumeCeQuiTattend }}
+                  {{ guideBioShort }}
                 </p>
-              </div>
-            </div>
-
-            <!-- Bloc Guide à droite -->
-            <NuxtLink
-              v-if="guideFullName"
-              :to="guideProfileLink || '#'"
-              class="block space-y-3 rounded-3xl bg-brand-950/85 p-5 ring-1 ring-secondaryBrand-400/40 shadow-xl shadow-black/40 transition hover:ring-secondaryBrand-300/70 focus:outline-none focus-visible:ring-2 focus-visible:ring-secondaryBrand-300"
-            >
-              <p class="text-[11px] font-semibold uppercase tracking-[0.3em] text-secondaryBrand-200">
-                Moniteur de l’aventure
-              </p>
-              <div class="flex items-center gap-4">
-                <div
-                  class="h-20 w-20 flex-shrink-0 overflow-hidden rounded-full border-2 border-secondaryBrand-400 bg-brand-900"
+                <p
+                  v-else
+                  class="text-xs text-brand-100/80"
                 >
-                  <img
-                    v-if="guideImage"
-                    :src="guideImage"
-                    :alt="guideFullName"
-                    class="size-full object-cover"
-                  />
-                </div>
-                <div class="space-y-1">
-                  <p class="text-sm font-semibold text-white">
-                    {{ guideFullName }}
-                  </p>
-                  <p v-if="guideBaseLocation" class="text-xs text-brand-200">
-                    Basé·e à {{ guideBaseLocation }}
-                  </p>
-                  <p v-if="languesList.length" class="text-[11px] text-brand-300">
-                    Langues : {{ languesList.join(', ') }}
-                  </p>
-                </div>
-              </div>
-              <p
-                v-if="guideBioShort"
-                class="text-xs text-brand-100/90"
+                  Moniteur·rice d’escalade passionné·e de belles lignes, de grande voie
+                  et d’ambiances conviviales, aux manettes de ta prochaine aventure.
+                </p>
+
+              </NuxtLink>
+
+              <div
+                v-if="galerieImages.length"
+                class="mt-3 grid grid-cols-3 gap-3"
               >
-                {{ guideBioShort }}
-              </p>
-              <p
-                v-else
-                class="text-xs text-brand-100/80"
-              >
-                Moniteur·rice d’escalade passionné·e de belles lignes, de grande voie
-                et d’ambiances conviviales, aux manettes de ta prochaine aventure.
-              </p>
-
-            </NuxtLink>
-          </div>
-
-          <!-- Stats compactes -->
-          <div class="mt-6">
-            <div
-              class="grid gap-12 rounded-3xl bg-brand-950/70 p-2 shadow-xl shadow-black/30 ring-1 ring-white/10 backdrop-blur sm:grid-cols-2 lg:grid-cols-4"
-            >
-              <div class="flex items-center justify-between rounded-2xl bg-brand-900/70 px-12 py-2">
-                <p class="text-[10px] font-semibold uppercase tracking-[0.22em] text-brand-200">
-                  Durée
-                </p>
-                <p class="text-base font-semibold text-white">
-                  {{ stage.jours }} {{ stage.jours > 1 ? 'jours' : 'jour' }}
-                </p>
-              </div>
-
-              <div class="flex items-center justify-between rounded-2xl bg-brand-900/70 px-12 py-2">
-                <p class="text-[10px] font-semibold uppercase tracking-[0.22em] text-brand-200">
-                  Niveau
-                </p>
-                <p class="text-base font-semibold text-white">
-                  {{ stage.niveauMinimum || 'Tous niveaux' }}
-                </p>
-              </div>
-
-              <div class="flex items-center justify-between rounded-2xl bg-brand-900/70 px-12 py-2">
-                <p class="text-[10px] font-semibold uppercase tracking-[0.22em] text-brand-200">
-                  Places max
-                </p>
-                <p class="text-base font-semibold text-white">
-                  {{ stage.placesMax }}
-                </p>
-              </div>
-
-              <div class="flex items-center justify-between rounded-2xl bg-brand-900/70 px-12 py-2">
-                <p class="text-[10px] font-semibold uppercase tracking-[0.22em] text-brand-200">
-                  Tarif / pers
-                </p>
-                <p class="text-base font-semibold text-white">
-                  {{ stage.prixParPersonne }} €
-                </p>
+                <button
+                  v-for="(img, idx) in galerieImages.slice(0, 3)"
+                  :key="img.id || idx"
+                  type="button"
+                  class="relative h-28 w-full overflow-hidden rounded-xl bg-white/5 transition hover:opacity-100"
+                  @click="() => openLightbox(idx)"
+                >
+                  <img :src="img.url" :alt="img.alt || stageTitle" class="size-full object-cover" loading="lazy" />
+                </button>
               </div>
             </div>
           </div>
-
-          
         </div>
       </div>
 
       <!-- MAIN + TABS -->
-      <main class="bg-brand-950 pb-24 pt-10">
+      <main class="bg-brand-950 pb-24">
         <div class="mx-auto max-w-7xl px-6 lg:px-8">
           <!-- Onglets -->
           <div class="mb-6 border-b border-white/10 pb-2">
@@ -681,70 +669,7 @@
 
           </div>
 
-          <section
-            v-if="galerieImages.length"
-            class="mt-8 rounded-3xl bg-brand-900/40 p-6 ring-1 ring-white/10"
-          >
-            <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-              <div>
-                <p class="text-[11px] font-semibold uppercase tracking-[0.3em] text-brand-200">
-                  Galerie
-                </p>
-                <h3 class="text-lg font-semibold text-white">
-                  Aperçu en images
-                </h3>
-              </div>
-              <div class="flex gap-2">
-                <button
-                  type="button"
-                  class="flex h-10 w-10 items-center justify-center rounded-full border border-white/20 text-white transition hover:border-white/40"
-                  @click="goToPrevImage"
-                  :aria-disabled="galerieImages.length < 2"
-                  :disabled="galerieImages.length < 2"
-                >
-                  <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
-                  </svg>
-                </button>
-                <button
-                  type="button"
-                  class="flex h-10 w-10 items-center justify-center rounded-full border border-white/20 text-white transition hover:border-white/40"
-                  @click="goToNextImage"
-                  :aria-disabled="galerieImages.length < 2"
-                  :disabled="galerieImages.length < 2"
-                >
-                  <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
-                  </svg>
-                </button>
-              </div>
-            </div>
-            <div class="mt-4">
-              <div class="relative overflow-hidden rounded-2xl bg-brand-950/40 ring-1 ring-white/5">
-                <img
-                  v-if="currentGalleryImage"
-                  :src="currentGalleryImage.url"
-                  :alt="currentGalleryImage.alt || stageTitle"
-                  class="h-64 w-full object-cover md:h-96"
-                />
-                <div v-else class="flex h-64 w-full items-center justify-center text-sm text-brand-200 md:h-96">
-                  Pas encore de photos.
-                </div>
-              </div>
-              <div class="mt-4 flex gap-2 overflow-x-auto">
-                <button
-                  v-for="(img, idx) in galerieImages"
-                  :key="img.id || idx"
-                  type="button"
-                  class="relative h-16 w-24 flex-shrink-0 overflow-hidden rounded-xl ring-2 transition"
-                  :class="idx === galleryIndex ? 'ring-secondaryBrand-400' : 'ring-transparent opacity-60 hover:opacity-100'"
-                  @click="selectGalleryImage(idx)"
-                >
-                  <img :src="img.url" :alt="img.alt || stageTitle" class="size-full object-cover" />
-                </button>
-              </div>
-            </div>
-          </section>
+          
         </div>
       </main>
 
@@ -829,6 +754,62 @@
     </section>
 
     <AppFooter />
+
+    <Teleport to="body">
+      <div
+        v-if="showLightbox"
+        class="fixed inset-0 z-[70] flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm"
+        @click.self="closeLightbox"
+      >
+        <button
+          type="button"
+          class="absolute right-4 top-4 rounded-full border border-white/30 bg-white/10 p-2 text-white transition hover:bg-white/20"
+          @click="closeLightbox"
+        >
+          <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 6l12 12M6 18L18 6" />
+          </svg>
+        </button>
+        <div class="relative w-full max-w-4xl">
+          <img
+            v-if="currentGalleryImage"
+            :src="currentGalleryImage.url"
+            :alt="currentGalleryImage.alt || stageTitle"
+            class="max-h-[80vh] w-full rounded-2xl object-contain"
+          />
+          <div class="mt-3 flex items-center justify-between text-xs text-white/80">
+            <div class="flex gap-2">
+              <button
+                type="button"
+                class="rounded-full border border-white/30 bg-white/10 px-3 py-1 transition hover:bg-white/20"
+                @click="goToPrevImage"
+                :aria-disabled="galerieImages.length < 2"
+                :disabled="galerieImages.length < 2"
+              >
+                Précédent
+              </button>
+              <button
+                type="button"
+                class="rounded-full border border-white/30 bg-white/10 px-3 py-1 transition hover:bg-white/20"
+                @click="goToNextImage"
+                :aria-disabled="galerieImages.length < 2"
+                :disabled="galerieImages.length < 2"
+              >
+                Suivant
+              </button>
+            </div>
+            <div class="flex gap-1.5">
+              <span
+                v-for="(img, idx) in galerieImages"
+                :key="img.id || idx"
+                class="h-1.5 w-1.5 rounded-full transition"
+                :class="idx === galleryIndex ? 'bg-secondaryBrand-300' : 'bg-white/40'"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    </Teleport>
   </div>
 </template>
 
@@ -900,6 +881,7 @@ const programmeJours = computed(() => {
 
 const galerieImages = computed(() => stage.value?.images || [])
 const galleryIndex = ref(0)
+const showLightbox = ref(false)
 watch(
   galerieImages,
   (images) => {
@@ -932,6 +914,33 @@ const selectGalleryImage = (index: number) => {
   if (index < 0 || index >= galerieImages.value.length) return
   galleryIndex.value = index
 }
+const openLightbox = (index: number) => {
+  selectGalleryImage(index)
+  showLightbox.value = true
+}
+const closeLightbox = () => {
+  showLightbox.value = false
+}
+
+// Lightbox keyboard navigation
+const handleKeydown = (event: KeyboardEvent) => {
+  if (!showLightbox.value) return
+  if (event.key === 'Escape') {
+    closeLightbox()
+  } else if (event.key === 'ArrowLeft') {
+    goToPrevImage()
+  } else if (event.key === 'ArrowRight') {
+    goToNextImage()
+  }
+}
+
+onMounted(() => {
+  window.addEventListener('keydown', handleKeydown)
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('keydown', handleKeydown)
+})
 
 // Résumé court de "ce qui t'attend"
 const resumeCeQuiTattend = computed(() => {
