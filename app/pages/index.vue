@@ -59,15 +59,15 @@
             class="absolute inset-0 size-full object-cover transition duration-700 group-hover:scale-105"
             loading="lazy"
           />
-          <div class="absolute inset-0 bg-gradient-to-t from-black/75 via-black/45 to-transparent" />
+          <div class="absolute inset-0 bg-gradient-to-t from-black/55 via-black/25 to-transparent" />
           <div class="absolute inset-0 flex flex-col justify-end gap-2 p-5">
-            <p class="text-[11px] uppercase tracking-[0.4em] text-secondaryBrand-200/90">
+            <p class="text-[14px] uppercase tracking-[0.4em] text-secondaryBrand-200/90">
               {{ benefit.kicker }}
             </p>
-            <h3 class="text-lg font-semibold text-white">
+            <h3 class="text-xl font-semibold text-white">
               {{ benefit.title }}
             </h3>
-            <p class="text-sm text-brand-100/85 leading-relaxed">
+            <p class="text-sm text-brand-100/90 leading-relaxed">
               {{ benefit.description }}
             </p>
           </div>

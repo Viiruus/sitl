@@ -3,7 +3,7 @@
     <div class="mx-auto max-w-7xl px-6 pt-16 pb-8 sm:pt-24 lg:px-8 lg:pt-32">
       <div class="xl:grid xl:grid-cols-3 xl:gap-8">
         <div class="space-y-8 text-center">
-          <img class="h-16 mx-auto" src="~/assets/images/brigade-du-kif_black-logo.png" alt="Company name" />
+          <img class="h-16 mx-auto" src="~/assets/images/brigade-du-kiff_black-logo.png" alt="Brigade du Kiff" />
           <p class="text-sm/6 text-balance text-gray-600">Vos aventures verticales commencent ici.</p>
           <div class="flex justify-center gap-x-6">
             <a v-for="item in footerNavigation.social" :key="item.name" :href="item.href" class="text-gray-600 hover:text-gray-800">
@@ -44,7 +44,7 @@
         </div>
       </div>
       <div class="mt-16 border-t border-gray-900/10 pt-8 sm:mt-20 lg:mt-24">
-        <p class="text-sm/6 text-gray-600">&copy; 2026 - Brigade du kif.</p>
+        <p class="text-sm/6 text-gray-600">&copy; 2026 - Brigade du kiff.</p>
       </div>
     </div>
   </footer>

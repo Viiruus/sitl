@@ -7,8 +7,8 @@
     <!-- Hero Section -->
     <div class="mx-auto max-w-7xl px-6 pt-16 lg:px-8">
       <div class="mx-auto max-w-2xl sm:text-center">
-        <h2 class="text-4xl font-semibold tracking-tight text-balance text-white sm:text-5xl">Rencontre la brigade du kif</h2>
-        <p class="mt-6 text-lg/8 text-gray-400">La brigade du kif est née pour te faire profiter de l’escalade en milieux naturels. Nos moniteurs connaissent leurs territoires et sauront te faire découvrir les meilleurs spots près de chez toi. Que ce soit pour t’initier, pour progresser ou pour te perfectionner, nos moniteurs diplômés d’Etat seront là pour toi.</p>
+        <h2 class="text-4xl font-semibold tracking-tight text-balance text-white sm:text-5xl">Rencontre la brigade du kiff</h2>
+        <p class="mt-6 text-lg/8 text-gray-400">La brigade du kiff est née pour te faire profiter de l’escalade en milieux naturels. Nos moniteurs connaissent leurs territoires et sauront te faire découvrir les meilleurs spots près de chez toi. Que ce soit pour t’initier, pour progresser ou pour te perfectionner, nos moniteurs diplômés d’Etat seront là pour toi.</p>
       </div>
       <div class="mx-auto mt-20 max-w-2xl lg:max-w-4xl xl:max-w-none">
         <div v-if="pending" class="grid grid-cols-1 gap-8 sm:grid-cols-2">

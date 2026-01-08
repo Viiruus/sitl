@@ -86,7 +86,7 @@
               Grimpe & terroir
             </h2>
             <p class="text-brand-100/80">
-              Refuges, gîtes, fermes, producteurs… la Brigade du kif partage ses vrais bons plans
+              Refuges, gîtes, fermes, producteurs… la Brigade du kiff partage ses vrais bons plans
               pour vivre l’expérience complète au-delà de la falaise.
             </p>
           </div>
@@ -111,7 +111,7 @@
         Les prochaines aventures d'escalade
       </h2>
       <p class="mt-2 text-lg/8 text-gray-600">
-        Embarque pour notre prochaine aventure imaginée par la Brigade du kif.
+        Embarque pour notre prochaine aventure imaginée par la Brigade du kiff.
       </p>
       <div class="mt-16 space-y-20 lg:mt-20">
         <article

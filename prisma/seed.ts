@@ -82,7 +82,7 @@ function addDays(date: Date, days: number): Date {
 async function seedGuides() {
   const guides = []
 
-  // 1) Nicolas – Brigade du kif
+  // 1) Nicolas – Brigade du kiff
   guides.push(
     await prisma.user.upsert({
       where: { email: 'nicolas@brigadedukif.dev' },
@@ -96,7 +96,7 @@ async function seedGuides() {
           upsert: {
             update: {
               bio:
-                "Moniteur d’escalade et créateur de la Brigade du kif. J’adore imaginer des aventures locales, " +
+                "Moniteur d’escalade et créateur de la Brigade du kiff. J’adore imaginer des aventures locales, " +
                 'mixer progression, moments de vie et bons plans terroir sans perdre le plaisir de grimper.',
               baseLocation: 'Massif des Bauges & Vercors',
               instagramUrl: 'https://www.instagram.com/brigadedukif',
@@ -107,7 +107,7 @@ async function seedGuides() {
             },
             create: {
               bio:
-                "Moniteur d’escalade et créateur de la Brigade du kif. J’adore imaginer des aventures locales, " +
+                "Moniteur d’escalade et créateur de la Brigade du kiff. J’adore imaginer des aventures locales, " +
                 'mixer progression, moments de vie et bons plans terroir sans perdre le plaisir de grimper.',
               baseLocation: 'Massif des Bauges & Vercors',
               instagramUrl: 'https://www.instagram.com/brigadedukif',
@@ -128,7 +128,7 @@ async function seedGuides() {
         guideProfile: {
           create: {
             bio:
-              "Moniteur d’escalade et créateur de la Brigade du kif. J’adore imaginer des aventures locales, " +
+              "Moniteur d’escalade et créateur de la Brigade du kiff. J’adore imaginer des aventures locales, " +
               'mixer progression, moments de vie et bons plans terroir sans perdre le plaisir de grimper.',
             baseLocation: 'Massif des Bauges & Vercors',
             instagramUrl: 'https://www.instagram.com/brigadedukif',
@@ -549,7 +549,7 @@ async function seedAventures(guides: any[]) {
     {
       slug: 'aventure-grande-voie-presles-autonomie-joyeuse',
       guideId: nicolas.id,
-      titre: 'Presles : autonomie grande voie en mode Brigade du kif',
+      titre: 'Presles : autonomie grande voie en mode Brigade du kiff',
       sousTitre:
         '2 jours pour oser se lancer en grande voie équipée, sans pression, avec un accompagnement pas à pas.',
       discipline: "GRANDE_VOIE",
@@ -1102,7 +1102,7 @@ async function seedBookings() {
 // ---------- main ----------
 
 async function main() {
-  console.log("🌱 Seed Brigade du kif : guides, grimpeurs, aventures...");
+  console.log("🌱 Seed Brigade du kiff : guides, grimpeurs, aventures...");
 
   const [userCount, aventureCount, sessionCount] = await prisma.$transaction([
     prisma.user.count(),

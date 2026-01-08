@@ -287,7 +287,7 @@ const benefits = [
 ]
 
 useHead({
-  title: 'Escalade grande voie - Brigade du kif',
+  title: 'Escalade grande voie - Brigade du kiff',
   meta: [
     {
       name: 'description',

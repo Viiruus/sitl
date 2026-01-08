@@ -4,8 +4,8 @@
       <div :class="isHome ? 'px-6 pt-10 lg:max-w-2xl lg:pr-0 lg:pl-8' : 'px-6 pt-10'">
         <nav class="flex items-center justify-between lg:justify-start" aria-label="Global">
           <NuxtLink to="/" class="-m-1.5 p-1.5">
-            <span class="sr-only">Your Company</span>
-            <img alt="Your Company" class="h-10 w-auto" src="~/assets/images/brigade-du-kiff_amber-logo.png" />
+            <span class="sr-only">Brigade du Kiff</span>
+            <img alt="Brigade du Kiff" class="h-10 w-auto" src="~/assets/images/brigade-du-kiff_amber-logo.png" />
           </NuxtLink>
           <button type="button" class="-m-2.5 rounded-md p-2.5 text-gray-200 lg:hidden" @click="mobileMenuOpen = true">
             <span class="sr-only">Open main menu</span>
@@ -32,8 +32,8 @@
       <DialogPanel class="fixed inset-y-0 right-0 z-50 w-full overflow-y-auto bg-brand-900 p-6 sm:max-w-sm sm:ring-1 sm:ring-gray-100/10">
         <div class="flex items-center justify-between">
           <NuxtLink to="/" class="-m-1.5 p-1.5">
-            <span class="sr-only">Your Company</span>
-            <img class="h-8 w-auto" src="~/assets/images/brigade-du-kif_amber-logo.png" alt="" />
+            <span class="sr-only">Brigade du Kiff</span>
+            <img class="h-8 w-auto" src="~/assets/images/brigade-du-kiff_amber-logo.png" alt="Brigade du Kiff" />
           </NuxtLink>
           <button type="button" class="-m-2.5 rounded-md p-2.5 text-gray-200" @click="mobileMenuOpen = false">
             <span class="sr-only">Close menu</span>

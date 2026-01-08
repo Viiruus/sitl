@@ -46,7 +46,7 @@
             class="grid items-start gap-8 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1.4fr)]"
           >
             <!-- Titre + tags -->
-            <div class="max-w-3xl space-y-6">
+            <div class="space-y-6">
               <div class="flex flex-wrap items-center gap-3 text-xs">
                 <span class="inline-flex items-center justify-center rounded-full bg-secondaryBrand-400/80 p-2 shadow-lg shadow-secondaryBrand-900/30">
                   <img
@@ -81,13 +81,13 @@
 
               <div class="space-y-3">
                 <h1
-                  class="text-balance text-4xl font-semibold tracking-tight sm:text-5xl"
+                  class="text-4xl font-semibold leading-tight tracking-tight sm:text-5xl"
                 >
                   {{ stage.titre }}
                 </h1>
                 <p
                   v-if="stage.sousTitre"
-                  class="text-balance text-sm text-brand-100/85 sm:text-base"
+                  class="text-sm text-brand-100/85 sm:text-base"
                 >
                   {{ stage.sousTitre }}
                 </p>
@@ -674,10 +674,7 @@
       </main>
 
       <!-- AUTRES AVENTURES -->
-      <section
-        v-if="otherStages.length"
-        class="bg-brand-900 py-16"
-      >
+      <section v-if="otherStages.length" class="bg-brand-900 py-16">
         <div class="mx-auto max-w-7xl px-6 lg:px-8 space-y-8">
           <div class="flex flex-wrap items-center justify-between gap-3">
             <h2 class="text-2xl font-semibold text-white">
@@ -693,57 +690,87 @@
 
           <div class="grid gap-6 md:grid-cols-3">
             <NuxtLink
-              v-for="autre in otherStages"
-              :key="autre.id"
-              :to="`/aventures-escalade/${autre.slug}`"
-              class="group flex flex-col overflow-hidden rounded-2xl bg-white/5 shadow-lg shadow-black/40 ring-1 ring-white/10"
+              v-for="stage in otherStages"
+              :key="stage.id"
+              :to="`/aventures-escalade/${stage.slug}`"
+              class="group flex flex-col overflow-hidden rounded-3xl border border-white/10 bg-white/5 shadow-2xl shadow-black/40 ring-1 ring-white/10 transition hover:-translate-y-1"
             >
-              <div class="relative h-40 overflow-hidden">
+              <div class="relative h-52">
                 <img
-                  :src="
-                    autre.coverImageUrl ||
-                    imageForDiscipline(autre.discipline)
-                  "
-                  :alt="autre.titre"
-                  class="size-full object-cover transition duration-500 group-hover:scale-105"
+                  :src="stage.coverImageUrl || imageForDiscipline(stage.discipline)"
+                  :alt="stage.titre"
+                  class="size-full object-cover transition duration-500 hover:scale-105"
                 />
-                <div
-                  class="absolute inset-0 bg-gradient-to-t from-brand-950/70 via-transparent to-transparent"
-                />
-                <span
-                  class="absolute bottom-2 left-2 inline-flex items-center rounded-full bg-brand-950/70 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.3em] text-white"
-                >
-                  {{ formatDisciplineLabel(autre.discipline) }}
-                </span>
+                <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent" />
+                <div class="absolute inset-4 flex flex-col justify-between">
+                  <div class="flex flex-wrap items-center gap-3 text-xs text-white sm:flex-row sm:justify-between">
+                    <div class="flex flex-wrap items-center gap-2 flex-1">
+                      <span
+                        class="inline-flex max-w-[70%] items-center rounded-full bg-secondaryBrand-400/80 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.3em] text-secondaryBrand-100 ring-1 ring-white/20"
+                      >
+                        {{ formatDisciplineLabel(stage.discipline) }}
+                      </span>
+                      <span
+                        class="inline-flex items-center rounded-full border border-brand-200/40 bg-brand-950/60 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-white"
+                      >
+                        {{ stage.jours }} {{ stage.jours > 1 ? 'jours' : 'jour' }}
+                      </span>
+                    </div>
+                    <div class="ml-auto">
+                      <span
+                        class="inline-flex h-12 w-12 items-center justify-center rounded-full bg-secondaryBrand-400/80 shadow-lg shadow-secondaryBrand-900/30 sm:h-14 sm:w-14"
+                      >
+                        <img
+                          :src="iconPathForDiscipline(stage.discipline)"
+                          :alt="formatDisciplineLabel(stage.discipline)"
+                          class="h-8 w-8 object-contain sm:h-10 sm:w-10"
+                        />
+                      </span>
+                    </div>
+                  </div>
+                  <div class="flex flex-col gap-1 text-sm text-white">
+                    <span class="inline-flex items-center gap-2 font-semibold text-xs text-white">
+                      <svg class="h-4 w-4 text-secondaryBrand-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <rect x="3" y="4" width="18" height="16" rx="2" />
+                        <path d="M16 2v4M8 2v4M3 10h18" />
+                      </svg>
+                      {{ stage.nextSession ? formatSessionRange(stage.nextSession) : 'Date à confirmer' }}
+                    </span>
+                    <span class="inline-flex items-center gap-2 font-semibold text-xs text-white">
+                      <svg class="h-4 w-4 text-secondaryBrand-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 21c-4-4-6-7-6-10a6 6 0 0 1 12 0c0 3-2 6-6 10Z" />
+                        <circle cx="12" cy="11" r="2.3" />
+                      </svg>
+                      {{ stage.lieuLabel }}
+                    </span>
+                  </div>
+                </div>
               </div>
-              <div class="flex flex-1 flex-col p-4">
-                <h3 class="text-sm font-semibold text-white">
-                  {{ autre.titre }}
+              <div class="flex flex-1 flex-col p-5">
+                <h3 class="mt-2 text-xl font-semibold text-white">
+                  {{ stage.titre }}
                 </h3>
-                <p class="mt-1 line-clamp-2 text-xs text-brand-100/80">
-                  {{ autre.sousTitre }}
+                <p class="mt-1 line-clamp-2 text-sm text-brand-100/80">
+                  {{ stage.sousTitre }}
                 </p>
-                <div class="pt-4 flex items-center justify-between text-xs mt-auto">
-                  <span class="font-semibold text-secondaryBrand-300">
-                    {{ autre.prixParPersonne }} € / pers
-                  </span>
-                  <span
-                    class="inline-flex items-center gap-1 text-[11px] font-semibold text-brand-100"
-                  >
-                    Voir l’aventure
-                    <svg
-                      class="h-3 w-3"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="1.5"
-                    >
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        d="M8 5l8 7-8 7"
-                      />
-                    </svg>
+                <div class="mt-6 flex items-center justify-between text-sm text-white">
+                  <div class="flex items-center gap-3 text-sm text-brand-100/80">
+                    <img
+                      :src="stage.guideImageUrl || imageForDiscipline(stage.discipline)"
+                      :alt="stage.guideName || 'Moniteur'"
+                      class="h-10 w-10 rounded-full border border-white/20 bg-brand-900 object-cover"
+                    />
+                    <div>
+                      <p class="text-xs uppercase tracking-[0.3em] text-brand-200/70">
+                        Moniteur
+                      </p>
+                      <p class="font-semibold text-white">
+                        {{ stage.guideName || 'Moniteur local' }}
+                      </p>
+                    </div>
+                  </div>
+                  <span class="font-semibold text-right">
+                    {{ stage.prixParPersonne }} € <span class="text-brand-200 text-xs">/ pers</span>
                   </span>
                 </div>
               </div>
@@ -1274,7 +1301,7 @@ const handleSuggestionClick = async () => {
 watchEffect(() => {
   if (stage.value) {
     useHead({
-      title: `${stage.value.titre} - Brigade du kif`,
+      title: `${stage.value.titre} - Brigade du kiff`,
       meta: [
         {
           name: 'description',
