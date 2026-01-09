@@ -77,7 +77,7 @@ import { Bars3Icon, XMarkIcon } from '@heroicons/vue/24/outline'
 
 const navigation = [
   { name: 'Les stages', href: '/aventures-escalade' },
-  { name: 'La brigade', href: '/la-brigade' },
+  { name: 'La Brigade', href: '/la-brigade' },
 ]
 
 const { loggedIn, user } = useUserSession()

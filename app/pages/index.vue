@@ -42,9 +42,18 @@
       <h2 class="mt-4 text-4xl font-semibold tracking-tight sm:text-5xl">
         Votre <span class="text-secondaryBrand-200">{{ activeBenefitWord }}</span>
       </h2>
-      <p class="mt-4 max-w-2xl text-base text-brand-100/80">
-        Des séjours imaginés pour connecter les grimpeurs à la nature, progresser avec des moniteurs diplômés
-        et vivre une expérience sympa.
+      <p class="mt-4 text-base text-brand-100/80">
+        La Brigade du Kiff, c’est une équipe de passionné.e.s par l’escalade mais surtout par les humains.
+        <br/>
+        Notre objectif est de te faire passer un moment inoubliable en pleine nature et en bonne compagnie.
+      </p>
+      <p class="mt-4 text-base text-brand-100/80">
+        Viens grimper dans les spots les plus jolis mais surtout les plus adaptés à ta pratique.
+        <br/>
+        Et ce n’est pas tout : notre priorité c’est ta progression. Nos moniteurs sont déterminés à te faire performer.
+      </p>
+      <p class="mt-4 text-base text-brand-100/80">
+        Rejoins la team et inscris-toi à un prochain stage !
       </p>
 
       <div class="mt-12 grid gap-6 lg:grid-cols-2">
@@ -82,8 +91,18 @@
       <h2 class="mt-4 text-4xl font-semibold tracking-tight text-pretty text-gray-900 sm:text-5xl">
         L’escalade sous toutes ses formes
       </h2>
-      <p class="mt-4 max-w-2xl text-base text-gray-600">
-        Chaque pratique a ses sensations. Choisis l’activité qui colle à ton envie du moment et laisse nos moniteurs t’emmener jouer sur le rocher.
+      <p class="mt-4 text-base text-gray-600">
+        L’escalade est une pratique sportive exceptionnellement riche.
+      </p>
+      <p class="mt-4 text-base text-gray-600">
+        Chez la Brigade du Kiff, nous avons souhaité les organiser en 4 grandes catégories même s’il existe une infinie de sensibilités différentes…
+        <br/>
+        Qu’il s’agisse d’une bambée de plusieurs centaines de mètres en terrain d’aventure ou d’un bloc déversant hyper technique, ce n’est pas la même discipline !
+        <br/>
+        Pourtant, toutes ces spécificités se complètent et font de toi un meilleur grimpeur ou une meilleure grimpeuse.
+      </p>
+      <p class="mt-4 text-base text-gray-600">
+        Alors en selle, rejoins l’aventure !
       </p>
 
       <div class="mt-12 grid gap-6 lg:grid-cols-2">
