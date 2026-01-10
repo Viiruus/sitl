@@ -113,9 +113,9 @@
             <div v-for="n in 2" :key="n" class="h-64 animate-pulse rounded-3xl bg-white/5" />
           </div>
 
-          <div v-else-if="aventures.length" class="mt-12 grid gap-6 lg:grid-cols-2">
+          <div v-else-if="filteredAventures.length" class="mt-12 grid gap-6 lg:grid-cols-2">
             <NuxtLink
-              v-for="aventure in aventures"
+              v-for="aventure in filteredAventures"
               :key="aventure.id"
               :to="`/aventures-escalade/${aventure.slug}`"
               class="group flex flex-col overflow-hidden rounded-3xl border border-white/10 bg-white/5 shadow-2xl shadow-black/40 ring-1 ring-white/10 transition hover:-translate-y-1 backdrop-blur focus:outline-none focus-visible:ring-2 focus-visible:ring-secondaryBrand-400"
@@ -232,6 +232,27 @@ const { data, pending, error } = await useAsyncData(
 
 const moniteur = computed(() => data.value?.moniteur ?? null)
 const aventures = computed(() => data.value?.aventures ?? [])
+const filteredAventures = computed(() => {
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  const list = (aventures.value || []).map((a: any) => {
+    const nextDate = a.nextSession?.dateDebut ? new Date(a.nextSession.dateDebut).getTime() : null
+    const hasSessions = Array.isArray(a.sessions) && a.sessions.length > 0
+    return { ...a, nextDate, hasSessions }
+  })
+  return list
+    .filter((a: any) => {
+      if (a.nextDate) return a.nextDate >= today.getTime()
+      if (a.hasSessions) return false
+      return true
+    })
+    .sort((a: any, b: any) => {
+      if (a.nextDate && b.nextDate) return a.nextDate - b.nextDate
+      if (a.nextDate && !b.nextDate) return -1
+      if (!a.nextDate && b.nextDate) return 1
+      return 0
+    })
+})
 
 useHead(() => {
   const title = moniteur.value?.fullName

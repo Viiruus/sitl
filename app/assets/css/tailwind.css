@@ -15,4 +15,11 @@
   body {
     background-color: var(--sitl-surface);
   }
+
+  /* Hide time picker toggle in Vue Date Picker */
+  .dp__open_time_picker_btn,
+  [data-test-id='open-time-picker-btn'],
+  .dp--tp-wrap .dp__button {
+    display: none !important;
+  }
 }

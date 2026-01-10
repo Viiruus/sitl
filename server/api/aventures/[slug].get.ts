@@ -80,8 +80,14 @@ export default defineEventHandler(async (event) => {
         select: {
           firstName: true,
           lastName: true,
+          guideProfile: {
+            select: {
+              profileImageUrl: true,
+            },
+          },
         },
       },
+      sessions: true,
     },
   })
 
@@ -137,6 +143,10 @@ const mapListAventure = (a: any) => ({
   coverImageUrl: a.coverImageUrl,
   guideName:
     [a.guide?.firstName, a.guide?.lastName].filter(Boolean).join(' ') || null,
+  guide: mapGuide(a),
+  guideImageUrl: a.guide?.guideProfile?.profileImageUrl || null,
+  sessions: mapSessions(a.sessions ?? []),
+  nextSession: mapNextSession(a.sessions ?? []),
 })
 
 const mapDetailAventure = (a: any, bookedSessionIds: Set<number>) => ({
@@ -183,7 +193,11 @@ const mapDetailAventure = (a: any, bookedSessionIds: Set<number>) => ({
 
   guide: mapGuide(a),
 
-  sessions: (a.sessions ?? [])
+  sessions: mapSessions(a.sessions ?? [], bookedSessionIds),
+})
+
+const mapSessions = (sessions: any[], bookedSessionIds?: Set<number>) =>
+  (sessions ?? [])
     .sort((s1: any, s2: any) => +s1.dateDebut - +s2.dateDebut)
     .map((session: any) => ({
       id: session.id,
@@ -192,6 +206,27 @@ const mapDetailAventure = (a: any, bookedSessionIds: Set<number>) => ({
       statut: session.statut,
       placesTotales: session.placesTotales,
       placesReservees: session.placesReservees,
-      userIsBooked: bookedSessionIds.has(session.id),
-    })),
-})
+      userIsBooked: bookedSessionIds?.has(session.id) ?? false,
+    }))
+
+const mapNextSession = (sessions: any[]) => {
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  const future = (sessions ?? [])
+    .filter((s: any) => s?.dateDebut)
+    .map((s: any) => ({ ...s, _ts: new Date(s.dateDebut).getTime() }))
+    .filter((s: any) => !Number.isNaN(s._ts) && s._ts >= today.getTime())
+    .sort((a: any, b: any) => a._ts - b._ts)
+
+  if (!future.length) return null
+  const best = { ...future[0] }
+  delete best._ts
+  return {
+    id: best.id,
+    dateDebut: best.dateDebut,
+    dateFin: best.dateFin,
+    statut: best.statut,
+    placesTotales: best.placesTotales,
+    placesReservees: best.placesReservees,
+  }
+}

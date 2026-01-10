@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { VueDatePicker } from '@vuepic/vue-datepicker'
+import { fr } from 'date-fns/locale'
 import '@vuepic/vue-datepicker/dist/main.css'
 const route = useRoute()
 const { data, pending, error } = await useFetch('/api/aventures')
@@ -10,6 +11,8 @@ const dateFilterFormats = {
   input: 'dd/MM/yyyy',
   preview: 'dd/MM/yyyy',
 }
+
+const frLocale = fr
 
 const disciplineLabels: Record<string, string> = {
   GRANDE_VOIE: 'Grande voie',
@@ -76,7 +79,22 @@ const formatSessionRange = (session: any) => {
 }
 
 const filteredAventures = computed(() => {
-  let adventures = data.value?.aventures ?? []
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+
+  let adventures = (data.value?.aventures ?? [])
+    .map((aventure: any) => {
+      const nextDate = aventure.nextSession?.dateDebut ? new Date(aventure.nextSession.dateDebut).getTime() : null
+      const hasSessions = Array.isArray(aventure.sessions) && aventure.sessions.length > 0
+      return { ...aventure, nextDate, hasSessions }
+    })
+    .filter((aventure: any) => {
+      if (aventure.nextDate) {
+        return aventure.nextDate >= today.getTime()
+      }
+      if (aventure.hasSessions) return false
+      return true
+    })
 
   if (selectedDiscipline.value) {
     adventures = adventures.filter(
@@ -89,10 +107,8 @@ const filteredAventures = computed(() => {
     const startTime = start ? new Date(start).setHours(0, 0, 0, 0) : null
     const endTime = end ? new Date(end).setHours(23, 59, 59, 999) : null
     if (startTime || endTime) {
-      adventures = adventures.filter((aventure) => {
-        const nextDate = aventure.nextSession?.dateDebut
-          ? new Date(aventure.nextSession.dateDebut).getTime()
-          : null
+      adventures = adventures.filter((aventure: any) => {
+        const nextDate = aventure.nextDate ?? null
         if (!nextDate) return false
         if (startTime && nextDate < startTime) return false
         if (endTime && nextDate > endTime) return false
@@ -100,6 +116,16 @@ const filteredAventures = computed(() => {
       })
     }
   }
+
+  adventures.sort((a: any, b: any) => {
+    const aDate = a.nextDate ?? null
+    const bDate = b.nextDate ?? null
+
+    if (aDate && bDate) return aDate - bDate
+    if (aDate && !bDate) return -1
+    if (!aDate && bDate) return 1
+    return 0
+  })
 
   return adventures
 })
@@ -122,13 +148,14 @@ const filteredAventures = computed(() => {
         />
         <section class="relative isolate overflow-hidden py-24 sm:py-20">
           <div class="absolute inset-0 -z-10"></div>
-          <div class="max-w-3xl space-y-6">
+          <div class="max-w-4xl space-y-6">
             <h1 class="text-4xl font-semibold tracking-tight text-pretty text-white sm:text-5xl">
-              Aventures d’escalade qui collent à ton style
+              L’aventure escalade par et pour les meilleur·e·s : c’est la Brigade du kiff
             </h1>
             <p class="text-base text-brand-100/80">
-              Séjours locaux imaginés par les moniteurs de la Brigade : grandes voies, couennes, bloc,
-              grimpe pure ou immersion totale.
+              Choisis un stage, inscris-toi et entre directement en contact avec la monitrice ou le moniteur de l’aventure.
+              <br/>
+              Tu organises ton séjour et tu pars à l’aventure. La Brigade du kiff, c’est l’assurance d’une expérience unique accompagnée par les meilleur·e·s.
             </p>
           </div>
         </section>
@@ -145,9 +172,9 @@ const filteredAventures = computed(() => {
       </div>
 
       <div v-else class="space-y-6">
-        <section class="space-y-4 rounded-3xl border border-brand-800 bg-brand-900/70 p-4">
+        <section class="space-y-4 pb-8 mb-8 border-b border-white/10">
           <div class="grid gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(220px,1.2fr)]">
-            <div class="space-y-4 rounded-2xl bg-brand-950/40 p-4">
+            <div class="space-y-4 rounded-2xl border border-white/15 bg-brand-900/50 p-4 shadow-lg shadow-black/30 backdrop-blur">
               <div class="flex flex-wrap items-center justify-between gap-3">
                 <div>
                   <p class="text-xs uppercase tracking-[0.3em] text-brand-200/70">Filtrer par discipline</p>
@@ -191,7 +218,7 @@ const filteredAventures = computed(() => {
               </div>
             </div>
 
-            <div class="space-y-3 rounded-2xl bg-brand-950/40 p-4 text-sm text-brand-100">
+            <div class="space-y-3 rounded-2xl border border-white/15 bg-brand-900/50 p-4 text-sm text-brand-100 shadow-lg shadow-black/30 backdrop-blur">
               <div class="flex flex-wrap items-center justify-between gap-3">
                 <div>
                   <p class="text-xs uppercase tracking-[0.3em] text-brand-200/70">Filtrer par dates</p>
@@ -202,11 +229,15 @@ const filteredAventures = computed(() => {
               </div>
               <ClientOnly>
                 <VueDatePicker
+                  class="dp-no-time-toggle"
                   v-model="dateRangeFilter"
                   range
+                  :auto-apply="true"
+                  :action-row="false"
                   :enable-time-picker="false"
                   :formats="dateFilterFormats"
                   :teleport="true"
+                  :locale="frLocale"
                   placeholder="JJ/MM/AAAA → JJ/MM/AAAA"
                   input-class-name="w-full rounded-2xl border border-white/20 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-white/60 focus:border-secondaryBrand-400 focus:outline-none focus:ring-2 focus:ring-secondaryBrand-400/40"
                   :disabled="pending"
@@ -221,7 +252,7 @@ const filteredAventures = computed(() => {
             v-for="a in filteredAventures"
             :key="a.id"
             :to="`/aventures-escalade/${a.slug}`"
-            class="block overflow-hidden rounded-3xl border border-white/10 bg-white/5 shadow-2xl shadow-black/30 backdrop-blur focus:outline-none focus-visible:ring-2 focus-visible:ring-secondaryBrand-400"
+            class="block overflow-hidden rounded-3xl border border-white/10 bg-white/5 shadow-2xl shadow-black/30 backdrop-blur transition duration-300 hover:-translate-y-1 hover:border-white/30 hover:shadow-3xl hover:shadow-black/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-secondaryBrand-400"
           >
             <div class="relative h-72 w-full overflow-hidden">
               <img
@@ -311,3 +342,23 @@ const filteredAventures = computed(() => {
   <!-- Footer réutilisable -->
   <AppFooter />
 </template>
+
+<style scoped>
+:deep(.dp-no-time-toggle .dp__open_time_picker_btn) {
+  display: none !important;
+}
+:deep(.dp-no-time-toggle [data-test-id="open-time-picker-btn"]) {
+  display: none !important;
+}
+:deep(.dp-no-time-toggle .dp--tp-wrap .dp__button) {
+  display: none !important;
+}
+</style>
+
+<style>
+:global(.dp__open_time_picker_btn),
+:global([data-test-id="open-time-picker-btn"]),
+:global(.dp--tp-wrap .dp__button) {
+  display: none !important;
+}
+</style>

@@ -211,7 +211,7 @@
             class="flex flex-col gap-10 lg:grid lg:grid-cols-[minmax(0,2fr)_minmax(280px,1fr)] lg:items-start"
           >
             <!-- COLONNE GAUCHE : contenu tabulé -->
-            <div class="space-y-8">
+            <div class="space-y-8 text-sm text-brand-100">
               <!-- TAB : OVERVIEW -->
               <section
                 v-if="activeTab === 'overview'"
@@ -221,7 +221,7 @@
                   <div class="rounded-3xl bg-brand-900/70 p-6 ring-1 ring-white/10">
                     <div class="flex flex-wrap items-center justify-between gap-4">
                       <div>
-                        <h2 class="text-xl font-semibold text-white">
+                        <h2 class="text-xl font-semibold text-white uppercase">
                           En bref
                         </h2>
                       </div>
@@ -229,52 +229,34 @@
                     <p class="mt-3 text-sm text-brand-100/90">
                       {{ resumeCeQuiTattend || "Une aventure locale pour progresser en grimpe sans perdre le kif." }}
                     </p>
-                    <ul class="mt-4 space-y-2 text-xs text-brand-100/80">
-                      <li class="flex items-start gap-2">
-                        <span class="mt-1 h-1.5 w-1.5 rounded-full bg-secondaryBrand-400" />
-                        <span>Immersion de {{ stage.jours }} jour{{ stage.jours > 1 ? 's' : '' }} adaptée au groupe.</span>
-                      </li>
-                      <li
-                        v-if="stage.niveauMinimum"
-                        class="flex items-start gap-2"
-                      >
-                        <span class="mt-1 h-1.5 w-1.5 rounded-full bg-secondaryBrand-400" />
-                        <span>Niveau conseillé : {{ stage.niveauMinimum }}.</span>
-                      </li>
-                    </ul>
                   </div>
                   <div class="grid gap-6 lg:grid-cols-2">
                     <div
                       v-if="hasPrerequisSection"
                       class="rounded-3xl bg-brand-900/50 p-6 ring-1 ring-white/10"
                     >
-                      <h3 class="text-xs font-semibold uppercase tracking-wide text-white">
+                      <h3 class="text-xl font-semibold uppercase tracking-wide text-white">
                         Pre-requis
                       </h3>
                       <ul
                         v-if="prerequisList.length"
-                        class="mt-4 space-y-2 text-xs text-brand-100/90"
+                        class="mt-4 space-y-2 text-sm text-brand-100/90"
                       >
                         <li
                           v-for="item in prerequisList"
                           :key="item"
                           class="flex gap-2 rounded-2xl bg-brand-900/70 px-3 py-2"
                         >
-                          <span class="mt-1 h-1.5 w-1.5 rounded-full bg-brand-400" />
+                          <span class="mt-2 h-1.5 w-1.5 rounded-full bg-brand-400" />
                           <span>{{ item }}</span>
                         </li>
                       </ul>
-                      <div class="mt-4 space-y-2 text-[11px] text-brand-200">
-                        <p v-if="ageRange">
-                          Âge conseillé : {{ ageRange }}
-                        </p>
-                      </div>
                     </div>
                     <div
                       v-if="hasObjectifsSection"
                       class="rounded-3xl bg-brand-900/50 p-6 ring-1 ring-white/10"
                     >
-                      <h3 class="text-xs font-semibold uppercase tracking-wide text-white">
+                      <h3 class="text-xl font-semibold uppercase tracking-wide text-white">
                         Objectifs
                       </h3>
                       <p
@@ -297,24 +279,17 @@
                   v-if="stage.descriptionLongue"
                   class="rounded-2xl bg-brand-900/40 p-4 text-sm text-brand-100/90 ring-1 ring-white/10"
                 >
-                  <p class="text-[11px] font-semibold uppercase tracking-wide text-brand-200">
+                  <h3 class="text-xl font-semibold uppercase tracking-wide text-white">
                     Descriptif détaillé
-                  </p>
-                  <p class="mt-2 whitespace-pre-line">
+                  </h3>
+                  <p class="mt-2 text-sm text-brand-100/90 whitespace-pre-line">
                     {{ stage.descriptionLongue }}
                   </p>
                 </div>
 
-                <h3 class="text-xs font-semibold uppercase tracking-wide text-white">
+                <h3 class="text-xl font-semibold uppercase tracking-wide text-white">
                   Programme jour par jour
                 </h3>
-                <p
-                  v-if="hasProgramme"
-                  class="text-xs text-brand-200"
-                >
-                  Trame indicative : le moniteur adapte selon le groupe et les conditions.
-                </p>
-
                 <div
                   v-if="programmeJours.length"
                   class="mt-4 space-y-3"
@@ -330,7 +305,7 @@
                       J{{ jour.ordre || 1 }}
                     </div>
                     <div class="space-y-1">
-                      <h3 class="text-xs font-semibold text-white">
+                      <h3 class="text-sm font-semibold text-white">
                         {{ jour.titre }}
                       </h3>
                       <p
@@ -341,7 +316,7 @@
                       </p>
                       <p
                         v-if="jour.description"
-                        class="text-xs text-brand-100/90 whitespace-pre-line"
+                        class="text-sm text-brand-100/90 whitespace-pre-line"
                       >
                         {{ jour.description }}
                       </p>
@@ -365,11 +340,11 @@
                 <!-- Matériel / Transport -->
                 <div class="grid gap-4 lg:grid-cols-2">
                   <div class="space-y-2 rounded-2xl bg-brand-900/40 p-4 ring-1 ring-white/10">
-                    <h3 class="text-xs font-semibold uppercase tracking-wide text-white">
+                    <h3 class="text-xl font-semibold uppercase tracking-wide text-white">
                       Matériel
                     </h3>
                     <div v-if="equipementRequisList.length">
-                      <p class="text-[11px] font-semibold text-brand-200">
+                      <p class="text-sm font-semibold text-brand-200">
                         À apporter
                       </p>
                       <ul class="mt-1 space-y-1 text-xs text-brand-100/90">
@@ -379,14 +354,14 @@
                           class="flex gap-2"
                         >
                           <span
-                            class="mt-1 h-1.5 w-1.5 rounded-full bg-secondaryBrand-400"
+                            class="mt-2 h-1.5 w-1.5 rounded-full bg-secondaryBrand-400"
                           />
-                          <span>{{ item }}</span>
+                          <span class="text-sm">{{ item }}</span>
                         </li>
                       </ul>
                     </div>
-                    <div v-if="equipementFourniList.length" class="mt-3">
-                      <p class="text-[11px] font-semibold text-brand-200">
+                    <div v-if="equipementFourniList.length" class="mt-4">
+                      <p class="text-sm font-semibold text-brand-200">
                         Fournis par le guide
                       </p>
                       <ul class="mt-1 space-y-1 text-xs text-brand-100/90">
@@ -396,46 +371,46 @@
                           class="flex gap-2"
                         >
                           <span
-                            class="mt-1 h-1.5 w-1.5 rounded-full bg-brand-400"
+                            class="mt-2 h-1.5 w-1.5 rounded-full bg-brand-400"
                           />
-                          <span>{{ item }}</span>
+                          <span class="text-sm">{{ item }}</span>
                         </li>
                       </ul>
                     </div>
                     <p
                       v-if="!equipementRequisList.length && !equipementFourniList.length"
-                      class="text-xs text-brand-100/80"
+                      class="text-sm text-brand-100/80"
                     >
                       La liste précise du matériel est envoyée après inscription.
                     </p>
                   </div>
 
                   <div class="space-y-2 rounded-2xl bg-brand-900/40 p-4 ring-1 ring-white/10">
-                    <h3 class="text-xs font-semibold uppercase tracking-wide text-white">
+                    <h3 class="text-xl font-semibold uppercase tracking-wide text-white">
                       Transport & RDV
                     </h3>
                     <p
                       v-if="stage.transportLabel"
-                      class="text-xs text-brand-100/90 whitespace-pre-line"
+                      class="text-sm text-brand-100/90 whitespace-pre-line"
                     >
                       {{ stage.transportLabel }}
                     </p>
                     <p
                       v-if="stage.pointRdv"
-                      class="text-xs text-brand-100/90"
+                      class="text-sm text-brand-100/90"
                     >
-                      <span class="font-semibold">Point de rendez-vous :</span>
+                      <span class="font-semibold text-sm">Point de rendez-vous :</span>
                       {{ stage.pointRdv }}
                     </p>
                     <p
                       v-if="stage.pointsLocaux"
-                      class="text-xs text-brand-100/90 whitespace-pre-line"
+                      class="text-sm text-brand-100/90 whitespace-pre-line"
                     >
                       {{ stage.pointsLocaux }}
                     </p>
                     <p
                       v-if="!hasTransport"
-                      class="text-xs text-brand-100/90 whitespace-pre-line"
+                      class="text-sm text-brand-100/90 whitespace-pre-line"
                     >
                       L'organisation pour le transport sera communiquée par le moniteur après l'inscription.
                     </p>
@@ -447,11 +422,11 @@
                   <div
                     class="space-y-2 rounded-2xl bg-brand-900/40 p-4 ring-1 ring-white/10"
                   >
-                    <h3 class="text-xs font-semibold uppercase tracking-wide text-white">
+                    <h3 class="text-xl font-semibold uppercase tracking-wide text-white">
                       Inclus
                     </h3>
                     <p
-                      class="text-xs text-brand-100/90 whitespace-pre-line"
+                      class="text-sm text-brand-100/90 whitespace-pre-line"
                     >
                       {{ stage.inclus || 'Encadrement par un moniteur·rice diplômé·e, choix de secteurs adaptés, brief sécurité.' }}
                     </p>
@@ -460,14 +435,49 @@
                   <div
                     class="space-y-2 rounded-2xl bg-brand-900/40 p-4 ring-1 ring-white/10"
                   >
-                    <h3 class="text-xs font-semibold uppercase tracking-wide text-white">
+                    <h3 class="text-xl font-semibold uppercase tracking-wide text-white">
                       Non inclus
                     </h3>
                     <p
-                      class="text-xs text-brand-100/90 whitespace-pre-line"
+                      class="text-sm text-brand-100/90 whitespace-pre-line"
                     >
                       {{ stage.nonInclus || 'Transport, hébergement et repas selon les besoins du groupe.' }}
                     </p>
+                  </div>
+                </div>
+
+                <div
+                  v-if="mapEmbedUrl"
+                  class="rounded-2xl bg-brand-900/40 p-4 ring-1 ring-white/10"
+                >
+                  <div class="flex items-center justify-between">
+                    <div>
+                      <p class="text-[11px] font-semibold uppercase tracking-[0.25em] text-brand-200">
+                        Localisation
+                      </p>
+                      <p class="text-sm text-brand-100/85">
+                        {{ stage.lieuLabel }}
+                      </p>
+                    </div>
+                    <NuxtLink
+                      :to="`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(stage.lieuLabel || '')}`"
+                      target="_blank"
+                      rel="noopener"
+                      class="text-xs font-semibold text-secondaryBrand-300 hover:text-secondaryBrand-200 underline"
+                    >
+                      Ouvrir dans Google Maps
+                    </NuxtLink>
+                  </div>
+                  <div class="mt-3 overflow-hidden rounded-xl ring-1 ring-white/10">
+                    <iframe
+                      :src="mapEmbedUrl"
+                      width="100%"
+                      height="300"
+                      style="border:0;"
+                      allowfullscreen
+                      loading="lazy"
+                      referrerpolicy="no-referrer-when-downgrade"
+                    ></iframe>
                   </div>
                 </div>
               </section>
@@ -477,16 +487,41 @@
               <!-- COLONNE DROITE : encart Réservation sticky -->
               <aside class="lg:sticky lg:top-32 lg:h-fit">
                 <div
-                  class="rounded-3xl bg-white p-6 text-gray-900 shadow-2xl shadow-black/30 ring-1 ring-gray-900/10"
+                  class="relative rounded-3xl bg-white p-6 text-gray-900 shadow-2xl shadow-black/30 ring-1 ring-gray-900/10"
                 >
-                  <p class="text-[11px] font-semibold uppercase tracking-[0.3em] text-gray-500">
-                    Réservation
-                  </p>
+                  <div class="flex items-start justify-between gap-3">
+                    <p class="text-[11px] font-semibold uppercase tracking-[0.3em] text-gray-500">
+                      INSCRIPTION
+                    </p>
+                    <div class="relative group/info">
+                      <button
+                        type="button"
+                        class="flex h-8 w-8 items-center justify-center text-brand-800 transition hover:text-brand-600 focus:outline-none focus:ring-2 focus:ring-secondaryBrand-400 focus:ring-offset-2 focus:ring-offset-white"
+                        aria-label="Infos inscription"
+                      >
+                        <svg class="h-8 w-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                          <circle cx="12" cy="12" r="9" />
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M12 8h.01M11 12h1v4h1" />
+                        </svg>
+                      </button>
+                      <div
+                        class="pointer-events-none absolute right-0 top-10 z-10 w-64 rounded-2xl bg-secondaryBrand-400 px-4 py-3 text-[11px] font-semibold leading-snug text-brand-950 shadow-lg shadow-secondaryBrand-900/30 ring-1 ring-secondaryBrand-300/70 opacity-0 translate-y-1 transition duration-200 ease-out group-hover/info:opacity-100 group-hover/info:translate-y-0 group-focus-within/info:opacity-100 group-focus-within/info:translate-y-0"
+                      >
+                        Lorsque tu t’inscris, le moniteur prend contact avec toi pour l’organisation.
+                        <br/>
+                        Tu règles l’acompte et le solde directement auprès de lui.
+                        <br/>
+                        Tu comptes les dodos et tu pars à l’aventure.
+                      </div>
+                    </div>
+                  </div>
                   <h3 class="mt-2 text-lg font-semibold text-gray-900">
-                    Choisis ta ou tes dates
+                    Tu peux partir quand ?
                   </h3>
                   <p class="mt-1 text-xs text-gray-500" v-if="hasSessions">
-                    Indique-nous les dates qui t’intéressent. Le moniteur te recontactera pour regrouper les motivé·es.
+                    Choisis le ou les créneaux qui te conviennent le mieux.
+                    <br/>
+                    Le moniteur de la Brigade du kiff te recontacte pour organiser le stage.
                   </p>
 
                   <!-- Messages -->
@@ -505,13 +540,13 @@
 
                   <div class="mt-5 space-y-4">
                     <template v-if="hasSessions">
+                    <div class="space-y-3">
+                      <p class="text-xs font-medium text-gray-700">
+                        Dates disponibles
+                      </p>
                       <div class="space-y-3">
-                        <p class="text-xs font-medium text-gray-700">
-                          Dates disponibles
-                        </p>
-                        <div class="space-y-3">
-                          <label
-                            v-for="session in stage.sessions"
+                        <label
+                            v-for="session in availableSessions"
                             :key="session.id"
                             class="flex items-start gap-3 rounded-2xl border border-gray-200 px-4 py-3 text-sm shadow-sm"
                           >
@@ -558,7 +593,7 @@
                           Déjà positionné·e dessus
                         </span>
                         <span v-else>
-                          Je suis intéressé·e par ces dates
+                          Je m’inscris !
                         </span>
                         <svg
                           class="h-4 w-4"
@@ -577,11 +612,12 @@
                     </template>
                     <template v-else>
                       <p class="text-sm text-gray-500">
-                        Pas encore de dates planifiées. Propose-nous un créneau pour lequel tu serais disponible ci-dessous et on te recontacte !
+                        Il n’y a pas encore de date proposée pour ce stage. Indique nous le créneau sur lequel tu es disponible !
                       </p>
                     </template>
                   </div>
                   <details
+                    v-if="hasSessions"
                     class="mt-8 rounded-2xl border border-gray-200 bg-gray-50 p-4 text-sm text-gray-700"
                     :open="suggestionDetailsOpen"
                     @toggle="onSuggestionToggle"
@@ -592,7 +628,7 @@
                           Aucune de ces dates ne colle ?
                         </p>
                         <p class="text-xs text-gray-500">
-                          Propose un créneau : on regroupe les grimpeurs dispo et on te recontacte.
+                          Propose un créneau : on regroupe les grimpeurs dispos et on te recontacte.
                         </p>
                       </div>
                       <svg
@@ -663,6 +699,64 @@
                       </button>
                     </div>
                   </details>
+                  <div
+                    v-else
+                    class="mt-8 space-y-3 rounded-2xl border border-gray-200 bg-gray-50 p-4 text-sm text-gray-700"
+                  >
+                    <div>
+                      <label class="text-[11px] font-semibold uppercase tracking-[0.3em] text-gray-500">
+                        Intervalle de dates
+                      </label>
+                      <ClientOnly>
+                        <VueDatePicker
+                          v-model="datePickerModel"
+                          range
+                          :enable-time-picker="false"
+                          :min-date="new Date()"
+                          :locale="datePickerLocale"
+                          :formats="datePickerFormats"
+                          placeholder="JJ/MM/AAAA → JJ/MM/AAAA"
+                          :teleport="true"
+                          :disabled="suggestionLoading"
+                          class="mt-2"
+                          input-class-name="w-full rounded-2xl border border-gray-300 bg-white px-3 py-2 text-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/40"
+                        />
+                      </ClientOnly>
+                      <p class="text-[11px] text-gray-400">
+                        Choisis une date de début et, si besoin, une date de fin.
+                      </p>
+                    </div>
+                    <div>
+                      <label class="text-[11px] font-semibold uppercase tracking-[0.3em] text-gray-500">
+                        Message pour le moniteur
+                      </label>
+                      <textarea
+                        rows="3"
+                        class="mt-1 w-full rounded-2xl border border-gray-300 bg-white px-3 py-2 text-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/40"
+                        placeholder="Ex: dispo le week-end, on est déjà 3 personnes motivées..."
+                        v-model="customComment"
+                        :disabled="suggestionLoading"
+                      />
+                    </div>
+                    <p v-if="suggestionError" class="rounded-md bg-red-50 px-3 py-2 text-xs text-red-700">
+                      {{ suggestionError }}
+                    </p>
+                    <p v-if="suggestionSuccess" class="rounded-md bg-green-50 px-3 py-2 text-xs text-green-700">
+                      {{ suggestionSuccess }}
+                    </p>
+                    <button
+                      type="button"
+                      class="inline-flex w-full items-center justify-center gap-2 rounded-full bg-secondaryBrand-500/90 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-white shadow-lg shadow-secondaryBrand-900/30 transition hover:bg-secondaryBrand-400 disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-400"
+                      :disabled="suggestionLoading || !suggestionRange.start"
+                      @click="handleSuggestionClick"
+                    >
+                      <span v-if="suggestionLoading">Envoi en cours...</span>
+                      <span v-else>Je propose ce créneau</span>
+                      <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M8 5l8 7-8 7" />
+                      </svg>
+                    </button>
+                  </div>
                 </div>
               </aside>
             </div>
@@ -674,7 +768,7 @@
       </main>
 
       <!-- AUTRES AVENTURES -->
-      <section v-if="otherStages.length" class="bg-brand-900 py-16">
+      <section v-if="filteredOtherStages.length" class="bg-brand-900 py-16">
         <div class="mx-auto max-w-7xl px-6 lg:px-8 space-y-8">
           <div class="flex flex-wrap items-center justify-between gap-3">
             <h2 class="text-2xl font-semibold text-white">
@@ -690,15 +784,16 @@
 
           <div class="grid gap-6 md:grid-cols-3">
             <NuxtLink
-              v-for="stage in otherStages"
-              :key="stage.id"
-              :to="`/aventures-escalade/${stage.slug}`"
+              v-for="s in filteredOtherStages"
+              :key="s.id"
+              :to="`/aventures-escalade/${s.slug}`"
               class="group flex flex-col overflow-hidden rounded-3xl border border-white/10 bg-white/5 shadow-2xl shadow-black/40 ring-1 ring-white/10 transition hover:-translate-y-1"
             >
+              <div>{{ s.value?.sessions }}</div>
               <div class="relative h-52">
                 <img
-                  :src="stage.coverImageUrl || imageForDiscipline(stage.discipline)"
-                  :alt="stage.titre"
+                  :src="s.coverImageUrl || imageForDiscipline(s.discipline)"
+                  :alt="s.titre"
                   class="size-full object-cover transition duration-500 hover:scale-105"
                 />
                 <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent" />
@@ -708,12 +803,12 @@
                       <span
                         class="inline-flex max-w-[70%] items-center rounded-full bg-secondaryBrand-400/80 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.3em] text-secondaryBrand-100 ring-1 ring-white/20"
                       >
-                        {{ formatDisciplineLabel(stage.discipline) }}
+                        {{ formatDisciplineLabel(s.discipline) }}
                       </span>
                       <span
                         class="inline-flex items-center rounded-full border border-brand-200/40 bg-brand-950/60 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-white"
                       >
-                        {{ stage.jours }} {{ stage.jours > 1 ? 'jours' : 'jour' }}
+                        {{ s.jours }} {{ s.jours > 1 ? 'jours' : 'jour' }}
                       </span>
                     </div>
                     <div class="ml-auto">
@@ -721,8 +816,8 @@
                         class="inline-flex h-12 w-12 items-center justify-center rounded-full bg-secondaryBrand-400/80 shadow-lg shadow-secondaryBrand-900/30 sm:h-14 sm:w-14"
                       >
                         <img
-                          :src="iconPathForDiscipline(stage.discipline)"
-                          :alt="formatDisciplineLabel(stage.discipline)"
+                          :src="iconPathForDiscipline(s.discipline)"
+                          :alt="formatDisciplineLabel(s.discipline)"
                           class="h-8 w-8 object-contain sm:h-10 sm:w-10"
                         />
                       </span>
@@ -734,30 +829,30 @@
                         <rect x="3" y="4" width="18" height="16" rx="2" />
                         <path d="M16 2v4M8 2v4M3 10h18" />
                       </svg>
-                      {{ stage.nextSession ? formatSessionRange(stage.nextSession) : 'Date à confirmer' }}
+                      {{ displayNextSession(s) ? formatSessionRange(displayNextSession(s)) : 'Date à confirmer' }}
                     </span>
                     <span class="inline-flex items-center gap-2 font-semibold text-xs text-white">
                       <svg class="h-4 w-4 text-secondaryBrand-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 21c-4-4-6-7-6-10a6 6 0 0 1 12 0c0 3-2 6-6 10Z" />
                         <circle cx="12" cy="11" r="2.3" />
                       </svg>
-                      {{ stage.lieuLabel }}
+                      {{ s.lieuLabel }}
                     </span>
                   </div>
                 </div>
               </div>
               <div class="flex flex-1 flex-col p-5">
                 <h3 class="mt-2 text-xl font-semibold text-white">
-                  {{ stage.titre }}
+                  {{ s.titre }}
                 </h3>
                 <p class="mt-1 line-clamp-2 text-sm text-brand-100/80">
-                  {{ stage.sousTitre }}
+                  {{ s.sousTitre }}
                 </p>
                 <div class="mt-6 flex items-center justify-between text-sm text-white">
                   <div class="flex items-center gap-3 text-sm text-brand-100/80">
                     <img
-                      :src="stage.guideImageUrl || imageForDiscipline(stage.discipline)"
-                      :alt="stage.guideName || 'Moniteur'"
+                      :src="s.guideImageUrl || imageForDiscipline(s.discipline)"
+                      :alt="s.guideName || 'Moniteur'"
                       class="h-10 w-10 rounded-full border border-white/20 bg-brand-900 object-cover"
                     />
                     <div>
@@ -765,12 +860,12 @@
                         Moniteur
                       </p>
                       <p class="font-semibold text-white">
-                        {{ stage.guideName || 'Moniteur local' }}
+                        {{ s.guideName || 'Moniteur local' }}
                       </p>
                     </div>
                   </div>
                   <span class="font-semibold text-right">
-                    {{ stage.prixParPersonne }} € <span class="text-brand-200 text-xs">/ pers</span>
+                    {{ s.prixParPersonne }} € <span class="text-brand-200 text-xs">/ pers</span>
                   </span>
                 </div>
               </div>
@@ -852,6 +947,59 @@ const { data, pending, error } = await useFetch(`/api/aventures/${slug}`)
 const stage = computed(() => data.value?.aventure)
 const stageTitle = computed(() => stage.value?.titre || 'Aventure')
 const otherStages = computed(() => data.value?.autres ?? [])
+const filteredOtherStages = computed(() => {
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  const todayMs = today.getTime()
+  const list = (otherStages.value || []).map((a: any) => {
+    const { next, hasAnySession } = findNextSession(a, todayMs)
+    const nextDate = next?.dateDebut ? new Date(next.dateDebut).getTime() : null
+    return { ...a, nextDate, hasSessions: hasAnySession, derivedNextSession: next }
+  })
+  return list
+    .filter((a: any) => {
+      if (a.nextDate) return a.nextDate >= todayMs
+      if (a.hasSessions) return false
+      return true
+    })
+    .sort((a: any, b: any) => {
+      if (a.nextDate && b.nextDate) return a.nextDate - b.nextDate
+      if (a.nextDate && !b.nextDate) return -1
+      if (!a.nextDate && b.nextDate) return 1
+      return 0
+    })
+})
+
+const findNextSession = (aventure: any, todayMs: number) => {
+  const sessions: any[] = []
+  console.log(aventure.sessions)
+  if (Array.isArray(aventure?.sessions)) {
+    sessions.push(...aventure.sessions)
+  }
+  if (aventure?.nextSession) {
+    sessions.push(aventure.nextSession)
+  }
+
+  const hasAnySession = sessions.length > 0
+  const future = sessions
+    .filter((s) => s?.dateDebut && !Number.isNaN(new Date(s.dateDebut).getTime()))
+    .map((s) => ({ ...s, _ts: new Date(s.dateDebut).getTime() }))
+    .filter((s) => s._ts >= todayMs)
+    .sort((a, b) => a._ts - b._ts)
+
+  if (future.length) {
+    const best = { ...future[0] }
+    delete best._ts
+    return { next: best, hasAnySession }
+  }
+  return { next: null, hasAnySession }
+}
+
+const displayNextSession = (aventure: any) => {
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  return findNextSession(aventure, today.getTime()).next
+}
 
 // Onglets
 const tabs = [
@@ -1009,6 +1157,12 @@ const heroImage = computed(() => {
   return imageForDiscipline(stage.value.discipline)
 })
 
+const mapEmbedUrl = computed(() => {
+  const label = stage.value?.lieuLabel || stage.value?.region || stage.value?.titre
+  if (!label) return null
+  return `https://www.google.com/maps?q=${encodeURIComponent(label)}&output=embed`
+})
+
 // ----- Guide / moniteur -----
 const guide = computed(() => stage.value?.guide || null)
 
@@ -1081,6 +1235,19 @@ const formatSessionDate = (session: any) => {
   return start === end ? start : `${start} → ${end}`
 }
 
+const formatSessionRange = (session?: { dateDebut?: string | Date; dateFin?: string | Date } | null) => {
+  if (!session?.dateDebut) return ''
+  const formatter = new Intl.DateTimeFormat('fr-FR', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  })
+  const start = formatter.format(new Date(session.dateDebut))
+  if (!session.dateFin) return start
+  const end = formatter.format(new Date(session.dateFin))
+  return start === end ? start : `${start} → ${end}`
+}
+
 const { loggedIn } = useUserSession()
 const router = useRouter()
 
@@ -1116,11 +1283,27 @@ const hasSessions = computed(
   () => !!(stage.value?.sessions && stage.value.sessions.length),
 )
 
+const availableSessions = computed(() => {
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  return (stage.value?.sessions || []).filter((s: any) => {
+    if (!s?.dateDebut) return false
+    const ts = new Date(s.dateDebut).getTime()
+    return !Number.isNaN(ts) && ts >= today.getTime()
+  })
+})
+
 const selectedSessionIds = ref<string[]>([])
 
 const selectedSessions = computed(() => {
   const ids = selectedSessionIds.value
-  const sessions = stage.value?.sessions || []
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  const sessions = (stage.value?.sessions || []).filter((s: any) => {
+    if (!s?.dateDebut) return false
+    const ts = new Date(s.dateDebut).getTime()
+    return !Number.isNaN(ts) && ts >= today.getTime()
+  })
   return sessions.filter((s: any) => ids.includes(String(s.id)))
 })
 

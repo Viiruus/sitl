@@ -43,7 +43,7 @@
         Votre <span class="text-secondaryBrand-200">{{ activeBenefitWord }}</span>
       </h2>
       <p class="mt-4 text-base text-brand-100/80">
-        La Brigade du Kiff, c’est une équipe de passionné.e.s par l’escalade mais surtout par les humains.
+        La Brigade du kiff, c’est une équipe de passionné.e.s par l’escalade mais surtout par les humains.
         <br/>
         Notre objectif est de te faire passer un moment inoubliable en pleine nature et en bonne compagnie.
       </p>
@@ -95,7 +95,7 @@
         L’escalade est une pratique sportive exceptionnellement riche.
       </p>
       <p class="mt-4 text-base text-gray-600">
-        Chez la Brigade du Kiff, nous avons souhaité les organiser en 4 grandes catégories même s’il existe une infinie de sensibilités différentes…
+        Chez la Brigade du kiff, nous avons souhaité les organiser en 4 grandes catégories même s’il existe une infinie de sensibilités différentes…
         <br/>
         Qu’il s’agisse d’une bambée de plusieurs centaines de mètres en terrain d’aventure ou d’un bloc déversant hyper technique, ce n’est pas la même discipline !
         <br/>
@@ -269,20 +269,33 @@ import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 const { data: aventuresData, pending: aventuresPending } = await useFetch('/api/aventures')
 
   const upcomingStages = computed(() => {
-    const list = (aventuresData.value?.aventures ?? []).map((stage: any) => {
-      const nextDate = stage.nextSession?.dateDebut ? new Date(stage.nextSession.dateDebut) : null
-      return { ...stage, nextSessionDate: nextDate }
-    })
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+
+    const list = (aventuresData.value?.aventures ?? [])
+      .map((stage: any) => {
+        const nextDate = stage.nextSession?.dateDebut ? new Date(stage.nextSession.dateDebut) : null
+        const hasSessions = Array.isArray(stage.sessions) && stage.sessions.length > 0
+        return { ...stage, nextSessionDate: nextDate, hasSessions }
+      })
+      .filter((stage: any) => {
+        if (stage.nextSessionDate) {
+          return stage.nextSessionDate.getTime() >= today.getTime()
+        }
+        // If there are sessions but none upcoming, drop it
+        if (stage.hasSessions) return false
+        // Keep undated stages
+        return true
+      })
 
     const withNext = list
       .filter((stage: any) => stage.nextSessionDate)
       .sort((a: any, b: any) => (a.nextSessionDate as any) - (b.nextSessionDate as any))
 
-    if (withNext.length >= 3) {
-      return withNext.slice(0, 3)
-    }
+    const withoutNext = list.filter((stage: any) => !stage.nextSessionDate)
+    const ordered = [...withNext, ...withoutNext]
 
-    return list.slice(0, 3)
+    return ordered.slice(0, 3)
   })
 
   const faqs = [
