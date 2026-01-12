@@ -972,7 +972,6 @@ const filteredOtherStages = computed(() => {
 
 const findNextSession = (aventure: any, todayMs: number) => {
   const sessions: any[] = []
-  console.log(aventure.sessions)
   if (Array.isArray(aventure?.sessions)) {
     sessions.push(...aventure.sessions)
   }
