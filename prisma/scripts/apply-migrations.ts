@@ -74,11 +74,19 @@ async function migrationAlreadyAppliedStructurally(sql: string): Promise<boolean
 
 function getMigrations(): { name: string; sqlPath: string }[] {
   if (!fs.existsSync(migrationsDir)) return []
-  return fs
+  const names = fs
     .readdirSync(migrationsDir, { withFileTypes: true })
     .filter((dirent) => dirent.isDirectory())
     .map((dirent) => dirent.name)
-    .sort()
+  // Ensure the init migration runs first even if its timestamp isn't the earliest.
+  names.sort((a, b) => {
+    const aInit = a.toLowerCase().includes('init') ? 0 : 1
+    const bInit = b.toLowerCase().includes('init') ? 0 : 1
+    if (aInit !== bInit) return aInit - bInit
+    return a.localeCompare(b)
+  })
+
+  return names
     .map((name) => ({
       name,
       sqlPath: path.join(migrationsDir, name, 'migration.sql'),
