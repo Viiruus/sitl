@@ -10,6 +10,7 @@ const bodySchema = z.object({
   bio: z.string().trim().max(2000).optional().or(z.literal('')),
   instagramUrl: z.string().url().optional().or(z.literal('')),
   websiteUrl: z.string().url().optional().or(z.literal('')),
+  professionalCardNumber: z.string().trim().max(100).optional().or(z.literal('')),
   profileImageUrl: z.union([
     z.string().trim().url(),
     z.string().trim().startsWith('/uploads/'),
@@ -56,6 +57,7 @@ export default defineEventHandler(async (event) => {
             baseLocation: clean(body.baseLocation),
             instagramUrl: clean(body.instagramUrl),
             websiteUrl: clean(body.websiteUrl),
+            professionalCardNumber: clean(body.professionalCardNumber),
             profileImageUrl: clean(body.profileImageUrl),
           },
           create: {
@@ -63,6 +65,7 @@ export default defineEventHandler(async (event) => {
             baseLocation: clean(body.baseLocation) ?? null,
             instagramUrl: clean(body.instagramUrl) ?? null,
             websiteUrl: clean(body.websiteUrl) ?? null,
+            professionalCardNumber: clean(body.professionalCardNumber) ?? null,
             profileImageUrl: clean(body.profileImageUrl) ?? null,
             isPublic: true,
           },
@@ -97,6 +100,7 @@ export default defineEventHandler(async (event) => {
       bio: user.guideProfile?.bio || null,
       instagramUrl: user.guideProfile?.instagramUrl || null,
       websiteUrl: user.guideProfile?.websiteUrl || null,
+      professionalCardNumber: user.guideProfile?.professionalCardNumber || null,
       profileImageUrl: user.guideProfile?.profileImageUrl || null,
     },
   }

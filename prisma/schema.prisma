@@ -118,6 +118,7 @@ model GuideProfile {
   baseLocation String? // "Massif des Bauges"
   instagramUrl String?
   websiteUrl   String?
+  professionalCardNumber String?
 
   // ✅ Nouveau : image principale du moniteur
   profileImageUrl String?

@@ -29,6 +29,7 @@ export default defineEventHandler(async (event) => {
               instagramUrl: true,
               websiteUrl: true,
               profileImageUrl: true,
+              professionalCardNumber: true,
             },
           },
         },
@@ -118,12 +119,14 @@ const mapGuide = (a: any) => {
   return {
     slug: slugifyName(a.guide.firstName, a.guide.lastName, a.guide.id),
     fullName: [a.guide.firstName, a.guide.lastName].filter(Boolean).join(' ') || null,
+    professionalCardNumber: gp?.professionalCardNumber || null,
     profile: gp
       ? {
           bio: gp.bio,
           baseLocation: gp.baseLocation,
           instagramUrl: gp.instagramUrl,
           websiteUrl: gp.websiteUrl,
+          professionalCardNumber: gp.professionalCardNumber,
           profileImageUrl: gp.profileImageUrl,
         }
       : null,

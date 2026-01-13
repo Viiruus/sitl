@@ -41,10 +41,10 @@ const disciplineOptions = computed(() => {
 })
 
 const disciplineIconMap: Record<string, string> = {
-  GRANDE_VOIE: '/images/grande-voie.png',
-  FALAISE: '/images/couenne.png',
-  BLOC: '/images/bloc.png',
-  TRAD: '/images/trad.png',
+  GRANDE_VOIE: '/images/grande-voie-white.png',
+  FALAISE: '/images/couenne-white.png',
+  BLOC: '/images/bloc-white.png',
+  TRAD: '/images/trad-white.png',
 }
 
 const iconPathForDiscipline = (value?: string | null) => {
@@ -150,7 +150,7 @@ const filteredAventures = computed(() => {
           <div class="absolute inset-0 -z-10"></div>
           <div class="max-w-4xl space-y-6">
             <h1 class="text-4xl font-semibold tracking-tight text-pretty text-white sm:text-5xl">
-              L’aventure escalade par et pour les meilleur·e·s : c’est la Brigade du kiff
+              L’aventure escalade par et pour les meilleur·e·s
             </h1>
             <p class="text-base text-brand-100/80">
               Choisis un stage, inscris-toi et entre directement en contact avec la monitrice ou le moniteur de l’aventure.
@@ -176,12 +176,7 @@ const filteredAventures = computed(() => {
           <div class="grid gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(220px,1.2fr)]">
             <div class="space-y-4 rounded-2xl border border-white/15 bg-brand-900/50 p-4 shadow-lg shadow-black/30 backdrop-blur">
               <div class="flex flex-wrap items-center justify-between gap-3">
-                <div>
-                  <p class="text-xs uppercase tracking-[0.3em] text-brand-200/70">Filtrer par discipline</p>
-                  <p class="text-xs text-brand-200/60">
-                    Choisis le type d’aventure qui t’intéresse.
-                  </p>
-                </div>
+                <p class="text-xs uppercase tracking-[0.3em] text-brand-200/70">Filtrer par discipline</p>
                 <button
                   v-if="selectedDiscipline"
                   type="button"
@@ -196,20 +191,20 @@ const filteredAventures = computed(() => {
                   v-for="option in disciplineOptions"
                   :key="option.value"
                   type="button"
-                  class="flex items-center gap-3 rounded-2xl border px-3 py-2 text-sm transition"
+                  class="group flex items-center gap-3 rounded-2xl border px-3 py-2 text-sm transition"
                   :class="selectedDiscipline === option.value
                     ? 'border-secondaryBrand-400 bg-secondaryBrand-500/20 text-white'
                     : 'border-brand-800 bg-brand-900/80 text-brand-100'"
                   @click="selectedDiscipline = option.value"
                 >
-              <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-secondaryBrand-400/80">
-                <img
-                  :src="iconPathForDiscipline(option.value)"
-                  :alt="option.label"
-                  class="h-8 w-8 object-contain"
-                  loading="lazy"
-                />
-              </span>
+                  <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-secondaryBrand-400/80 transition duration-300 ease-out group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-secondaryBrand-500/40 group-hover:rotate-1">
+                    <img
+                      :src="iconPathForDiscipline(option.value)"
+                      :alt="option.label"
+                      class="h-8 w-8 object-contain"
+                      loading="lazy"
+                    />
+                  </span>
                   <span class="font-medium">{{ option.label }}</span>
                 </button>
                 <p v-if="!disciplineOptions.length" class="text-xs text-brand-200/70">
@@ -220,12 +215,7 @@ const filteredAventures = computed(() => {
 
             <div class="space-y-3 rounded-2xl border border-white/15 bg-brand-900/50 p-4 text-sm text-brand-100 shadow-lg shadow-black/30 backdrop-blur">
               <div class="flex flex-wrap items-center justify-between gap-3">
-                <div>
-                  <p class="text-xs uppercase tracking-[0.3em] text-brand-200/70">Filtrer par dates</p>
-                  <p class="text-xs text-brand-200/60">
-                    Montre-moi les aventures ayant une session qui commence dans cet intervalle.
-                  </p>
-                </div>
+                <p class="text-xs uppercase tracking-[0.3em] text-brand-200/70">Filtrer par dates</p>
               </div>
               <ClientOnly>
                 <VueDatePicker

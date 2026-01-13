@@ -19,6 +19,7 @@ const form = reactive({
   bio: '',
   instagramUrl: '',
   websiteUrl: '',
+  professionalCardNumber: '',
   profileImageUrl: '',
 })
 
@@ -34,6 +35,7 @@ watch(
     form.bio = value.bio || ''
     form.instagramUrl = value.instagramUrl || ''
     form.websiteUrl = value.websiteUrl || ''
+    form.professionalCardNumber = value.professionalCardNumber || ''
     form.profileImageUrl = value.profileImageUrl || ''
   },
   { immediate: true },
@@ -141,6 +143,30 @@ const logout = async () => {
             <div class="space-y-2">
               <label class="text-sm text-brand-100/80">Camp de base</label>
               <input v-model="form.baseLocation" type="text" class="w-full rounded-xl border border-brand-800 bg-brand-900/80 px-3 py-2 text-white focus:border-secondaryBrand-400 focus:outline-none" />
+            </div>
+
+            <div class="grid gap-4 md:grid-cols-2">
+              <div class="space-y-2">
+                <label class="text-sm text-brand-100/80">Instagram (URL)</label>
+                <input
+                  v-model="form.instagramUrl"
+                  type="url"
+                  placeholder="https://www.instagram.com/toncompte"
+                  class="w-full rounded-xl border border-brand-800 bg-brand-900/80 px-3 py-2 text-white focus:border-secondaryBrand-400 focus:outline-none"
+                />
+              </div>
+              <div class="space-y-2">
+                <label class="text-sm text-brand-100/80">Numéro de carte professionnelle</label>
+                <input
+                  v-model="form.professionalCardNumber"
+                  type="text"
+                  placeholder="Ex: 07323ED0071"
+                  class="w-full rounded-xl border border-brand-800 bg-brand-900/80 px-3 py-2 text-white focus:border-secondaryBrand-400 focus:outline-none"
+                />
+                <p class="text-xs text-brand-200/70">
+                  Utilisé pour générer le lien carte pro (sports.gouv.fr).
+                </p>
+              </div>
             </div>
 
             <div class="grid gap-4 md:grid-cols-2">

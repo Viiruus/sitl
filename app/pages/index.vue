@@ -35,14 +35,11 @@
   
     <!-- Section Bénéfices -->
   <section class="bg-brand-900 py-20 sm:py-28 text-white">
-    <div class="mx-auto max-w-7xl px-6 lg:px-8">
-      <p class="text-xs uppercase tracking-[0.5em] text-secondaryBrand-200/80">
-        Notre mission ?
-      </p>
+    <div class="mx-auto max-w-5xl px-6 text-center lg:px-8">
       <h2 class="mt-4 text-4xl font-semibold tracking-tight sm:text-5xl">
-        Votre <span class="text-secondaryBrand-200">{{ activeBenefitWord }}</span>
+        Notre mission ?
       </h2>
-      <p class="mt-4 text-base text-brand-100/80">
+      <p class="mt-6 text-base text-brand-100/80">
         La Brigade du kiff, c’est une équipe de passionné.e.s par l’escalade mais surtout par les humains.
         <br/>
         Notre objectif est de te faire passer un moment inoubliable en pleine nature et en bonne compagnie.
@@ -53,34 +50,61 @@
         Et ce n’est pas tout : notre priorité c’est ta progression. Nos moniteurs sont déterminés à te faire performer.
       </p>
       <p class="mt-4 text-base text-brand-100/80">
-        Rejoins la team et inscris-toi à un prochain stage !
+        Rejoins la team et
+        <NuxtLink to="/login" class="font-semibold text-secondaryBrand-200 hover:text-secondaryBrand-100 underline underline-offset-4">
+          inscris-toi
+        </NuxtLink>
+        à un prochain stage !
       </p>
 
-      <div class="mt-12 grid gap-6 lg:grid-cols-2">
-        <article
-          v-for="benefit in benefits"
-          :key="benefit.title"
-          class="group relative isolate h-96 overflow-hidden rounded-3xl border border-white/10 bg-white/5 shadow-2xl shadow-black/30 ring-1 ring-white/10"
-        >
-          <img
-            :src="benefit.image"
-            :alt="benefit.title"
-            class="absolute inset-0 size-full object-cover transition duration-700 group-hover:scale-105"
-            loading="lazy"
-          />
-          <div class="absolute inset-0 bg-gradient-to-t from-black/55 via-black/25 to-transparent" />
-          <div class="absolute inset-0 flex flex-col justify-end gap-2 p-5">
-            <p class="text-[14px] uppercase tracking-[0.4em] text-secondaryBrand-200/90">
-              {{ benefit.kicker }}
-            </p>
-            <h3 class="text-xl font-semibold text-white">
-              {{ benefit.title }}
-            </h3>
-            <p class="text-sm text-brand-100/90 leading-relaxed">
-              {{ benefit.description }}
-            </p>
+      <div class="mt-12 mb-8">
+        <div class="relative overflow-hidden rounded-3xl border border-white/10 bg-white/5 shadow-2xl shadow-black/30 ring-1 ring-white/10">
+          <div
+            class="flex transition-transform duration-700 ease-out"
+            :style="{ transform: `translateX(-${benefitCarouselIndex * 100}%)` }"
+            @mouseenter="benefitCarouselPaused = true"
+            @mouseleave="benefitCarouselPaused = false"
+          >
+            <article
+              v-for="benefit in benefits"
+              :key="benefit.title"
+              class="relative isolate h-[36rem] w-full flex-shrink-0 overflow-hidden"
+            >
+              <img
+                :src="benefit.image"
+                :alt="benefit.title"
+                class="absolute inset-0 size-full object-cover transition duration-700"
+                loading="lazy"
+              />
+              <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/35 to-transparent" />
+              <div class="absolute inset-0 flex flex-col justify-end gap-3 p-6 mb-12">
+                <div class="flex items-center justify-center">
+                  <span class="inline-flex max-w-fit items-center gap-2 rounded-full bg-secondaryBrand-300/95 px-4 py-1.5 text-[12px] font-extrabold uppercase tracking-[0.5em] text-brand-950 shadow-lg shadow-secondaryBrand-900/40">
+                    <span class="h-2 w-2 rounded-full bg-brand-900/70" />
+                    {{ benefit.kicker }}
+                  </span>
+                </div>
+                <h3 class="text-2xl font-semibold text-white text-center">
+                  {{ benefit.title }}
+                </h3>
+                <p class="text-sm text-brand-100/90 leading-relaxed text-center">
+                  {{ benefit.description }}
+                </p>
+              </div>
+            </article>
           </div>
-        </article>
+          <div class="absolute inset-x-0 bottom-6 flex justify-center gap-2">
+            <button
+              v-for="(benefit, idx) in benefits"
+              :key="benefit.title + idx"
+              type="button"
+              class="h-2.5 w-8 rounded-full transition"
+              :class="idx === benefitCarouselIndex ? 'bg-secondaryBrand-300' : 'bg-white/30 hover:bg-white/60'"
+              @click="benefitCarouselIndex = idx"
+              aria-label="Aller à la diapositive"
+            />
+          </div>
+        </div>
       </div>
     </div>
   </section>
@@ -102,7 +126,11 @@
         Pourtant, toutes ces spécificités se complètent et font de toi un meilleur grimpeur ou une meilleure grimpeuse.
       </p>
       <p class="mt-4 text-base text-gray-600">
-        Alors en selle, rejoins l’aventure !
+        Alors en selle,
+        <NuxtLink to="/login" class="font-semibold text-brand-700 hover:text-brand-900 underline underline-offset-4">
+          rejoins l’aventure
+        </NuxtLink>
+        !
       </p>
 
       <div class="mt-12 grid gap-6 lg:grid-cols-2">
@@ -309,21 +337,31 @@ const { data: aventuresData, pending: aventuresPending } = await useFetch('/api/
     },
   ]
 
-  const rotatingBenefitWords = ['progression', 'immersion', 'déconnexion', 'reconnexion'];
-  const activeBenefitWordIndex = ref(0);
-  const activeBenefitWord = computed(() => rotatingBenefitWords[activeBenefitWordIndex.value]);
+const rotatingBenefitWords = ['progression', 'immersion', 'déconnexion', 'reconnexion'];
+const activeBenefitWordIndex = ref(0);
+const activeBenefitWord = computed(() => rotatingBenefitWords[activeBenefitWordIndex.value]);
+const benefitCarouselIndex = ref(0);
+const benefitCarouselPaused = ref(false);
 
-  let benefitInterval: ReturnType<typeof setInterval> | null = null;
+let benefitInterval: ReturnType<typeof setInterval> | null = null;
+let benefitCarouselInterval: ReturnType<typeof setInterval> | null = null;
 
-  onMounted(() => {
-    benefitInterval = setInterval(() => {
-      activeBenefitWordIndex.value = (activeBenefitWordIndex.value + 1) % rotatingBenefitWords.length;
-    }, 2500);
-  });
+onMounted(() => {
+  benefitInterval = setInterval(() => {
+    activeBenefitWordIndex.value = (activeBenefitWordIndex.value + 1) % rotatingBenefitWords.length;
+  }, 2500);
 
-  onBeforeUnmount(() => {
-    if (benefitInterval) clearInterval(benefitInterval);
-  });
+  benefitCarouselInterval = setInterval(() => {
+    if (!benefitCarouselPaused.value) {
+      benefitCarouselIndex.value = (benefitCarouselIndex.value + 1) % benefits.length;
+    }
+  }, 4200);
+});
+
+onBeforeUnmount(() => {
+  if (benefitInterval) clearInterval(benefitInterval);
+  if (benefitCarouselInterval) clearInterval(benefitCarouselInterval);
+});
 
   const benefits = [
     {

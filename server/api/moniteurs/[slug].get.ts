@@ -105,6 +105,7 @@ export default defineEventHandler(async (event) => {
     baseLocation: guide.guideProfile?.baseLocation || null,
     instagramUrl: guide.guideProfile?.instagramUrl || null,
     websiteUrl: guide.guideProfile?.websiteUrl || null,
+    professionalCardNumber: guide.guideProfile?.professionalCardNumber || null,
     profileImageUrl: guide.guideProfile?.profileImageUrl || null,
     heroImageUrl:
       guide.guideProfile?.profileImageUrl ||

@@ -27,7 +27,7 @@
                 :to="`/moniteurs/${moniteur.slug}`"
                 class="group flex h-full flex-col gap-6 rounded-2xl bg-white/5 p-6 ring-1 ring-white/10 transition hover:-translate-y-1 hover:bg-white/10"
               >
-                <div class="relative aspect-[3/4] overflow-hidden rounded-2xl outline-1 -outline-offset-1 outline-white/10">
+                <div class="relative aspect-[7/8] overflow-hidden rounded-2xl outline-1 -outline-offset-1 outline-white/10">
                   <img
                     class="absolute inset-0 h-full w-full object-cover"
                     :src="profileImageFor(moniteur)"

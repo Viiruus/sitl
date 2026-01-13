@@ -67,23 +67,45 @@
                       </span>
                     </li>
                   </ul>
-                  <p class="mt-8">
-                    {{ moniteurClosing }}
-                  </p>
-                  <h2 class="mt-16 text-2xl font-bold tracking-tight text-white">Les stages encadrés par {{ moniteurName || 'ton moniteur' }}</h2>
-                  <p class="mt-6">
-                    Découvre ci-dessous ses prochains stages et expériences escalade déjà imaginés pour les grimpeurs motivés.
-                  </p>
                 </div>
               </div>
             </div>
             <div class="order-1 lg:order-2 mt-8 lg:mt-0 lg:sticky lg:top-4 lg:justify-self-end">
               <div class="rounded-3xl bg-white/5 p-6 shadow-2xl shadow-black/40 ring-1 ring-white/10 lg:max-w-[34rem] xl:max-w-[36rem]">
                 <img
-                  class="w-full rounded-2xl bg-gray-800 object-cover"
+                  class="w-full max-h-[44rem] rounded-2xl bg-gray-800 object-cover"
                   :src="moniteurPortrait"
                   :alt="moniteurName || 'Portrait du moniteur'"
                 />
+                <div class="mt-4 flex flex-wrap items-center justify-center gap-2">
+                  <NuxtLink
+                    v-if="moniteurWebsiteUrl"
+                    :to="moniteurWebsiteUrl"
+                    target="_blank"
+                    rel="noopener"
+                    class="inline-flex items-center gap-2 rounded-full border border-white/20 px-4 py-2 text-sm font-semibold text-white transition hover:border-secondaryBrand-300 hover:text-secondaryBrand-200"
+                  >
+                    Carte professionnelle
+                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M13 11l8-8M16 3h5v5" />
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M21 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h6" />
+                    </svg>
+                  </NuxtLink>
+                  <NuxtLink
+                    v-if="moniteurInstagramUrl"
+                    :to="moniteurInstagramUrl"
+                    target="_blank"
+                    rel="noopener"
+                    class="inline-flex items-center gap-2 rounded-full border border-white/20 px-4 py-2 text-sm font-semibold text-white transition hover:border-secondaryBrand-300 hover:text-secondaryBrand-200"
+                  >
+                    Instagram
+                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                      <rect x="4" y="4" width="16" height="16" rx="4" />
+                      <circle cx="12" cy="12" r="3" />
+                      <circle cx="16.5" cy="7.5" r="1" />
+                    </svg>
+                  </NuxtLink>
+                </div>
               </div>
             </div>
           </div>
@@ -218,7 +240,7 @@
 </template>
 
 <script setup lang="ts">
-import { CloudArrowUpIcon, LockClosedIcon, ServerIcon } from '@heroicons/vue/20/solid'
+import { HomeIcon, TruckIcon, ServerIcon } from '@heroicons/vue/24/solid'
 
 const route = useRoute()
 const slug = computed(() => route.params.slug as string)
@@ -279,10 +301,10 @@ const disciplineLabels: Record<string, string> = {
 }
 
 const disciplineIconMap: Record<string, string> = {
-  GRANDE_VOIE: '/images/grande-voie.png',
-  FALAISE: '/images/couenne.png',
-  BLOC: '/images/bloc.png',
-  TRAD: '/images/trad.png',
+  GRANDE_VOIE: '/images/grande-voie-white.png',
+  FALAISE: '/images/couenne-white.png',
+  BLOC: '/images/bloc-white.png',
+  TRAD: '/images/trad-white.png',
 }
 
 const disciplineImageMap: Record<string, string> = {
@@ -340,6 +362,28 @@ const moniteurPortrait = computed(() => {
 const heroBackground = computed(() => normalizeImagePath(moniteur.value?.heroImageUrl) || fallbackImageForDiscipline())
 const locationLabel = computed(() => moniteur.value?.baseLocation || moniteur.value?.department || 'France')
 
+const moniteurWebsiteUrl = computed(() => {
+  const card = moniteur.value?.professionalCardNumber || moniteur.value?.guideProfile?.professionalCardNumber
+  if (card) {
+    return `https://recherche-educateur.sports.gouv.fr/CartePro/${card}`
+  }
+  const url =
+    moniteur.value?.websiteUrl ||
+    moniteur.value?.guideProfile?.websiteUrl ||
+    moniteur.value?.profile?.websiteUrl ||
+    null
+  return url || null
+})
+
+const moniteurInstagramUrl = computed(() => {
+  return (
+    moniteur.value?.instagramUrl ||
+    moniteur.value?.guideProfile?.instagramUrl ||
+    moniteur.value?.profile?.instagramUrl ||
+    null
+  )
+})
+
 const disciplineChips = computed(() => {
   const disciplines = moniteur.value?.disciplines ?? []
   if (!disciplines.length && aventures.value.length) {
@@ -366,9 +410,35 @@ const moniteurTagline = computed(() => {
 })
 
 const nextSessionLabel = computed(() => {
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  const todayMs = today.getTime()
+
+  const candidates: number[] = []
+  for (const a of aventures.value || []) {
+    if (a?.nextSession?.dateDebut) {
+      const ts = new Date(a.nextSession.dateDebut).getTime()
+      if (!Number.isNaN(ts) && ts >= todayMs) candidates.push(ts)
+    }
+    if (Array.isArray(a?.sessions)) {
+      for (const s of a.sessions) {
+        if (!s?.dateDebut) continue
+        const ts = new Date(s.dateDebut).getTime()
+        if (!Number.isNaN(ts) && ts >= todayMs) candidates.push(ts)
+      }
+    }
+  }
+  if (candidates.length) {
+    const nextTs = Math.min(...candidates)
+    return formatFullDate(nextTs)
+  }
+
   const stats = moniteur.value?.stats
   if (stats?.prochaineDate) {
-    return formatFullDate(stats.prochaineDate)
+    const ts = new Date(stats.prochaineDate).getTime()
+    if (!Number.isNaN(ts) && ts >= todayMs) {
+      return formatFullDate(ts)
+    }
   }
   return 'Sur demande'
 })
@@ -382,27 +452,17 @@ const aventuresCountLabel = computed(() => {
 
 const featureList = computed(() => [
   {
-    icon: CloudArrowUpIcon,
+    icon: HomeIcon,
     title: 'Camp de base',
     description: locationLabel.value,
   },
   {
-    icon: LockClosedIcon,
-    title: 'Prochaine disponibilité',
+    icon: TruckIcon,
+    title: 'Prochain départ',
     description: nextSessionLabel.value,
-  },
-  {
-    icon: ServerIcon,
-    title: 'Stages proposés',
-    description: aventuresCountLabel.value,
   },
 ])
 
-const moniteurClosing = computed(() => {
-  const name = moniteurName.value || 'Ce moniteur'
-  const location = locationLabel.value
-  return `${name} accueille les grimpeurs à ${location} et adapte chaque aventure selon le niveau et les envies du groupe.`
-})
 
 const formatFullDate = (dateInput: string | number | Date) => {
   const formatter = new Intl.DateTimeFormat('fr-FR', {
