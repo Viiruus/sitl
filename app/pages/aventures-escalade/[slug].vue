@@ -489,20 +489,17 @@
                 <div
                   class="relative rounded-3xl bg-white p-6 text-gray-900 shadow-2xl shadow-black/30 ring-1 ring-gray-900/10"
                 >
-                  <div class="flex items-start justify-between gap-3">
+                  <div class="flex items-center justify-between gap-3">
                     <p class="text-[11px] font-semibold uppercase tracking-[0.3em] text-gray-500">
                       INSCRIPTION
                     </p>
                     <div class="relative group/info">
                       <button
                         type="button"
-                        class="flex h-8 w-8 items-center justify-center text-brand-800 transition hover:text-brand-600 focus:outline-none focus:ring-2 focus:ring-secondaryBrand-400 focus:ring-offset-2 focus:ring-offset-white"
+                        class="flex h-7 w-7 items-center justify-center rounded-full border border-gray-300 bg-white text-brand-800 transition hover:border-secondaryBrand-400 hover:text-secondaryBrand-600 focus:outline-none focus:ring-2 focus:ring-secondaryBrand-400 focus:ring-offset-2 focus:ring-offset-white"
                         aria-label="Infos inscription"
                       >
-                        <svg class="h-8 w-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                          <circle cx="12" cy="12" r="9" />
-                          <path stroke-linecap="round" stroke-linejoin="round" d="M12 8h.01M11 12h1v4h1" />
-                        </svg>
+                        <span class="text-sm font-bold">?</span>
                       </button>
                       <div
                         class="pointer-events-none absolute right-0 top-10 z-10 w-64 rounded-2xl bg-secondaryBrand-400 px-4 py-3 text-[11px] font-semibold leading-snug text-brand-950 shadow-lg shadow-secondaryBrand-900/30 ring-1 ring-secondaryBrand-300/70 opacity-0 translate-y-1 transition duration-200 ease-out group-hover/info:opacity-100 group-hover/info:translate-y-0 group-focus-within/info:opacity-100 group-focus-within/info:translate-y-0"
@@ -515,9 +512,29 @@
                       </div>
                     </div>
                   </div>
-                  <h3 class="mt-2 text-lg font-semibold text-gray-900">
-                    Tu peux partir quand ?
-                  </h3>
+                  <div class="mt-2 flex items-center gap-3">
+                    <h3 class="text-lg font-semibold text-gray-900">
+                      Tu peux partir quand ?
+                    </h3>
+                    <div class="relative group/info">
+                      <button
+                        type="button"
+                        class="flex h-7 w-7 items-center justify-center rounded-full border border-gray-300 bg-white text-gray-700 transition hover:border-secondaryBrand-400 hover:text-secondaryBrand-600 focus:outline-none focus:ring-2 focus:ring-secondaryBrand-400 focus:ring-offset-2 focus:ring-offset-white"
+                        aria-label="Infos inscription"
+                      >
+                        <span class="text-sm font-bold">?</span>
+                      </button>
+                      <div
+                        class="pointer-events-none absolute right-0 top-10 z-10 w-64 rounded-2xl bg-secondaryBrand-400 px-4 py-3 text-[11px] font-semibold leading-snug text-brand-950 shadow-lg shadow-secondaryBrand-900/30 ring-1 ring-secondaryBrand-300/70 opacity-0 translate-y-1 transition duration-200 ease-out group-hover/info:opacity-100 group-hover/info:translate-y-0 group-focus-within/info:opacity-100 group-focus-within/info:translate-y-0"
+                      >
+                        Lorsque tu t’inscris, le moniteur prend contact avec toi pour l’organisation.
+                        <br/>
+                        Tu règles l’acompte et le solde directement auprès de lui.
+                        <br/>
+                        Tu comptes les dodos et tu pars à l’aventure.
+                      </div>
+                    </div>
+                  </div>
                   <p class="mt-1 text-xs text-gray-500" v-if="hasSessions">
                     Choisis le ou les créneaux qui te conviennent le mieux.
                     <br/>
