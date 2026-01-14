@@ -517,13 +517,6 @@
                       Tu peux partir quand ?
                     </h3>
                     <div class="relative group/info">
-                      <button
-                        type="button"
-                        class="flex h-7 w-7 items-center justify-center rounded-full border border-gray-300 bg-white text-gray-700 transition hover:border-secondaryBrand-400 hover:text-secondaryBrand-600 focus:outline-none focus:ring-2 focus:ring-secondaryBrand-400 focus:ring-offset-2 focus:ring-offset-white"
-                        aria-label="Infos inscription"
-                      >
-                        <span class="text-sm font-bold">?</span>
-                      </button>
                       <div
                         class="pointer-events-none absolute right-0 top-10 z-10 w-64 rounded-2xl bg-secondaryBrand-400 px-4 py-3 text-[11px] font-semibold leading-snug text-brand-950 shadow-lg shadow-secondaryBrand-900/30 ring-1 ring-secondaryBrand-300/70 opacity-0 translate-y-1 transition duration-200 ease-out group-hover/info:opacity-100 group-hover/info:translate-y-0 group-focus-within/info:opacity-100 group-focus-within/info:translate-y-0"
                       >

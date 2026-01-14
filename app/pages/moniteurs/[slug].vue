@@ -367,17 +367,12 @@ const moniteurWebsiteUrl = computed(() => {
   if (card) {
     return `https://recherche-educateur.sports.gouv.fr/CartePro/${card}`
   }
-  const url =
-    moniteur.value?.websiteUrl ||
-    moniteur.value?.guideProfile?.websiteUrl ||
-    moniteur.value?.profile?.websiteUrl ||
-    null
-  return url || null
+  
+  return null
 })
 
 const moniteurInstagramUrl = computed(() => {
   return (
-    moniteur.value?.instagramUrl ||
     moniteur.value?.guideProfile?.instagramUrl ||
     moniteur.value?.profile?.instagramUrl ||
     null
