@@ -462,10 +462,10 @@ onBeforeUnmount(() => {
   }
 
   const disciplineIconMap: Record<string, string> = {
-    GRANDE_VOIE: '/images/grande-voie.png',
-    FALAISE: '/images/couenne.png',
-    BLOC: '/images/bloc.png',
-    TRAD: '/images/trad.png',
+    GRANDE_VOIE: '/images/grande-voie-white.png',
+    FALAISE: '/images/couenne-white.png',
+    BLOC: '/images/bloc-white.png',
+    TRAD: '/images/trad-white.png',
   }
 
   const iconPathForDiscipline = (value?: string | null) => {

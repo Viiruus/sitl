@@ -70,7 +70,7 @@
                 </div>
               </div>
             </div>
-            <div class="order-1 lg:order-2 mt-8 lg:mt-0 lg:sticky lg:top-4 lg:justify-self-end">
+            <div class="order-1 lg:order-2 -mt-16 lg:mt-0 lg:sticky lg:top-4 lg:justify-self-end">
               <div class="rounded-3xl bg-white/5 p-6 shadow-2xl shadow-black/40 ring-1 ring-white/10 lg:max-w-[34rem] xl:max-w-[36rem]">
                 <img
                   class="w-full max-h-[44rem] rounded-2xl bg-gray-800 object-cover"

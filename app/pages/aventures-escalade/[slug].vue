@@ -47,7 +47,7 @@
           >
             <!-- Titre + tags -->
             <div class="space-y-6">
-              <div class="flex flex-wrap items-center gap-3 text-xs">
+              <div class="flex items-center gap-3 text-xs">
                 <span class="inline-flex items-center justify-center rounded-full bg-secondaryBrand-400/80 p-2 shadow-lg shadow-secondaryBrand-900/30">
                   <img
                     :src="iconPathForDiscipline(stage.discipline)"
@@ -56,7 +56,7 @@
                   />
                 </span>
                 <span
-                  class="inline-flex items-center gap-1.5 rounded-full bg-brand-900/70 px-3 py-1 text-[11px] font-medium text-brand-100"
+                  class="inline-flex min-w-0 items-center gap-1.5 rounded-full bg-brand-900/70 px-3 py-1 text-[11px] font-medium text-brand-100"
                 >
                   <svg
                     class="h-3.5 w-3.5 text-secondaryBrand-200"
@@ -72,7 +72,7 @@
                     />
                     <circle cx="12" cy="11" r="2.3" />
                   </svg>
-                  <span class="text-sm">
+                  <span class="text-sm max-w-[60vw] sm:max-w-none truncate whitespace-nowrap block">
                     {{ stage.lieuLabel }}
                     <span v-if="stage.region" class="ml-1">· {{ stage.region }}</span>
                   </span>
@@ -189,7 +189,7 @@
         <div class="mx-auto max-w-7xl px-6 lg:px-8">
           <!-- Onglets -->
           <div class="mb-6 border-b border-white/10 pb-2">
-            <nav class="flex gap-2 overflow-x-auto text-xs">
+            <nav class="flex gap-2 overflow-x-auto no-scrollbar text-xs">
               <button
                 v-for="tab in tabs"
                 :key="tab.id"
@@ -1508,3 +1508,12 @@ watchEffect(() => {
   }
 })
 </script>
+
+<style scoped>
+.no-scrollbar {
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+</style>
