@@ -18,7 +18,11 @@ const error = ref<string | null>(null)
 
 onMounted(async () => {
   await fetch()
-  if (loggedIn.value && user.value?.role === 'GUIDE') {
+  // If logged as climber, clear to avoid mixed roles
+  if (loggedIn.value && user.value?.role !== 'GUIDE') {
+    await clear()
+    await fetch()
+  } else if (loggedIn.value && user.value?.role === 'GUIDE') {
     router.push('/moniteurs')
   }
 })
@@ -37,6 +41,10 @@ const submit = async () => {
   loading.value = true
 
   try {
+    // Ensure any existing session is cleared before guide auth
+    await clear()
+    await fetch()
+
     if (mode.value === 'login') {
       await $fetch('/api/moniteurs/login', {
         method: 'POST',

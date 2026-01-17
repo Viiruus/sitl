@@ -3,23 +3,26 @@ const route = useRoute()
 const router = useRouter()
 const { loggedIn, user, fetch, clear } = useUserSession()
 
-const mode = ref<'login' | 'register'>('login')
-
-const email = ref('')
-const password = ref('')
-const confirmPassword = ref('')
-const phoneNumber = ref('')
-const whatsappOptIn = ref(true)
-
 const loading = ref(false)
+const sending = ref(false)
 const error = ref<string | null>(null)
+const success = ref<string | null>(null)
+const phoneNumber = ref('')
+const code = ref('')
+const codeSent = ref(false)
+const otpToken = ref<string | null>(null)
 
 // pour tracker l'origine (ex: ?source=landing)
 const source = computed(() => (route.query.source as string) || 'direct')
 
 onMounted(async () => {
   await fetch()
-  // si déjà connecté & pas onboardé → direct onboarding
+  // Si connecté en tant que guide, on nettoie la session pour éviter le mélange des rôles
+  if (loggedIn.value && user.value?.role === 'GUIDE') {
+    await clear()
+    await fetch()
+  }
+  // Si déjà connecté & pas onboardé → direct onboarding
   if (loggedIn.value && !user.value?.onboarded) {
     router.push('/onboarding')
   }
@@ -34,61 +37,60 @@ const redirectAfterAuth = async () => {
   }
 }
 
-const submit = async () => {
+const requestCode = async () => {
   error.value = null
-  loading.value = true
-
+  success.value = null
+  sending.value = true
   try {
-    if (mode.value === 'login') {
-      await $fetch('/api/login', {
-        method: 'POST',
-        body: {
-          email: email.value,
-          password: password.value,
-        },
-      })
+    // Nettoyer toute session existante avant de lancer le flow
+    await clear()
+    await fetch()
+    const res: any = await $fetch('/api/auth/whatsapp', {
+      method: 'POST',
+      body: {
+        phoneNumber: phoneNumber.value,
+        source: source.value,
+      },
+    })
+    codeSent.value = true
+    otpToken.value = res?.token || null
+    if (res?.devCode && process.dev) {
+      success.value = `Code de test : ${res.devCode}`
     } else {
-      if (password.value !== confirmPassword.value) {
-        error.value = 'Les mots de passe ne correspondent pas.'
-        loading.value = false
-        return
-      }
-
-      await $fetch('/api/register', {
-        method: 'POST',
-        body: {
-          email: email.value,
-          password: password.value,
-          source: source.value,
-          phoneNumber: phoneNumber.value,
-          whatsappOptIn: whatsappOptIn.value,
-        },
-      })
+      success.value = 'Code envoyé sur WhatsApp.'
     }
-
-    await redirectAfterAuth()
   } catch (e: any) {
     error.value = e?.data?.message || 'Une erreur est survenue.'
-  } finally {
-    loading.value = false
   }
+  sending.value = false
 }
 
-// Social logins
-const loginWithGoogle = () => {
-  window.location.href = '/auth/google'
-}
-const loginWithFacebook = () => {
-  window.location.href = '/auth/facebook'
-}
-
-// Logout (optionnel sur cette page)
-const logout = async () => {
-  await clear()
-  await fetch()
+const verifyCode = async () => {
+  error.value = null
+  success.value = null
+  loading.value = true
+  if (!otpToken.value) {
+    error.value = 'Demande un code avant de valider.'
+    loading.value = false
+    return
+  }
+  try {
+    await $fetch('/api/auth/whatsapp/verify', {
+      method: 'POST',
+      body: {
+        phoneNumber: phoneNumber.value,
+        code: code.value,
+        token: otpToken.value,
+        source: source.value,
+      },
+    })
+    await redirectAfterAuth()
+  } catch (e: any) {
+    error.value = e?.data?.message || 'Code invalide ou expiré.'
+  }
+  loading.value = false
 }
 </script>
-
 
 <template>
   <div class="min-h-screen bg-brand-950 flex items-center justify-center px-4 py-10">
@@ -100,35 +102,35 @@ const logout = async () => {
         <div class="space-y-6">
           <div class="inline-flex items-center gap-2 rounded-full bg-brand-800/80 px-3 py-1 text-[11px] font-medium">
             <span class="h-2 w-2 rounded-full bg-secondaryBrand-400" />
-            <span class="text-brand-100/80">Stages & séjours escalade</span>
+            <span class="text-brand-100/80">Connexion WhatsApp</span>
           </div>
 
           <div class="space-y-2">
             <h1 class="text-2xl font-semibold text-secondaryBrand-300">
-              Rejoins la communauté des grimpeurs motivés 🧗‍♂️
+              Rejoins la communauté via WhatsApp
             </h1>
             <p class="text-sm text-brand-100/80">
-              Crée ton compte, remplis ton profil grimpeur et reçois des propositions de séjours / stages
-              adaptés à ton niveau, ta pratique et ta vision de l’aventure.
+              Utilise ton numéro WhatsApp pour créer ton compte ou te connecter. On t’enverra une
+              confirmation pour finaliser la création de ton espace grimpeur.
             </p>
           </div>
 
           <div class="space-y-3 text-sm text-brand-100/80">
             <p class="font-medium text-secondaryBrand-300">
-              Onboarding en 3 minutes :
+              Comment ça marche :
             </p>
             <ul class="space-y-1.5">
               <li class="flex items-start gap-2">
                 <span class="mt-[5px] h-1.5 w-1.5 rounded-full bg-secondaryBrand-400" />
-                <span>Parle-nous de ta pratique : bloc, couenne, grande voie…</span>
+                <span>Tu cliques sur “Continuer avec WhatsApp”.</span>
               </li>
               <li class="flex items-start gap-2">
                 <span class="mt-[5px] h-1.5 w-1.5 rounded-full bg-secondaryBrand-400" />
-                <span>Indique ton niveau, ta fréquence et ton autonomie.</span>
+                <span>Tu confirmes ton numéro et valides la connexion.</span>
               </li>
               <li class="flex items-start gap-2">
                 <span class="mt-[5px] h-1.5 w-1.5 rounded-full bg-secondaryBrand-400" />
-                <span>Découvre les prochaines aventures directement depuis ton espace.</span>
+                <span>Tu arrives sur ton espace pour compléter ton profil et réserver.</span>
               </li>
             </ul>
           </div>
@@ -139,7 +141,7 @@ const logout = async () => {
         </div>
       </div>
 
-      <!-- Colonne droite : authentification -->
+      <!-- Colonne droite : authentification WhatsApp -->
       <div class="p-6 md:p-8 flex flex-col gap-6">
         <!-- Header mobile -->
         <div class="md:hidden space-y-2">
@@ -150,138 +152,80 @@ const logout = async () => {
             Connexion / inscription
           </h1>
           <p class="text-xs text-brand-100/70">
-            Renseigne ton email pour accéder à ton espace grimpeur.
+            Connecte-toi avec ton numéro WhatsApp pour accéder à ton espace grimpeur.
           </p>
         </div>
 
-        <!-- Toggle login / register -->
-        <div class="flex text-[11px] border border-brand-700 rounded-full overflow-hidden bg-brand-900">
-          <button
-            type="button"
-            class="flex-1 py-2"
-            :class="mode === 'login'
-              ? 'bg-secondaryBrand-500 text-brand-950'
-              : 'bg-transparent text-brand-100/80'"
-            @click="mode = 'login'"
-          >
-            Connexion
-          </button>
-          <button
-            type="button"
-            class="flex-1 py-2"
-            :class="mode === 'register'
-              ? 'bg-secondaryBrand-500 text-brand-950'
-              : 'bg-transparent text-brand-100/80'"
-            @click="mode = 'register'"
-          >
-            Inscription
-          </button>
-        </div>
+        <div class="space-y-4">
+          <p class="text-sm text-brand-100/80">
+            Nous utilisons WhatsApp pour vérifier ton numéro et t’ouvrir l’accès aux prochaines aventures.
+          </p>
 
-        <!-- Boutons sociaux -->
-        <div class="space-y-2">
-          <button
-            type="button"
-            class="w-full flex items-center justify-center gap-2 border border-brand-700 rounded-xl px-3 py-2 text-sm bg-brand-900 hover:bg-brand-800/80 transition"
-            @click="loginWithGoogle"
-          >
-            <span class="h-5 w-5 rounded-full bg-white flex items-center justify-center text-[11px] text-brand-900 font-semibold">
-              G
-            </span>
-            <span>Continuer avec Google</span>
-          </button>
-          <button
-            type="button"
-            class="w-full flex items-center justify-center gap-2 border border-brand-700 rounded-xl px-3 py-2 text-sm bg-brand-900 hover:bg-brand-800/80 transition"
-            @click="loginWithFacebook"
-          >
-            <span class="h-5 w-5 rounded-full bg-[#1877F2] flex items-center justify-center text-[11px] font-semibold">
-              f
-            </span>
-            <span>Continuer avec Facebook</span>
-          </button>
-        </div>
-
-        <div class="relative text-center text-[11px] text-brand-200/60">
-          <span class="bg-brand-900 px-2 relative z-10">ou avec ton email</span>
-          <div class="absolute left-0 right-0 top-1/2 border-b border-brand-800 -z-0" />
-        </div>
-
-        <!-- Formulaire email / mot de passe -->
-        <form class="space-y-4" @submit.prevent="submit">
-          <div class="space-y-1">
-            <label class="block text-xs font-medium text-brand-100/90">Email</label>
+          <div class="space-y-2">
+            <label class="block text-xs font-medium text-brand-100/90">
+              Numéro WhatsApp
+            </label>
             <input
-              v-model="email"
-              type="email"
-              required
-              class="w-full border border-brand-700 rounded-lg px-3 py-2 text-sm bg-brand-950/50 text-white placeholder:text-brand-200/50 focus:outline-none focus:ring-2 focus:ring-secondaryBrand-500 focus:border-secondaryBrand-500"
-              placeholder="ton.email@exemple.com"
-            />
-          </div>
-
-          <div class="space-y-1">
-            <label class="block text-xs font-medium text-brand-100/90">Mot de passe</label>
-            <input
-              v-model="password"
-              type="password"
-              required
-              minlength="6"
+              v-model="phoneNumber"
+              type="tel"
+              inputmode="tel"
+              placeholder="+33 6 12 34 56 78"
               class="w-full border border-brand-700 rounded-lg px-3 py-2 text-sm bg-brand-950/50 text-white placeholder:text-brand-200/50 focus:outline-none focus:ring-2 focus:ring-secondaryBrand-500 focus:border-secondaryBrand-500"
             />
             <p class="text-[11px] text-brand-200/70">
-              Minimum 6 caractères.
+              Un code à 6 chiffres sera envoyé sur WhatsApp. Valide-le pour te connecter.
             </p>
           </div>
 
-          <div v-if="mode === 'register'" class="space-y-1">
-            <label class="block text-xs font-medium text-brand-100/90">
-              Confirmation du mot de passe
-            </label>
-            <input
-              v-model="confirmPassword"
-              type="password"
-              required
-              minlength="6"
-              class="w-full border border-brand-700 rounded-lg px-3 py-2 text-sm bg-brand-950/50 text-white placeholder:text-brand-200/50 focus:outline-none focus:ring-2 focus:ring-secondaryBrand-500 focus:border-secondaryBrand-500"
-            />
-          </div>
-
-          <div v-if="mode === 'register'" class="space-y-2">
-            <div class="space-y-1">
-              <label class="block text-xs font-medium text-brand-100/90">Téléphone (WhatsApp)</label>
-              <input
-                v-model="phoneNumber"
-                type="tel"
-                required
-                class="w-full border border-brand-700 rounded-lg px-3 py-2 text-sm bg-brand-950/50 text-white placeholder:text-brand-200/50 focus:outline-none focus:ring-2 focus:ring-secondaryBrand-500 focus:border-secondaryBrand-500"
-                placeholder="+33 6 12 34 56 78"
-              />
-              <p class="text-[11px] text-brand-200/70">
-                Indispensable pour que les moniteurs te contactent et créent les groupes WhatsApp.
-              </p>
-            </div>
-          </div>
-
           <button
-            type="submit"
-            class="w-full rounded-lg bg-secondaryBrand-500 text-brand-950 text-sm font-medium py-2.5 mt-1 disabled:opacity-60 hover:bg-secondaryBrand-400 transition"
-            :disabled="loading"
+            type="button"
+            class="w-full inline-flex items-center justify-center gap-3 rounded-xl bg-[#25D366] px-4 py-3 text-brand-950 font-semibold shadow-lg shadow-[#25D366]/30 transition hover:translate-y-[-1px] hover:shadow-xl disabled:opacity-60"
+            :disabled="sending || !phoneNumber"
+            @click="requestCode"
           >
-            <span v-if="loading">Traitement en cours...</span>
-            <span v-else>
-              {{ mode === 'login' ? 'Se connecter' : 'Créer mon compte' }}
-            </span>
+            <svg class="h-5 w-5" viewBox="0 0 32 32" fill="currentColor" aria-hidden="true">
+              <path
+                d="M16 3C9.4 3 4 8.2 4 14.7c0 2.4.7 4.6 2 6.5L4 29l8-1.8c1.3.4 2.7.6 4 .6 6.6 0 12-5.2 12-11.7C28 8.2 22.6 3 16 3Zm0 2c5.5 0 10 4.3 10 9.7S21.5 24.4 16 24.4c-1.3 0-2.5-.2-3.7-.7l-.8-.3-.8.2-3.9.9 1.1-3.3.2-.7-.5-.6c-1.1-1.6-1.6-3.4-1.6-5.3C6 9.3 10.5 5 16 5Zm5.2 10.9c-.3-.1-1.8-.9-2-1-.3-.1-.5-.1-.7.1-.2.3-.8 1-.9 1.1-.2.2-.3.2-.6.1-.3-.1-1.2-.4-2.2-1.4-.8-.8-1.4-1.7-1.6-2-.2-.3 0-.4.1-.6.1-.2.3-.3.4-.5.1-.1.2-.3.3-.5.1-.2 0-.4 0-.5 0-.1-.7-1.7-1-2.3-.3-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.3-.3.3-1 1-1 2.4s1.1 2.8 1.2 3c.1.2 2.1 3.3 5 4.5.7.3 1.2.5 1.6.6.7.2 1.4.2 1.9.1.6-.1 1.8-.7 2-1.3.2-.6.2-1.2.2-1.3 0-.1-.2-.1-.5-.2Z"
+              />
+            </svg>
+            <span v-if="sending">Envoi du code…</span>
+            <span v-else>Recevoir le code WhatsApp</span>
           </button>
 
-          <p v-if="error" class="text-xs text-red-400 mt-1">
-            {{ error }}
-          </p>
+          <div v-if="codeSent" class="space-y-2">
+            <label class="block text-xs font-medium text-brand-100/90">
+              Code reçu
+            </label>
+            <input
+              v-model="code"
+              type="text"
+              inputmode="numeric"
+              maxlength="6"
+              class="w-full border border-brand-700 rounded-lg px-3 py-2 text-sm bg-brand-950/50 text-white placeholder:text-brand-200/50 focus:outline-none focus:ring-2 focus:ring-secondaryBrand-500 focus:border-secondaryBrand-500"
+              placeholder="123456"
+            />
+            <button
+              type="button"
+              class="w-full rounded-lg bg-secondaryBrand-500 text-brand-950 text-sm font-semibold py-2.5 mt-1 disabled:opacity-60 hover:bg-secondaryBrand-400 transition"
+              :disabled="loading || !code || !otpToken"
+              @click="verifyCode"
+            >
+              <span v-if="loading">Vérification…</span>
+              <span v-else>Confirmer et se connecter</span>
+            </button>
+          </div>
+        </div>
 
-          <p class="text-[11px] text-brand-200/60 mt-2">
-            Source : <span class="font-medium text-secondaryBrand-300">{{ source }}</span>
-          </p>
-        </form>
+        <p v-if="success" class="text-xs text-secondaryBrand-300">
+          {{ success }}
+        </p>
+        <p v-if="error" class="text-xs text-red-400 mt-1">
+          {{ error }}
+        </p>
+
+        <p class="text-[11px] text-brand-200/60 mt-2">
+          Source : <span class="font-medium text-secondaryBrand-300">{{ source }}</span>
+        </p>
       </div>
     </div>
   </div>

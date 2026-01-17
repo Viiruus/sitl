@@ -23,6 +23,11 @@ export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
   pages: true,
+  runtimeConfig: {
+    public: {
+      publicUrl: process.env.PUBLIC_URL || 'http://localhost:3000',
+    },
+  },
   app: {
     head: {
       title: 'Nuxt', // default fallback title

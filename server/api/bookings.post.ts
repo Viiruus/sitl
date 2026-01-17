@@ -12,6 +12,13 @@ export default defineEventHandler(async (event) => {
     })
   }
 
+  if (sessionAuth.user.role && sessionAuth.user.role !== 'CLIMBER') {
+    throw createError({
+      statusCode: 403,
+      statusMessage: "Seuls les grimpeurs peuvent s'inscrire à une date.",
+    })
+  }
+
   const userId = Number(sessionAuth.user.id)
   if (Number.isNaN(userId)) {
     throw createError({

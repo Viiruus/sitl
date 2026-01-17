@@ -528,7 +528,7 @@
                       </div>
                     </div>
                   </div>
-                  <p class="mt-1 text-xs text-gray-500" v-if="hasSessions">
+                  <p class="mt-1 text-sm text-gray-600" v-if="hasSessions">
                     Choisis le ou les créneaux qui te conviennent le mieux.
                     <br/>
                     Le moniteur de la Brigade du kiff te recontacte pour organiser le stage.
@@ -548,13 +548,13 @@
                     {{ bookingSuccess }}
                   </p>
 
-                  <div class="mt-5 space-y-4">
+                  <div class="mt-5 space-y-4 text-[15px] text-gray-900">
                     <template v-if="hasSessions">
                     <div class="space-y-3">
                       <p class="text-xs font-medium text-gray-700">
                         Dates disponibles
                       </p>
-                      <div class="space-y-3">
+                      <div class="space-y-3" v-if="availableSessions.length">
                         <label
                             v-for="session in availableSessions"
                             :key="session.id"
@@ -582,7 +582,10 @@
                               </p>
                             </div>
                           </label>
-                        </div>
+                        <p v-if="!availableSessions.length" class="text-sm text-gray-500">
+                          Il n’y a pas encore de date proposée pour ce stage. Indique nous le créneau sur lequel tu es disponible !
+                        </p>
+                      </div>
                       </div>
 
                       <button
@@ -767,6 +770,12 @@
                       </svg>
                     </button>
                   </div>
+                  <p class="mt-6 text-[11px] leading-relaxed text-gray-500">
+                    Ce stage est proposé, organisé et encadré par {{ guideFullName || 'le moniteur' }} (DE Escalade), professionnel indépendant.
+                    <br/>
+                    Brigade du kiff agit uniquement comme plateforme de mise en relation et n’est pas partie au contrat d’encadrement. Conditions, annulation,
+                    responsabilité et facturation relèvent de l’organisateur : le moniteur.
+                  </p>
                 </div>
               </aside>
             </div>
@@ -1288,10 +1297,6 @@ const suggestionLoading = ref(false)
 const suggestionError = ref<string | null>(null)
 const suggestionSuccess = ref<string | null>(null)
 
-const hasSessions = computed(
-  () => !!(stage.value?.sessions && stage.value.sessions.length),
-)
-
 const availableSessions = computed(() => {
   const today = new Date()
   today.setHours(0, 0, 0, 0)
@@ -1301,6 +1306,8 @@ const availableSessions = computed(() => {
     return !Number.isNaN(ts) && ts >= today.getTime()
   })
 })
+
+const hasSessions = computed(() => availableSessions.value.length > 0)
 
 const selectedSessionIds = ref<string[]>([])
 
