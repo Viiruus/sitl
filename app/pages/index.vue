@@ -35,76 +35,70 @@
   
     <!-- Section Bénéfices -->
   <section class="bg-brand-900 py-20 sm:py-28 text-white">
-    <div class="mx-auto max-w-5xl px-6 text-center lg:px-8">
-      <h2 class="mt-4 text-4xl font-semibold tracking-tight sm:text-5xl">
+    <div class="mx-auto max-w-7xl px-6 lg:px-8">
+      <p class="text-lg font-semibold uppercase tracking-[0.4em] text-secondaryBrand-200">
         Notre mission ?
-      </h2>
-      <p class="mt-6 text-base text-brand-100/80">
-        La Brigade du kiff, c’est une équipe de passionné.e.s par l’escalade mais surtout par les humains.
-        <br/>
-        Notre objectif est de te faire passer un moment inoubliable en pleine nature et en bonne compagnie.
       </p>
-      <p class="mt-4 text-base text-brand-100/80">
-        Viens grimper dans les spots les plus jolis mais surtout les plus adaptés à ta pratique.
-        <br/>
-        Et ce n’est pas tout : notre priorité c’est ta progression. Nos moniteurs sont déterminés à te faire performer.
-      </p>
-      <p class="mt-4 text-base text-brand-100/80">
-        Rejoins la team et
-        <NuxtLink to="/login" class="font-semibold text-secondaryBrand-200 hover:text-secondaryBrand-100 underline underline-offset-4">
-          inscris-toi
-        </NuxtLink>
-        à un prochain stage !
-      </p>
+      <div class="mt-3 flex items-baseline gap-3">
+        <span class="text-4xl font-semibold text-white sm:text-5xl lg:text-6xl">
+          Votre
+        </span>
+        <span class="text-4xl font-semibold text-secondaryBrand-200 sm:text-5xl lg:text-6xl transition-colors duration-300">
+          {{ activeBenefitWord }}
+        </span>
+      </div>
+      <div class="mt-6 space-y-4 text-base leading-relaxed text-brand-100/85">
+        <p>
+          La Brigade du kiff, c’est une équipe passionnée par escalade mais surtout par les humains.
+          Notre objectif est de te faire passer un moment inoubliable en pleine nature et en bonne compagnie.
+        </p>
+        <p>
+          Viens grimper dans les spots les plus canons mais surtout les plus adaptés à ta pratique.
+          Et ce n’est pas tout : notre priorité c’est ta progression. Nos moniteurs sont déterminés à te faire performer.
+        </p>
+        <p>
+          Rejoins la team et
+          <NuxtLink to="/aventures-escalade" class="font-semibold text-secondaryBrand-200 hover:text-secondaryBrand-400 underline underline-offset-4">
+            inscris-toi
+          </NuxtLink>
+          à un prochain stage !
+        </p>
+      </div>
 
-      <div class="mt-12 mb-8">
-        <div class="relative overflow-hidden rounded-3xl border border-white/10 bg-white/5 shadow-2xl shadow-black/30 ring-1 ring-white/10">
-          <div
-            class="flex transition-transform duration-700 ease-out"
-            :style="{ transform: `translateX(-${benefitCarouselIndex * 100}%)` }"
-            @mouseenter="benefitCarouselPaused = true"
-            @mouseleave="benefitCarouselPaused = false"
-          >
-            <article
-              v-for="benefit in benefits"
-              :key="benefit.title"
-              class="relative isolate h-[36rem] w-full flex-shrink-0 overflow-hidden"
-            >
-              <img
-                :src="benefit.image"
-                :alt="benefit.title"
-                class="absolute inset-0 size-full object-cover transition duration-700"
-                loading="lazy"
-              />
-              <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/35 to-transparent" />
-              <div class="absolute inset-0 flex flex-col justify-end gap-3 p-6 mb-12">
-                <div class="flex items-center justify-center">
-                  <span class="inline-flex max-w-fit items-center gap-2 rounded-full bg-secondaryBrand-300/95 px-4 py-1.5 text-[12px] font-extrabold uppercase tracking-[0.5em] text-brand-950 shadow-lg shadow-secondaryBrand-900/40">
-                    <span class="h-2 w-2 rounded-full bg-brand-900/70" />
-                    {{ benefit.kicker }}
-                  </span>
-                </div>
-                <h3 class="text-2xl font-semibold text-white text-center">
-                  {{ benefit.title }}
-                </h3>
-                <p class="text-sm text-brand-100/90 leading-relaxed text-center">
-                  {{ benefit.description }}
-                </p>
-              </div>
-            </article>
+      <div class="mt-12 grid gap-4 sm:grid-cols-2">
+        <article
+          v-for="benefit in benefits"
+          :key="benefit.title"
+          class="rounded-2xl border border-white/10 bg-white/5 p-6 shadow-lg shadow-black/30 ring-1 ring-white/10 transition hover:-translate-y-1 hover:border-secondaryBrand-300/40 hover:shadow-secondaryBrand-900/20"
+        >
+          <div class="flex items-center gap-3">
+            <div class="flex h-12 w-12 items-center justify-center rounded-full bg-secondaryBrand-500/20 text-secondaryBrand-100">
+              <svg v-if="benefit.icon === 'outdoor'" class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 19l6.5-11 3.5 6 2-3 6 8H3z" />
+              </svg>
+              <svg v-else-if="benefit.icon === 'progression'" class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4-4 3 3 5-7 4 6" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4 20h16" />
+              </svg>
+              <svg v-else-if="benefit.icon === 'communaute'" class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M7 10a4 4 0 1 1 8 0 4 4 0 0 1-8 0Z" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4 20a6 6 0 1 1 12 0" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M16.8 10.2a3.2 3.2 0 1 1 2.8 5.8" />
+              </svg>
+              <svg v-else class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 3l2.5 5 5.5.7-4 4.1 1 5.7L12 16.5 7 18.5l1-5.7-4-4.1 5.5-.7L12 3Z" />
+              </svg>
+            </div>
+            <div>
+              <p class="text-xs uppercase tracking-[0.28em] text-brand-200/70">
+                {{ benefit.kicker }}
+              </p>
+              <h3 class="text-lg font-semibold text-white">
+                {{ benefit.title }}
+              </h3>
+            </div>
           </div>
-          <div class="absolute inset-x-0 bottom-6 flex justify-center gap-2">
-            <button
-              v-for="(benefit, idx) in benefits"
-              :key="benefit.title + idx"
-              type="button"
-              class="h-2.5 w-8 rounded-full transition"
-              :class="idx === benefitCarouselIndex ? 'bg-secondaryBrand-300' : 'bg-white/30 hover:bg-white/60'"
-              @click="benefitCarouselIndex = idx"
-              aria-label="Aller à la diapositive"
-            />
-          </div>
-        </div>
+        </article>
       </div>
     </div>
   </section>
@@ -112,7 +106,7 @@
   <!-- Section Activités -->
   <section class="bg-white py-24 sm:py-32">
     <div class="mx-auto max-w-7xl px-6 lg:px-8">
-      <h2 class="mt-4 text-4xl font-semibold tracking-tight text-pretty text-gray-900 sm:text-5xl">
+      <h2 class="mt-4 text-4xl font-semibold tracking-tight text-pretty text-gray-900 sm:text-5xl lg:text-6xl">
         L’escalade sous toutes ses formes
       </h2>
       <p class="mt-4 text-base text-gray-600">
@@ -127,7 +121,7 @@
       </p>
       <p class="mt-4 text-base text-gray-600">
         Alors en selle,
-        <NuxtLink to="/login" class="font-semibold text-brand-700 hover:text-brand-900 underline underline-offset-4">
+        <NuxtLink to="/aventures-escalade" class="font-semibold text-brand-700 hover:text-brand-900 underline underline-offset-4">
           rejoins l’aventure
         </NuxtLink>
         !
@@ -172,7 +166,7 @@
   <!-- Section Stages -->
   <section id="stages" class="bg-brand-950 py-24 sm:py-32 text-white">
     <div class="mx-auto max-w-7xl px-6 lg:px-8">
-      <h2 class="text-4xl font-semibold tracking-tight text-pretty sm:text-5xl">
+      <h2 class="text-4xl font-semibold tracking-tight text-pretty sm:text-5xl lg:text-6xl">
         Les prochains stages d'escalade
       </h2>
       <p class="mt-2 text-lg/8 text-brand-100/80">
@@ -337,62 +331,48 @@ const { data: aventuresData, pending: aventuresPending } = await useFetch('/api/
     },
   ]
 
-const rotatingBenefitWords = ['progression', 'immersion', 'déconnexion', 'reconnexion'];
-const activeBenefitWordIndex = ref(0);
-const activeBenefitWord = computed(() => rotatingBenefitWords[activeBenefitWordIndex.value]);
-const benefitCarouselIndex = ref(0);
-const benefitCarouselPaused = ref(false);
+const rotatingBenefitWords = ['Progression', 'Immersion', 'Déconnexion', 'Reconnexion']
+const activeBenefitWordIndex = ref(0)
+const activeBenefitWord = computed(() => rotatingBenefitWords[activeBenefitWordIndex.value])
 
-let benefitInterval: ReturnType<typeof setInterval> | null = null;
-let benefitCarouselInterval: ReturnType<typeof setInterval> | null = null;
+let benefitInterval: ReturnType<typeof setInterval> | null = null
 
 onMounted(() => {
   benefitInterval = setInterval(() => {
-    activeBenefitWordIndex.value = (activeBenefitWordIndex.value + 1) % rotatingBenefitWords.length;
-  }, 2500);
-
-  benefitCarouselInterval = setInterval(() => {
-    if (!benefitCarouselPaused.value) {
-      benefitCarouselIndex.value = (benefitCarouselIndex.value + 1) % benefits.length;
-    }
-  }, 4200);
-});
+    activeBenefitWordIndex.value = (activeBenefitWordIndex.value + 1) % rotatingBenefitWords.length
+  }, 2500)
+})
 
 onBeforeUnmount(() => {
-  if (benefitInterval) clearInterval(benefitInterval);
-  if (benefitCarouselInterval) clearInterval(benefitCarouselInterval);
-});
+  if (benefitInterval) clearInterval(benefitInterval)
+})
 
   const benefits = [
     {
-      kicker: 'Escalade outdoor',
+      kicker: 'Outdoor',
       title: 'Reconnecte avec le milieu naturel',
-      description:
-        'Découvre les milliers de spots de nos territoires en pratiquant dehors. Au soleil ou à l’ombre selon la saison, apprends à jouer avec la météo pour vivre des moments inoubliables en falaise.',
-      image: '/images/reconnecte3.jpg',
+      description: 'Retrouve le rocher, les odeurs de pin et les lumières changeantes. Un vrai shoot d’outdoor.',
+      icon: 'outdoor',
     },
     {
       kicker: 'Progression',
-      title: 'Émulation garantie & moniteurs diplômés',
-      description:
-        'Notre objectif est de te faire prendre goût à l’escalade en milieu naturel, mais surtout de te faire progresser et t’accompagner vers l’autonomie.',
-      image: '/images/emulation2.jpeg',
+      title: 'Émulation garantie',
+      description: 'Un cadre sécurisé, des tips concrets et un groupe motivé pour booster ta progression.',
+      icon: 'progression',
     },
     {
-      kicker: 'Club',
+      kicker: 'Communauté',
       title: 'Rencontre tes futurs partenaires',
-      description:
-        'Pas toujours simple de trouver les bonnes personnes avec qui grimper. Pendant nos stages, tu rencontres des grimpeurs et grimpeuses motivé·es pour partager la corde.',
-      image: '/images/rencontre3.jpeg',
+      description: 'Des rencontres qui comptent : les cordées et les potes avec qui tu grimperas demain.',
+      icon: 'communaute',
     },
     {
       kicker: 'Authenticité',
       title: 'Moniteurs locaux passionnés',
-      description:
-        'Nos Moniteurs aiment leur territoire et vous font découvrir les joyaux de leurs régions : plus belles voies, meilleures adresses pour manger ou dormir… tu es entre de bonnes mains.',
-      image: '/images/passion5.jpeg',
+      description: 'Des guides du cru, amoureux de leurs falaises et de leur culture, pour des aventures vraies.',
+      icon: 'authenticite',
     },
-  ];
+  ]
 
   const activities = [
     {
