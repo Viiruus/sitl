@@ -1,16 +1,28 @@
 <template>
-
-  <div class="bg-brand-950 py-24 sm:py-32">
-    <!-- Header réutilisable -->
-    <AppHeader />
-
-    <!-- Hero Section -->
-    <div class="mx-auto max-w-7xl px-6 pt-16 lg:px-8">
-      <div class="mx-auto max-w-2xl sm:text-center">
-        <h2 class="text-4xl font-semibold tracking-tight text-balance text-white sm:text-5xl">Rencontre la Brigade du kiff</h2>
-        <p class="mt-6 text-lg/8 text-gray-400">La Brigade du kiff est née pour te faire profiter au maximum de l’escalade en milieux naturels. Nos moniteurs connaissent leurs territoires et sauront te faire découvrir les meilleurs spots près ou loin de chez toi. Que ce soit pour t’initier, pour progresser ou pour te perfectionner, nos moniteurs diplômés d’État seront là pour toi.</p>
+  <div class="bg-brand-950">
+    <!-- Hero with background -->
+    <div class="relative overflow-hidden pb-16">
+      <div class="absolute inset-0">
+        <img src="/images/emulation2.jpeg" alt="" class="h-full w-full object-cover opacity-25" />
+        <div class="absolute inset-0 bg-brand-950/70" />
       </div>
-      <div class="mx-auto mt-20 max-w-2xl lg:max-w-4xl xl:max-w-none">
+      <div class="relative">
+        <!-- Header réutilisable -->
+        <AppHeader />
+
+        <!-- Hero Section -->
+        <div class="mx-auto max-w-7xl px-6 pt-16 lg:px-8">
+          <div class="mx-auto max-w-2xl py-16 sm:text-center sm:py-24">
+            <h2 class="text-4xl font-semibold tracking-tight text-balance text-white sm:text-5xl">Rencontre la Brigade du kiff</h2>
+            <p class="mt-6 text-lg/8 text-gray-300">La Brigade du kiff est née pour te faire profiter au maximum de l’escalade en milieux naturels. Nos moniteurs connaissent leurs territoires et sauront te faire découvrir les meilleurs spots près ou loin de chez toi. Que ce soit pour t’initier, pour progresser ou pour te perfectionner, nos moniteurs diplômés d’État seront là pour toi.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Listing Section -->
+    <div class="mx-auto max-w-7xl px-6 pb-24 sm:pb-32 lg:px-8">
+      <div class="mx-auto max-w-2xl lg:max-w-4xl xl:max-w-none">
         <div v-if="pending" class="grid grid-cols-1 gap-8 sm:grid-cols-2">
           <div v-for="n in 4" :key="n" class="h-64 animate-pulse rounded-2xl bg-white/5" />
         </div>
@@ -20,7 +32,7 @@
         <div v-else>
           <ul
             role="list"
-            class="grid grid-cols-1 gap-x-6 gap-y-20 sm:grid-cols-2 lg:gap-x-8 xl:grid-cols-3"
+            class="grid grid-cols-1 gap-x-6 gap-y-20 sm:grid-cols-2 lg:grid-cols-3 lg:gap-x-8 xl:grid-cols-4"
           >
             <li v-for="moniteur in randomizedMoniteurs" :key="moniteur.id">
               <NuxtLink
@@ -64,11 +76,10 @@
         </div>
       </div>
     </div>
+
+    <!-- Footer réutilisable -->
+    <AppFooter />
   </div>
-  
-  <!-- Footer réutilisable -->
-  <AppFooter />
-  
 </template>
 
 <script setup lang="ts">

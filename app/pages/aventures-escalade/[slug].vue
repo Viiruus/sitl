@@ -572,7 +572,12 @@
                                 {{ formatSessionDate(session) }}
                               </p>
                               <p class="text-xs text-brand-600">
-                                {{ session.placesReservees || 0 }} personnes intéressées
+                                {{
+                                  Math.max(
+                                    0,
+                                    (stage?.placesMax || 0) - (session.placesReservees || 0)
+                                  )
+                                }} places restantes
                               </p>
                               <p
                                 v-if="session.userIsBooked"

@@ -65,40 +65,37 @@
         </p>
       </div>
 
-      <div class="mt-12 grid gap-4 sm:grid-cols-2">
-        <article
+      <div class="mt-20 grid gap-6 sm:gap-8 text-center sm:grid-cols-2 lg:grid-cols-4">
+        <div
           v-for="benefit in benefits"
           :key="benefit.title"
-          class="rounded-2xl border border-white/10 bg-white/5 p-6 shadow-lg shadow-black/30 ring-1 ring-white/10 transition hover:-translate-y-1 hover:border-secondaryBrand-300/40 hover:shadow-secondaryBrand-900/20"
+          class="flex flex-col items-center gap-4 rounded-3xl bg-white/5 px-4 py-6 ring-1 ring-white/10 shadow-md shadow-black/20 transition hover:-translate-y-1 hover:ring-secondaryBrand-300/50"
         >
-          <div class="flex items-center gap-3">
-            <div class="flex h-12 w-12 items-center justify-center rounded-full bg-secondaryBrand-500/20 text-secondaryBrand-100">
-              <svg v-if="benefit.icon === 'outdoor'" class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M3 19l6.5-11 3.5 6 2-3 6 8H3z" />
-              </svg>
-              <svg v-else-if="benefit.icon === 'progression'" class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4-4 3 3 5-7 4 6" />
-                <path stroke-linecap="round" stroke-linejoin="round" d="M4 20h16" />
-              </svg>
-              <svg v-else-if="benefit.icon === 'communaute'" class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M7 10a4 4 0 1 1 8 0 4 4 0 0 1-8 0Z" />
-                <path stroke-linecap="round" stroke-linejoin="round" d="M4 20a6 6 0 1 1 12 0" />
-                <path stroke-linecap="round" stroke-linejoin="round" d="M16.8 10.2a3.2 3.2 0 1 1 2.8 5.8" />
-              </svg>
-              <svg v-else class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 3l2.5 5 5.5.7-4 4.1 1 5.7L12 16.5 7 18.5l1-5.7-4-4.1 5.5-.7L12 3Z" />
-              </svg>
-            </div>
-            <div>
-              <p class="text-xs uppercase tracking-[0.28em] text-brand-200/70">
-                {{ benefit.kicker }}
-              </p>
-              <h3 class="text-lg font-semibold text-white">
-                {{ benefit.title }}
-              </h3>
-            </div>
+          <div class="flex h-16 w-16 items-center justify-center rounded-full bg-white/10 ring-1 ring-white/15 shadow-inner shadow-black/10">
+            <svg v-if="benefit.icon === 'leaf'" class="h-8 w-8 text-secondaryBrand-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3 17.5 9.5 8l3.5 5 3-4.5L21 17.5H3Z" />
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3 17.5h18" />
+            </svg>
+            <svg v-else-if="benefit.icon === 'progress'" class="h-8 w-8 text-secondaryBrand-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 18h4V9H4v9Zm6 0h4v-6h-4v6Zm6 0h4V5h-4v13Z" />
+            </svg>
+            <svg v-else-if="benefit.icon === 'heart'" class="h-8 w-8 text-secondaryBrand-200" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 21s-6.7-4.2-9.4-9C.4 8.2 2.3 4 6 4c2.3 0 3.6 1.5 4 2.2C10.4 5.5 11.7 4 14 4c3.7 0 5.6 4.2 3.4 8-2.7 4.8-9.4 9-9.4 9Z" />
+            </svg>
+            <svg v-else class="h-8 w-8 text-secondaryBrand-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 3c3.3 0 6 2.6 6 5.8 0 3.9-3.7 8.2-5.5 9.9a.7.7 0 0 1-1 0C9.7 17 6 12.6 6 8.8 6 5.6 8.7 3 12 3Z" />
+              <circle cx="12" cy="9" r="2.2" />
+            </svg>
           </div>
-        </article>
+          <div class="flex flex-col items-center gap-2">
+            <span class="inline-flex items-center rounded-full bg-secondaryBrand-300/25 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.3em] text-secondaryBrand-100 shadow-sm shadow-secondaryBrand-900/20">
+              {{ benefit.kicker }}
+            </span>
+            <h3 class="text-sm font-semibold text-white">
+              {{ benefit.title }}
+            </h3>
+          </div>
+        </div>
       </div>
     </div>
   </section>
@@ -351,26 +348,26 @@ onBeforeUnmount(() => {
     {
       kicker: 'Outdoor',
       title: 'Reconnecte avec le milieu naturel',
+      icon: 'leaf',
       description: 'Retrouve le rocher, les odeurs de pin et les lumières changeantes. Un vrai shoot d’outdoor.',
-      icon: 'outdoor',
     },
     {
       kicker: 'Progression',
       title: 'Émulation garantie',
+      icon: 'progress',
       description: 'Un cadre sécurisé, des tips concrets et un groupe motivé pour booster ta progression.',
-      icon: 'progression',
     },
     {
       kicker: 'Communauté',
       title: 'Rencontre tes futurs partenaires',
+      icon: 'heart',
       description: 'Des rencontres qui comptent : les cordées et les potes avec qui tu grimperas demain.',
-      icon: 'communaute',
     },
     {
       kicker: 'Authenticité',
       title: 'Moniteurs locaux passionnés',
+      icon: 'pin',
       description: 'Des guides du cru, amoureux de leurs falaises et de leur culture, pour des aventures vraies.',
-      icon: 'authenticite',
     },
   ]
 
