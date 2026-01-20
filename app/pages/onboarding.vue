@@ -4,122 +4,14 @@ const router = useRouter()
 
 // Étapes
 const step = ref(1)
-const maxStep = 3
-
-// Liste des départements de France (tu peux ajuster/compléter si besoin)
-const departments = [
-  '01 - Ain',
-  '02 - Aisne',
-  '03 - Allier',
-  '04 - Alpes-de-Haute-Provence',
-  '05 - Hautes-Alpes',
-  '06 - Alpes-Maritimes',
-  '07 - Ardèche',
-  '08 - Ardennes',
-  '09 - Ariège',
-  '10 - Aube',
-  '11 - Aude',
-  '12 - Aveyron',
-  '13 - Bouches-du-Rhône',
-  '14 - Calvados',
-  '15 - Cantal',
-  '16 - Charente',
-  '17 - Charente-Maritime',
-  '18 - Cher',
-  '19 - Corrèze',
-  '21 - Côte-d’Or',
-  '22 - Côtes-d’Armor',
-  '23 - Creuse',
-  '24 - Dordogne',
-  '25 - Doubs',
-  '26 - Drôme',
-  '27 - Eure',
-  '28 - Eure-et-Loir',
-  '29 - Finistère',
-  '2A - Corse-du-Sud',
-  '2B - Haute-Corse',
-  '30 - Gard',
-  '31 - Haute-Garonne',
-  '32 - Gers',
-  '33 - Gironde',
-  '34 - Hérault',
-  '35 - Ille-et-Vilaine',
-  '36 - Indre',
-  '37 - Indre-et-Loire',
-  '38 - Isère',
-  '39 - Jura',
-  '40 - Landes',
-  '41 - Loir-et-Cher',
-  '42 - Loire',
-  '43 - Haute-Loire',
-  '44 - Loire-Atlantique',
-  '45 - Loiret',
-  '46 - Lot',
-  '47 - Lot-et-Garonne',
-  '48 - Lozère',
-  '49 - Maine-et-Loire',
-  '50 - Manche',
-  '51 - Marne',
-  '52 - Haute-Marne',
-  '53 - Mayenne',
-  '54 - Meurthe-et-Moselle',
-  '55 - Meuse',
-  '56 - Morbihan',
-  '57 - Moselle',
-  '58 - Nièvre',
-  '59 - Nord',
-  '60 - Oise',
-  '61 - Orne',
-  '62 - Pas-de-Calais',
-  '63 - Puy-de-Dôme',
-  '64 - Pyrénées-Atlantiques',
-  '65 - Hautes-Pyrénées',
-  '66 - Pyrénées-Orientales',
-  '67 - Bas-Rhin',
-  '68 - Haut-Rhin',
-  '69 - Rhône',
-  '70 - Haute-Saône',
-  '71 - Saône-et-Loire',
-  '72 - Sarthe',
-  '73 - Savoie',
-  '74 - Haute-Savoie',
-  '75 - Paris',
-  '76 - Seine-Maritime',
-  '77 - Seine-et-Marne',
-  '78 - Yvelines',
-  '79 - Deux-Sèvres',
-  '80 - Somme',
-  '81 - Tarn',
-  '82 - Tarn-et-Garonne',
-  '83 - Var',
-  '84 - Vaucluse',
-  '85 - Vendée',
-  '86 - Vienne',
-  '87 - Haute-Vienne',
-  '88 - Vosges',
-  '89 - Yonne',
-  '90 - Territoire de Belfort',
-  '91 - Essonne',
-  '92 - Hauts-de-Seine',
-  '93 - Seine-Saint-Denis',
-  '94 - Val-de-Marne',
-  '95 - Val-d’Oise',
-  '971 - Guadeloupe',
-  '972 - Martinique',
-  '973 - Guyane',
-  '974 - La Réunion',
-  '976 - Mayotte',
-]
+const maxStep = 2
 
 // Formulaire
 const form = reactive({
   // Informations personnelles
   firstName: '',
   lastName: '',
-  birthDate: '',
-  department: '',
-  phoneNumber: '',
-  whatsappOptIn: true,
+  cguAccepted: false,
 
   // Pratique
   typesOfClimbing: [] as string[], // ['bloc', 'sport', 'multi']
@@ -178,6 +70,13 @@ const nextStep = () => {
 const prevStep = () => {
   if (step.value > 1) step.value--
 }
+
+const canGoNext = computed(() => {
+  if (step.value === 1) {
+    return Boolean(form.firstName.trim()) && Boolean(form.lastName.trim()) && form.cguAccepted
+  }
+  return true
+})
 
 const submit = async () => {
   error.value = null
@@ -243,7 +142,6 @@ const submit = async () => {
               v-for="s in [
                 { n: 1, label: 'Profil' },
                 { n: 2, label: 'Pratique' },
-                { n: 3, label: 'Vision du stage' },
               ]"
               :key="s.n"
               class="flex items-center gap-3"
@@ -286,7 +184,7 @@ const submit = async () => {
               Informations personnelles
             </h2>
             <p class="text-xs text-brand-200/80">
-              De quoi te situer un peu : qui tu es et où tu grimpes.
+              Juste l’essentiel pour personnaliser ton espace.
             </p>
           </header>
 
@@ -309,42 +207,31 @@ const submit = async () => {
             </div>
           </div>
 
-          <div class="grid md:grid-cols-2 gap-4">
-            <div class="space-y-1">
-              <label class="block text-xs font-medium text-brand-100/90">Date de naissance</label>
-              <input
-                v-model="form.birthDate"
-                type="date"
-                class="w-full border border-brand-700 rounded-lg px-3 py-2 text-sm bg-brand-950/50 text-white focus:outline-none focus:ring-2 focus:ring-secondaryBrand-500 focus:border-secondaryBrand-500"
-              />
+          <div class="space-y-3">
+            <div class="max-h-32 overflow-y-auto rounded-2xl border border-brand-800 bg-brand-950/50 p-4 text-[11px] leading-relaxed text-brand-100/80">
+              <p class="font-semibold text-secondaryBrand-200">Conditions générales d’utilisation</p>
+              <p class="mt-2">
+                En utilisant la plateforme, tu acceptes de fournir des informations exactes et à jour.
+                Tu es responsable des messages et contenus partagés avec les moniteurs et les autres
+                participants. Les réservations et paiements se font directement avec le moniteur :
+                Brigade du kiff n’est pas partie au contrat d’encadrement.
+              </p>
+              <p class="mt-2">
+                Les données personnelles sont utilisées pour gérer ton compte, tes préférences et tes
+                inscriptions. Tu peux demander leur suppression ou modification. En poursuivant, tu confirmes
+                avoir lu et accepté ces conditions.
+              </p>
             </div>
-            <div class="space-y-1">
-              <label class="block text-xs font-medium text-brand-100/90">
-                Dans quel département habites-tu ?
+            <div class="flex items-start gap-3 rounded-2xl border border-brand-800 bg-brand-950/50 p-4">
+              <input
+                id="cgu"
+                v-model="form.cguAccepted"
+                type="checkbox"
+                class="mt-1 h-4 w-4 rounded border-brand-700 text-secondaryBrand-500 focus:ring-secondaryBrand-500"
+              />
+              <label for="cgu" class="text-sm text-brand-100/85">
+                J’ai lu et j’accepte les CGU.
               </label>
-              <select
-                v-model="form.department"
-                class="w-full border border-brand-700 rounded-lg px-3 py-2 text-sm bg-brand-950/50 text-white focus:outline-none focus:ring-2 focus:ring-secondaryBrand-500 focus:border-secondaryBrand-500"
-              >
-                <option value="" class="bg-brand-900 text-white">Sélectionne ton département</option>
-                <option
-                  v-for="d in departments"
-                  :key="d"
-                  :value="d"
-                  class="bg-brand-900 text-white"
-                >
-                  {{ d }}
-                </option>
-              </select>
-            </div>
-            <div class="space-y-1">
-              <label class="block text-xs font-medium text-brand-100/90">Téléphone (WhatsApp)</label>
-              <input
-                v-model="form.phoneNumber"
-                type="tel"
-                class="w-full border border-brand-700 rounded-lg px-3 py-2 text-sm bg-brand-950/50 text-white placeholder:text-brand-200/50 focus:outline-none focus:ring-2 focus:ring-secondaryBrand-500 focus:border-secondaryBrand-500"
-                placeholder="+33..."
-              />
             </div>
           </div>
         </section>
@@ -541,49 +428,6 @@ const submit = async () => {
           </div>
         </section>
 
-        <!-- ÉTAPE 3 -->
-        <section
-          v-else-if="step === 3"
-          class="space-y-6"
-        >
-          <header class="space-y-1">
-            <h2 class="text-lg font-semibold text-secondaryBrand-300">
-              Ta vision d’un voyage / stage d’escalade
-            </h2>
-            <p class="text-xs text-brand-200/80">
-              Plutôt aventure roots, confort total… ou un mélange des deux suivant les moments ?
-            </p>
-          </header>
-
-          <div class="space-y-2">
-            <p class="text-sm font-medium text-brand-100/90">
-              Pour toi, quelle serait la forme typique d'un stage d'escalade ?
-            </p>
-            <div class="flex flex-col gap-2 text-sm">
-              <label class="inline-flex items-start gap-2">
-                <input
-                  type="checkbox"
-                  :checked="form.tripStyles.includes('aventure')"
-                  @change="toggleInArray(form.tripStyles, 'aventure')"
-                />
-                <span class="text-brand-100/90">Une aventure (vélo, tente, débrouille)</span>
-              </label>
-              <label class="inline-flex items-start gap-2">
-                <input
-                  type="checkbox"
-                  :checked="form.tripStyles.includes('confort')"
-                  @change="toggleInArray(form.tripStyles, 'confort')"
-                />
-                <span class="text-brand-100/90">Tout confort (hébergement, restauration, focus escalade)</span>
-              </label>
-            </div>
-          </div>
-
-          <p class="text-xs text-brand-200/70">
-            Tes réponses ne t’engagent à rien, elles servent juste à t’envoyer les bons séjours au bon moment.
-          </p>
-        </section>
-
         <!-- Messages + navigation -->
         <section class="space-y-3 border-t border-brand-800 pt-4">
           <p v-if="error" class="text-xs text-red-400">
@@ -607,6 +451,7 @@ const submit = async () => {
               v-if="step < maxStep"
               type="button"
               class="px-4 py-2 rounded-lg bg-secondaryBrand-500 text-brand-950 text-xs font-medium hover:bg-secondaryBrand-400 transition"
+              :disabled="step === 1 && !canGoNext"
               @click="nextStep"
             >
               Étape suivante

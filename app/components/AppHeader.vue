@@ -20,6 +20,7 @@
             <NuxtLink
               :to="ctaHref"
               class="inline-flex items-center gap-2 rounded-full bg-secondaryBrand-500 px-5 py-2 text-sm font-semibold text-white shadow-lg shadow-secondaryBrand-900/20 transition hover:bg-secondaryBrand-400"
+              @click="handleCtaClick"
             >
               {{ ctaLabel }}
             </NuxtLink>
@@ -57,7 +58,7 @@
               <NuxtLink
                 :to="ctaHref"
                 class="-mx-3 block rounded-lg px-3 py-2.5 text-base/7 font-semibold text-white hover:bg-white/5"
-                @click="mobileMenuOpen = false"
+                @click="(event) => { mobileMenuOpen = false; handleCtaClick(event) }"
               >
                 {{ ctaLabel }}
               </NuxtLink>
@@ -66,14 +67,16 @@
         </div>
       </DialogPanel>
     </Dialog>
+    <AuthModal />
   </header>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed } from 'vue'
 const route = useRoute()
 import { Dialog, DialogPanel } from '@headlessui/vue'
 import { Bars3Icon, XMarkIcon } from '@heroicons/vue/24/outline'
+import AuthModal from './AuthModal.vue'
 
 const navigation = [
   { name: 'Les stages', href: '/aventures-escalade' },
@@ -81,6 +84,7 @@ const navigation = [
 ]
 
 const { loggedIn, user } = useUserSession()
+const { openModal } = useAuthModal()
 
 const ctaLabel = computed(() => {
   if (!loggedIn.value) {
@@ -90,6 +94,13 @@ const ctaLabel = computed(() => {
 })
 
 const ctaHref = computed(() => (loggedIn.value ? '/profil' : '/login'))
+
+const handleCtaClick = (event: Event) => {
+  if (!loggedIn.value) {
+    event.preventDefault()
+    openModal()
+  }
+}
 
 const isHome = computed(() => route.path === '/')
 

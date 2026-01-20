@@ -9,7 +9,12 @@ const onboardingSchema = z.object({
   lastName: z.string().trim().min(1).optional().or(z.literal('')),
   birthDate: z.string().optional().or(z.literal('')), // string simple
   department: z.string().optional().or(z.literal('')),
-  phoneNumber: z.string().trim().min(6, 'Ajoute un numéro de téléphone.').max(30),
+  phoneNumber: z.string().trim().max(30).optional().or(z.literal('')),
+  cguAccepted: z
+    .literal(true, {
+      errorMap: () => ({ message: 'Merci de valider les CGU.' }),
+    })
+    .optional(),
   whatsappOptIn: z.boolean().optional(),
 
   // Pratique
@@ -46,6 +51,13 @@ export default defineEventHandler(async (event) => {
     })
   }
 
+  const currentUser = await db.user.findUnique({
+    where: { id: Number(session.user.id) },
+  })
+  if (!currentUser) {
+    throw createError({ statusCode: 404, statusMessage: 'Utilisateur introuvable' })
+  }
+
   // 2) Lire et valider le body
   const rawBody = await readBody(event)
   const body = onboardingSchema.parse(rawBody)
@@ -58,8 +70,8 @@ export default defineEventHandler(async (event) => {
       lastName: body.lastName || null,
       birthDate: body.birthDate || null,
       department: body.department || null,
-      phoneNumber: body.phoneNumber.trim(),
-      whatsappOptIn: body.whatsappOptIn ?? user.whatsappOptIn ?? false,
+      phoneNumber: body.phoneNumber?.trim?.() || currentUser.phoneNumber,
+      whatsappOptIn: body.whatsappOptIn ?? currentUser.whatsappOptIn ?? false,
 
       typesOfClimbing: body.typesOfClimbing ?? [],
       climbsMainly: body.climbsMainly || null,
@@ -69,9 +81,8 @@ export default defineEventHandler(async (event) => {
 
       gradeLevel: body.gradeLevel || null,
       tripStyles: body.tripStyles ?? [],
-
       onboarded: true,
-      onboardingStep: 3,
+      onboardingStep: 2,
     },
   })
 

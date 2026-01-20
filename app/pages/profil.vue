@@ -10,118 +10,10 @@
   const userBookings = ref<any[]>([])
   const activePanel = ref<'bookings' | 'profil'>('bookings')
 
-  // Liste des départements (même que dans l’onboarding)
-  const departments = [
-  '01 - Ain',
-  '02 - Aisne',
-  '03 - Allier',
-  '04 - Alpes-de-Haute-Provence',
-  '05 - Hautes-Alpes',
-  '06 - Alpes-Maritimes',
-  '07 - Ardèche',
-  '08 - Ardennes',
-  '09 - Ariège',
-  '10 - Aube',
-  '11 - Aude',
-  '12 - Aveyron',
-  '13 - Bouches-du-Rhône',
-  '14 - Calvados',
-  '15 - Cantal',
-  '16 - Charente',
-  '17 - Charente-Maritime',
-  '18 - Cher',
-  '19 - Corrèze',
-  '21 - Côte-d’Or',
-  '22 - Côtes-d’Armor',
-  '23 - Creuse',
-  '24 - Dordogne',
-  '25 - Doubs',
-  '26 - Drôme',
-  '27 - Eure',
-  '28 - Eure-et-Loir',
-  '29 - Finistère',
-  '2A - Corse-du-Sud',
-  '2B - Haute-Corse',
-  '30 - Gard',
-  '31 - Haute-Garonne',
-  '32 - Gers',
-  '33 - Gironde',
-  '34 - Hérault',
-  '35 - Ille-et-Vilaine',
-  '36 - Indre',
-  '37 - Indre-et-Loire',
-  '38 - Isère',
-  '39 - Jura',
-  '40 - Landes',
-  '41 - Loir-et-Cher',
-  '42 - Loire',
-  '43 - Haute-Loire',
-  '44 - Loire-Atlantique',
-  '45 - Loiret',
-  '46 - Lot',
-  '47 - Lot-et-Garonne',
-  '48 - Lozère',
-  '49 - Maine-et-Loire',
-  '50 - Manche',
-  '51 - Marne',
-  '52 - Haute-Marne',
-  '53 - Mayenne',
-  '54 - Meurthe-et-Moselle',
-  '55 - Meuse',
-  '56 - Morbihan',
-  '57 - Moselle',
-  '58 - Nièvre',
-  '59 - Nord',
-  '60 - Oise',
-  '61 - Orne',
-  '62 - Pas-de-Calais',
-  '63 - Puy-de-Dôme',
-  '64 - Pyrénées-Atlantiques',
-  '65 - Hautes-Pyrénées',
-  '66 - Pyrénées-Orientales',
-  '67 - Bas-Rhin',
-  '68 - Haut-Rhin',
-  '69 - Rhône',
-  '70 - Haute-Saône',
-  '71 - Saône-et-Loire',
-  '72 - Sarthe',
-  '73 - Savoie',
-  '74 - Haute-Savoie',
-  '75 - Paris',
-  '76 - Seine-Maritime',
-  '77 - Seine-et-Marne',
-  '78 - Yvelines',
-  '79 - Deux-Sèvres',
-  '80 - Somme',
-  '81 - Tarn',
-  '82 - Tarn-et-Garonne',
-  '83 - Var',
-  '84 - Vaucluse',
-  '85 - Vendée',
-  '86 - Vienne',
-  '87 - Haute-Vienne',
-  '88 - Vosges',
-  '89 - Yonne',
-  '90 - Territoire de Belfort',
-  '91 - Essonne',
-  '92 - Hauts-de-Seine',
-  '93 - Seine-Saint-Denis',
-  '94 - Val-de-Marne',
-  '95 - Val-d’Oise',
-  '971 - Guadeloupe',
-  '972 - Martinique',
-  '973 - Guyane',
-  '974 - La Réunion',
-  '976 - Mayotte',
-  ]
-
   // Formulaire (version simplifiée du formulaire d’onboarding)
   const form = reactive({
-  email: user.value?.email || '',
   firstName: '',
   lastName: '',
-  birthDate: '', // on laisse en string
-  department: '',
   phoneNumber: '',
   whatsappOptIn: false,
 
@@ -131,7 +23,6 @@
   autonomy: [] as string[],
   frequency: '' as '' | 'moins_1' | '1' | '2_3' | 'plus_3',
   gradeLevel: '' as '' | 'sub_5a' | '5a_5c' | '6a_6c' | '7_plus' | 'dont_know',
-  tripStyles: [] as string[],
   })
 
   // helpers
@@ -154,14 +45,8 @@
       const res = await $fetch<{ user: any }>('/api/me')
       const u = res.user
 
-      form.email = u.email || user.value?.email || ''
-      if (!form.email) {
-        throw new Error('Adresse email manquante pour ce profil.')
-      }
       form.firstName = u.firstName || ''
       form.lastName = u.lastName || ''
-      form.birthDate = u.birthDate || ''
-      form.department = u.department || ''
       form.phoneNumber = u.phoneNumber || ''
       form.whatsappOptIn = Boolean(u.whatsappOptIn)
 
@@ -171,7 +56,6 @@
       form.autonomy = Array.isArray(u.autonomy) ? u.autonomy : []
       form.frequency = u.frequency || ''
       form.gradeLevel = u.gradeLevel || ''
-      form.tripStyles = Array.isArray(u.tripStyles) ? u.tripStyles : []
 
       userBookings.value = Array.isArray(u.bookings) ? u.bookings : []
       profileLoaded.value = true
@@ -472,16 +356,6 @@
                 </h3>
 
                 <div class="grid md:grid-cols-2 gap-4">
-                  <div class="md:col-span-2">
-                    <label class="block text-sm mb-1 text-brand-100/90">Email</label>
-                    <input
-                      v-model="form.email"
-                      type="email"
-                      required
-                      disabled
-                      class="w-full border border-brand-800 rounded-lg px-3 py-2 bg-brand-900 text-brand-300 cursor-not-allowed"
-                    />
-                  </div>
                   <div>
                     <label class="block text-sm mb-1 text-brand-100/90">Prénom</label>
                     <input
@@ -505,42 +379,15 @@
                   <input
                     v-model="form.phoneNumber"
                     type="tel"
-                    required
                     class="w-full border border-brand-800 rounded-lg px-3 py-2 bg-brand-950/40 text-white placeholder:text-brand-200/50 focus:outline-none focus:ring-2 focus:ring-secondaryBrand-500 focus:border-secondaryBrand-500"
                     placeholder="+33 6 12 34 56 78"
                   />
                   <p class="mt-1 text-xs text-brand-200/70">
-                    Indispensable pour créer les groupes avec les moniteurs.
+                    Numéro utilisé pour les échanges avec les moniteurs et la connexion WhatsApp.
                   </p>
                 </div>
 
-                <div class="grid md:grid-cols-2 gap-4">
-                  <div>
-                    <label class="block text-sm mb-1 text-brand-100/90">Date de naissance</label>
-                    <input
-                      v-model="form.birthDate"
-                      type="date"
-                      class="w-full border border-brand-800 rounded-lg px-3 py-2 bg-brand-950/40 text-white focus:outline-none focus:ring-2 focus:ring-secondaryBrand-500 focus:border-secondaryBrand-500"
-                    />
-                  </div>
-                  <div>
-                    <label class="block text-sm mb-1 text-brand-100/90">Département</label>
-                    <select
-                      v-model="form.department"
-                      class="w-full border border-brand-800 rounded-lg px-3 py-2 bg-brand-950/40 text-white focus:outline-none focus:ring-2 focus:ring-secondaryBrand-500 focus:border-secondaryBrand-500"
-                    >
-                      <option value="" class="bg-brand-900 text-white">Sélectionne ton département</option>
-                      <option
-                        v-for="d in departments"
-                        :key="d"
-                        :value="d"
-                        class="bg-brand-900 text-white"
-                      >
-                        {{ d }}
-                      </option>
-                    </select>
-                  </div>
-                </div>
+                <div class="grid md:grid-cols-2 gap-4"></div>
               </section>
 
               <section class="space-y-3 border-t border-brand-800 pt-4">
@@ -766,36 +613,6 @@
                         value="dont_know"
                       />
                       <span class="text-brand-100/90">Je ne sais pas / surtout du bloc en salle</span>
-                    </label>
-                  </div>
-                </div>
-              </section>
-
-              <section class="space-y-3 border-t border-brand-800 pt-4">
-                <h3 class="text-lg font-semibold text-secondaryBrand-300">
-                  Vision du stage
-                </h3>
-
-                <div class="space-y-2">
-                  <p class="text-sm font-medium text-brand-100/90">
-                    Pour toi, quel serait la forme typique d'un stage d'escalade ?
-                  </p>
-                  <div class="flex flex-col gap-1 text-sm">
-                    <label class="inline-flex items-start gap-2">
-                      <input
-                        type="checkbox"
-                        :checked="form.tripStyles.includes('aventure')"
-                        @change="toggleInArray(form.tripStyles, 'aventure')"
-                      />
-                      <span class="text-brand-100/90">Une aventure (vélo, tente, débrouille)</span>
-                    </label>
-                    <label class="inline-flex items-start gap-2">
-                      <input
-                        type="checkbox"
-                        :checked="form.tripStyles.includes('confort')"
-                        @change="toggleInArray(form.tripStyles, 'confort')"
-                      />
-                      <span class="text-brand-100/90">Tout confort (hébergement, restauration, focus escalade)</span>
                     </label>
                   </div>
                 </div>
