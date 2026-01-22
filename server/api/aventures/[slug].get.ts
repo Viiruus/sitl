@@ -161,6 +161,7 @@ const mapDetailAventure = (a: any, bookedSessionIds: Set<number>) => ({
   niveauMinimum: a.niveauMinimum,
   autonomieMini: a.autonomieMini,
   placesMax: a.placesMax,
+  placesMin: a.placesMin,
   devise: a.devise,
 
   descriptionCourte: a.descriptionCourte,

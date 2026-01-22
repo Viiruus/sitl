@@ -107,10 +107,16 @@
     return start === end ? start : `${start} → ${end}`
   }
 
-  const bookingStatusLabel = (value?: string | null) => {
-    if (value === 'CONFIRMEE') return 'Confirmée'
-    if (value === 'ANNULEE') return 'Annulée'
+  const bookingStatusLabel = (booking: any) => {
+    if (booking?.statut === 'ANNULEE') return 'Annulée'
+    if (booking?.statut === 'CONFIRMEE') return 'Confirmée'
     return 'En attente'
+  }
+
+  const bookingStatusToneClass = (booking: any) => {
+    if (booking?.statut === 'ANNULEE') return 'bg-red-500/20 text-red-200'
+    if (booking?.statut === 'CONFIRMEE') return 'bg-emerald-500/20 text-emerald-200'
+    return 'bg-amber-500/20 text-amber-200'
   }
 
   const bookingAdventureLink = (booking: any) => {
@@ -122,21 +128,119 @@
     return booking?.session?.aventure?.lieuLabel || 'Lieu à confirmer'
   }
 
+  const showCancelModal = ref(false)
+  const bookingPendingCancel = ref<any | null>(null)
+  const cancelling = ref(false)
+
+  const openCancelModal = (booking: any) => {
+    bookingPendingCancel.value = booking
+    showCancelModal.value = true
+  }
+
+  const closeCancelModal = () => {
+    if (cancelling.value) return
+    showCancelModal.value = false
+    bookingPendingCancel.value = null
+  }
+
+  const confirmCancel = async () => {
+    const booking = bookingPendingCancel.value
+    if (!booking?.id) return
+    cancelling.value = true
+    error.value = null
+    success.value = null
+    try {
+      await $fetch(`/api/bookings/${booking.id}`, {
+        method: 'DELETE',
+      })
+      userBookings.value = userBookings.value.filter((b: any) => b.id !== booking.id)
+      success.value = 'Pré-inscription annulée.'
+    } catch (e: any) {
+      console.error(e)
+      error.value = e?.data?.message || 'Impossible d’annuler cette session.'
+    } finally {
+      cancelling.value = false
+      showCancelModal.value = false
+      bookingPendingCancel.value = null
+    }
+  }
+
   const bookingGuideName = (booking: any) => {
     const guide = booking?.session?.aventure?.guide
     return [guide?.firstName, guide?.lastName].filter(Boolean).join(' ') || 'Moniteur local'
   }
 
+  const slugifyName = (firstName?: string | null, lastName?: string | null, fallback?: string | number | null) => {
+    const base = [firstName, lastName].filter(Boolean).join(' ').trim()
+    if (!base) return fallback ? String(fallback) : ''
+    return base
+      .normalize('NFD')
+      .replace(/\p{Diacritic}/gu, '')
+      .replace(/[^a-zA-Z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '')
+      .toLowerCase()
+  }
+
   const bookingGuideProfileUrl = (booking: any) => {
-    const guide = booking?.session?.aventure?.guide
-    return (
-      guide?.profile?.websiteUrl ||
-      guide?.profile?.instagramUrl ||
-      '/la-brigade'
-    )
+    const aventure = booking?.session?.aventure
+    const guide = aventure?.guide
+    const slug = slugifyName(guide?.firstName, guide?.lastName, guide?.id)
+    return slug ? `/moniteurs/${slug}` : '/la-brigade'
+  }
+
+  const shareAdventure = async (booking: any) => {
+    const path = bookingAdventureLink(booking)
+    const origin = typeof window !== 'undefined' ? window.location.origin : ''
+    const url = origin ? `${origin}${path}` : path
+    error.value = null
+    success.value = null
+    shareMessage.value = ''
+    shareError.value = ''
+
+    if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      try {
+        await navigator.clipboard.writeText(url)
+        shareMessage.value = 'Lien copié dans le presse-papiers ✅'
+        setTimeout(() => {
+          shareMessage.value = ''
+        }, 3000)
+        return url
+      } catch (e) {
+        shareError.value = 'Impossible de copier le lien'
+        setTimeout(() => {
+          shareError.value = ''
+        }, 3000)
+        return
+      }
+    }
+    // Fallback: best-effort prompt copy
+    try {
+      window.prompt('Copie ce lien', url)
+      shareMessage.value = 'Lien affiché pour copie'
+      setTimeout(() => {
+        shareMessage.value = ''
+      }, 3000)
+    } catch (e) {
+      shareError.value = 'Partage indisponible sur ce navigateur'
+      setTimeout(() => {
+        shareError.value = ''
+      }, 3000)
+    }
+  }
+
+  const bookingPlacesInfo = (booking: any) => {
+    const session = booking?.session
+    if (!session) return null
+    const reserved = session.placesReservees ?? 0
+    const minNeeded = session.aventure?.placesMin ?? 0
+    if (!minNeeded) return null
+    const remaining = Math.max(0, minNeeded - reserved)
+    return { remaining, minNeeded }
   }
 
   const hasBookings = computed(() => userBookings.value.length > 0)
+  const shareMessage = ref('')
+  const shareError = ref('')
 
   const logout = async () => {
     await clear()
@@ -222,85 +326,176 @@
                   Les moniteurs te contacteront directement pour constituer les groupes.
                 </p>
               </div>
-              <NuxtLink
-                to="/aventures-escalade"
-                class="inline-flex items-center gap-2 rounded-full bg-secondaryBrand-500/90 px-5 py-2 text-xs font-semibold uppercase tracking-wide text-brand-950 hover:bg-secondaryBrand-400"
-              >
-                Voir les aventures
-                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M8 5l8 7-8 7" />
-                </svg>
-              </NuxtLink>
+            </div>
+
+            <div v-if="shareMessage || shareError" class="rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm">
+              <p v-if="shareMessage" class="text-emerald-200">{{ shareMessage }}</p>
+              <p v-else-if="shareError" class="text-red-200">{{ shareError }}</p>
             </div>
 
             <p v-if="!hasBookings" class="rounded-2xl border border-dashed border-brand-700/80 bg-brand-950/40 px-5 py-6 text-sm text-brand-100/70">
               Tu ne t’es pas encore positionné·e sur une date. Explore les aventures pour manifester ton intérêt 💛
             </p>
 
-            <div v-else class="space-y-4">
-              <NuxtLink
-                v-for="booking in userBookings"
-                :key="booking.id"
-                :to="bookingAdventureLink(booking)"
-                class="block rounded-2xl border border-brand-800 bg-brand-950/60 p-4 transition hover:border-secondaryBrand-400/50"
-              >
-                <div class="flex flex-wrap items-start justify-between gap-3">
-                  <div>
-                    <p class="text-base font-semibold text-white">
+          <div v-else class="space-y-4">
+            <div
+              v-for="booking in userBookings"
+              :key="booking.id"
+              class="rounded-2xl border border-brand-800 bg-brand-950/70 p-5"
+            >
+              <div class="grid gap-4 md:grid-cols-[7fr_4fr]">
+                <!-- Bloc infos session -->
+                <div class="md:col-span-2 rounded-xl flex flex-col gap-3 h-full">
+                  <div class="flex items-start justify-between gap-3">
+                    <p class="text-lg font-semibold text-white">
                       {{ booking.session?.aventure?.titre || 'Aventure' }}
                     </p>
                   </div>
-                  <span
-                    class="inline-flex items-center rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-wide"
-                    :class="booking.statut === 'CONFIRMEE'
-                      ? 'bg-emerald-500/20 text-emerald-200'
-                      : booking.statut === 'ANNULEE'
-                        ? 'bg-red-500/20 text-red-200'
-                        : 'bg-amber-500/20 text-amber-200'"
-                  >
-                    {{ bookingStatusLabel(booking.statut) }}
-                  </span>
+
+                  <div class="grid gap-3 text-sm text-brand-100/85 sm:grid-cols-2 flex-1">
+                    <div class="flex items-start gap-2">
+                      <svg class="mt-0.5 h-4 w-4 text-secondaryBrand-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10m-12 9h14a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2Z" />
+                      </svg>
+                      <div>
+                        <p class="text-[11px] uppercase tracking-[0.2em] text-brand-200/70">Dates</p>
+                        <p class="font-medium text-white/90">{{ formatSessionRange(booking.session) }}</p>
+                      </div>
+                    </div>
+                    <div class="flex items-start gap-2">
+                      <svg class="mt-0.5 h-4 w-4 text-secondaryBrand-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 21c-4-4-6-7-6-10a6 6 0 0 1 12 0c0 3-2 6-6 10Z" />
+                        <circle cx="12" cy="11" r="2.2" />
+                      </svg>
+                      <div>
+                        <p class="text-[11px] uppercase tracking-[0.2em] text-brand-200/70">Lieu</p>
+                        <p class="font-medium text-white/90">{{ bookingLocationLabel(booking) }}</p>
+                      </div>
+                    </div>
+                    <div class="flex items-start gap-2">
+                      <svg class="mt-0.5 h-4 w-4 text-secondaryBrand-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M16 14c1.657 0 3 1.343 3 3v1h-6v-1c0-1.657 1.343-3 3-3Z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M8 14c1.657 0 3 1.343 3 3v1H5v-1c0-1.657 1.343-3 3-3Z" />
+                        <circle cx="16" cy="10" r="2.5" />
+                        <circle cx="8" cy="10" r="2.5" />
+                      </svg>
+                      <div>
+                        <p class="text-[11px] uppercase tracking-[0.2em] text-brand-200/70">Participants</p>
+                        <p class="font-medium text-white/90">{{ booking.participants || 1 }}</p>
+                      </div>
+                    </div>
+                    <div class="flex items-start gap-2">
+                      <svg class="mt-0.5 h-4 w-4 text-secondaryBrand-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0Z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 19a6 6 0 0 1 12 0v1H6v-1Z" />
+                      </svg>
+                      <div>
+                        <p class="text-[11px] uppercase tracking-[0.2em] text-brand-200/70">Moniteur</p>
+                        <a
+                          :href="bookingGuideProfileUrl(booking)"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          class="font-semibold text-secondaryBrand-200 hover:text-secondaryBrand-100"
+                          @click.stop
+                        >
+                          {{ bookingGuideName(booking) }}
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+
                 </div>
 
-                <div class="mt-3 flex flex-wrap gap-4 text-xs text-brand-200/80">
-                  <span class="inline-flex items-center gap-1.5">
-                    <svg class="h-3.5 w-3.5 text-secondaryBrand-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10m-12 9h14a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2Z" />
-                    </svg>
-                    {{ formatSessionRange(booking.session) }}
-                  </span>
-                  <span class="inline-flex items-center gap-1.5">
-                    <svg class="h-3.5 w-3.5 text-secondaryBrand-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M12 21c-4-4-6-7-6-10a6 6 0 0 1 12 0c0 3-2 6-6 10Z" />
-                      <circle cx="12" cy="11" r="2.2" />
-                    </svg>
-                    {{ bookingLocationLabel(booking) }}
-                  </span>
-                </div>
-
-                <div class="mt-3 flex flex-wrap items-center justify-between gap-3 text-xs text-brand-200/80">
-                  <span class="inline-flex items-center gap-1.5">
-                    <svg class="h-3.5 w-3.5 text-secondaryBrand-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0Z" />
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M6 19a6 6 0 0 1 12 0v1H6v-1Z" />
-                    </svg>
-                    Moniteur :
-                    <a
-                      :href="bookingGuideProfileUrl(booking)"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      class="font-semibold text-secondaryBrand-200 hover:text-secondaryBrand-100"
-                      @click.stop
+                <!-- Bloc réservation -->
+                <div class="rounded-xl border border-brand-800/70 bg-brand-950/50 p-5 flex flex-col gap-4 md:col-span-1 md:col-start-3 md:w-full md:max-w-[360px] min-w-[280px]">
+                  <div class="flex items-center justify-between gap-2">
+                    <p class="text-xs uppercase tracking-[0.25em] text-brand-200/70">Réservation</p>
+                    <span
+                      class="inline-flex items-center rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-wide"
+                      :class="bookingStatusToneClass(booking)"
                     >
-                      {{ bookingGuideName(booking) }}
-                    </a>
-                  </span>
-                  <span class="text-brand-200/60">
-                    Demandé le {{ new Date(booking.createdAt).toLocaleDateString('fr-FR') }}
-                  </span>
+                      {{ bookingStatusLabel(booking) }}
+                    </span>
+                  </div>
+
+                    <div class="text-sm text-brand-100/85 space-y-1">
+                      <p>Demandé le <span class="font-semibold text-white">{{ new Date(booking.createdAt).toLocaleDateString('fr-FR') }}</span></p>
+                    </div>
+
+                  <div class="mt-auto flex items-center gap-2">
+                    <NuxtLink
+                      :to="bookingAdventureLink(booking)"
+                      class="group relative flex h-10 w-10 items-center justify-center rounded-full border border-white/15 bg-white/5 text-secondaryBrand-200 transition hover:border-secondaryBrand-300 hover:bg-secondaryBrand-500/15"
+                    >
+                      <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M8 5l7 7-7 7" />
+                      </svg>
+                      <span class="pointer-events-none absolute left-1/2 top-full mt-1 -translate-x-1/2 whitespace-nowrap rounded-full bg-brand-900 px-2 py-1 text-[10px] font-semibold text-white opacity-0 shadow-lg shadow-black/40 transition group-hover:opacity-100">
+                        Voir l'aventure
+                      </span>
+                    </NuxtLink>
+
+                    <button
+                      type="button"
+                      class="group relative flex h-10 w-10 items-center justify-center rounded-full border border-white/15 bg-white/5 text-secondaryBrand-200 transition hover:border-secondaryBrand-300 hover:bg-secondaryBrand-500/15"
+                      @click.stop.prevent="shareAdventure(booking)"
+                    >
+                      <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+                        <circle cx="18" cy="5.5" r="2.3" />
+                        <circle cx="6" cy="12" r="2.3" />
+                        <circle cx="18" cy="18.5" r="2.3" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M7.8 10.9 16.2 6.6M7.8 13.1l8.4 4.3" />
+                      </svg>
+                      <span class="pointer-events-none absolute left-1/2 top-full mt-1 -translate-x-1/2 whitespace-nowrap rounded-full bg-brand-900 px-2 py-1 text-[10px] font-semibold text-white opacity-0 shadow-lg shadow-black/40 transition group-hover:opacity-100">
+                        Partager l'aventure
+                      </span>
+                    </button>
+
+                    <button
+                      v-if="booking.statut !== 'ANNULEE'"
+                      type="button"
+                      class="group relative flex h-10 w-10 items-center justify-center rounded-full border border-white/15 bg-white/5 text-red-200 transition hover:border-red-300 hover:bg-red-500/15"
+                      @click.stop.prevent="openCancelModal(booking)"
+                    >
+                      <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 6l12 12M6 18L18 6" />
+                      </svg>
+                      <span class="pointer-events-none absolute left-1/2 top-full mt-1 -translate-x-1/2 whitespace-nowrap rounded-full bg-brand-900 px-2 py-1 text-[10px] font-semibold text-white opacity-0 shadow-lg shadow-black/40 transition group-hover:opacity-100">
+                        Annuler la pré-inscription
+                      </span>
+                    </button>
+                  </div>
                 </div>
-              </NuxtLink>
+
+                <div
+                  v-if="bookingPlacesInfo(booking) && bookingPlacesInfo(booking)?.remaining > 0"
+                  class="md:col-span-3 rounded-xl border border-amber-400/30 bg-amber-500/8 px-3 py-3 space-y-3 text-xs text-amber-50/90"
+                >
+                  <div class="flex items-start gap-2">
+                    <svg class="mt-0.5 h-4 w-4 text-amber-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v4l2.5 2.5m5.5-3.5a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                    </svg>
+                    <p>
+                      Il manque {{ bookingPlacesInfo(booking)?.remaining }} grimpeur<span v-if="bookingPlacesInfo(booking)?.remaining > 1">s</span> pour que le départ soit confirmé.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    class="inline-flex items-center justify-center gap-2 rounded-full border border-secondaryBrand-300/60 bg-secondaryBrand-400/15 px-4 py-2 text-[12px] font-semibold text-secondaryBrand-100 hover:bg-secondaryBrand-400/25 transition"
+                    @click.stop.prevent="shareAdventure(booking)"
+                  >
+                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+                      <circle cx="18" cy="5.5" r="2.3" />
+                      <circle cx="6" cy="12" r="2.3" />
+                      <circle cx="18" cy="18.5" r="2.3" />
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M7.8 10.9 16.2 6.6M7.8 13.1l8.4 4.3" />
+                    </svg>
+                    Partager cette aventure
+                  </button>
+                </div>
+              </div>
             </div>
+          </div>
           </section>
 
           <section
@@ -633,6 +828,62 @@
         </template>
       </main>
     </div>
+
+    <!-- Modal d'annulation -->
+    <transition name="fade">
+      <div
+        v-if="showCancelModal"
+        class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4 backdrop-blur-sm"
+        role="dialog"
+        aria-modal="true"
+      >
+        <div class="max-w-lg w-full rounded-2xl border border-brand-700 bg-brand-900/90 p-6 shadow-2xl shadow-black/50">
+          <div class="flex items-start justify-between gap-4">
+            <div class="space-y-3">
+              <p class="text-xs uppercase tracking-[0.3em] text-amber-200/80">
+                Confirmation
+              </p>
+              <h3 class="text-xl font-semibold text-white">
+                Annuler cette pré-inscription ?
+              </h3>
+              <p class="text-sm text-brand-100/80 leading-relaxed">
+                Tu es à un clic d'annuler ton aventure d'escalade, es-tu sûr de ça ? Si oui, fais toi remplacer par un(e) ami(e) en partageant cette aventure !
+              </p>
+            </div>
+            <button
+              type="button"
+              class="text-brand-200 hover:text-white transition"
+              @click="closeCancelModal"
+              aria-label="Fermer"
+            >
+              <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 6l12 12M6 18L18 6" />
+              </svg>
+            </button>
+          </div>
+
+          <div class="mt-6 flex justify-end gap-3">
+            <button
+              type="button"
+              class="rounded-lg px-4 py-2 text-sm font-semibold text-brand-100 hover:bg-brand-800/70 border border-brand-700"
+              @click="closeCancelModal"
+              :disabled="cancelling"
+            >
+              Revenir
+            </button>
+            <button
+              type="button"
+              class="rounded-lg px-4 py-2 text-sm font-semibold text-brand-950 bg-red-400 hover:bg-red-300 disabled:opacity-60"
+              @click="confirmCancel"
+              :disabled="cancelling"
+            >
+              <span v-if="cancelling">Annulation...</span>
+              <span v-else>Confirmer l'annulation</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </transition>
   </div>
 </template>
 

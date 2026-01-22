@@ -147,6 +147,7 @@ model Aventure {
 
   jours         Int
   placesMax     Int
+  placesMin     Int @default(0)
   niveauMinimum String? // "5b", "6a", etc.
   autonomieMini String? // "assur_tete", etc.
 

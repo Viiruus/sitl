@@ -24,11 +24,7 @@ export default defineEventHandler(async (event) => {
             include: {
               aventure: {
                 include: {
-                guide: {
-                  include: {
-                    guideProfile: true,
-                  },
-                },
+                  guide: true,
                 },
               },
             },
