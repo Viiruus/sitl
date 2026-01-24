@@ -1,5 +1,6 @@
 <script setup lang="ts">
   const { loggedIn, fetch, user, clear } = useUserSession()
+  const route = useRoute()
   const router = useRouter()
 
   const loading = ref(true)
@@ -69,6 +70,17 @@
 
   onMounted(loadProfile)
 
+  watch(
+    () => route.query.panel,
+    (value) => {
+      const panel = Array.isArray(value) ? value[0] : value
+      if (panel === 'profil' || panel === 'bookings') {
+        activePanel.value = panel
+      }
+    },
+    { immediate: true },
+  )
+
   // Enregistrer = réutiliser /api/onboarding
   const save = async () => {
   error.value = null
@@ -131,6 +143,7 @@
   const showCancelModal = ref(false)
   const bookingPendingCancel = ref<any | null>(null)
   const cancelling = ref(false)
+  const cancelledSectionOpen = ref(false)
 
   const openCancelModal = (booking: any) => {
     bookingPendingCancel.value = booking
@@ -153,7 +166,10 @@
       await $fetch(`/api/bookings/${booking.id}`, {
         method: 'DELETE',
       })
-      userBookings.value = userBookings.value.filter((b: any) => b.id !== booking.id)
+      userBookings.value = userBookings.value.map((b: any) =>
+        b.id === booking.id ? { ...b, statut: 'ANNULEE' } : b,
+      )
+      cancelledSectionOpen.value = true
       success.value = 'Pré-inscription annulée.'
     } catch (e: any) {
       console.error(e)
@@ -238,7 +254,18 @@
     return { remaining, minNeeded }
   }
 
-  const hasBookings = computed(() => userBookings.value.length > 0)
+  const activeBookings = computed(() =>
+    userBookings.value.filter((booking: any) => booking?.statut !== 'ANNULEE'),
+  )
+  const cancelledBookings = computed(() =>
+    userBookings.value.filter((booking: any) => booking?.statut === 'ANNULEE'),
+  )
+  const hasActiveBookings = computed(() => activeBookings.value.length > 0)
+
+  const onCancelledToggle = (event: Event) => {
+    const target = event.target as HTMLDetailsElement | undefined
+    cancelledSectionOpen.value = target?.open ?? false
+  }
   const shareMessage = ref('')
   const shareError = ref('')
 
@@ -333,13 +360,22 @@
               <p v-else-if="shareError" class="text-red-200">{{ shareError }}</p>
             </div>
 
-            <p v-if="!hasBookings" class="rounded-2xl border border-dashed border-brand-700/80 bg-brand-950/40 px-5 py-6 text-sm text-brand-100/70">
+            <p
+              v-if="!hasActiveBookings && !cancelledBookings.length"
+              class="rounded-2xl border border-dashed border-brand-700/80 bg-brand-950/40 px-5 py-6 text-sm text-brand-100/70"
+            >
               Tu ne t’es pas encore positionné·e sur une date. Explore les aventures pour manifester ton intérêt 💛
             </p>
+            <p
+              v-else-if="!hasActiveBookings && cancelledBookings.length"
+              class="rounded-2xl border border-dashed border-brand-700/80 bg-brand-950/40 px-5 py-6 text-sm text-brand-100/70"
+            >
+              Tu n’as plus de pré-inscriptions actives pour le moment.
+            </p>
 
-          <div v-else class="space-y-4">
+          <div v-if="hasActiveBookings" class="space-y-4">
             <div
-              v-for="booking in userBookings"
+              v-for="booking in activeBookings"
               :key="booking.id"
               class="rounded-2xl border border-brand-800 bg-brand-950/70 p-5"
             >
@@ -496,6 +532,77 @@
               </div>
             </div>
           </div>
+
+          <details
+            v-if="cancelledBookings.length"
+            class="group rounded-2xl border border-brand-800 bg-brand-950/60 p-4"
+            :open="cancelledSectionOpen"
+            @toggle="onCancelledToggle"
+          >
+            <summary class="flex cursor-pointer items-center justify-between gap-3 text-left">
+              <div>
+                <p class="text-sm font-semibold text-white">
+                  Stages annulés
+                </p>
+                <p class="text-xs text-brand-100/70">
+                  {{ cancelledBookings.length }} pré-inscription<span v-if="cancelledBookings.length > 1">s</span> annulée<span v-if="cancelledBookings.length > 1">s</span>
+                </p>
+              </div>
+              <svg
+                class="h-5 w-5 text-brand-200 transition group-open:rotate-180"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.5"
+              >
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 9l6 6 6-6" />
+              </svg>
+            </summary>
+
+            <div class="mt-3 space-y-2">
+              <div
+                v-for="booking in cancelledBookings"
+                :key="booking.id"
+                class="rounded-xl border border-brand-800/70 bg-brand-950/70 px-4 py-3"
+              >
+                <div class="flex items-center justify-between gap-3">
+                  <p class="text-sm font-semibold text-white truncate">
+                    {{ booking.session?.aventure?.titre || 'Aventure' }}
+                  </p>
+                  <span
+                    class="inline-flex items-center rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide"
+                    :class="bookingStatusToneClass(booking)"
+                  >
+                    {{ bookingStatusLabel(booking) }}
+                  </span>
+                </div>
+                <div class="mt-2 flex flex-wrap items-center gap-3 text-xs text-brand-100/80">
+                  <span class="inline-flex items-center gap-1.5">
+                    <svg class="h-3.5 w-3.5 text-secondaryBrand-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10m-12 9h14a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2Z" />
+                    </svg>
+                    {{ formatSessionRange(booking.session) }}
+                  </span>
+                  <span class="inline-flex items-center gap-1.5">
+                    <svg class="h-3.5 w-3.5 text-secondaryBrand-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M12 21c-4-4-6-7-6-10a6 6 0 0 1 12 0c0 3-2 6-6 10Z" />
+                      <circle cx="12" cy="11" r="2.2" />
+                    </svg>
+                    {{ bookingLocationLabel(booking) }}
+                  </span>
+                </div>
+                <NuxtLink
+                  :to="bookingAdventureLink(booking)"
+                  class="mt-2 inline-flex items-center text-[11px] font-semibold text-secondaryBrand-200 hover:text-secondaryBrand-100"
+                >
+                  Voir l'aventure →
+                </NuxtLink>
+                <p class="mt-1 text-[11px] text-brand-100/50">
+                  Annulé le {{ new Date(booking.updatedAt || booking.createdAt).toLocaleDateString('fr-FR') }}
+                </p>
+              </div>
+            </div>
+          </details>
           </section>
 
           <section

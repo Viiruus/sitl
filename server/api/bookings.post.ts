@@ -62,6 +62,9 @@ export default defineEventHandler(async (event) => {
     where: {
       userId,
       sessionId,
+      statut: {
+        not: 'ANNULEE',
+      },
     },
   })
 

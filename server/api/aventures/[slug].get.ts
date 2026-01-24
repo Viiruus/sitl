@@ -59,6 +59,9 @@ export default defineEventHandler(async (event) => {
           session: {
             aventureId: aventure.id,
           },
+          statut: {
+            not: 'ANNULEE',
+          },
         },
         select: {
           sessionId: true,

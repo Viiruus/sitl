@@ -541,12 +541,6 @@
                   >
                     {{ bookingError }}
                   </p>
-                  <p
-                    v-if="bookingSuccess"
-                    class="mt-3 rounded-md bg-green-50 px-3 py-2 text-xs text-green-700"
-                  >
-                    {{ bookingSuccess }}
-                  </p>
 
                   <div class="mt-5 space-y-4 text-[15px] text-gray-900">
                     <template v-if="hasSessions">
@@ -580,7 +574,7 @@
                                 }} places restantes
                               </p>
                               <p
-                                v-if="session.userIsBooked"
+                                v-if="session.userIsBooked && session.statut !== 'ANNULE'"
                                 class="text-xs font-semibold text-emerald-600"
                               >
                                 Tu t’es déjà positionné·e sur cette date
@@ -900,6 +894,143 @@
     </section>
 
     <AppFooter />
+
+    <Teleport to="body">
+      <div
+        v-if="showBookingModal"
+        class="fixed inset-0 z-[80] flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm"
+        @click.self="closeBookingModal"
+      >
+        <div class="w-full max-w-lg overflow-hidden rounded-3xl bg-brand-950 text-white shadow-2xl shadow-black/50 ring-1 ring-white/10">
+          <div class="flex items-start justify-between gap-4 border-b border-white/10 px-6 py-5">
+            <div>
+              <p class="text-[11px] font-semibold uppercase tracking-[0.3em] text-secondaryBrand-200">
+                Inscription
+              </p>
+              <h3 class="mt-2 text-xl font-semibold">
+                Merci, inscription reçue
+              </h3>
+              <p class="mt-2 text-sm text-brand-100/85">
+                {{ bookingSuccess }}
+              </p>
+            </div>
+            <button
+              type="button"
+              class="rounded-full border border-white/20 bg-white/5 p-2 text-white transition hover:bg-white/10"
+              @click="closeBookingModal"
+              aria-label="Fermer"
+            >
+              <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 6l12 12M6 18L18 6" />
+              </svg>
+            </button>
+          </div>
+          <div class="space-y-5 px-6 py-5">
+            <img
+              src="https://media.giphy.com/media/26tOZ42Mg6pbTUPHW/giphy.gif"
+              alt="Feux d'artifice"
+              class="mx-auto h-28 w-auto rounded-2xl"
+              loading="lazy"
+            />
+            <div class="flex items-center gap-3 rounded-2xl border border-white/10 bg-brand-900/60 p-3">
+              <div class="h-14 w-14 overflow-hidden rounded-full border border-secondaryBrand-400/70 bg-brand-900">
+                <img
+                  v-if="guideImage"
+                  :src="guideImage"
+                  :alt="guideFullName || 'Moniteur'"
+                  class="size-full object-cover"
+                />
+                <div
+                  v-else
+                  class="flex h-full w-full items-center justify-center text-[10px] font-semibold uppercase tracking-[0.2em] text-secondaryBrand-200"
+                >
+                  Guide
+                </div>
+              </div>
+              <div>
+                <p class="text-[11px] font-semibold uppercase tracking-[0.3em] text-brand-200/70">
+                  Moniteur
+                </p>
+                <p class="text-sm font-semibold text-white">
+                  {{ guideFullName || 'Moniteur local' }}
+                </p>
+              </div>
+            </div>
+
+            <div
+              v-if="needsMoreClimbers"
+              class="space-y-3 rounded-2xl border border-secondaryBrand-400/30 bg-secondaryBrand-500/10 p-4"
+            >
+              <div class="space-y-2 rounded-xl border border-white/10 bg-brand-950/60 p-3">
+                <p class="text-[11px] font-semibold uppercase tracking-[0.3em] text-secondaryBrand-200/80">
+                  Confirmation
+                </p>
+                <p v-if="confirmationNeeds.length === 1" class="text-sm text-brand-100/90">
+                  Il manque encore
+                  <span class="font-semibold text-white">{{ confirmationNeeds[0].remaining }}</span>
+                  grimpeur<span v-if="confirmationNeeds[0].remaining > 1">s</span> pour confirmer cette date.
+                  <span class="text-brand-200">({{ confirmationNeeds[0].label }})</span>
+                </p>
+                <div v-else class="space-y-2 text-sm text-brand-100/90">
+                  <p>Il manque encore des grimpeur·euse·s sur tes dates :</p>
+                  <div class="space-y-1">
+                    <div
+                      v-for="need in confirmationNeeds"
+                      :key="need.id"
+                      class="flex items-center justify-between rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs"
+                    >
+                      <span class="font-semibold text-white">
+                        {{ need.label }}
+                      </span>
+                      <span class="text-brand-200">
+                        {{ need.remaining }} manquant{{ need.remaining > 1 ? 's' : '' }}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <p class="text-sm text-brand-100/90">
+                Tu peux aider à compléter le groupe en partageant l’aventure.
+              </p>
+              <button
+                type="button"
+                class="inline-flex w-full items-center justify-center gap-2 rounded-full border border-secondaryBrand-300/60 bg-secondaryBrand-400/15 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-secondaryBrand-100 hover:bg-secondaryBrand-400/25 transition"
+                @click="shareStage"
+              >
+                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+                  <circle cx="18" cy="5.5" r="2.3" />
+                  <circle cx="6" cy="12" r="2.3" />
+                  <circle cx="18" cy="18.5" r="2.3" />
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M7.8 10.9 16.2 6.6M7.8 13.1l8.4 4.3" />
+                </svg>
+                Partager cette aventure
+              </button>
+              <p v-if="shareMessage" class="text-xs text-emerald-200">
+                {{ shareMessage }}
+              </p>
+              <p v-else-if="shareError" class="text-xs text-red-200">
+                {{ shareError }}
+              </p>
+            </div>
+
+            <div class="grid gap-3 sm:grid-cols-2">
+              <NuxtLink
+                to="/profil"
+                class="inline-flex items-center justify-center rounded-full border border-white/15 bg-white/5 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-white transition hover:border-secondaryBrand-300 hover:bg-white/10"
+              >
+                Mes inscriptions
+              </NuxtLink>
+              <NuxtLink
+                to="/profil?panel=profil"
+                class="inline-flex items-center justify-center rounded-full bg-secondaryBrand-400 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-brand-950 shadow-lg shadow-secondaryBrand-900/30 transition hover:bg-secondaryBrand-300"
+              >
+                Mon profil
+              </NuxtLink>
+            </div>
+          </div>
+        </div>
+      </div>
+    </Teleport>
 
     <Teleport to="body">
       <div
@@ -1277,6 +1408,9 @@ const router = useRouter()
 const bookingLoading = ref(false)
 const bookingError = ref<string | null>(null)
 const bookingSuccess = ref<string | null>(null)
+const showBookingModal = ref(false)
+const shareMessage = ref('')
+const shareError = ref('')
 const customComment = ref('')
 const customDateRange = ref<[Date | null, Date | null]>([null, null])
 const datePickerModel = computed<[Date | null, Date | null] | null>({
@@ -1326,6 +1460,30 @@ const selectedSessions = computed(() => {
     return !Number.isNaN(ts) && ts >= today.getTime()
   })
   return sessions.filter((s: any) => ids.includes(String(s.id)))
+})
+
+const needsMoreClimbers = computed(() => {
+  const minNeeded = stage.value?.placesMin ?? 0
+  if (!minNeeded) return false
+  if (!selectedSessions.value.length) return false
+  return selectedSessions.value.some(
+    (session: any) => (session.placesReservees ?? 0) < minNeeded,
+  )
+})
+
+const confirmationNeeds = computed(() => {
+  const minNeeded = stage.value?.placesMin ?? 0
+  if (!minNeeded || !selectedSessions.value.length) return []
+  return selectedSessions.value
+    .map((session: any) => {
+      const remaining = Math.max(0, minNeeded - (session.placesReservees ?? 0))
+      return {
+        id: session.id,
+        remaining,
+        label: formatSessionDate(session),
+      }
+    })
+    .filter((need) => need.remaining > 0)
 })
 
 const overviewHighlights = computed(() => {
@@ -1399,9 +1557,53 @@ const onSuggestionToggle = (event: Event) => {
   suggestionDetailsOpen.value = target?.open ?? false
 }
 
+const closeBookingModal = () => {
+  showBookingModal.value = false
+  shareMessage.value = ''
+  shareError.value = ''
+}
+
+const shareStage = async () => {
+  const path = `/aventures-escalade/${slug}`
+  const origin = typeof window !== 'undefined' ? window.location.origin : ''
+  const url = origin ? `${origin}${path}` : path
+  shareMessage.value = ''
+  shareError.value = ''
+
+  if (typeof navigator !== 'undefined' && navigator.clipboard) {
+    try {
+      await navigator.clipboard.writeText(url)
+      shareMessage.value = 'Lien copié dans le presse-papiers ✅'
+      setTimeout(() => {
+        shareMessage.value = ''
+      }, 3000)
+      return
+    } catch (e) {
+      shareError.value = 'Impossible de copier le lien'
+      setTimeout(() => {
+        shareError.value = ''
+      }, 3000)
+      return
+    }
+  }
+  try {
+    window.prompt('Copie ce lien', url)
+    shareMessage.value = 'Lien affiché pour copie'
+    setTimeout(() => {
+      shareMessage.value = ''
+    }, 3000)
+  } catch (e) {
+    shareError.value = 'Partage indisponible sur ce navigateur'
+    setTimeout(() => {
+      shareError.value = ''
+    }, 3000)
+  }
+}
+
 const handleInterestClick = async () => {
   bookingError.value = null
   bookingSuccess.value = null
+  closeBookingModal()
 
   if (!selectedSessionIds.value.length) return
 
@@ -1421,7 +1623,8 @@ const handleInterestClick = async () => {
 
     if (!targets.length) {
       bookingSuccess.value =
-        'Tu es déjà positionné·e sur ces dates. Merci !'
+        'Tu es déjà positionné·e sur ces dates. Le moniteur te recontacte dès confirmation du stage.'
+      showBookingModal.value = true
       return
     }
 
@@ -1442,7 +1645,8 @@ const handleInterestClick = async () => {
     }
 
     bookingSuccess.value =
-      'Merci ! Ton intérêt a bien été pris en compte 💛'
+      'Ton inscription est bien enregistrée. Le moniteur te recontacte dès confirmation du stage.'
+    showBookingModal.value = true
   } catch (err: any) {
     const message =
       err?.data?.statusMessage ||
