@@ -502,13 +502,16 @@
                         <span class="text-sm font-bold">?</span>
                       </button>
                       <div
-                        class="pointer-events-none absolute right-0 top-10 z-10 w-64 rounded-2xl bg-secondaryBrand-400 px-4 py-3 text-[11px] font-semibold leading-snug text-brand-950 shadow-lg shadow-secondaryBrand-900/30 ring-1 ring-secondaryBrand-300/70 opacity-0 translate-y-1 transition duration-200 ease-out group-hover/info:opacity-100 group-hover/info:translate-y-0 group-focus-within/info:opacity-100 group-focus-within/info:translate-y-0"
+                        class="pointer-events-none absolute right-0 top-10 z-10 w-72 rounded-2xl bg-gradient-to-br from-secondaryBrand-300/95 via-secondaryBrand-400/95 to-secondaryBrand-500/95 px-4 py-4 text-[11px] font-semibold leading-snug text-brand-950 shadow-xl shadow-secondaryBrand-900/35 ring-1 ring-white/40 opacity-0 translate-y-1 transition duration-200 ease-out group-hover/info:opacity-100 group-hover/info:translate-y-0 group-focus-within/info:opacity-100 group-focus-within/info:translate-y-0"
                       >
-                        Lorsque tu t’inscris, le moniteur prend contact avec toi pour l’organisation.
-                        <br/>
-                        Tu règles l’acompte et le solde directement auprès de lui.
-                        <br/>
-                        Tu comptes les dodos et tu pars à l’aventure.
+                        <p class="text-[10px] uppercase tracking-[0.3em] text-brand-950/70">
+                          Comment ça marche
+                        </p>
+                        <div class="mt-2 space-y-2 text-[11px] text-brand-950/90">
+                          <p>Lorsque tu t’inscris, le moniteur prend contact avec toi pour l’organisation.</p>
+                          <p>Tu règles l’acompte et le solde directement auprès de lui.</p>
+                          <p>Tu comptes les dodos et tu pars à l’aventure.</p>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -518,13 +521,16 @@
                     </h3>
                     <div class="relative group/info">
                       <div
-                        class="pointer-events-none absolute right-0 top-10 z-10 w-64 rounded-2xl bg-secondaryBrand-400 px-4 py-3 text-[11px] font-semibold leading-snug text-brand-950 shadow-lg shadow-secondaryBrand-900/30 ring-1 ring-secondaryBrand-300/70 opacity-0 translate-y-1 transition duration-200 ease-out group-hover/info:opacity-100 group-hover/info:translate-y-0 group-focus-within/info:opacity-100 group-focus-within/info:translate-y-0"
+                        class="pointer-events-none absolute right-0 top-10 z-10 w-72 rounded-2xl bg-gradient-to-br from-secondaryBrand-300/95 via-secondaryBrand-400/95 to-secondaryBrand-500/95 px-4 py-4 text-[11px] font-semibold leading-snug text-brand-950 shadow-xl shadow-secondaryBrand-900/35 ring-1 ring-white/40 opacity-0 translate-y-1 transition duration-200 ease-out group-hover/info:opacity-100 group-hover/info:translate-y-0 group-focus-within/info:opacity-100 group-focus-within/info:translate-y-0"
                       >
-                        Lorsque tu t’inscris, le moniteur prend contact avec toi pour l’organisation.
-                        <br/>
-                        Tu règles l’acompte et le solde directement auprès de lui.
-                        <br/>
-                        Tu comptes les dodos et tu pars à l’aventure.
+                        <p class="text-[10px] uppercase tracking-[0.3em] text-brand-950/70">
+                          Comment ça marche
+                        </p>
+                        <div class="mt-2 space-y-2 text-[11px] text-brand-950/90">
+                          <p>Lorsque tu t’inscris, le moniteur prend contact avec toi pour l’organisation.</p>
+                          <p>Tu règles l’acompte et le solde directement auprès de lui.</p>
+                          <p>Tu comptes les dodos et tu pars à l’aventure.</p>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -569,7 +575,7 @@
                                 {{
                                   Math.max(
                                     0,
-                                    (stage?.placesMax || 0) - (session.placesReservees || 0)
+                                    (stage?.placesMax || 0) - sessionParticipantsCount(session)
                                   )
                                 }} places restantes
                               </p>
@@ -1389,6 +1395,21 @@ const formatSessionDate = (session: any) => {
   return start === end ? start : `${start} → ${end}`
 }
 
+const sessionParticipantsCount = (session?: {
+  participantsCount?: number | null
+  reservations?: { participants?: number | null }[]
+} | null) => {
+  if (!session) return 0
+  if (typeof session.participantsCount === 'number') return session.participantsCount
+  if (Array.isArray(session.reservations)) {
+    return session.reservations.reduce(
+      (total, booking) => total + (booking?.participants ?? 1),
+      0,
+    )
+  }
+  return 0
+}
+
 const formatSessionRange = (session?: { dateDebut?: string | Date; dateFin?: string | Date } | null) => {
   if (!session?.dateDebut) return ''
   const formatter = new Intl.DateTimeFormat('fr-FR', {
@@ -1411,6 +1432,9 @@ const bookingSuccess = ref<string | null>(null)
 const showBookingModal = ref(false)
 const shareMessage = ref('')
 const shareError = ref('')
+const pendingBookingHandled = ref(false)
+const pendingBookingKey = 'bdk_pending_booking'
+const pendingBookingIntentKey = 'bdk_pending_booking_intent'
 const customComment = ref('')
 const customDateRange = ref<[Date | null, Date | null]>([null, null])
 const datePickerModel = computed<[Date | null, Date | null] | null>({
@@ -1467,7 +1491,7 @@ const needsMoreClimbers = computed(() => {
   if (!minNeeded) return false
   if (!selectedSessions.value.length) return false
   return selectedSessions.value.some(
-    (session: any) => (session.placesReservees ?? 0) < minNeeded,
+    (session: any) => sessionParticipantsCount(session) < minNeeded,
   )
 })
 
@@ -1476,7 +1500,7 @@ const confirmationNeeds = computed(() => {
   if (!minNeeded || !selectedSessions.value.length) return []
   return selectedSessions.value
     .map((session: any) => {
-      const remaining = Math.max(0, minNeeded - (session.placesReservees ?? 0))
+      const remaining = Math.max(0, minNeeded - sessionParticipantsCount(session))
       return {
         id: session.id,
         remaining,
@@ -1557,6 +1581,55 @@ const onSuggestionToggle = (event: Event) => {
   suggestionDetailsOpen.value = target?.open ?? false
 }
 
+const storePendingBooking = () => {
+  if (typeof window === 'undefined') return
+  if (!selectedSessionIds.value.length) return
+  const payload = {
+    slug,
+    sessionIds: [...selectedSessionIds.value],
+    createdAt: Date.now(),
+  }
+  window.localStorage.setItem(pendingBookingKey, JSON.stringify(payload))
+  window.localStorage.setItem(pendingBookingIntentKey, slug)
+}
+
+const tryResumePendingBooking = async () => {
+  if (pendingBookingHandled.value) return
+  if (!loggedIn.value) return
+  if (!stage.value) return
+  if (typeof window === 'undefined') return
+
+  const raw = window.localStorage.getItem(pendingBookingKey)
+  if (!raw) {
+    pendingBookingHandled.value = true
+    return
+  }
+
+  let payload: { slug?: string; sessionIds?: string[] } | null = null
+  try {
+    payload = JSON.parse(raw)
+  } catch (error) {
+    window.localStorage.removeItem(pendingBookingKey)
+    pendingBookingHandled.value = true
+    return
+  }
+
+  if (payload?.slug !== slug || !Array.isArray(payload.sessionIds)) {
+    return
+  }
+
+  const availableIds = new Set(availableSessions.value.map((s: any) => String(s.id)))
+  const nextIds = payload.sessionIds.filter((id) => availableIds.has(String(id)))
+
+  window.localStorage.removeItem(pendingBookingKey)
+  pendingBookingHandled.value = true
+
+  if (!nextIds.length) return
+  selectedSessionIds.value = nextIds.map((id) => String(id))
+  await nextTick()
+  await handleInterestClick()
+}
+
 const closeBookingModal = () => {
   showBookingModal.value = false
   shareMessage.value = ''
@@ -1609,6 +1682,7 @@ const handleInterestClick = async () => {
 
   // 1) S'il n'est pas connecté → login
   if (!loggedIn.value) {
+    storePendingBooking()
     const redirect = encodeURIComponent(route.fullPath)
     await router.push(`/login?redirect=${redirect}`)
     return
@@ -1622,9 +1696,6 @@ const handleInterestClick = async () => {
       .filter((s: any) => s && !s.userIsBooked)
 
     if (!targets.length) {
-      bookingSuccess.value =
-        'Tu es déjà positionné·e sur ces dates. Le moniteur te recontacte dès confirmation du stage.'
-      showBookingModal.value = true
       return
     }
 
@@ -1641,7 +1712,8 @@ const handleInterestClick = async () => {
       })
 
       session.userIsBooked = true
-      session.placesReservees = (session.placesReservees || 0) + 1
+      const nextCount = sessionParticipantsCount(session) + 1
+      session.participantsCount = nextCount
     }
 
     bookingSuccess.value =
@@ -1657,6 +1729,14 @@ const handleInterestClick = async () => {
     bookingLoading.value = false
   }
 }
+
+watch(
+  () => [loggedIn.value, stage.value, availableSessions.value.length],
+  () => {
+    tryResumePendingBooking()
+  },
+  { immediate: true },
+)
 
 const handleSuggestionClick = async () => {
   suggestionError.value = null

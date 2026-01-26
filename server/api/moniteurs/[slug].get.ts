@@ -11,8 +11,25 @@ const slugifyName = (firstName?: string | null, lastName?: string | null, fallba
     .toLowerCase()
 }
 
+const findNextSession = (sessions: any[]) => {
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  const todayMs = today.getTime()
+
+  const future = (sessions ?? [])
+    .filter((s: any) => s?.dateDebut)
+    .map((s: any) => ({ ...s, _ts: new Date(s.dateDebut).getTime() }))
+    .filter((s: any) => !Number.isNaN(s._ts) && s._ts >= todayMs)
+    .sort((a: any, b: any) => a._ts - b._ts)
+
+  if (!future.length) return null
+  const best = { ...future[0] }
+  delete best._ts
+  return best
+}
+
 const mapAventureForGuide = (a: any) => {
-  const sessions = (a.sessions ?? []).slice().sort((s1: any, s2: any) => +s1.dateDebut - +s2.dateDebut)
+  const nextSession = findNextSession(a.sessions ?? [])
   return {
     id: a.id,
     slug: a.slug,
@@ -23,10 +40,10 @@ const mapAventureForGuide = (a: any) => {
     jours: a.jours,
     prixParPersonne: a.prixParPersonne,
     coverImageUrl: a.coverImageUrl,
-    nextSession: sessions[0]
+    nextSession: nextSession
       ? {
-          dateDebut: sessions[0].dateDebut,
-          dateFin: sessions[0].dateFin,
+          dateDebut: nextSession.dateDebut,
+          dateFin: nextSession.dateFin,
         }
       : null,
   }
@@ -83,8 +100,7 @@ export default defineEventHandler(async (event) => {
   })
 
   const allSessions = aventures.flatMap((a) => a.sessions || [])
-  const sortedSessions = allSessions.slice().sort((s1: any, s2: any) => +s1.dateDebut - +s2.dateDebut)
-  const nextSessionDate = sortedSessions[0]?.dateDebut ?? null
+  const nextSessionDate = findNextSession(allSessions)?.dateDebut ?? null
 
   const uniqueDisciplines = Array.from(
     new Set(

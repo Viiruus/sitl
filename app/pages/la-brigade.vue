@@ -5,6 +5,7 @@
       <div class="absolute inset-0">
         <img src="/images/emulation2.jpeg" alt="" class="h-full w-full object-cover opacity-25" />
         <div class="absolute inset-0 bg-brand-950/70" />
+        <div class="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-b from-transparent to-brand-950" />
       </div>
       <div class="relative">
         <!-- Header réutilisable -->

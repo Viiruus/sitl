@@ -36,7 +36,20 @@ export default defineEventHandler(async (event) => {
       },
       images: true,
       programmeJours: true,
-      sessions: true,
+      sessions: {
+        include: {
+          reservations: {
+            where: {
+              statut: {
+                not: 'ANNULEE',
+              },
+            },
+            select: {
+              participants: true,
+            },
+          },
+        },
+      },
     },
   })
 
@@ -206,15 +219,24 @@ const mapDetailAventure = (a: any, bookedSessionIds: Set<number>) => ({
 const mapSessions = (sessions: any[], bookedSessionIds?: Set<number>) =>
   (sessions ?? [])
     .sort((s1: any, s2: any) => +s1.dateDebut - +s2.dateDebut)
-    .map((session: any) => ({
-      id: session.id,
-      dateDebut: session.dateDebut,
-      dateFin: session.dateFin,
-      statut: session.statut,
-      placesTotales: session.placesTotales,
-      placesReservees: session.placesReservees,
-      userIsBooked: bookedSessionIds?.has(session.id) ?? false,
-    }))
+    .map((session: any) => {
+      const participantsCount = Array.isArray(session.reservations)
+        ? session.reservations.reduce(
+            (total: number, booking: any) =>
+              total + (booking?.participants ?? 1),
+            0,
+          )
+        : null
+      return {
+        id: session.id,
+        dateDebut: session.dateDebut,
+        dateFin: session.dateFin,
+        statut: session.statut,
+        placesTotales: session.placesTotales,
+        participantsCount,
+        userIsBooked: bookedSessionIds?.has(session.id) ?? false,
+      }
+    })
 
 const mapNextSession = (sessions: any[]) => {
   const today = new Date()
@@ -234,6 +256,5 @@ const mapNextSession = (sessions: any[]) => {
     dateFin: best.dateFin,
     statut: best.statut,
     placesTotales: best.placesTotales,
-    placesReservees: best.placesReservees,
   }
 }

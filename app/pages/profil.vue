@@ -247,7 +247,9 @@
   const bookingPlacesInfo = (booking: any) => {
     const session = booking?.session
     if (!session) return null
-    const reserved = session.placesReservees ?? 0
+    const reserved = Array.isArray(session.reservations)
+      ? session.reservations.length
+      : 0
     const minNeeded = session.aventure?.placesMin ?? 0
     if (!minNeeded) return null
     const remaining = Math.max(0, minNeeded - reserved)
@@ -408,7 +410,10 @@
                         <p class="font-medium text-white/90">{{ bookingLocationLabel(booking) }}</p>
                       </div>
                     </div>
-                    <div class="flex items-start gap-2">
+                    <div
+                      v-if="booking.participants !== null && booking.participants !== undefined"
+                      class="flex items-start gap-2"
+                    >
                       <svg class="mt-0.5 h-4 w-4 text-secondaryBrand-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M16 14c1.657 0 3 1.343 3 3v1h-6v-1c0-1.657 1.343-3 3-3Z" />
                         <path stroke-linecap="round" stroke-linejoin="round" d="M8 14c1.657 0 3 1.343 3 3v1H5v-1c0-1.657 1.343-3 3-3Z" />
@@ -417,7 +422,7 @@
                       </svg>
                       <div>
                         <p class="text-[11px] uppercase tracking-[0.2em] text-brand-200/70">Participants</p>
-                        <p class="font-medium text-white/90">{{ booking.participants || 1 }}</p>
+                        <p class="font-medium text-white/90">{{ booking.participants }}</p>
                       </div>
                     </div>
                     <div class="flex items-start gap-2">

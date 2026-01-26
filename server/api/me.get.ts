@@ -27,6 +27,16 @@ export default defineEventHandler(async (event) => {
                   guide: true,
                 },
               },
+              reservations: {
+                where: {
+                  statut: {
+                    not: 'ANNULEE',
+                  },
+                },
+                select: {
+                  id: true,
+                },
+              },
             },
           },
         },

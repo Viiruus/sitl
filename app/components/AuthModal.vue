@@ -12,6 +12,9 @@ const phoneNumber = ref('')
 const code = ref('')
 const codeSent = ref(false)
 const otpToken = ref<string | null>(null)
+const pendingBookingKey = 'bdk_pending_booking'
+const pendingBookingIntentKey = 'bdk_pending_booking_intent'
+const skipPendingClear = ref(false)
 
 const source = computed(() => (route.query.source as string) || 'direct')
 
@@ -27,12 +30,50 @@ const resetState = () => {
 watch(open, (val) => {
   if (!val) {
     resetState()
+    if (!skipPendingClear.value && !loggedIn.value && typeof window !== 'undefined') {
+      window.localStorage.removeItem(pendingBookingKey)
+      window.localStorage.removeItem(pendingBookingIntentKey)
+    }
+    skipPendingClear.value = false
   }
 })
 
 const redirectAfterAuth = async () => {
   await fetch()
+  skipPendingClear.value = true
   closeModal()
+
+  if (typeof window !== 'undefined') {
+    const raw = window.localStorage.getItem(pendingBookingKey)
+    if (raw) {
+      try {
+        const payload = JSON.parse(raw)
+        const pendingSlug = payload?.slug
+        if (pendingSlug) {
+          const target = `/aventures-escalade/${pendingSlug}`
+          if (route.path !== target) {
+            await router.push(target)
+          }
+          window.localStorage.removeItem(pendingBookingKey)
+          window.localStorage.removeItem(pendingBookingIntentKey)
+          return
+        }
+      } catch (error) {
+        window.localStorage.removeItem(pendingBookingKey)
+      }
+    }
+
+    const intentSlug = window.localStorage.getItem(pendingBookingIntentKey)
+    if (intentSlug) {
+      const target = `/aventures-escalade/${intentSlug}`
+      if (route.path !== target) {
+        await router.push(target)
+      }
+      window.localStorage.removeItem(pendingBookingIntentKey)
+      return
+    }
+  }
+
   if (user.value?.onboarded) {
     router.push('/profil')
   } else {

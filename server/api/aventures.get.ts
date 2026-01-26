@@ -36,8 +36,24 @@ export default defineEventHandler(async () => {
       guideName: [a.guide?.firstName, a.guide?.lastName].filter(Boolean).join(" ") || null,
       guideImageUrl: a.guide?.guideProfile?.profileImageUrl || null,
       hasSessions: a.sessions.length > 0,
-      nextSession: a.sessions.sort((s1, s2) => +s1.dateDebut - +s2.dateDebut)[0] ?? null,
+      nextSession: findNextSession(a.sessions),
     })),
   };
 });
 
+const findNextSession = (sessions: any[]) => {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const todayMs = today.getTime();
+
+  const future = (sessions ?? [])
+    .filter((s: any) => s?.dateDebut)
+    .map((s: any) => ({ ...s, _ts: new Date(s.dateDebut).getTime() }))
+    .filter((s: any) => !Number.isNaN(s._ts) && s._ts >= todayMs)
+    .sort((a: any, b: any) => a._ts - b._ts);
+
+  if (!future.length) return null;
+  const best = { ...future[0] };
+  delete best._ts;
+  return best;
+};
