@@ -19,8 +19,12 @@ export default defineEventHandler(async (event) => {
   const sendResult = await sendOtpViaWhatsapp(normalized, code)
 
   if (!sendResult.ok) {
-    // En dev, on renvoie le code pour faciliter les tests si WhatsApp n’est pas configuré
-    if (process.env.NODE_ENV !== 'production') {
+    const allowDevCode =
+      process.env.NODE_ENV !== 'production' ||
+      process.env.VERCEL_ENV === 'preview' ||
+      process.env.WHATSAPP_DEV_CODE === 'true'
+    // En dev/preview, renvoyer le code pour faciliter les tests si WhatsApp n’est pas configuré.
+    if (allowDevCode) {
       return {
         ok: true,
         token,
