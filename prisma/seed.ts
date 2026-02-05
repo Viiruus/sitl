@@ -103,7 +103,7 @@ async function seedGuides() {
               websiteUrl: 'https://brigadedukif.fr',
               // mets ici une vraie image de toi si tu veux
               profileImageUrl:
-                'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=600&q=80',
+                '/images/falaise-Bauges-Chatelard-Garins.jpg',
             },
             create: {
               bio:
@@ -113,7 +113,7 @@ async function seedGuides() {
               instagramUrl: 'https://www.instagram.com/brigadedukif',
               websiteUrl: 'https://brigadedukif.fr',
               profileImageUrl:
-                'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=600&q=80',
+                '/images/falaise-Bauges-Chatelard-Garins.jpg',
             },
           },
         },
@@ -134,7 +134,7 @@ async function seedGuides() {
             instagramUrl: 'https://www.instagram.com/brigadedukif',
             websiteUrl: 'https://brigadedukif.fr',
             profileImageUrl:
-              'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=600&q=80',
+              '/images/falaise-Bauges-Chatelard-Garins.jpg',
           },
         },
       },
@@ -162,7 +162,7 @@ async function seedGuides() {
               instagramUrl: 'https://www.instagram.com/bleau_avec_emma',
               websiteUrl: null,
               profileImageUrl:
-                'https://images.unsplash.com/photo-1544723795-3fb6469f5b39?auto=format&fit=crop&w=600&q=80',
+                '/images/bloc-Pays-Basque-Mondarrain.jpg',
             },
             create: {
               bio:
@@ -172,7 +172,7 @@ async function seedGuides() {
               instagramUrl: 'https://www.instagram.com/bleau_avec_emma',
               websiteUrl: null,
               profileImageUrl:
-                'https://images.unsplash.com/photo-1544723795-3fb6469f5b39?auto=format&fit=crop&w=600&q=80',
+                '/images/bloc-Pays-Basque-Mondarrain.jpg',
             },
           },
         },
@@ -193,7 +193,7 @@ async function seedGuides() {
             instagramUrl: 'https://www.instagram.com/bleau_avec_emma',
             websiteUrl: null,
             profileImageUrl:
-              'https://images.unsplash.com/photo-1544723795-3fb6469f5b39?auto=format&fit=crop&w=600&q=80',
+              '/images/bloc-Pays-Basque-Mondarrain.jpg',
           },
         },
       },
@@ -221,7 +221,7 @@ async function seedGuides() {
               instagramUrl: 'https://www.instagram.com/trad_pays_basque',
               websiteUrl: null,
               profileImageUrl:
-                'https://images.unsplash.com/photo-1546530967-21531b891dd4?auto=format&fit=crop&w=600&q=80',
+                '/images/falaise-Calanques.jpg',
             },
             create: {
               bio:
@@ -231,7 +231,7 @@ async function seedGuides() {
               instagramUrl: 'https://www.instagram.com/trad_pays_basque',
               websiteUrl: null,
               profileImageUrl:
-                'https://images.unsplash.com/photo-1546530967-21531b891dd4?auto=format&fit=crop&w=600&q=80',
+                '/images/falaise-Calanques.jpg',
             },
           },
         },
@@ -252,7 +252,7 @@ async function seedGuides() {
             instagramUrl: 'https://www.instagram.com/trad_pays_basque',
             websiteUrl: null,
             profileImageUrl:
-              'https://images.unsplash.com/photo-1546530967-21531b891dd4?auto=format&fit=crop&w=600&q=80',
+              '/images/falaise-Calanques.jpg',
           },
         },
       },
@@ -275,10 +275,20 @@ async function seedClimbers() {
       acquisitionSource: 'direct',
       typesOfClimbing: ['sport', 'multi'],
       climbsMainly: 'lead',
-      environments: ['falaise', 'salle_privee'],
-      autonomy: ['assur_tete', 'manip_haut_de_voie'],
+      environments: ['exterieur', 'salle_privee'],
+      autonomy: ['assur_moulinette', 'assur_tete', 'manip_haut_de_voie', 'rechappe'],
       frequency: '2_3',
       gradeLevel: '6a_6c',
+      preferredClimbingStyle: 'vertical',
+      climbingGoal: 'Gagner en endurance en grande voie et devenir autonome sur des itinéraires en réversible.',
+      boulderingLocations: [],
+      boulderingGrade: '',
+      belayDevices: ['reverso', 'grigri', 'smart_jul'],
+      multiAutonomy: ['assur_haut_voie', 'rappel'],
+      tradProtections: [],
+      tradMovingBelay: '',
+      profileImageUrl:
+        'https://images.pexels.com/photos/5916407/pexels-photo-5916407.jpeg?cs=srgb&dl=pexels-tima-miroshnichenko-5916407.jpg&fm=jpg',
       tripStyles: ['aventure', 'confort'],
     },
     {
@@ -289,10 +299,20 @@ async function seedClimbers() {
       acquisitionSource: 'direct',
       typesOfClimbing: ['bloc', 'sport'],
       climbsMainly: 'lead',
-      environments: ['salle_privee', 'falaise'],
-      autonomy: ['assur_tete'],
+      environments: ['salle_privee', 'exterieur'],
+      autonomy: ['assur_moulinette', 'assur_tete'],
       frequency: '1',
       gradeLevel: '5a_5c',
+      preferredClimbingStyle: 'devers',
+      climbingGoal: 'Progresser en tête en couenne et découvrir des falaises proches de Lyon.',
+      boulderingLocations: ['salle', 'exterieur'],
+      boulderingGrade: 'rouge',
+      belayDevices: ['grigri'],
+      multiAutonomy: [],
+      tradProtections: [],
+      tradMovingBelay: '',
+      profileImageUrl:
+        'https://images.unsplash.com/photo-1667864201800-76dead781c6d?fm=jpg&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&ixlib=rb-4.1.0&q=60&w=3000',
       tripStyles: ['aventure'],
     },
     {
@@ -302,11 +322,93 @@ async function seedClimbers() {
       department: '64 - Pyrénées-Atlantiques',
       acquisitionSource: 'instagram',
       typesOfClimbing: ['bloc'],
-      climbsMainly: 'toprope',
+      climbsMainly: '',
       environments: ['salle_privee'],
       autonomy: [],
       frequency: '2_3',
       gradeLevel: 'dont_know',
+      preferredClimbingStyle: 'dalle',
+      climbingGoal: 'Être plus à l’aise sur dalle et passer plus souvent en extérieur.',
+      boulderingLocations: ['salle'],
+      boulderingGrade: 'bleu',
+      belayDevices: [],
+      multiAutonomy: [],
+      tradProtections: [],
+      tradMovingBelay: '',
+      profileImageUrl:
+        'https://images.pexels.com/photos/5384006/pexels-photo-5384006.jpeg?cs=srgb&dl=pexels-allan-mas-5384006.jpg&fm=jpg',
+      tripStyles: ['aventure'],
+    },
+    {
+      email: 'camille.trad@grimpe.test',
+      firstName: 'Camille',
+      lastName: 'Perrin',
+      department: '05 - Hautes-Alpes',
+      acquisitionSource: 'stage',
+      typesOfClimbing: ['sport', 'multi', 'trad'],
+      climbsMainly: 'lead',
+      environments: ['exterieur'],
+      autonomy: ['assur_moulinette', 'assur_tete', 'manip_haut_de_voie', 'rechappe'],
+      frequency: '1',
+      gradeLevel: '6a_6c',
+      preferredClimbingStyle: 'vertical',
+      climbingGoal: 'Devenir autonome en grande voie trad et apprendre à protéger efficacement.',
+      boulderingLocations: [],
+      boulderingGrade: '',
+      belayDevices: ['reverso', 'smart_jul'],
+      multiAutonomy: ['assur_haut_voie', 'rappel', 'leader_cordee'],
+      tradProtections: ['friends', 'cables', 'piton', 'lunule'],
+      tradMovingBelay: 'oui',
+      profileImageUrl:
+        'https://images.pexels.com/photos/5383491/pexels-photo-5383491.jpeg?cs=srgb&dl=pexels-allan-mas-5383491.jpg&fm=jpg',
+      tripStyles: ['aventure'],
+    },
+    {
+      email: 'milo.bloc@grimpe.test',
+      firstName: 'Milo',
+      lastName: 'Renaud',
+      department: '77 - Seine-et-Marne',
+      acquisitionSource: 'club',
+      typesOfClimbing: ['bloc'],
+      climbsMainly: '',
+      environments: ['salle_privee', 'exterieur'],
+      autonomy: [],
+      frequency: 'plus_3',
+      gradeLevel: 'dont_know',
+      preferredClimbingStyle: 'devers',
+      climbingGoal: 'Passer des circuits rouges réguliers à Bleau et gagner en puissance.',
+      boulderingLocations: ['salle', 'exterieur'],
+      boulderingGrade: 'noir',
+      belayDevices: [],
+      multiAutonomy: [],
+      tradProtections: [],
+      tradMovingBelay: '',
+      profileImageUrl:
+        'https://images.unsplash.com/photo-1696346996051-1868f698aaa2?fm=jpg&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&ixlib=rb-4.0.3&q=60&w=3000',
+      tripStyles: ['aventure', 'confort'],
+    },
+    {
+      email: 'sarah.multi@grimpe.test',
+      firstName: 'Sarah',
+      lastName: 'Delage',
+      department: '73 - Savoie',
+      acquisitionSource: 'ami',
+      typesOfClimbing: ['sport', 'multi'],
+      climbsMainly: 'lead',
+      environments: ['exterieur', 'salle_asso'],
+      autonomy: ['assur_moulinette', 'assur_tete', 'manip_haut_de_voie'],
+      frequency: '2_3',
+      gradeLevel: '5a_5c',
+      preferredClimbingStyle: 'dalle',
+      climbingGoal: 'Être plus fluide en grande voie et mieux gérer les relais.',
+      boulderingLocations: [],
+      boulderingGrade: '',
+      belayDevices: ['reverso', 'smart_jul'],
+      multiAutonomy: ['assur_haut_voie'],
+      tradProtections: [],
+      tradMovingBelay: '',
+      profileImageUrl:
+        'https://images.pexels.com/photos/5383479/pexels-photo-5383479.jpeg?cs=srgb&dl=pexels-allan-mas-5383479.jpg&fm=jpg',
       tripStyles: ['aventure'],
     },
   ] as const
@@ -329,6 +431,15 @@ async function seedClimbers() {
           autonomy: c.autonomy,
           frequency: c.frequency,
           gradeLevel: c.gradeLevel,
+          preferredClimbingStyle: c.preferredClimbingStyle,
+          climbingGoal: c.climbingGoal,
+          boulderingLocations: c.boulderingLocations,
+          boulderingGrade: c.boulderingGrade || null,
+          belayDevices: c.belayDevices,
+          multiAutonomy: c.multiAutonomy,
+          tradProtections: c.tradProtections,
+          tradMovingBelay: c.tradMovingBelay || null,
+          profileImageUrl: c.profileImageUrl,
           tripStyles: c.tripStyles,
           onboarded: true,
           onboardingStep: 3,
@@ -346,6 +457,15 @@ async function seedClimbers() {
           autonomy: c.autonomy,
           frequency: c.frequency,
           gradeLevel: c.gradeLevel,
+          preferredClimbingStyle: c.preferredClimbingStyle,
+          climbingGoal: c.climbingGoal,
+          boulderingLocations: c.boulderingLocations,
+          boulderingGrade: c.boulderingGrade || null,
+          belayDevices: c.belayDevices,
+          multiAutonomy: c.multiAutonomy,
+          tradProtections: c.tradProtections,
+          tradMovingBelay: c.tradMovingBelay || null,
+          profileImageUrl: c.profileImageUrl,
           tripStyles: c.tripStyles,
           onboarded: true,
           onboardingStep: 3,
@@ -542,6 +662,7 @@ async function seedAventures(guides: any[]) {
       sessions: [
         { offsetDays: 20, durationDays: 4, placesTotales: 6 },
         { offsetDays: 65, durationDays: 4, placesTotales: 6 },
+        { offsetDays: 110, durationDays: 4, placesTotales: 6 },
       ],
     },
 
@@ -638,6 +759,7 @@ async function seedAventures(guides: any[]) {
       sessions: [
         { offsetDays: 10, durationDays: 2, placesTotales: 4 },
         { offsetDays: 45, durationDays: 2, placesTotales: 4 },
+        { offsetDays: 80, durationDays: 2, placesTotales: 4 },
       ],
     },
 
@@ -733,6 +855,8 @@ async function seedAventures(guides: any[]) {
       estPublie: true,
       sessions: [
         { offsetDays: 18, durationDays: 3, placesTotales: 8 },
+        { offsetDays: 55, durationDays: 3, placesTotales: 8 },
+        { offsetDays: 95, durationDays: 3, placesTotales: 8 },
       ],
     },
 
@@ -803,6 +927,7 @@ async function seedAventures(guides: any[]) {
       sessions: [
         { offsetDays: 7, durationDays: 1, placesTotales: 10 },
         { offsetDays: 21, durationDays: 1, placesTotales: 10 },
+        { offsetDays: 42, durationDays: 1, placesTotales: 10 },
       ],
     },
 
@@ -893,6 +1018,221 @@ async function seedAventures(guides: any[]) {
       estPublie: true,
       sessions: [
         { offsetDays: 30, durationDays: 2, placesTotales: 4 },
+        { offsetDays: 70, durationDays: 2, placesTotales: 4 },
+      ],
+    },
+
+    // 6) Buoux – couenne technique
+    {
+      slug: 'aventure-falaise-buoux-placements-fluidite',
+      guideId: nicolas.id,
+      titre: 'Buoux : couenne technique et placements précis',
+      sousTitre:
+        '2 jours pour gagner en fluidité sur le calcaire et travailler les placements sur des lignes variées.',
+      discipline: "FALAISE",
+      formule: "GRIMPE_SEULEMENT",
+      lieuLabel: 'Buoux, Luberon',
+      region: 'Provence-Alpes-Côte d’Azur',
+      jours: 2,
+      placesMax: 6,
+      niveauMinimum: '5c',
+      autonomieMini: 'assur_tete',
+      prixParPersonne: 240,
+      inclus:
+        'Encadrement, ateliers techniques, prêt de dégaines si besoin.',
+      nonInclus:
+        'Transport, hébergement, repas.',
+      pointsLocaux:
+        'Village provençal, vue sur le Luberon, falaises à l’ombre l’après-midi.',
+      descriptionCourte:
+        'Un week-end pour travailler la gestuelle et la lecture de voie sur un calcaire exigeant.',
+      descriptionLongue:
+        'On choisit des secteurs adaptés au niveau du groupe pour travailler les placements de pied, la gestion du repos et le rythme en tête. ' +
+        'Retour vidéo et débriefs express pour repartir avec des pistes claires.',
+      objectifs:
+        '- Gagner en fluidité sur le calcaire.\n' +
+        '- Améliorer la lecture de voie et les placements.\n' +
+        '- Être plus serein·e en tête.',
+      prerequis: [
+        'Être à l’aise en moulinette en falaise.',
+        'Avoir déjà grimpé en tête en salle ou dehors.',
+      ],
+      equipementRequis: [
+        'Chaussons',
+        'Baudrier',
+        'Casque',
+        'Vêtements adaptés',
+      ],
+      equipementFourni: [
+        'Dégaines et matériel collectif',
+        'Cordes',
+      ],
+      hebergementLabel: 'Hébergement libre',
+      hebergementDetails:
+        'Gîtes, van ou camping selon ton style. Suggestions possibles.',
+      repasLabel:
+        'Repas libres, apéro possible en fin de journée.',
+      transportLabel:
+        'Covoiturage encouragé, accès facile en voiture.',
+      pointRdv: 'Parking principal de Buoux, jour 1 à 9h.',
+      langues: ['Français'],
+      ageMin: 16,
+      ageMax: 65,
+      coverImageUrl: '/images/falaise-Buoux.jpg',
+      images: [
+        {
+          url: '/images/falaise-Buoux.jpg',
+          alt: 'Falaise calcaire de Buoux en lumière douce',
+          kind: "COVER",
+          position: 1,
+        },
+        {
+          url: '/images/falaise-Buoux2.jpg',
+          alt: 'Lignes techniques et prises franches à Buoux',
+          kind: "GALLERY",
+          position: 2,
+        },
+        {
+          url: '/images/falaise-Buoux-rose-des-sables.jpg',
+          alt: 'Secteur emblématique de Buoux',
+          kind: "GALLERY",
+          position: 3,
+        },
+      ],
+      programmeJours: [
+        {
+          ordre: 1,
+          titre: 'Placement & lecture de voie',
+          description:
+            'Échauffement, travail sur les placements et la gestion du repos. Vidéo et feedback rapides.',
+          lieuLabel: 'Secteur école de Buoux',
+          discipline: "FALAISE",
+        },
+        {
+          ordre: 2,
+          titre: 'Objectifs perso',
+          description:
+            'Choix de voies “objectif” selon ton niveau, coaching sur le rythme et le mental.',
+          lieuLabel: 'Secteurs variés selon conditions',
+          discipline: "FALAISE",
+        },
+      ],
+      estPublie: true,
+      sessions: [
+        { offsetDays: 15, durationDays: 2, placesTotales: 6 },
+        { offsetDays: 60, durationDays: 2, placesTotales: 6 },
+      ],
+    },
+
+    // 7) Bauges – grande voie panoramique
+    {
+      slug: 'aventure-grande-voie-roc-des-boeufs-bauges',
+      guideId: nicolas.id,
+      titre: 'Roc des Bœufs : grande voie panoramique',
+      sousTitre:
+        '3 jours pour apprendre à gérer l’itinéraire et les relais dans un cadre sauvage.',
+      discipline: "GRANDE_VOIE",
+      formule: "GRIMPE_SEULEMENT",
+      disciplinesComplementaires: ['FALAISE'],
+      lieuLabel: 'Roc des Bœufs, Bauges',
+      region: 'Auvergne-Rhône-Alpes',
+      jours: 3,
+      placesMax: 5,
+      niveauMinimum: '6a',
+      autonomieMini: 'assur_tete',
+      prixParPersonne: 520,
+      inclus:
+        'Encadrement, matériel collectif, ateliers relais et gestion d’itinéraire.',
+      nonInclus:
+        'Transport, hébergement, repas.',
+      pointsLocaux:
+        'Ambiance montagne, vues sur le lac d’Annecy, belles approches.',
+      descriptionCourte:
+        'Une grande voie pour franchir un cap et prendre confiance sur plusieurs longueurs.',
+      descriptionLongue:
+        'On construit la progression sur 3 jours : rappel des manip, gestion de la corde, itinéraire et communication. ' +
+        'Le tout en petit groupe pour prendre le temps.',
+      objectifs:
+        '- Savoir s’organiser en tête de cordée.\n' +
+        '- Être à l’aise sur les relais et les rappels.\n' +
+        '- Gérer une grande voie en autonomie progressive.',
+      prerequis: [
+        'Être à l’aise dans le 6a en tête.',
+        'Avoir déjà grimpé en falaise naturelle.',
+      ],
+      equipementRequis: [
+        'Chaussons',
+        'Baudrier',
+        'Casque',
+        'Veste coupe-vent',
+        'Petit sac à dos',
+      ],
+      equipementFourni: [
+        'Cordes',
+        'Dégaines et matériel de relais',
+      ],
+      hebergementLabel: 'Hébergement libre',
+      hebergementDetails:
+        'Hôtels, gîtes ou camping selon ton budget.',
+      repasLabel:
+        'Repas libres, pique-niques à prévoir.',
+      transportLabel:
+        'Covoiturage encouragé, accès route aux parkings.',
+      pointRdv: 'Parking de départ des voies, jour 1 à 8h30.',
+      langues: ['Français'],
+      ageMin: 18,
+      ageMax: 65,
+      coverImageUrl: '/images/escalade-grande-voie-roc-des-boeufs-bauges.jpg',
+      images: [
+        {
+          url: '/images/escalade-grande-voie-roc-des-boeufs-bauges.jpg',
+          alt: 'Grande voie en montagne dans les Bauges',
+          kind: "COVER",
+          position: 1,
+        },
+        {
+          url: '/images/escalade-grande-voie-roc-des-boeufs-bauges2.jpg',
+          alt: 'Corde tendue sur une longueur aérienne',
+          kind: "GALLERY",
+          position: 2,
+        },
+        {
+          url: '/images/approche-Bauges-Dent-Arclusaz.jpg',
+          alt: 'Approche en montagne vers la paroi',
+          kind: "GALLERY",
+          position: 3,
+        },
+      ],
+      programmeJours: [
+        {
+          ordre: 1,
+          titre: 'Rappels & relais',
+          description:
+            'Ateliers relais, révision des rappels et communication de cordée.',
+          lieuLabel: 'Paroi école proche',
+          discipline: "GRANDE_VOIE",
+        },
+        {
+          ordre: 2,
+          titre: 'Grande voie principale',
+          description:
+            'Choix d’un itinéraire adapté, gestion du rythme et des placements.',
+          lieuLabel: 'Roc des Bœufs',
+          discipline: "GRANDE_VOIE",
+        },
+        {
+          ordre: 3,
+          titre: 'Optimisation & autonomie',
+          description:
+            'Deuxième grande voie ou ateliers spécifiques selon le groupe.',
+          lieuLabel: 'Secteur selon météo',
+          discipline: "GRANDE_VOIE",
+        },
+      ],
+      estPublie: true,
+      sessions: [
+        { offsetDays: 25, durationDays: 3, placesTotales: 5 },
+        { offsetDays: 75, durationDays: 3, placesTotales: 5 },
       ],
     },
   ]

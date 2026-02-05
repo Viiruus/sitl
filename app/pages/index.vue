@@ -72,17 +72,17 @@
           class="flex flex-col items-center gap-4 rounded-3xl bg-white/5 px-4 py-6 ring-1 ring-white/10 shadow-md shadow-black/20 transition hover:-translate-y-1 hover:ring-secondaryBrand-300/50"
         >
           <div class="flex h-16 w-16 items-center justify-center rounded-full bg-white/10 ring-1 ring-white/15 shadow-inner shadow-black/10">
-            <svg v-if="benefit.icon === 'leaf'" class="h-8 w-8 text-secondaryBrand-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <svg v-if="benefit.icon === 'leaf'" class="h-8 w-8 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
               <path stroke-linecap="round" stroke-linejoin="round" d="M3 17.5 9.5 8l3.5 5 3-4.5L21 17.5H3Z" />
               <path stroke-linecap="round" stroke-linejoin="round" d="M3 17.5h18" />
             </svg>
-            <svg v-else-if="benefit.icon === 'progress'" class="h-8 w-8 text-secondaryBrand-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <svg v-else-if="benefit.icon === 'progress'" class="h-8 w-8 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
               <path stroke-linecap="round" stroke-linejoin="round" d="M4 18h4V9H4v9Zm6 0h4v-6h-4v6Zm6 0h4V5h-4v13Z" />
             </svg>
-            <svg v-else-if="benefit.icon === 'heart'" class="h-8 w-8 text-secondaryBrand-200" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M12 21s-6.7-4.2-9.4-9C.4 8.2 2.3 4 6 4c2.3 0 3.6 1.5 4 2.2C10.4 5.5 11.7 4 14 4c3.7 0 5.6 4.2 3.4 8-2.7 4.8-9.4 9-9.4 9Z" />
+            <svg v-else-if="benefit.icon === 'heart'" class="h-8 w-8 text-white" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 21.35 10.55 20.03C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35Z" />
             </svg>
-            <svg v-else class="h-8 w-8 text-secondaryBrand-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <svg v-else class="h-8 w-8 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
               <path stroke-linecap="round" stroke-linejoin="round" d="M12 3c3.3 0 6 2.6 6 5.8 0 3.9-3.7 8.2-5.5 9.9a.7.7 0 0 1-1 0C9.7 17 6 12.6 6 8.8 6 5.6 8.7 3 12 3Z" />
               <circle cx="12" cy="9" r="2.2" />
             </svg>

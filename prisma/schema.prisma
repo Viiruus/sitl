@@ -67,6 +67,7 @@ model User {
   department String? // ex: "38 - Isère"
   phoneNumber String?
   whatsappOptIn Boolean @default(false)
+  profileImageUrl String?
 
   // Pratique de l’escalade
   /// typesOfClimbing: JSON pour stocker un tableau de strings
@@ -76,10 +77,10 @@ model User {
   /// climbsMainly: "lead", "toprope" ou null
   climbsMainly String?
 
-  /// environments: JSON, ex: ["falaise","salle_privee","salle_asso"]
+  /// environments: JSON, ex: ["exterieur","salle_privee","salle_asso"]
   environments Json?
 
-  /// autonomy: JSON, ex: ["assur_tete","manip_haut_de_voie","relais_grande_voie"]
+  /// autonomy: JSON, ex: ["assur_moulinette","assur_tete","manip_haut_de_voie","rechappe"]
   autonomy Json?
 
   /// frequency: "moins_1", "1", "2_3", "plus_3"
@@ -88,6 +89,30 @@ model User {
   // Niveau
   /// gradeLevel: "sub_5a", "5a_5c", "6a_6c", "7_plus", "dont_know"
   gradeLevel String?
+
+  /// preferredClimbingStyle: "devers", "vertical", "dalle"
+  preferredClimbingStyle String?
+
+  /// climbingGoal: texte libre
+  climbingGoal String?
+
+  /// boulderingLocations: JSON, ex: ["salle","exterieur"]
+  boulderingLocations Json?
+
+  /// boulderingGrade: "jaune", "vert", "bleu", "rouge", "noir", "violet"
+  boulderingGrade String?
+
+  /// belayDevices: JSON, ex: ["reverso","grigri","smart_jul"]
+  belayDevices Json?
+
+  /// multiAutonomy: JSON, ex: ["assur_haut_voie","rappel","leader_cordee"]
+  multiAutonomy Json?
+
+  /// tradProtections: JSON, ex: ["friends","cables","piton","lunule"]
+  tradProtections Json?
+
+  /// tradMovingBelay: "oui", "non"
+  tradMovingBelay String?
 
   // Vision du voyage / stage
   /// tripStyles: JSON, ex: ["aventure","confort"]

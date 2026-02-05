@@ -24,6 +24,14 @@
   autonomy: [] as string[],
   frequency: '' as '' | 'moins_1' | '1' | '2_3' | 'plus_3',
   gradeLevel: '' as '' | 'sub_5a' | '5a_5c' | '6a_6c' | '7_plus' | 'dont_know',
+  preferredClimbingStyle: '' as '' | 'devers' | 'vertical' | 'dalle',
+  climbingGoal: '',
+  boulderingLocations: [] as string[],
+  boulderingGrade: '' as '' | 'jaune' | 'vert' | 'bleu' | 'rouge' | 'noir' | 'violet',
+  belayDevices: [] as string[],
+  multiAutonomy: [] as string[],
+  tradProtections: [] as string[],
+  tradMovingBelay: '' as '' | 'oui' | 'non',
   })
 
   // helpers
@@ -53,10 +61,26 @@
 
       form.typesOfClimbing = Array.isArray(u.typesOfClimbing) ? u.typesOfClimbing : []
       form.climbsMainly = u.climbsMainly || ''
-      form.environments = Array.isArray(u.environments) ? u.environments : []
-      form.autonomy = Array.isArray(u.autonomy) ? u.autonomy : []
+      const rawEnvironments = Array.isArray(u.environments) ? u.environments : []
+      const normalizedEnvironments = rawEnvironments.map((value: string) =>
+        value === 'falaise' ? 'exterieur' : value,
+      )
+      form.environments = Array.from(new Set(normalizedEnvironments))
+      const rawAutonomy = Array.isArray(u.autonomy) ? u.autonomy : []
+      const normalizedAutonomy = rawAutonomy.map((value: string) =>
+        value === 'relais_grande_voie' ? 'rechappe' : value,
+      )
+      form.autonomy = Array.from(new Set(normalizedAutonomy))
       form.frequency = u.frequency || ''
       form.gradeLevel = u.gradeLevel || ''
+      form.preferredClimbingStyle = u.preferredClimbingStyle || ''
+      form.climbingGoal = u.climbingGoal || ''
+      form.boulderingLocations = Array.isArray(u.boulderingLocations) ? u.boulderingLocations : []
+      form.boulderingGrade = u.boulderingGrade || ''
+      form.belayDevices = Array.isArray(u.belayDevices) ? u.belayDevices : []
+      form.multiAutonomy = Array.isArray(u.multiAutonomy) ? u.multiAutonomy : []
+      form.tradProtections = Array.isArray(u.tradProtections) ? u.tradProtections : []
+      form.tradMovingBelay = u.tradMovingBelay || ''
 
       userBookings.value = Array.isArray(u.bookings) ? u.bookings : []
       profileLoaded.value = true
@@ -105,7 +129,8 @@
   const needsRopeFields = computed(
   () =>
       form.typesOfClimbing.includes('sport') ||
-      form.typesOfClimbing.includes('multi'),
+      form.typesOfClimbing.includes('multi') ||
+      form.typesOfClimbing.includes('trad'),
   )
 
   const formatSessionRange = (session: any) => {
@@ -302,29 +327,29 @@
           <nav class="space-y-2 text-sm">
             <button
               type="button"
-              class="flex w-full items-center justify-between rounded-2xl border px-3 py-2 text-left transition"
-              :class="activePanel === 'bookings'
-                ? 'border-secondaryBrand-400 bg-secondaryBrand-500/20 text-white'
-                : 'border-brand-700 bg-brand-950/40 text-brand-100/70 hover:border-secondaryBrand-400/50'"
-              @click="activePanel = 'bookings'"
-            >
-              <span>Mes demandes</span>
-              <span
-                v-if="userBookings.length"
-                class="rounded-full bg-brand-900 px-2 py-0.5 text-[11px] font-semibold text-secondaryBrand-200"
-              >
-                {{ userBookings.length }}
-              </span>
-            </button>
-            <button
-              type="button"
               class="flex w-full items-center rounded-2xl border px-3 py-2 text-left transition"
               :class="activePanel === 'profil'
                 ? 'border-secondaryBrand-400 bg-secondaryBrand-500/20 text-white'
                 : 'border-brand-700 bg-brand-950/40 text-brand-100/70 hover:border-secondaryBrand-400/50'"
               @click="activePanel = 'profil'"
             >
-              Profil & préférences
+              Mon profil
+            </button>
+            <button
+              type="button"
+              class="flex w-full items-center justify-between rounded-2xl border px-3 py-2 text-left transition"
+              :class="activePanel === 'bookings'
+                ? 'border-secondaryBrand-400 bg-secondaryBrand-500/20 text-white'
+                : 'border-brand-700 bg-brand-950/40 text-brand-100/70 hover:border-secondaryBrand-400/50'"
+              @click="activePanel = 'bookings'"
+            >
+              <span>Mes inscriptions</span>
+              <span
+                v-if="userBookings.length"
+                class="rounded-full bg-brand-900 px-2 py-0.5 text-[11px] font-semibold text-secondaryBrand-200"
+              >
+                {{ userBookings.length }}
+              </span>
             </button>
           </nav>
         </div>
@@ -346,10 +371,10 @@
             <div class="flex flex-wrap items-center justify-between gap-3">
               <div>
                 <p class="text-xs uppercase tracking-[0.3em] text-brand-200/80">
-                  Mes demandes
+                  Mes inscriptions
                 </p>
                 <h1 class="text-2xl font-semibold text-secondaryBrand-200">
-                  Pré-inscriptions & dates envisagées
+                  Tes prochaines aventures
                 </h1>
                 <p class="text-sm text-brand-100/80">
                   Les moniteurs te contacteront directement pour constituer les groupes.
@@ -450,7 +475,7 @@
                 <!-- Bloc réservation -->
                 <div class="rounded-xl border border-brand-800/70 bg-brand-950/50 p-5 flex flex-col gap-4 md:col-span-1 md:col-start-3 md:w-full md:max-w-[360px] min-w-[280px]">
                   <div class="flex items-center justify-between gap-2">
-                    <p class="text-xs uppercase tracking-[0.25em] text-brand-200/70">Réservation</p>
+                    <p class="text-xs uppercase tracking-[0.25em] text-brand-200/70">Inscription</p>
                     <span
                       class="inline-flex items-center rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-wide"
                       :class="bookingStatusToneClass(booking)"
@@ -502,7 +527,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" d="M6 6l12 12M6 18L18 6" />
                       </svg>
                       <span class="pointer-events-none absolute left-1/2 top-full mt-1 -translate-x-1/2 whitespace-nowrap rounded-full bg-brand-900 px-2 py-1 text-[10px] font-semibold text-white opacity-0 shadow-lg shadow-black/40 transition group-hover:opacity-100">
-                        Annuler la pré-inscription
+                        Annuler ton inscription
                       </span>
                     </button>
                   </div>
@@ -704,140 +729,6 @@
 
                 <div class="space-y-2">
                   <p class="text-sm font-medium text-brand-100/90">
-                    Quel(s) type(s) d'escalade pratiques-tu ?
-                  </p>
-                  <div class="flex flex-wrap gap-2 text-sm">
-                    <button
-                      type="button"
-                      class="px-3 py-1 rounded-full border text-xs"
-                      :class="form.typesOfClimbing.includes('bloc')
-                        ? 'bg-secondaryBrand-500 text-brand-950 border-secondaryBrand-500'
-                        : 'bg-brand-950/40 text-brand-100/80 border-brand-700'"
-                      @click="toggleInArray(form.typesOfClimbing, 'bloc')"
-                    >
-                      Bloc
-                    </button>
-                    <button
-                      type="button"
-                      class="px-3 py-1 rounded-full border text-xs"
-                      :class="form.typesOfClimbing.includes('sport')
-                        ? 'bg-secondaryBrand-500 text-brand-950 border-secondaryBrand-500'
-                        : 'bg-brand-950/40 text-brand-100/80 border-brand-700'"
-                      @click="toggleInArray(form.typesOfClimbing, 'sport')"
-                    >
-                      Escalade sportive
-                    </button>
-                    <button
-                      type="button"
-                      class="px-3 py-1 rounded-full border text-xs"
-                      :class="form.typesOfClimbing.includes('multi')
-                        ? 'bg-secondaryBrand-500 text-brand-950 border-secondaryBrand-500'
-                        : 'bg-brand-950/40 text-brand-100/80 border-brand-700'"
-                      @click="toggleInArray(form.typesOfClimbing, 'multi')"
-                    >
-                      Grande voie
-                    </button>
-                  </div>
-                </div>
-
-                <div v-if="needsRopeFields" class="space-y-3">
-                  <div>
-                    <p class="text-sm font-medium text-brand-100/90">
-                      Tu grimpes principalement ?
-                    </p>
-                    <div class="flex flex-col gap-1 text-sm">
-                      <label class="inline-flex items-center gap-2">
-                        <input
-                          v-model="form.climbsMainly"
-                          type="radio"
-                          value="lead"
-                        />
-                        <span class="text-brand-100/90">En tête</span>
-                      </label>
-                      <label class="inline-flex items-center gap-2">
-                        <input
-                          v-model="form.climbsMainly"
-                          type="radio"
-                          value="toprope"
-                        />
-                        <span class="text-brand-100/90">En moulinette</span>
-                      </label>
-                    </div>
-                  </div>
-
-                  <div class="space-y-2">
-                    <p class="text-sm font-medium text-brand-100/90">
-                      Tu grimpes dans quel(s) environnement(s) ?
-                    </p>
-                    <div class="flex flex-wrap gap-2 text-sm">
-                      <button
-                        type="button"
-                        class="px-3 py-1 rounded-full border text-xs"
-                        :class="form.environments.includes('falaise')
-                          ? 'bg-secondaryBrand-500 text-brand-950 border-secondaryBrand-500'
-                          : 'bg-brand-950/40 text-brand-100/80 border-brand-700'"
-                        @click="toggleInArray(form.environments, 'falaise')"
-                      >
-                        Falaise
-                      </button>
-                      <button
-                        type="button"
-                        class="px-3 py-1 rounded-full border text-xs"
-                        :class="form.environments.includes('salle_privee')
-                          ? 'bg-secondaryBrand-500 text-brand-950 border-secondaryBrand-500'
-                          : 'bg-brand-950/40 text-brand-100/80 border-brand-700'"
-                        @click="toggleInArray(form.environments, 'salle_privee')"
-                      >
-                        Salle privée
-                      </button>
-                      <button
-                        type="button"
-                        class="px-3 py-1 rounded-full border text-xs"
-                        :class="form.environments.includes('salle_asso')
-                          ? 'bg-secondaryBrand-500 text-brand-950 border-secondaryBrand-500'
-                          : 'bg-brand-950/40 text-brand-100/80 border-brand-700'"
-                        @click="toggleInArray(form.environments, 'salle_asso')"
-                      >
-                        Salle communale (asso)
-                      </button>
-                    </div>
-                  </div>
-
-                  <div class="space-y-2">
-                    <p class="text-sm font-medium text-brand-100/90">
-                      Ton niveau d'autonomie
-                    </p>
-                    <div class="flex flex-col gap-1 text-sm">
-                      <label class="inline-flex items-start gap-2">
-                        <input
-                          type="checkbox"
-                          :checked="form.autonomy.includes('assur_tete')"
-                          @change="toggleInArray(form.autonomy, 'assur_tete')"
-                        />
-                        <span class="text-brand-100/90">Assurer en tête un partenaire</span>
-                      </label>
-                      <label class="inline-flex items-start gap-2">
-                        <input
-                          type="checkbox"
-                          :checked="form.autonomy.includes('manip_haut_de_voie')"
-                          @change="toggleInArray(form.autonomy, 'manip_haut_de_voie')"
-                        />
-                        <span class="text-brand-100/90">Manip de haut de voie</span>
-                      </label>
-                      <label class="inline-flex items-start gap-2">
-                        <input
-                          type="checkbox"
-                          :checked="form.autonomy.includes('relais_grande_voie')"
-                          @change="toggleInArray(form.autonomy, 'relais_grande_voie')"
-                        />
-                        <span class="text-brand-100/90">Relais grande voie</span>
-                      </label>
-                    </div>
-                  </div>
-                </div>
-
-                <div class="space-y-2">
-                  <p class="text-sm font-medium text-brand-100/90">
                     À quelle fréquence grimpes-tu ?
                   </p>
                   <div class="flex flex-col gap-1 text-sm">
@@ -923,6 +814,445 @@
                     </label>
                   </div>
                 </div>
+
+                <div class="space-y-2">
+                  <p class="text-sm font-medium text-brand-100/90">
+                    Ton style de grimpe préféré ?
+                  </p>
+                  <div class="flex flex-col gap-1 text-sm">
+                    <label class="inline-flex items-center gap-2">
+                      <input
+                        v-model="form.preferredClimbingStyle"
+                        type="radio"
+                        value="devers"
+                      />
+                      <span class="text-brand-100/90">Dévers</span>
+                    </label>
+                    <label class="inline-flex items-center gap-2">
+                      <input
+                        v-model="form.preferredClimbingStyle"
+                        type="radio"
+                        value="vertical"
+                      />
+                      <span class="text-brand-100/90">Vertical</span>
+                    </label>
+                    <label class="inline-flex items-center gap-2">
+                      <input
+                        v-model="form.preferredClimbingStyle"
+                        type="radio"
+                        value="dalle"
+                      />
+                      <span class="text-brand-100/90">Dalle</span>
+                    </label>
+                  </div>
+                </div>
+
+                <div class="space-y-2">
+                  <p class="text-sm font-medium text-brand-100/90">
+                    Ton objectif en escalade ?
+                  </p>
+                  <textarea
+                    v-model="form.climbingGoal"
+                    rows="3"
+                    class="w-full border border-brand-800 rounded-lg px-3 py-2 bg-brand-950/40 text-white placeholder:text-brand-200/50 focus:outline-none focus:ring-2 focus:ring-secondaryBrand-500 focus:border-secondaryBrand-500"
+                    placeholder="Ex: progresser en tête, découvrir le dehors, préparer une grande voie..."
+                  ></textarea>
+                </div>
+
+                <div class="space-y-2">
+                  <p class="text-sm font-medium text-brand-100/90">
+                    Quel(s) type(s) d'escalade pratiques-tu ?
+                  </p>
+                  <div class="flex flex-wrap gap-2 text-sm">
+                    <button
+                      type="button"
+                      class="px-3 py-1 rounded-full border text-xs"
+                      :class="form.typesOfClimbing.includes('bloc')
+                        ? 'bg-secondaryBrand-500 text-brand-950 border-secondaryBrand-500'
+                        : 'bg-brand-950/40 text-brand-100/80 border-brand-700'"
+                      @click="toggleInArray(form.typesOfClimbing, 'bloc')"
+                    >
+                      Bloc
+                    </button>
+                    <button
+                      type="button"
+                      class="px-3 py-1 rounded-full border text-xs"
+                      :class="form.typesOfClimbing.includes('sport')
+                        ? 'bg-secondaryBrand-500 text-brand-950 border-secondaryBrand-500'
+                        : 'bg-brand-950/40 text-brand-100/80 border-brand-700'"
+                      @click="toggleInArray(form.typesOfClimbing, 'sport')"
+                    >
+                      Voie
+                    </button>
+                    <button
+                      type="button"
+                      class="px-3 py-1 rounded-full border text-xs"
+                      :class="form.typesOfClimbing.includes('multi')
+                        ? 'bg-secondaryBrand-500 text-brand-950 border-secondaryBrand-500'
+                        : 'bg-brand-950/40 text-brand-100/80 border-brand-700'"
+                      @click="toggleInArray(form.typesOfClimbing, 'multi')"
+                    >
+                      Grande Voie
+                    </button>
+                    <button
+                      type="button"
+                      class="px-3 py-1 rounded-full border text-xs"
+                      :class="form.typesOfClimbing.includes('trad')
+                        ? 'bg-secondaryBrand-500 text-brand-950 border-secondaryBrand-500'
+                        : 'bg-brand-950/40 text-brand-100/80 border-brand-700'"
+                      @click="toggleInArray(form.typesOfClimbing, 'trad')"
+                    >
+                      Trad
+                    </button>
+                  </div>
+                </div>
+
+                <div v-if="form.typesOfClimbing.includes('bloc')" class="space-y-3 rounded-2xl border border-brand-800/70 bg-brand-950/30 p-4">
+                  <p class="text-sm font-semibold uppercase tracking-[0.3em] text-brand-200/80">
+                    Bloc
+                  </p>
+
+                  <div class="space-y-2">
+                    <p class="text-sm font-medium text-brand-100/90">
+                      Tu fais du bloc ?
+                    </p>
+                    <div class="flex flex-wrap gap-2 text-sm">
+                      <button
+                        type="button"
+                        class="px-3 py-1 rounded-full border text-xs"
+                        :class="form.boulderingLocations.includes('salle')
+                          ? 'bg-secondaryBrand-500 text-brand-950 border-secondaryBrand-500'
+                          : 'bg-brand-950/40 text-brand-100/80 border-brand-700'"
+                        @click="toggleInArray(form.boulderingLocations, 'salle')"
+                      >
+                        En salle
+                      </button>
+                      <button
+                        type="button"
+                        class="px-3 py-1 rounded-full border text-xs"
+                        :class="form.boulderingLocations.includes('exterieur')
+                          ? 'bg-secondaryBrand-500 text-brand-950 border-secondaryBrand-500'
+                          : 'bg-brand-950/40 text-brand-100/80 border-brand-700'"
+                        @click="toggleInArray(form.boulderingLocations, 'exterieur')"
+                      >
+                        En extérieur
+                      </button>
+                    </div>
+                  </div>
+
+                  <div class="space-y-2">
+                    <p class="text-sm font-medium text-brand-100/90">
+                      Tu grimpes quel niveau ?
+                    </p>
+                    <div class="grid gap-2 text-sm sm:grid-cols-2">
+                      <label class="inline-flex items-center gap-2">
+                        <input
+                          v-model="form.boulderingGrade"
+                          type="radio"
+                          value="jaune"
+                        />
+                        <span class="text-brand-100/90">Jaune</span>
+                      </label>
+                      <label class="inline-flex items-center gap-2">
+                        <input
+                          v-model="form.boulderingGrade"
+                          type="radio"
+                          value="vert"
+                        />
+                        <span class="text-brand-100/90">Vert</span>
+                      </label>
+                      <label class="inline-flex items-center gap-2">
+                        <input
+                          v-model="form.boulderingGrade"
+                          type="radio"
+                          value="bleu"
+                        />
+                        <span class="text-brand-100/90">Bleu</span>
+                      </label>
+                      <label class="inline-flex items-center gap-2">
+                        <input
+                          v-model="form.boulderingGrade"
+                          type="radio"
+                          value="rouge"
+                        />
+                        <span class="text-brand-100/90">Rouge</span>
+                      </label>
+                      <label class="inline-flex items-center gap-2">
+                        <input
+                          v-model="form.boulderingGrade"
+                          type="radio"
+                          value="noir"
+                        />
+                        <span class="text-brand-100/90">Noir</span>
+                      </label>
+                      <label class="inline-flex items-center gap-2">
+                        <input
+                          v-model="form.boulderingGrade"
+                          type="radio"
+                          value="violet"
+                        />
+                        <span class="text-brand-100/90">Violet</span>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+
+                <div v-if="needsRopeFields" class="space-y-3">
+                  <div
+                    v-if="form.typesOfClimbing.includes('sport')"
+                    class="space-y-3 rounded-2xl border border-brand-800/70 bg-brand-950/30 p-4"
+                  >
+                    <p class="text-sm font-semibold uppercase tracking-[0.3em] text-brand-200/80">
+                      Voie
+                    </p>
+                    <div>
+                      <p class="text-sm font-medium text-brand-100/90">
+                        Tu grimpes principalement ?
+                      </p>
+                      <div class="flex flex-col gap-1 text-sm">
+                        <label class="inline-flex items-center gap-2">
+                          <input
+                            v-model="form.climbsMainly"
+                            type="radio"
+                            value="lead"
+                          />
+                          <span class="text-brand-100/90">En tête</span>
+                        </label>
+                        <label class="inline-flex items-center gap-2">
+                          <input
+                            v-model="form.climbsMainly"
+                            type="radio"
+                            value="toprope"
+                          />
+                          <span class="text-brand-100/90">En moulinette</span>
+                        </label>
+                      </div>
+                    </div>
+
+                    <div class="space-y-2">
+                      <p class="text-sm font-medium text-brand-100/90">
+                        Tu grimpes dans quel(s) environnement(s) ?
+                      </p>
+                      <div class="flex flex-wrap gap-2 text-sm">
+                        <button
+                          type="button"
+                          class="px-3 py-1 rounded-full border text-xs"
+                          :class="form.environments.includes('exterieur')
+                            ? 'bg-secondaryBrand-500 text-brand-950 border-secondaryBrand-500'
+                            : 'bg-brand-950/40 text-brand-100/80 border-brand-700'"
+                          @click="toggleInArray(form.environments, 'exterieur')"
+                        >
+                          En extérieur
+                        </button>
+                        <button
+                          type="button"
+                          class="px-3 py-1 rounded-full border text-xs"
+                          :class="form.environments.includes('salle_privee')
+                            ? 'bg-secondaryBrand-500 text-brand-950 border-secondaryBrand-500'
+                            : 'bg-brand-950/40 text-brand-100/80 border-brand-700'"
+                          @click="toggleInArray(form.environments, 'salle_privee')"
+                        >
+                          En salle privée
+                        </button>
+                        <button
+                          type="button"
+                          class="px-3 py-1 rounded-full border text-xs"
+                          :class="form.environments.includes('salle_asso')
+                            ? 'bg-secondaryBrand-500 text-brand-950 border-secondaryBrand-500'
+                            : 'bg-brand-950/40 text-brand-100/80 border-brand-700'"
+                          @click="toggleInArray(form.environments, 'salle_asso')"
+                        >
+                          En salle associative
+                        </button>
+                      </div>
+                    </div>
+
+                    <div class="space-y-2">
+                      <p class="text-sm font-medium text-brand-100/90">
+                        Ton niveau d'autonomie
+                      </p>
+                      <div class="flex flex-col gap-1 text-sm">
+                        <label class="inline-flex items-start gap-2">
+                          <input
+                            type="checkbox"
+                            :checked="form.autonomy.includes('assur_moulinette')"
+                            @change="toggleInArray(form.autonomy, 'assur_moulinette')"
+                          />
+                          <span class="text-brand-100/90">Assurer un partenaire en moulinette</span>
+                        </label>
+                        <label class="inline-flex items-start gap-2">
+                          <input
+                            type="checkbox"
+                            :checked="form.autonomy.includes('assur_tete')"
+                            @change="toggleInArray(form.autonomy, 'assur_tete')"
+                          />
+                          <span class="text-brand-100/90">Assurer un partenaire en tête</span>
+                        </label>
+                        <label class="inline-flex items-start gap-2">
+                          <input
+                            type="checkbox"
+                            :checked="form.autonomy.includes('manip_haut_de_voie')"
+                            @change="toggleInArray(form.autonomy, 'manip_haut_de_voie')"
+                          />
+                          <span class="text-brand-100/90">Manip de haut de voie</span>
+                        </label>
+                        <label class="inline-flex items-start gap-2">
+                          <input
+                            type="checkbox"
+                            :checked="form.autonomy.includes('rechappe')"
+                            @change="toggleInArray(form.autonomy, 'rechappe')"
+                          />
+                          <span class="text-brand-100/90">Réchappe</span>
+                        </label>
+                      </div>
+                    </div>
+
+                    <div class="space-y-2">
+                      <p class="text-sm font-medium text-brand-100/90">
+                        Tu sais assurer avec ?
+                      </p>
+                      <div class="flex flex-col gap-1 text-sm">
+                        <label class="inline-flex items-start gap-2">
+                          <input
+                            type="checkbox"
+                            :checked="form.belayDevices.includes('reverso')"
+                            @change="toggleInArray(form.belayDevices, 'reverso')"
+                          />
+                          <span class="text-brand-100/90">Un descendeur type “Reverso”</span>
+                        </label>
+                        <label class="inline-flex items-start gap-2">
+                          <input
+                            type="checkbox"
+                            :checked="form.belayDevices.includes('grigri')"
+                            @change="toggleInArray(form.belayDevices, 'grigri')"
+                          />
+                          <span class="text-brand-100/90">Un “Grigri”</span>
+                        </label>
+                        <label class="inline-flex items-start gap-2">
+                          <input
+                            type="checkbox"
+                            :checked="form.belayDevices.includes('smart_jul')"
+                            @change="toggleInArray(form.belayDevices, 'smart_jul')"
+                          />
+                          <span class="text-brand-100/90">Un descendeur autobloquant type “Smart” ou “Jul”</span>
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div
+                    v-if="form.typesOfClimbing.includes('multi')"
+                    class="space-y-3 rounded-2xl border border-brand-800/70 bg-brand-950/30 p-4"
+                  >
+                    <p class="text-sm font-semibold uppercase tracking-[0.3em] text-brand-200/80">
+                      Grande voie
+                    </p>
+                    <div class="space-y-2">
+                      <p class="text-sm font-medium text-brand-100/90">
+                        Ton niveau d’autonomie
+                      </p>
+                      <div class="flex flex-col gap-1 text-sm">
+                        <label class="inline-flex items-start gap-2">
+                          <input
+                            type="checkbox"
+                            :checked="form.multiAutonomy.includes('assur_haut_voie')"
+                            @change="toggleInArray(form.multiAutonomy, 'assur_haut_voie')"
+                          />
+                          <span class="text-brand-100/90">Assurer depuis le haut de la voie</span>
+                        </label>
+                        <label class="inline-flex items-start gap-2">
+                          <input
+                            type="checkbox"
+                            :checked="form.multiAutonomy.includes('rappel')"
+                            @change="toggleInArray(form.multiAutonomy, 'rappel')"
+                          />
+                          <span class="text-brand-100/90">Descendre en rappel</span>
+                        </label>
+                        <label class="inline-flex items-start gap-2">
+                          <input
+                            type="checkbox"
+                            :checked="form.multiAutonomy.includes('leader_cordee')"
+                            @change="toggleInArray(form.multiAutonomy, 'leader_cordee')"
+                          />
+                          <span class="text-brand-100/90">Leader une cordée</span>
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div
+                    v-if="form.typesOfClimbing.includes('trad')"
+                    class="space-y-3 rounded-2xl border border-brand-800/70 bg-brand-950/30 p-4"
+                  >
+                    <p class="text-sm font-semibold uppercase tracking-[0.3em] text-brand-200/80">
+                      Trad
+                    </p>
+                    <div class="space-y-2">
+                      <p class="text-sm font-medium text-brand-100/90">
+                        Quelles protections as tu déjà posé ?
+                      </p>
+                      <div class="flex flex-col gap-1 text-sm">
+                        <label class="inline-flex items-start gap-2">
+                          <input
+                            type="checkbox"
+                            :checked="form.tradProtections.includes('friends')"
+                            @change="toggleInArray(form.tradProtections, 'friends')"
+                          />
+                          <span class="text-brand-100/90">Friends</span>
+                        </label>
+                        <label class="inline-flex items-start gap-2">
+                          <input
+                            type="checkbox"
+                            :checked="form.tradProtections.includes('cables')"
+                            @change="toggleInArray(form.tradProtections, 'cables')"
+                          />
+                          <span class="text-brand-100/90">Câblés</span>
+                        </label>
+                        <label class="inline-flex items-start gap-2">
+                          <input
+                            type="checkbox"
+                            :checked="form.tradProtections.includes('piton')"
+                            @change="toggleInArray(form.tradProtections, 'piton')"
+                          />
+                          <span class="text-brand-100/90">Piton</span>
+                        </label>
+                        <label class="inline-flex items-start gap-2">
+                          <input
+                            type="checkbox"
+                            :checked="form.tradProtections.includes('lunule')"
+                            @change="toggleInArray(form.tradProtections, 'lunule')"
+                          />
+                          <span class="text-brand-100/90">Lunule</span>
+                        </label>
+                      </div>
+                    </div>
+
+                    <div class="space-y-2">
+                      <p class="text-sm font-medium text-brand-100/90">
+                        Connais tu les principes de l’assurage en mouvement (corde tendue) ?
+                      </p>
+                      <div class="flex flex-col gap-1 text-sm">
+                        <label class="inline-flex items-center gap-2">
+                          <input
+                            v-model="form.tradMovingBelay"
+                            type="radio"
+                            value="oui"
+                          />
+                          <span class="text-brand-100/90">Oui</span>
+                        </label>
+                        <label class="inline-flex items-center gap-2">
+                          <input
+                            v-model="form.tradMovingBelay"
+                            type="radio"
+                            value="non"
+                          />
+                          <span class="text-brand-100/90">Non</span>
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
               </section>
 
               <div class="flex justify-end">
@@ -959,7 +1289,7 @@
                 Annuler cette pré-inscription ?
               </h3>
               <p class="text-sm text-brand-100/80 leading-relaxed">
-                Tu es à un clic d'annuler ton aventure d'escalade, es-tu sûr de ça ? Si oui, fais toi remplacer par un(e) ami(e) en partageant cette aventure !
+                Tu es à un clic d'annuler ta prochaine aventure : en es-tu sûr ? Tu peux te faire remplacer en partageant la page du stage autour de toi.
               </p>
             </div>
             <button
@@ -977,11 +1307,11 @@
           <div class="mt-6 flex justify-end gap-3">
             <button
               type="button"
-              class="rounded-lg px-4 py-2 text-sm font-semibold text-brand-100 hover:bg-brand-800/70 border border-brand-700"
-              @click="closeCancelModal"
-              :disabled="cancelling"
+              class="rounded-lg px-4 py-2 text-sm font-semibold text-brand-100 border border-brand-700 hover:bg-brand-800/70"
+              :disabled="!bookingPendingCancel"
+              @click="shareAdventure(bookingPendingCancel)"
             >
-              Revenir
+              Partager l'aventure
             </button>
             <button
               type="button"
@@ -992,6 +1322,10 @@
               <span v-if="cancelling">Annulation...</span>
               <span v-else>Confirmer l'annulation</span>
             </button>
+          </div>
+          <div v-if="shareMessage || shareError" class="mt-3 text-sm">
+            <p v-if="shareMessage" class="text-emerald-200">{{ shareMessage }}</p>
+            <p v-else-if="shareError" class="text-red-200">{{ shareError }}</p>
           </div>
         </div>
       </div>

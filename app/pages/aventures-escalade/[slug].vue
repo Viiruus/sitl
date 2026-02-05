@@ -914,7 +914,7 @@
                 Inscription
               </p>
               <h3 class="mt-2 text-xl font-semibold">
-                Merci, inscription reçue
+                Ta demande a été prise en compte
               </h3>
               <p class="mt-2 text-sm text-brand-100/85">
                 {{ bookingSuccess }}
@@ -932,12 +932,6 @@
             </button>
           </div>
           <div class="space-y-5 px-6 py-5">
-            <img
-              src="https://media.giphy.com/media/26tOZ42Mg6pbTUPHW/giphy.gif"
-              alt="Feux d'artifice"
-              class="mx-auto h-28 w-auto rounded-2xl"
-              loading="lazy"
-            />
             <div class="flex items-center gap-3 rounded-2xl border border-white/10 bg-brand-900/60 p-3">
               <div class="h-14 w-14 overflow-hidden rounded-full border border-secondaryBrand-400/70 bg-brand-900">
                 <img
@@ -1717,7 +1711,7 @@ const handleInterestClick = async () => {
     }
 
     bookingSuccess.value =
-      'Ton inscription est bien enregistrée. Le moniteur te recontacte dès confirmation du stage.'
+      "Le moniteur va te contacter directement via WhatsApp pour finaliser l’organisation du stage. \nEn attendant, on s’entraine et on se repose !"
     showBookingModal.value = true
   } catch (err: any) {
     const message =

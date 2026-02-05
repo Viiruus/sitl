@@ -35,6 +35,26 @@ const onboardingSchema = z.object({
     .optional()
     .or(z.literal('')),
 
+  preferredClimbingStyle: z
+    .enum(['devers', 'vertical', 'dalle'])
+    .optional()
+    .or(z.literal('')),
+
+  climbingGoal: z.string().trim().max(500).optional().or(z.literal('')),
+
+  boulderingLocations: z.array(z.string()).optional().default([]),
+
+  boulderingGrade: z
+    .enum(['jaune', 'vert', 'bleu', 'rouge', 'noir', 'violet'])
+    .optional()
+    .or(z.literal('')),
+
+  belayDevices: z.array(z.string()).optional().default([]),
+
+  multiAutonomy: z.array(z.string()).optional().default([]),
+  tradProtections: z.array(z.string()).optional().default([]),
+  tradMovingBelay: z.enum(['oui', 'non']).optional().or(z.literal('')),
+
   // Vision du voyage
   tripStyles: z.array(z.string()).optional().default([]),
 })
@@ -80,6 +100,14 @@ export default defineEventHandler(async (event) => {
       frequency: body.frequency || null,
 
       gradeLevel: body.gradeLevel || null,
+      preferredClimbingStyle: body.preferredClimbingStyle || null,
+      climbingGoal: body.climbingGoal || null,
+      boulderingLocations: body.boulderingLocations ?? [],
+      boulderingGrade: body.boulderingGrade || null,
+      belayDevices: body.belayDevices ?? [],
+      multiAutonomy: body.multiAutonomy ?? [],
+      tradProtections: body.tradProtections ?? [],
+      tradMovingBelay: body.tradMovingBelay || null,
       tripStyles: body.tripStyles ?? [],
       onboarded: true,
       onboardingStep: 2,

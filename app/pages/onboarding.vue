@@ -14,10 +14,14 @@ const form = reactive({
   cguAccepted: false,
 
   // Pratique
-  typesOfClimbing: [] as string[], // ['bloc', 'sport', 'multi']
+  typesOfClimbing: [] as string[], // ['bloc', 'sport', 'multi', 'trad']
   climbsMainly: '' as '' | 'lead' | 'toprope',
-  environments: [] as string[], // ['falaise','salle_privee','salle_asso']
+  environments: [] as string[], // ['exterieur','salle_privee','salle_asso']
   autonomy: [] as string[], // valeurs prédéfinies
+  belayDevices: [] as string[],
+  multiAutonomy: [] as string[],
+  tradProtections: [] as string[],
+  tradMovingBelay: '' as '' | 'oui' | 'non',
   frequency: '' as
     | ''
     | 'moins_1'
@@ -45,7 +49,8 @@ const success = ref<string | null>(null)
 // Champs conditionnels : si corde (sport ou grande voie) cochés
 const needsRopeFields = computed(() =>
   form.typesOfClimbing.includes('sport') ||
-  form.typesOfClimbing.includes('multi')
+  form.typesOfClimbing.includes('multi') ||
+  form.typesOfClimbing.includes('trad')
 )
 
 // Guard d’auth : on vérifie que l’utilisateur est connecté
@@ -285,6 +290,16 @@ const submit = async () => {
               >
                 Grande voie
               </button>
+              <button
+                type="button"
+                class="px-3 py-1.5 rounded-full border text-xs"
+                :class="form.typesOfClimbing.includes('trad')
+                  ? 'bg-secondaryBrand-500 text-brand-950 border-secondaryBrand-500'
+                  : 'bg-brand-950/40 text-brand-100/80 border-brand-700'"
+                @click="toggleInArray(form.typesOfClimbing, 'trad')"
+              >
+                Trad
+              </button>
             </div>
           </div>
 
@@ -292,97 +307,257 @@ const submit = async () => {
             v-if="needsRopeFields"
             class="space-y-4 border-t border-brand-800 pt-4"
           >
-            <div class="space-y-2">
-              <p class="text-sm font-medium text-brand-100/90">
-                Tu grimpes principalement ?
+            <div
+              v-if="form.typesOfClimbing.includes('sport')"
+              class="space-y-3 rounded-2xl border border-brand-800/70 bg-brand-950/30 p-4"
+            >
+              <p class="text-sm font-semibold uppercase tracking-[0.3em] text-brand-200/80">
+                Voie
               </p>
-              <div class="flex flex-col gap-1 text-sm">
-                <label class="inline-flex items-center gap-2">
-                  <input
-                    v-model="form.climbsMainly"
-                    type="radio"
-                    value="lead"
-                  />
-                  <span class="text-brand-100/90">En tête</span>
-                </label>
-                <label class="inline-flex items-center gap-2">
-                  <input
-                    v-model="form.climbsMainly"
-                    type="radio"
-                    value="toprope"
-                  />
-                  <span class="text-brand-100/90">En moulinette</span>
-                </label>
+              <div class="space-y-2">
+                <p class="text-sm font-medium text-brand-100/90">
+                  Tu grimpes principalement ?
+                </p>
+                <div class="flex flex-col gap-1 text-sm">
+                  <label class="inline-flex items-center gap-2">
+                    <input
+                      v-model="form.climbsMainly"
+                      type="radio"
+                      value="lead"
+                    />
+                    <span class="text-brand-100/90">En tête</span>
+                  </label>
+                  <label class="inline-flex items-center gap-2">
+                    <input
+                      v-model="form.climbsMainly"
+                      type="radio"
+                      value="toprope"
+                    />
+                    <span class="text-brand-100/90">En moulinette</span>
+                  </label>
+                </div>
+              </div>
+
+              <div class="space-y-2">
+                <p class="text-sm font-medium text-brand-100/90">
+                  Tu grimpes dans quel(s) environnement(s) ?
+                </p>
+                <div class="flex flex-wrap gap-2 text-sm">
+                  <button
+                    type="button"
+                    class="px-3 py-1.5 rounded-full border text-xs"
+                    :class="form.environments.includes('exterieur')
+                      ? 'bg-secondaryBrand-500 text-brand-950 border-secondaryBrand-500'
+                      : 'bg-brand-950/40 text-brand-100/80 border-brand-700'"
+                    @click="toggleInArray(form.environments, 'exterieur')"
+                  >
+                    En extérieur
+                  </button>
+                  <button
+                    type="button"
+                    class="px-3 py-1.5 rounded-full border text-xs"
+                    :class="form.environments.includes('salle_privee')
+                      ? 'bg-secondaryBrand-500 text-brand-950 border-secondaryBrand-500'
+                      : 'bg-brand-950/40 text-brand-100/80 border-brand-700'"
+                    @click="toggleInArray(form.environments, 'salle_privee')"
+                  >
+                    En salle privée
+                  </button>
+                  <button
+                    type="button"
+                    class="px-3 py-1.5 rounded-full border text-xs"
+                    :class="form.environments.includes('salle_asso')
+                      ? 'bg-secondaryBrand-500 text-brand-950 border-secondaryBrand-500'
+                      : 'bg-brand-950/40 text-brand-100/80 border-brand-700'"
+                    @click="toggleInArray(form.environments, 'salle_asso')"
+                  >
+                    En salle associative
+                  </button>
+                </div>
+              </div>
+
+              <div class="space-y-2">
+                <p class="text-sm font-medium text-brand-100/90">
+                  Ton niveau d'autonomie
+                </p>
+                <div class="flex flex-col gap-1 text-sm">
+                  <label class="inline-flex items-start gap-2">
+                    <input
+                      type="checkbox"
+                      :checked="form.autonomy.includes('assur_moulinette')"
+                      @change="toggleInArray(form.autonomy, 'assur_moulinette')"
+                    />
+                    <span class="text-brand-100/90">Assurer un partenaire en moulinette</span>
+                  </label>
+                  <label class="inline-flex items-start gap-2">
+                    <input
+                      type="checkbox"
+                      :checked="form.autonomy.includes('assur_tete')"
+                      @change="toggleInArray(form.autonomy, 'assur_tete')"
+                    />
+                    <span class="text-brand-100/90">Assurer un partenaire en tête</span>
+                  </label>
+                  <label class="inline-flex items-start gap-2">
+                    <input
+                      type="checkbox"
+                      :checked="form.autonomy.includes('manip_haut_de_voie')"
+                      @change="toggleInArray(form.autonomy, 'manip_haut_de_voie')"
+                    />
+                    <span class="text-brand-100/90">Manip de haut de voie</span>
+                  </label>
+                  <label class="inline-flex items-start gap-2">
+                    <input
+                      type="checkbox"
+                      :checked="form.autonomy.includes('rechappe')"
+                      @change="toggleInArray(form.autonomy, 'rechappe')"
+                    />
+                    <span class="text-brand-100/90">Réchappe</span>
+                  </label>
+                </div>
+              </div>
+
+              <div class="space-y-2">
+                <p class="text-sm font-medium text-brand-100/90">
+                  Tu sais assurer avec ?
+                </p>
+                <div class="flex flex-col gap-1 text-sm">
+                  <label class="inline-flex items-start gap-2">
+                    <input
+                      type="checkbox"
+                      :checked="form.belayDevices.includes('reverso')"
+                      @change="toggleInArray(form.belayDevices, 'reverso')"
+                    />
+                    <span class="text-brand-100/90">Un descendeur type “Reverso”</span>
+                  </label>
+                  <label class="inline-flex items-start gap-2">
+                    <input
+                      type="checkbox"
+                      :checked="form.belayDevices.includes('grigri')"
+                      @change="toggleInArray(form.belayDevices, 'grigri')"
+                    />
+                    <span class="text-brand-100/90">Un “Grigri”</span>
+                  </label>
+                  <label class="inline-flex items-start gap-2">
+                    <input
+                      type="checkbox"
+                      :checked="form.belayDevices.includes('smart_jul')"
+                      @change="toggleInArray(form.belayDevices, 'smart_jul')"
+                    />
+                    <span class="text-brand-100/90">Un descendeur autobloquant type “Smart” ou “Jul”</span>
+                  </label>
+                </div>
               </div>
             </div>
 
-            <div class="space-y-2">
-              <p class="text-sm font-medium text-brand-100/90">
-                Tu grimpes dans quel(s) environnement(s) ?
+            <div
+              v-if="form.typesOfClimbing.includes('multi')"
+              class="space-y-3 rounded-2xl border border-brand-800/70 bg-brand-950/30 p-4"
+            >
+              <p class="text-sm font-semibold uppercase tracking-[0.3em] text-brand-200/80">
+                Grande voie
               </p>
-              <div class="flex flex-wrap gap-2 text-sm">
-                <button
-                  type="button"
-                  class="px-3 py-1.5 rounded-full border text-xs"
-                  :class="form.environments.includes('falaise')
-                    ? 'bg-secondaryBrand-500 text-brand-950 border-secondaryBrand-500'
-                    : 'bg-brand-950/40 text-brand-100/80 border-brand-700'"
-                  @click="toggleInArray(form.environments, 'falaise')"
-                >
-                  Falaise
-                </button>
-                <button
-                  type="button"
-                  class="px-3 py-1.5 rounded-full border text-xs"
-                  :class="form.environments.includes('salle_privee')
-                    ? 'bg-secondaryBrand-500 text-brand-950 border-secondaryBrand-500'
-                    : 'bg-brand-950/40 text-brand-100/80 border-brand-700'"
-                  @click="toggleInArray(form.environments, 'salle_privee')"
-                >
-                  Salle privée
-                </button>
-                <button
-                  type="button"
-                  class="px-3 py-1.5 rounded-full border text-xs"
-                  :class="form.environments.includes('salle_asso')
-                    ? 'bg-secondaryBrand-500 text-brand-950 border-secondaryBrand-500'
-                    : 'bg-brand-950/40 text-brand-100/80 border-brand-700'"
-                  @click="toggleInArray(form.environments, 'salle_asso')"
-                >
-                  Salle communale (asso)
-                </button>
+              <div class="space-y-2">
+                <p class="text-sm font-medium text-brand-100/90">
+                  Ton niveau d’autonomie
+                </p>
+                <div class="flex flex-col gap-1 text-sm">
+                  <label class="inline-flex items-start gap-2">
+                    <input
+                      type="checkbox"
+                      :checked="form.multiAutonomy.includes('assur_haut_voie')"
+                      @change="toggleInArray(form.multiAutonomy, 'assur_haut_voie')"
+                    />
+                    <span class="text-brand-100/90">Assurer depuis le haut de la voie</span>
+                  </label>
+                  <label class="inline-flex items-start gap-2">
+                    <input
+                      type="checkbox"
+                      :checked="form.multiAutonomy.includes('rappel')"
+                      @change="toggleInArray(form.multiAutonomy, 'rappel')"
+                    />
+                    <span class="text-brand-100/90">Descendre en rappel</span>
+                  </label>
+                  <label class="inline-flex items-start gap-2">
+                    <input
+                      type="checkbox"
+                      :checked="form.multiAutonomy.includes('leader_cordee')"
+                      @change="toggleInArray(form.multiAutonomy, 'leader_cordee')"
+                    />
+                    <span class="text-brand-100/90">Leader une cordée</span>
+                  </label>
+                </div>
               </div>
             </div>
 
-            <div class="space-y-2">
-              <p class="text-sm font-medium text-brand-100/90">
-                Ton niveau d'autonomie
+            <div
+              v-if="form.typesOfClimbing.includes('trad')"
+              class="space-y-3 rounded-2xl border border-brand-800/70 bg-brand-950/30 p-4"
+            >
+              <p class="text-sm font-semibold uppercase tracking-[0.3em] text-brand-200/80">
+                Trad
               </p>
-              <div class="flex flex-col gap-1 text-sm">
-                <label class="inline-flex items-start gap-2">
-                  <input
-                    type="checkbox"
-                    :checked="form.autonomy.includes('assur_tete')"
-                    @change="toggleInArray(form.autonomy, 'assur_tete')"
-                  />
-                  <span class="text-brand-100/90">Je sais assurer quelqu'un en tête</span>
-                </label>
-                <label class="inline-flex items-start gap-2">
-                  <input
-                    type="checkbox"
-                    :checked="form.autonomy.includes('manip_haut_de_voie')"
-                    @change="toggleInArray(form.autonomy, 'manip_haut_de_voie')"
-                  />
-                  <span class="text-brand-100/90">Je sais faire la manip de haut de voie pour installer une moulinette</span>
-                </label>
-                <label class="inline-flex items-start gap-2">
-                  <input
-                    type="checkbox"
-                    :checked="form.autonomy.includes('relais_grande_voie')"
-                    @change="toggleInArray(form.autonomy, 'relais_grande_voie')"
-                  />
-                  <span class="text-brand-100/90">Je sais confectionner un relais en grande voie équipée</span>
-                </label>
+              <div class="space-y-2">
+                <p class="text-sm font-medium text-brand-100/90">
+                  Quelles protections as tu déjà posé ?
+                </p>
+                <div class="flex flex-col gap-1 text-sm">
+                  <label class="inline-flex items-start gap-2">
+                    <input
+                      type="checkbox"
+                      :checked="form.tradProtections.includes('friends')"
+                      @change="toggleInArray(form.tradProtections, 'friends')"
+                    />
+                    <span class="text-brand-100/90">Friends</span>
+                  </label>
+                  <label class="inline-flex items-start gap-2">
+                    <input
+                      type="checkbox"
+                      :checked="form.tradProtections.includes('cables')"
+                      @change="toggleInArray(form.tradProtections, 'cables')"
+                    />
+                    <span class="text-brand-100/90">Câblés</span>
+                  </label>
+                  <label class="inline-flex items-start gap-2">
+                    <input
+                      type="checkbox"
+                      :checked="form.tradProtections.includes('piton')"
+                      @change="toggleInArray(form.tradProtections, 'piton')"
+                    />
+                    <span class="text-brand-100/90">Piton</span>
+                  </label>
+                  <label class="inline-flex items-start gap-2">
+                    <input
+                      type="checkbox"
+                      :checked="form.tradProtections.includes('lunule')"
+                      @change="toggleInArray(form.tradProtections, 'lunule')"
+                    />
+                    <span class="text-brand-100/90">Lunule</span>
+                  </label>
+                </div>
+              </div>
+
+              <div class="space-y-2">
+                <p class="text-sm font-medium text-brand-100/90">
+                  Connais tu les principes de l’assurage en mouvement (corde tendue) ?
+                </p>
+                <div class="flex flex-col gap-1 text-sm">
+                  <label class="inline-flex items-center gap-2">
+                    <input
+                      v-model="form.tradMovingBelay"
+                      type="radio"
+                      value="oui"
+                    />
+                    <span class="text-brand-100/90">Oui</span>
+                  </label>
+                  <label class="inline-flex items-center gap-2">
+                    <input
+                      v-model="form.tradMovingBelay"
+                      type="radio"
+                      value="non"
+                    />
+                    <span class="text-brand-100/90">Non</span>
+                  </label>
+                </div>
               </div>
             </div>
           </div>

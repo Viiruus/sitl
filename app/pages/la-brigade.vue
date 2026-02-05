@@ -3,7 +3,7 @@
     <!-- Hero with background -->
     <div class="relative overflow-hidden pb-16">
       <div class="absolute inset-0">
-        <img src="/images/emulation2.jpeg" alt="" class="h-full w-full object-cover opacity-25" />
+        <img src="/images/emulation2.jpeg" alt="" class="h-full w-full object-cover opacity-40" />
         <div class="absolute inset-0 bg-brand-950/70" />
         <div class="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-b from-transparent to-brand-950" />
       </div>
@@ -13,9 +13,9 @@
 
         <!-- Hero Section -->
         <div class="mx-auto max-w-7xl px-6 pt-16 lg:px-8">
-          <div class="mx-auto max-w-2xl py-16 sm:text-center sm:py-24">
-            <h2 class="text-4xl font-semibold tracking-tight text-balance text-white sm:text-5xl">Rencontre la Brigade du kiff</h2>
-            <p class="mt-6 text-lg/8 text-gray-300">La Brigade du kiff est née pour te faire profiter au maximum de l’escalade en milieux naturels. Nos moniteurs connaissent leurs territoires et sauront te faire découvrir les meilleurs spots près ou loin de chez toi. Que ce soit pour t’initier, pour progresser ou pour te perfectionner, nos moniteurs diplômés d’État seront là pour toi.</p>
+          <div class="max-w-4xl py-16 sm:py-24">
+            <h2 class="text-4xl font-semibold tracking-tight text-pretty text-white sm:text-5xl">Rencontre la Brigade du kiff</h2>
+            <p class="mt-6 text-base text-brand-100/80">La Brigade du kiff est née pour te faire profiter au maximum de l’escalade en milieux naturels. Nos moniteurs connaissent leurs territoires et sauront te faire découvrir les meilleurs spots près ou loin de chez toi. Que ce soit pour t’initier, pour progresser ou pour te perfectionner, nos moniteurs diplômés d’État seront là pour toi.</p>
           </div>
         </div>
       </div>
