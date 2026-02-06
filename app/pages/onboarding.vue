@@ -300,6 +300,16 @@ const submit = async () => {
               >
                 Trad
               </button>
+              <button
+                type="button"
+                class="px-3 py-1.5 rounded-full border text-xs"
+                :class="form.typesOfClimbing.includes('via_ferrata')
+                  ? 'bg-secondaryBrand-500 text-brand-950 border-secondaryBrand-500'
+                  : 'bg-brand-950/40 text-brand-100/80 border-brand-700'"
+                @click="toggleInArray(form.typesOfClimbing, 'via_ferrata')"
+              >
+                Via ferrata
+              </button>
             </div>
           </div>
 

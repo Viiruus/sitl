@@ -24,6 +24,7 @@ const disciplineLabels: Record<string, string> = {
   FALAISE: 'Falaise',
   BLOC: 'Bloc',
   TRAD: 'Trad',
+  VIA_FERRATA: 'Via ferrata',
 }
 
 const formatDiscipline = (value?: string | null) => (value ? disciplineLabels[value] ?? value : 'Aventure')

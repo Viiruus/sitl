@@ -4,7 +4,7 @@ type AdventureData = {
   slug: string
   estPublie: boolean
   titre: string
-  discipline: 'FALAISE' | 'GRANDE_VOIE' | 'BLOC' | 'TRAD'
+  discipline: 'FALAISE' | 'GRANDE_VOIE' | 'BLOC' | 'TRAD' | 'VIA_FERRATA'
   lieuLabel: string
   prixParPersonne: number
   jours: number
@@ -458,6 +458,7 @@ const uploadGalleryImage = async (event: Event, index: number) => {
               <option value="GRANDE_VOIE">Grande voie</option>
               <option value="BLOC">Bloc</option>
               <option value="TRAD">Trad</option>
+              <option value="VIA_FERRATA">Via ferrata</option>
             </select>
           </div>
         </div>

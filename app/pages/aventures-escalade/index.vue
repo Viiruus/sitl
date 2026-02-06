@@ -19,6 +19,7 @@ const disciplineLabels: Record<string, string> = {
   FALAISE: 'Falaise',
   BLOC: 'Bloc',
   TRAD: 'Trad',
+  VIA_FERRATA: 'Via ferrata',
 }
 
 const formatDisciplineLabel = (value: string) => {
@@ -28,7 +29,7 @@ const formatDisciplineLabel = (value: string) => {
 const disciplineOptions = computed(() => {
   const adventures = data.value?.aventures ?? []
   const seen = new Set<string>()
-  return adventures.reduce<{ value: string; label: string }[]>((acc, aventure) => {
+  const options = adventures.reduce<{ value: string; label: string }[]>((acc, aventure) => {
     if (aventure.discipline && !seen.has(aventure.discipline)) {
       seen.add(aventure.discipline)
       acc.push({
@@ -38,6 +39,13 @@ const disciplineOptions = computed(() => {
     }
     return acc
   }, [])
+  if (!seen.has('VIA_FERRATA')) {
+    options.push({
+      value: 'VIA_FERRATA',
+      label: formatDisciplineLabel('VIA_FERRATA'),
+    })
+  }
+  return options
 })
 
 const disciplineIconMap: Record<string, string> = {
@@ -45,6 +53,7 @@ const disciplineIconMap: Record<string, string> = {
   FALAISE: '/images/couenne-white.png',
   BLOC: '/images/bloc-white.png',
   TRAD: '/images/trad-white.png',
+  VIA_FERRATA: '/images/via-ferrata-white.svg',
 }
 
 const iconPathForDiscipline = (value?: string | null) => {
@@ -63,6 +72,7 @@ const disciplineImageMap: Record<string, string> = {
   FALAISE: '/images/falaise-escalade-beaufortain.jpg',
   BLOC: '/images/bloc-Pays-Basque-Mondarrain.jpg',
   TRAD: '/images/falaise-Calanques2.jpg',
+  VIA_FERRATA: '/images/rappel-Calanques.jpg',
 }
 
 const imageForDiscipline = (value?: string | null) => {

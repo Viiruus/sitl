@@ -1,0 +1,1 @@
+-- SQLite does not require schema changes for enum value additions.

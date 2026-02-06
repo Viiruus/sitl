@@ -54,7 +54,7 @@ const requestCode = async () => {
     codeSent.value = true
     otpToken.value = res?.token || null
     if (res?.devCode) {
-      success.value = `Code de test : ${res.devCode} (preview mode)`
+      success.value = `Code de test : ${res.devCode}`
     } else {
       success.value = 'Code envoyé sur WhatsApp.'
     }

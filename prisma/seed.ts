@@ -393,7 +393,7 @@ async function seedClimbers() {
       lastName: 'Delage',
       department: '73 - Savoie',
       acquisitionSource: 'ami',
-      typesOfClimbing: ['sport', 'multi'],
+      typesOfClimbing: ['sport', 'multi', 'via_ferrata'],
       climbsMainly: 'lead',
       environments: ['exterieur', 'salle_asso'],
       autonomy: ['assur_moulinette', 'assur_tete', 'manip_haut_de_voie'],
@@ -409,6 +409,30 @@ async function seedClimbers() {
       tradMovingBelay: '',
       profileImageUrl:
         'https://images.pexels.com/photos/5383479/pexels-photo-5383479.jpeg?cs=srgb&dl=pexels-allan-mas-5383479.jpg&fm=jpg',
+      tripStyles: ['aventure'],
+    },
+    {
+      email: 'enzo.ferrata@grimpe.test',
+      firstName: 'Enzo',
+      lastName: 'Marchal',
+      department: '05 - Hautes-Alpes',
+      acquisitionSource: 'direct',
+      typesOfClimbing: ['via_ferrata'],
+      climbsMainly: '',
+      environments: ['exterieur'],
+      autonomy: [],
+      frequency: '1',
+      gradeLevel: 'dont_know',
+      preferredClimbingStyle: 'vertical',
+      climbingGoal: 'Découvrir plusieurs via ferrata alpines et gagner en aisance sur l’exposition.',
+      boulderingLocations: [],
+      boulderingGrade: '',
+      belayDevices: [],
+      multiAutonomy: [],
+      tradProtections: [],
+      tradMovingBelay: '',
+      profileImageUrl:
+        'https://images.pexels.com/photos/11994041/pexels-photo-11994041.jpeg?cs=srgb&dl=pexels-pixabay-11994041.jpg&fm=jpg',
       tripStyles: ['aventure'],
     },
   ] as const
@@ -1233,6 +1257,101 @@ async function seedAventures(guides: any[]) {
       sessions: [
         { offsetDays: 25, durationDays: 3, placesTotales: 5 },
         { offsetDays: 75, durationDays: 3, placesTotales: 5 },
+      ],
+    },
+
+    // 8) Via ferrata – sensations & progression
+    {
+      slug: 'aventure-via-ferrata-verdon-sensations',
+      guideId: nicolas.id,
+      titre: 'Verdon : via ferrata entre ciel et calcaire',
+      sousTitre:
+        '2 jours pour apprivoiser le vide, apprendre les bons gestes et profiter d’une ambiance canyon.',
+      discipline: "VIA_FERRATA",
+      formule: "GRIMPE_SEULEMENT",
+      lieuLabel: 'Via ferrata du Verdon',
+      region: 'Provence-Alpes-Côte d’Azur',
+      jours: 2,
+      placesMax: 8,
+      niveauMinimum: 'Débutant',
+      autonomieMini: null as any,
+      prixParPersonne: 220,
+      inclus:
+        'Encadrement, briefing sécurité, prêt de longe et casque si besoin.',
+      nonInclus:
+        'Transport, hébergement, repas.',
+      pointsLocaux:
+        'Gorges spectaculaires, calcaire sculpté, lumière du sud.',
+      descriptionCourte:
+        'Un week-end pour découvrir la via ferrata en sécurité et gagner en confiance.',
+      descriptionLongue:
+        'On progresse sur des itinéraires adaptés au groupe, avec une attention particulière à la gestuelle, à la gestion des mousquetons et au rythme. ' +
+        'Objectif : repartir serein·e pour enchaîner d’autres parcours ensuite.',
+      objectifs:
+        '- Comprendre la progression en via ferrata.\n' +
+        '- Être à l’aise avec la longe et la gestion des obstacles.\n' +
+        '- Profiter d’un parcours panoramique en petit groupe.',
+      prerequis: [
+        'Avoir le vertige léger ou modéré (on s’adapte).',
+        'Avoir envie de bouger en extérieur.',
+      ],
+      equipementRequis: [
+        'Chaussures de rando ou d’approche',
+        'Vêtements adaptés',
+        'Petit sac à dos',
+      ],
+      equipementFourni: [
+        'Longes de via ferrata si besoin',
+        'Casques',
+      ],
+      hebergementLabel: 'Hébergement libre',
+      hebergementDetails:
+        'Gîtes, camping ou van selon ton style.',
+      repasLabel:
+        'Repas libres, pique-niques à prévoir.',
+      transportLabel:
+        'Covoiturage encouragé, accès route aux parkings.',
+      pointRdv: 'Parking du départ de la via ferrata, jour 1 à 9h.',
+      langues: ['Français'],
+      ageMin: 16,
+      ageMax: 65,
+      coverImageUrl: '/images/rappel-Calanques.jpg',
+      images: [
+        {
+          url: '/images/rappel-Calanques.jpg',
+          alt: 'Passage aérien en via ferrata',
+          kind: "COVER",
+          position: 1,
+        },
+        {
+          url: '/images/approche-Calanques-Grande-Candelle.jpg',
+          alt: 'Approche et panorama avant la ferrata',
+          kind: "GALLERY",
+          position: 2,
+        },
+      ],
+      programmeJours: [
+        {
+          ordre: 1,
+          titre: 'Découverte & progression sécurisée',
+          description:
+            'Briefing sécurité, mise en place des longes, progression sur un parcours accessible.',
+          lieuLabel: 'Parcours école du Verdon',
+          discipline: "VIA_FERRATA",
+        },
+        {
+          ordre: 2,
+          titre: 'Parcours panoramique',
+          description:
+            'Itinéraire plus long et aérien pour consolider les acquis.',
+          lieuLabel: 'Via ferrata principale',
+          discipline: "VIA_FERRATA",
+        },
+      ],
+      estPublie: true,
+      sessions: [
+        { offsetDays: 12, durationDays: 2, placesTotales: 8 },
+        { offsetDays: 50, durationDays: 2, placesTotales: 8 },
       ],
     },
   ]

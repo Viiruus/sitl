@@ -27,6 +27,7 @@ enum AventureDiscipline {
   GRANDE_VOIE
   BLOC
   TRAD
+  VIA_FERRATA
 }
 
 enum AventureSessionStatut {
@@ -71,7 +72,7 @@ model User {
 
   // Pratique de l’escalade
   /// typesOfClimbing: JSON pour stocker un tableau de strings
-  /// ex: ["bloc", "sport", "multi"]
+  /// ex: ["bloc", "sport", "multi", "trad", "via_ferrata"]
   typesOfClimbing Json?
 
   /// climbsMainly: "lead", "toprope" ou null

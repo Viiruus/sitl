@@ -1291,6 +1291,7 @@ const disciplineImageMap: Record<string, string> = {
   FALAISE: '/images/falaise-escalade-beaufortain.jpg',
   BLOC: '/images/bloc-Pays-Basque-Mondarrain.jpg',
   TRAD: '/images/falaise-Calanques2.jpg',
+  VIA_FERRATA: '/images/rappel-Calanques.jpg',
 }
 
 const imageForDiscipline = (value?: string | null) => {
@@ -1359,6 +1360,7 @@ const disciplineLabels: Record<string, string> = {
   FALAISE: 'Falaise',
   BLOC: 'Bloc',
   TRAD: 'Trad',
+  VIA_FERRATA: 'Via ferrata',
 }
 
 const disciplineIconMap: Record<string, string> = {
@@ -1366,6 +1368,7 @@ const disciplineIconMap: Record<string, string> = {
   FALAISE: '/images/couenne-white.png',
   BLOC: '/images/bloc-white.png',
   TRAD: '/images/trad-white.png',
+  VIA_FERRATA: '/images/via-ferrata-white.svg',
 }
 
 const iconPathForDiscipline = (value?: string | null) => {

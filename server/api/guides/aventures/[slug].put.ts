@@ -29,7 +29,7 @@ const galleryImageSchema = z.object({
 const bodySchema = z
   .object({
     titre: z.string().trim().min(3),
-    discipline: z.enum(['FALAISE', 'GRANDE_VOIE', 'BLOC', 'TRAD']),
+    discipline: z.enum(['FALAISE', 'GRANDE_VOIE', 'BLOC', 'TRAD', 'VIA_FERRATA']),
     lieuLabel: z.string().trim().min(3),
     prixParPersonne: z.number().int().min(0),
     jours: z.number().int().min(1).max(30),

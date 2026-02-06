@@ -22,7 +22,8 @@ export default defineEventHandler(async (event) => {
     const allowDevCode =
       process.env.NODE_ENV !== 'production' ||
       process.env.VERCEL_ENV === 'preview' ||
-      process.env.WHATSAPP_DEV_CODE === 'true'
+      process.env.WHATSAPP_DEV_CODE === 'true' ||
+      process.env.WHATSAPP_GUIDE_DEV_CODE === 'true'
     // En dev/preview, renvoyer le code pour faciliter les tests si WhatsApp n’est pas configuré.
     if (allowDevCode) {
       return {
