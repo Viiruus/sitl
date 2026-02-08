@@ -39,12 +39,6 @@ const disciplineOptions = computed(() => {
     }
     return acc
   }, [])
-  if (!seen.has('VIA_FERRATA')) {
-    options.push({
-      value: 'VIA_FERRATA',
-      label: formatDisciplineLabel('VIA_FERRATA'),
-    })
-  }
   return options
 })
 

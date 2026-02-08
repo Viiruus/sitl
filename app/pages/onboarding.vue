@@ -1,5 +1,9 @@
 <script setup lang="ts">
-const { loggedIn, fetch } = useUserSession()
+definePageMeta({
+  middleware: 'climber-auth',
+})
+
+const { loggedIn, fetch, user } = useUserSession()
 const router = useRouter()
 
 // Étapes
@@ -58,6 +62,9 @@ onMounted(async () => {
   await fetch()
   if (!loggedIn.value) {
     router.push('/login')
+  }
+  if (loggedIn.value && user.value?.role === 'GUIDE') {
+    router.push({ path: '/moniteurs', query: { notice: 'guide-only' } })
   }
 })
 

@@ -11,6 +11,12 @@ export default defineEventHandler(async (event) => {
       statusMessage: 'Non authentifié',
     })
   }
+  if (session.user.role === 'GUIDE') {
+    throw createError({
+      statusCode: 403,
+      statusMessage: 'Réservé aux grimpeurs.',
+    })
+  }
 
   const normalizedEmail = session.user.email.toLowerCase()
 
@@ -48,6 +54,12 @@ export default defineEventHandler(async (event) => {
     throw createError({
       statusCode: 404,
       statusMessage: 'Utilisateur introuvable',
+    })
+  }
+  if (user.role === 'GUIDE') {
+    throw createError({
+      statusCode: 403,
+      statusMessage: 'Réservé aux grimpeurs.',
     })
   }
 

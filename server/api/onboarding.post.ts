@@ -70,12 +70,21 @@ export default defineEventHandler(async (event) => {
       statusMessage: 'Non authentifié',
     })
   }
+  if (session.user.role === 'GUIDE') {
+    throw createError({
+      statusCode: 403,
+      statusMessage: 'Réservé aux grimpeurs.',
+    })
+  }
 
   const currentUser = await db.user.findUnique({
     where: { id: Number(session.user.id) },
   })
   if (!currentUser) {
     throw createError({ statusCode: 404, statusMessage: 'Utilisateur introuvable' })
+  }
+  if (currentUser.role === 'GUIDE') {
+    throw createError({ statusCode: 403, statusMessage: 'Réservé aux grimpeurs.' })
   }
 
   // 2) Lire et valider le body

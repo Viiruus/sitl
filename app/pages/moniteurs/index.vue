@@ -30,6 +30,13 @@ const profileComplete = computed(() => {
   return missingProfileFields.value.length === 0
 })
 
+const guideNotice = computed(() => route.query.notice)
+
+const clearNotice = async () => {
+  if (!guideNotice.value) return
+  await router.replace({ query: { ...route.query, notice: undefined } })
+}
+
 const hasPublishedAdventure = computed(() =>
   aventures.value.some((a: any) => a?.estPublie),
 )
@@ -62,6 +69,32 @@ const logout = async () => {
       <MoniteursGuideSidebar :guide="guide" :current-path="route.path" @logout="logout" />
 
       <main class="flex-1 space-y-8">
+        <div
+          v-if="guideNotice === 'guide-only'"
+          class="rounded-3xl border border-amber-400/40 bg-amber-500/10 p-6 text-amber-100/90"
+        >
+          <div class="flex flex-wrap items-start justify-between gap-4">
+            <div>
+              <p class="text-xs uppercase tracking-[0.3em] text-amber-200/80">
+                Accès grimpeur
+              </p>
+              <p class="mt-2 text-lg font-semibold">
+                Connecté en tant que moniteur
+              </p>
+              <p class="mt-1 text-sm text-amber-100/80">
+                L’espace grimpeur est réservé aux grimpeurs. Tu peux gérer ton compte depuis ce back‑office moniteurs.
+              </p>
+            </div>
+            <button
+              type="button"
+              class="rounded-full border border-amber-300/60 px-4 py-2 text-xs font-semibold uppercase tracking-[0.3em] text-amber-100 transition hover:bg-amber-400/20"
+              @click="clearNotice"
+            >
+              J’ai compris
+            </button>
+          </div>
+        </div>
+
         <div class="rounded-3xl bg-white/5 p-8 ring-1 ring-white/10">
           <p class="text-sm uppercase tracking-[0.4em] text-secondaryBrand-300">
             Tableau de bord moniteur

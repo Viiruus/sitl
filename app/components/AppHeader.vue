@@ -87,16 +87,16 @@ const { loggedIn, user } = useUserSession()
 const { openModal } = useAuthModal()
 
 const ctaLabel = computed(() => {
-  if (!loggedIn.value) {
+  if (!loggedIn.value || user.value?.role === 'GUIDE') {
     return 'Connexion'
   }
   return 'Mon compte'
 })
 
-const ctaHref = computed(() => (loggedIn.value ? '/profil' : '/login'))
+const ctaHref = computed(() => (loggedIn.value && user.value?.role !== 'GUIDE' ? '/profil' : '/login'))
 
 const handleCtaClick = (event: Event) => {
-  if (!loggedIn.value) {
+  if (!loggedIn.value || user.value?.role === 'GUIDE') {
     event.preventDefault()
     openModal()
   }

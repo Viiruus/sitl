@@ -36,9 +36,29 @@
                 <h1 class="mt-2 text-4xl font-semibold tracking-tight text-pretty text-white sm:text-5xl">
                   {{ moniteurName || 'Moniteur local' }}
                 </h1>
-                <p class="mt-6 text-xl/8 text-gray-300">
-                  {{ moniteurTagline }}
-                </p>
+                <div class="mt-6 max-w-xl text-base/7 text-gray-300 sm:text-lg/8">
+                  <p>
+                    {{ moniteurBioText }}
+                  </p>
+                  <button
+                    v-if="moniteurHasLongBio"
+                    type="button"
+                    class="mt-3 inline-flex items-center gap-2 text-sm font-semibold text-secondaryBrand-200 transition hover:text-secondaryBrand-100"
+                    @click="showFullBio = !showFullBio"
+                  >
+                    {{ showFullBio ? 'Voir moins' : 'Voir plus' }}
+                    <svg
+                      class="h-4 w-4 transition"
+                      :class="showFullBio ? 'rotate-180' : ''"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.5"
+                    >
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M6 9l6 6 6-6" />
+                    </svg>
+                  </button>
+                </div>
                 <div class="mt-8 flex flex-wrap gap-3">
                   <span
                     v-for="discipline in disciplineChips"
@@ -333,19 +353,23 @@ const formatDisciplineLabel = (value?: string | null) => {
 }
 
 const moniteurName = computed(() => moniteur.value?.fullName || null)
-const moniteurBio = computed(() => moniteur.value?.bio || 'Moniteur d’escalade passionné prêt à imaginer ta prochaine aventure en falaise.')
-const moniteurShortBio = computed(() => {
-  const bio = moniteur.value?.bio?.trim()
-  if (!bio) return null
-  return bio.length > 220 ? `${bio.slice(0, 220).trimEnd()}…` : bio
-})
-const moniteurBioLong = computed(() => {
-  const bio = moniteur.value?.bio
-  if (!bio) {
-    return "Chaque aventure est pensée pour faire progresser le groupe sans oublier l’esprit de cordée : pédagogie, sécurité, bonnes adresses locales et convivialité."
+const showFullBio = ref(false)
+const moniteurBioValue = computed(() => moniteur.value?.bio?.trim() || '')
+const moniteurBioFallback = computed(() => {
+  const disciplines = disciplineChips.value.map((d) => d.label).join(' • ')
+  if (disciplines) {
+    return `${disciplines} — ${locationLabel.value}`
   }
-  return bio.length > 680 ? bio : bio
+  return `Escalade locale — ${locationLabel.value}`
 })
+const moniteurBioPreview = computed(() => {
+  const bio = moniteurBioValue.value
+  if (!bio) return moniteurBioFallback.value
+  return bio.length > 520 ? `${bio.slice(0, 520).trimEnd()}…` : bio
+})
+const moniteurBioFull = computed(() => moniteurBioValue.value || moniteurBioFallback.value)
+const moniteurHasLongBio = computed(() => moniteurBioValue.value.length > 520)
+const moniteurBioText = computed(() => (showFullBio.value ? moniteurBioFull.value : moniteurBioPreview.value))
 const normalizeImagePath = (src?: string | null) => {
   if (!src) return null
   if (/^(https?:)?\/\//i.test(src) || src.startsWith('data:') || src.startsWith('blob:')) {
@@ -396,16 +420,6 @@ const disciplineChips = computed(() => {
   }))
 })
 
-const moniteurTagline = computed(() => {
-  if (moniteurShortBio.value) {
-    return moniteurShortBio.value
-  }
-  const disciplines = disciplineChips.value.map((d) => d.label).join(' • ')
-  if (disciplines) {
-    return `${disciplines} — ${locationLabel.value}`
-  }
-  return `Escalade locale — ${locationLabel.value}`
-})
 
 const nextSessionLabel = computed(() => {
   const today = new Date()

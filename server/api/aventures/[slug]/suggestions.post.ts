@@ -18,6 +18,12 @@ export default defineEventHandler(async (event) => {
       statusMessage: 'Tu dois être connecté·e pour proposer des dates.',
     })
   }
+  if (session?.user?.role === 'GUIDE') {
+    throw createError({
+      statusCode: 403,
+      statusMessage: 'Réservé aux grimpeurs.',
+    })
+  }
 
   const aventure = await db.aventure.findUnique({
     where: { slug },

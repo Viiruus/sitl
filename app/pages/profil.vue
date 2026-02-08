@@ -1,4 +1,8 @@
 <script setup lang="ts">
+  definePageMeta({
+    middleware: 'climber-auth',
+  })
+
   const { loggedIn, fetch, user, clear } = useUserSession()
   const route = useRoute()
   const router = useRouter()
@@ -49,6 +53,9 @@
       await fetch()
       if (!loggedIn.value) {
       return router.push('/login')
+      }
+      if (user.value?.role === 'GUIDE') {
+      return router.push({ path: '/moniteurs', query: { notice: 'guide-only' } })
       }
 
       const res = await $fetch<{ user: any }>('/api/me')

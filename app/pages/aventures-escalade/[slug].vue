@@ -1420,8 +1420,9 @@ const formatSessionRange = (session?: { dateDebut?: string | Date; dateFin?: str
   return start === end ? start : `${start} → ${end}`
 }
 
-const { loggedIn } = useUserSession()
+const { loggedIn, user } = useUserSession()
 const router = useRouter()
+const isClimber = computed(() => loggedIn.value && user.value?.role !== 'GUIDE')
 
 const bookingLoading = ref(false)
 const bookingError = ref<string | null>(null)
@@ -1592,7 +1593,7 @@ const storePendingBooking = () => {
 
 const tryResumePendingBooking = async () => {
   if (pendingBookingHandled.value) return
-  if (!loggedIn.value) return
+  if (!isClimber.value) return
   if (!stage.value) return
   if (typeof window === 'undefined') return
 
@@ -1678,7 +1679,7 @@ const handleInterestClick = async () => {
   if (!selectedSessionIds.value.length) return
 
   // 1) S'il n'est pas connecté → login
-  if (!loggedIn.value) {
+  if (!isClimber.value) {
     storePendingBooking()
     const redirect = encodeURIComponent(route.fullPath)
     await router.push(`/login?redirect=${redirect}`)
@@ -1728,7 +1729,7 @@ const handleInterestClick = async () => {
 }
 
 watch(
-  () => [loggedIn.value, stage.value, availableSessions.value.length],
+  () => [isClimber.value, stage.value, availableSessions.value.length],
   () => {
     tryResumePendingBooking()
   },
@@ -1745,7 +1746,7 @@ const handleSuggestionClick = async () => {
     return
   }
 
-  if (!loggedIn.value) {
+  if (!isClimber.value) {
     const redirect = encodeURIComponent(route.fullPath)
     await router.push(`/login?redirect=${redirect}`)
     return
