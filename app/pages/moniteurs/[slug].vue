@@ -37,7 +37,7 @@
                   {{ moniteurName || 'Moniteur local' }}
                 </h1>
                 <div class="mt-6 max-w-xl text-base/7 text-gray-300 sm:text-lg/8">
-                  <p>
+                  <p class="whitespace-pre-line">
                     {{ moniteurBioText }}
                   </p>
                   <button
