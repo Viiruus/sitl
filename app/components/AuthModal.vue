@@ -172,7 +172,7 @@ const verifyCode = async () => {
                 <ul class="space-y-1.5">
                   <li class="flex items-start gap-2">
                     <span class="mt-[5px] h-1.5 w-1.5 rounded-full bg-secondaryBrand-400" />
-                    <span>Tu cliques sur “Continuer avec WhatsApp”.</span>
+                    <span>Tu installes l'application WhatsApp sur ton téléphone.</span>
                   </li>
                   <li class="flex items-start gap-2">
                     <span class="mt-[5px] h-1.5 w-1.5 rounded-full bg-secondaryBrand-400" />
@@ -184,10 +184,6 @@ const verifyCode = async () => {
                   </li>
                 </ul>
               </div>
-            </div>
-
-            <div class="text-[11px] text-brand-200/60">
-              Tu pourras modifier ton profil à tout moment dans “Mon profil”.
             </div>
           </div>
 
@@ -218,6 +214,10 @@ const verifyCode = async () => {
             </div>
 
             <div class="space-y-4">
+              <h1 class="text-xl font-semibold text-secondaryBrand-300">
+                Inscription via WhatsApp
+              </h1>
+
               <p class="text-sm text-brand-100/80">
                 Nous utilisons WhatsApp pour vérifier ton numéro et t’ouvrir l’accès aux prochaines aventures.
               </p>
@@ -284,9 +284,6 @@ const verifyCode = async () => {
               {{ error }}
             </p>
 
-            <p class="text-[11px] text-brand-200/60 mt-2">
-              Source : <span class="font-medium text-secondaryBrand-300">{{ source }}</span>
-            </p>
           </div>
         </div>
       </div>

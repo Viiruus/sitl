@@ -26,6 +26,13 @@ const galleryImageSchema = z.object({
   position: z.number().int().min(0).optional(),
 })
 
+const programmeJourSchema = z.object({
+  ordre: z.number().int().min(1).optional(),
+  titre: z.string().trim().min(1),
+  description: z.string().trim().min(1).optional(),
+  lieuLabel: z.string().trim().min(1).optional(),
+})
+
 const bodySchema = z
   .object({
     titre: z.string().trim().min(3),
@@ -53,6 +60,7 @@ const bodySchema = z
     repasLabel: z.string().trim().optional(),
     estPublie: z.boolean().optional(),
     images: z.array(galleryImageSchema).optional(),
+    programmeJours: z.array(programmeJourSchema).optional(),
   })
   .superRefine((data, ctx) => {
     if (!data.estPublie) {
@@ -176,6 +184,21 @@ export default defineEventHandler(async (event) => {
             url: img.url.trim(),
             alt: valueOrNull(img.alt ?? null),
             position: img.position ?? index,
+          })),
+        })
+      }
+    }
+
+    if (body.programmeJours) {
+      await tx.aventureJour.deleteMany({ where: { aventureId: existing.id } })
+      if (body.programmeJours.length) {
+        await tx.aventureJour.createMany({
+          data: body.programmeJours.map((jour, index) => ({
+            aventureId: existing.id,
+            ordre: jour.ordre ?? index + 1,
+            titre: jour.titre.trim(),
+            description: valueOrNull(jour.description ?? null),
+            lieuLabel: valueOrNull(jour.lieuLabel ?? null),
           })),
         })
       }

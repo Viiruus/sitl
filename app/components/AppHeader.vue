@@ -17,12 +17,20 @@
             </NuxtLink>
           </div>
           <div class="hidden lg:flex lg:flex-1 lg:justify-end">
-            <NuxtLink
-              :to="ctaHref"
+            <button
+              v-if="showLoginCta"
+              type="button"
               class="inline-flex items-center gap-2 rounded-full bg-secondaryBrand-500 px-5 py-2 text-sm font-semibold text-white shadow-lg shadow-secondaryBrand-900/20 transition hover:bg-secondaryBrand-400"
-              @click="handleCtaClick"
+              @click="openModal"
             >
-              {{ ctaLabel }}
+              Connexion
+            </button>
+            <NuxtLink
+              v-else
+              to="/profil"
+              class="inline-flex items-center gap-2 rounded-full bg-secondaryBrand-500 px-5 py-2 text-sm font-semibold text-white shadow-lg shadow-secondaryBrand-900/20 transition hover:bg-secondaryBrand-400"
+            >
+              Mon compte
             </NuxtLink>
           </div>
         </nav>
@@ -55,12 +63,21 @@
               </NuxtLink>
             </div>
             <div class="py-6">
-              <NuxtLink
-                :to="ctaHref"
-                class="-mx-3 block rounded-lg px-3 py-2.5 text-base/7 font-semibold text-white hover:bg-white/5"
-                @click="(event) => { mobileMenuOpen = false; handleCtaClick(event) }"
+              <button
+                v-if="showLoginCta"
+                type="button"
+                class="-mx-3 block w-full rounded-lg px-3 py-2.5 text-left text-base/7 font-semibold text-white hover:bg-white/5"
+                @click="() => { mobileMenuOpen = false; openModal() }"
               >
-                {{ ctaLabel }}
+                Connexion
+              </button>
+              <NuxtLink
+                v-else
+                to="/profil"
+                class="-mx-3 block rounded-lg px-3 py-2.5 text-base/7 font-semibold text-white hover:bg-white/5"
+                @click="mobileMenuOpen = false"
+              >
+                Mon compte
               </NuxtLink>
             </div>
           </div>
@@ -86,21 +103,7 @@ const navigation = [
 const { loggedIn, user } = useUserSession()
 const { openModal } = useAuthModal()
 
-const ctaLabel = computed(() => {
-  if (!loggedIn.value || user.value?.role === 'GUIDE') {
-    return 'Connexion'
-  }
-  return 'Mon compte'
-})
-
-const ctaHref = computed(() => (loggedIn.value && user.value?.role !== 'GUIDE' ? '/profil' : '/login'))
-
-const handleCtaClick = (event: Event) => {
-  if (!loggedIn.value || user.value?.role === 'GUIDE') {
-    event.preventDefault()
-    openModal()
-  }
-}
+const showLoginCta = computed(() => !loggedIn.value || user.value?.role === 'GUIDE')
 
 const isHome = computed(() => route.path === '/')
 

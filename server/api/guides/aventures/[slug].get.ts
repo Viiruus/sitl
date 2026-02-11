@@ -29,6 +29,9 @@ export default defineEventHandler(async (event) => {
       images: {
         orderBy: [{ position: 'asc' }, { id: 'asc' }],
       },
+      programmeJours: {
+        orderBy: { ordre: 'asc' },
+      },
     },
   })
 
@@ -64,6 +67,13 @@ export default defineEventHandler(async (event) => {
       objectifs: aventure.objectifs || '',
       prerequis: toList(aventure.prerequis),
       repasLabel: aventure.repasLabel || '',
+      programmeJours: (aventure.programmeJours ?? []).map((jour) => ({
+        id: jour.id,
+        ordre: jour.ordre,
+        titre: jour.titre,
+        description: jour.description || '',
+        lieuLabel: jour.lieuLabel || '',
+      })),
       images: (aventure.images ?? []).map((img) => ({
         id: img.id,
         url: img.url,

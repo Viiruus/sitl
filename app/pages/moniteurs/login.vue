@@ -134,28 +134,28 @@ const logout = async () => {
           </div>
           <div class="space-y-2">
             <h1 class="text-2xl font-semibold text-secondaryBrand-300">
-              Gère tes stages, sorties, aventures & ton profil moniteur ✨
+              Diffuse tes prestations escalade grâce à la Brigade du kiff
             </h1>
             <p class="text-sm text-brand-100/80">
-              Crée ton compte moniteur, publie tes aventures et suis tes réservations depuis une interface dédiée.
+              Crée ton compte moniteur, publie tes aventures et suis tes inscriptions depuis une interface dédiée.
             </p>
           </div>
           <div class="space-y-3 text-sm text-brand-100/80">
             <p class="font-medium text-secondaryBrand-300">
-              Ce que tu peux faire :
+              Les prochaines étapes (rien de plus simple) :
             </p>
             <ul class="space-y-1.5">
               <li class="flex items-start gap-2">
                 <span class="mt-[5px] h-1.5 w-1.5 rounded-full bg-secondaryBrand-400" />
-                <span>Mettre à jour ton profil public : bio, photo, camp de base.</span>
+                <span>Mets à jour ton profil public : bio, photo, camp de base.</span>
               </li>
               <li class="flex items-start gap-2">
                 <span class="mt-[5px] h-1.5 w-1.5 rounded-full bg-secondaryBrand-400" />
-                <span>Créer des aventures, publier des dates et suivre les messages.</span>
+                <span>Publie tes prestations d’encadrement escalade.</span>
               </li>
               <li class="flex items-start gap-2">
                 <span class="mt-[5px] h-1.5 w-1.5 rounded-full bg-secondaryBrand-400" />
-                <span>Consulter les bookings et suggestions reçues.</span>
+                <span>Organise directement tes stages avec les personnes inscrites.</span>
               </li>
             </ul>
           </div>
@@ -163,15 +163,12 @@ const logout = async () => {
       </div>
 
       <div class="p-6 md:p-8 flex flex-col gap-6">
-        <div class="md:hidden space-y-2">
-          <p class="text-[11px] uppercase tracking-[0.2em] text-brand-200/70">
-            Espace moniteur
-          </p>
+        <div class="space-y-3">
           <h1 class="text-xl font-semibold text-secondaryBrand-300">
-            Connexion / inscription
+            Inscription via WhatsApp
           </h1>
           <p class="text-xs text-brand-100/70">
-            Publie tes aventures et garde le contact avec les grimpeurs motivés.
+            Fini les boites mails pleines et les mots de passe oubliés, l’inscription est ultra simplifiée : il te suffit d’avoir l’application WhatsApp sur ton téléphone et de renseigner ton numéro. Un code te sera envoyé pour te connecter.
           </p>
         </div>
 

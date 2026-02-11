@@ -27,6 +27,13 @@ type AdventureData = {
   prerequis: string[]
   repasLabel: string
   images: { url: string; alt?: string | null; position?: number | null }[]
+  programmeJours: {
+    id?: number | null
+    ordre?: number | null
+    titre: string
+    description?: string | null
+    lieuLabel?: string | null
+  }[]
 }
 
 const props = defineProps<{
@@ -54,13 +61,26 @@ const createList = (list?: string[] | null, atLeastOne = false) => {
   return atLeastOne ? [''] : ['']
 }
 
+const createProgrammeList = (
+  list?: { titre?: string | null; description?: string | null; lieuLabel?: string | null }[] | null,
+) => {
+  if (list && list.length) {
+    return list.map((jour) => ({
+      titre: jour?.titre || '',
+      description: jour?.description || '',
+      lieuLabel: jour?.lieuLabel || '',
+    }))
+  }
+  return [{ titre: '', description: '', lieuLabel: '' }]
+}
+
 const form = reactive({
   titre: '',
   discipline: 'FALAISE',
   lieuLabel: '',
-  prixParPersonne: 90,
-  jours: 2,
-  placesMax: 6,
+  prixParPersonne: '',
+  jours: '',
+  placesMax: '',
   sousTitre: '',
   transportLabel: '',
   niveauMinimum: '',
@@ -78,6 +98,7 @@ const form = reactive({
   objectifs: '',
   prerequis: [''],
   repasLabel: '',
+  programmeJours: [{ titre: '', description: '', lieuLabel: '' }],
 })
 
 const currentSlug = ref(props.initialData?.slug || '')
@@ -160,6 +181,7 @@ watch(
     form.objectifs = value.objectifs || ''
     form.prerequis = createList(value.prerequis || null)
     form.repasLabel = value.repasLabel || ''
+    form.programmeJours = createProgrammeList(value.programmeJours || null)
     if (value.images?.length) {
       galleryImages.splice(
         0,
@@ -200,6 +222,18 @@ const removeGalleryImage = (index: number) => {
   galleryImages.splice(index, 1)
 }
 
+const addProgrammeDay = () => {
+  form.programmeJours.push({ titre: '', description: '', lieuLabel: '' })
+}
+
+const removeProgrammeDay = (index: number) => {
+  if (form.programmeJours.length === 1) {
+    form.programmeJours[0] = { titre: '', description: '', lieuLabel: '' }
+    return
+  }
+  form.programmeJours.splice(index, 1)
+}
+
 const toListPayload = (list: string[]) => list.map((item) => item.trim()).filter(Boolean)
 
 const parseNumberField = (value: string | number) => {
@@ -216,13 +250,16 @@ const validateBaseFields = () => {
   if (!form.lieuLabel.trim()) {
     throw new Error('Ajoute un lieu.')
   }
-  if (!form.prixParPersonne || form.prixParPersonne < 0) {
+  const priceValue = parseNumberField(form.prixParPersonne)
+  if (priceValue == null || priceValue < 0) {
     throw new Error('Indique un prix par personne.')
   }
-  if (!form.jours || form.jours < 1) {
+  const daysValue = parseNumberField(form.jours)
+  if (daysValue == null || daysValue < 1) {
     throw new Error('Indique le nombre de jours.')
   }
-  if (!form.placesMax || form.placesMax < 1) {
+  const placesValue = parseNumberField(form.placesMax)
+  if (placesValue == null || placesValue < 1) {
     throw new Error('Indique le nombre de places.')
   }
 }
@@ -244,9 +281,9 @@ const ensureAdventureExists = async () => {
       slug: slugValue,
       discipline: form.discipline,
       lieuLabel: form.lieuLabel.trim(),
-      prixParPersonne: Number(form.prixParPersonne),
-      jours: Number(form.jours),
-      placesMax: Number(form.placesMax),
+      prixParPersonne: parseNumberField(form.prixParPersonne) ?? 0,
+      jours: parseNumberField(form.jours) ?? 0,
+      placesMax: parseNumberField(form.placesMax) ?? 0,
     },
   })
   currentSlug.value = result.aventure.slug
@@ -259,9 +296,9 @@ const buildPayload = (publish: boolean) => ({
   titre: form.titre.trim(),
   discipline: form.discipline as AdventureData['discipline'],
   lieuLabel: form.lieuLabel.trim(),
-  prixParPersonne: Number(form.prixParPersonne),
-  jours: Number(form.jours),
-  placesMax: Number(form.placesMax),
+  prixParPersonne: parseNumberField(form.prixParPersonne) ?? 0,
+  jours: parseNumberField(form.jours) ?? 0,
+  placesMax: parseNumberField(form.placesMax) ?? 0,
   sousTitre: form.sousTitre.trim(),
   transportLabel: form.transportLabel.trim(),
   niveauMinimum: form.niveauMinimum.trim(),
@@ -279,6 +316,21 @@ const buildPayload = (publish: boolean) => ({
   objectifs: form.objectifs.trim(),
   prerequis: toListPayload(form.prerequis),
   repasLabel: form.repasLabel.trim(),
+  programmeJours: form.programmeJours
+    .map((jour, index) => {
+      const rawTitle = jour.titre.trim()
+      const rawDescription = jour.description.trim()
+      const rawLieu = jour.lieuLabel.trim()
+      const hasContent = rawTitle || rawDescription || rawLieu
+      if (!hasContent) return null
+      return {
+        ordre: index + 1,
+        titre: rawTitle || `Jour ${index + 1}`,
+        description: rawDescription || undefined,
+        lieuLabel: rawLieu || undefined,
+      }
+    })
+    .filter(Boolean),
   estPublie: publish,
   images: galleryImages
     .map((img, index) => ({
@@ -445,6 +497,7 @@ const uploadGalleryImage = async (event: Event, index: number) => {
             <input
               v-model="form.titre"
               type="text"
+              placeholder="Ex: Grande voie au Verdon"
               class="w-full rounded-xl border border-white/10 bg-brand-900/80 px-3 py-2 text-white focus:border-secondaryBrand-400 focus:outline-none"
             />
           </div>
@@ -469,15 +522,17 @@ const uploadGalleryImage = async (event: Event, index: number) => {
             <input
               v-model="form.lieuLabel"
               type="text"
+              placeholder="Ex: Presles, Vercors"
               class="w-full rounded-xl border border-white/10 bg-brand-900/80 px-3 py-2 text-white focus:border-secondaryBrand-400 focus:outline-none"
             />
           </div>
           <div class="space-y-2">
             <label class="text-xs uppercase tracking-[0.3em] text-brand-200/70">Prix par personne (€)</label>
             <input
-              v-model.number="form.prixParPersonne"
+              v-model="form.prixParPersonne"
               min="0"
               type="number"
+              placeholder="Ex: 220"
               class="w-full rounded-xl border border-white/10 bg-brand-900/80 px-3 py-2 text-white focus:border-secondaryBrand-400 focus:outline-none"
             />
           </div>
@@ -487,20 +542,22 @@ const uploadGalleryImage = async (event: Event, index: number) => {
           <div class="space-y-2">
             <label class="text-xs uppercase tracking-[0.3em] text-brand-200/70">Durée (jours)</label>
             <input
-              v-model.number="form.jours"
+              v-model="form.jours"
               min="1"
               max="30"
               type="number"
+              placeholder="Ex: 2"
               class="w-full rounded-xl border border-white/10 bg-brand-900/80 px-3 py-2 text-white focus:border-secondaryBrand-400 focus:outline-none"
             />
           </div>
           <div class="space-y-2">
             <label class="text-xs uppercase tracking-[0.3em] text-brand-200/70">Places max</label>
             <input
-              v-model.number="form.placesMax"
+              v-model="form.placesMax"
               min="1"
               max="20"
               type="number"
+              placeholder="Ex: 6"
               class="w-full rounded-xl border border-white/10 bg-brand-900/80 px-3 py-2 text-white focus:border-secondaryBrand-400 focus:outline-none"
             />
           </div>
@@ -518,6 +575,7 @@ const uploadGalleryImage = async (event: Event, index: number) => {
             <input
               v-model="form.sousTitre"
               type="text"
+              placeholder="Ex: Deux jours pour progresser en grande voie"
               class="w-full rounded-xl border border-white/10 bg-brand-900/80 px-3 py-2 text-white focus:border-secondaryBrand-400 focus:outline-none"
             />
           </div>
@@ -526,6 +584,7 @@ const uploadGalleryImage = async (event: Event, index: number) => {
             <input
               v-model="form.transportLabel"
               type="text"
+              placeholder="Ex: Covoiturage depuis Grenoble"
               class="w-full rounded-xl border border-white/10 bg-brand-900/80 px-3 py-2 text-white focus:border-secondaryBrand-400 focus:outline-none"
             />
           </div>
@@ -540,6 +599,7 @@ const uploadGalleryImage = async (event: Event, index: number) => {
             <input
               v-model="form.niveauMinimum"
               type="text"
+              placeholder="Ex: 5c en tête"
               class="w-full rounded-xl border border-white/10 bg-brand-900/80 px-3 py-2 text-white focus:border-secondaryBrand-400 focus:outline-none"
             />
           </div>
@@ -550,6 +610,7 @@ const uploadGalleryImage = async (event: Event, index: number) => {
                 v-model="form.ageMin"
                 type="number"
                 min="0"
+                placeholder="Ex: 14"
                 class="w-full rounded-xl border border-white/10 bg-brand-900/80 px-3 py-2 text-white focus:border-secondaryBrand-400 focus:outline-none"
               />
             </div>
@@ -559,6 +620,7 @@ const uploadGalleryImage = async (event: Event, index: number) => {
                 v-model="form.ageMax"
                 type="number"
                 min="0"
+                placeholder="Ex: 65"
                 class="w-full rounded-xl border border-white/10 bg-brand-900/80 px-3 py-2 text-white focus:border-secondaryBrand-400 focus:outline-none"
               />
             </div>
@@ -571,6 +633,7 @@ const uploadGalleryImage = async (event: Event, index: number) => {
             <input
               v-model="form.autonomieMini"
               type="text"
+              placeholder="Ex: Assurage en tête + manip' haut de voie"
               class="w-full rounded-xl border border-white/10 bg-brand-900/80 px-3 py-2 text-white focus:border-secondaryBrand-400 focus:outline-none"
             />
           </div>
@@ -582,6 +645,7 @@ const uploadGalleryImage = async (event: Event, index: number) => {
             <input
               v-model="form.coverImageUrl"
               type="text"
+              placeholder="https://…"
               class="w-full rounded-xl border border-white/10 bg-brand-900/80 px-3 py-2 text-white focus:border-secondaryBrand-400 focus:outline-none"
             />
             <p class="text-xs text-brand-200/70">
@@ -637,6 +701,7 @@ const uploadGalleryImage = async (event: Event, index: number) => {
           <textarea
             v-model="form.descriptionCourte"
             rows="3"
+            placeholder="Résumé en quelques phrases : ambiance, niveau, objectifs…"
             class="w-full rounded-2xl border border-white/10 bg-brand-900/80 px-3 py-2 text-white focus:border-secondaryBrand-400 focus:outline-none"
           />
         </div>
@@ -645,6 +710,7 @@ const uploadGalleryImage = async (event: Event, index: number) => {
           <textarea
             v-model="form.descriptionLongue"
             rows="6"
+            placeholder="Décris le déroulé, les spots, le rythme des journées, etc."
             class="w-full rounded-2xl border border-white/10 bg-brand-900/80 px-3 py-2 text-white focus:border-secondaryBrand-400 focus:outline-none"
           />
         </div>
@@ -653,8 +719,75 @@ const uploadGalleryImage = async (event: Event, index: number) => {
           <textarea
             v-model="form.objectifs"
             rows="3"
+            placeholder="Ex: Gagner en autonomie, travailler la lecture de voie…"
             class="w-full rounded-2xl border border-white/10 bg-brand-900/80 px-3 py-2 text-white focus:border-secondaryBrand-400 focus:outline-none"
           />
+        </div>
+      </section>
+
+      <section class="space-y-4 rounded-2xl bg-brand-900/50 p-6 ring-1 ring-white/5">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h2 class="text-xl font-semibold">Programme jour par jour</h2>
+            <p class="text-sm text-brand-100/70">
+              Optionnel. Décris le déroulé pour aider les grimpeurs à se projeter.
+            </p>
+          </div>
+          <button
+            type="button"
+            class="inline-flex items-center gap-2 rounded-full border border-secondaryBrand-300/70 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-secondaryBrand-100 transition hover:border-secondaryBrand-200"
+            @click="addProgrammeDay"
+          >
+            + Ajouter une journée
+          </button>
+        </div>
+
+        <div class="space-y-4">
+          <div
+            v-for="(jour, index) in form.programmeJours"
+            :key="`programme-${index}`"
+            class="space-y-3 rounded-2xl bg-brand-900/70 p-4 ring-1 ring-white/5"
+          >
+            <div class="flex items-center justify-between text-xs uppercase tracking-[0.3em] text-brand-200/70">
+              <span>Jour {{ index + 1 }}</span>
+              <button
+                type="button"
+                class="text-[10px] font-semibold text-red-200/80 hover:text-red-100"
+                @click="removeProgrammeDay(index)"
+              >
+                Retirer
+              </button>
+            </div>
+            <div class="grid gap-3 md:grid-cols-2">
+              <div class="space-y-2">
+                <label class="text-[11px] uppercase tracking-[0.3em] text-brand-200/70">Titre</label>
+                <input
+                  v-model="jour.titre"
+                  type="text"
+                  class="w-full rounded-xl border border-white/10 bg-brand-900/80 px-3 py-2 text-white focus:border-secondaryBrand-400 focus:outline-none"
+                  placeholder="Ex: Approche & premières voies"
+                />
+              </div>
+              <div class="space-y-2">
+                <label class="text-[11px] uppercase tracking-[0.3em] text-brand-200/70">Lieu</label>
+                <input
+                  v-model="jour.lieuLabel"
+                  type="text"
+                  class="w-full rounded-xl border border-white/10 bg-brand-900/80 px-3 py-2 text-white focus:border-secondaryBrand-400 focus:outline-none"
+                  placeholder="Ex: Presles"
+                />
+              </div>
+            </div>
+            <div class="space-y-2">
+              <label class="text-[11px] uppercase tracking-[0.3em] text-brand-200/70">Description</label>
+              <textarea
+                v-model="jour.description"
+                rows="3"
+                class="w-full rounded-2xl border border-white/10 bg-brand-900/80 px-3 py-2 text-white focus:border-secondaryBrand-400 focus:outline-none"
+                placeholder="Ex: Échauffement, choix des voies, coaching technique."
+              />
+            </div>
+          </div>
         </div>
       </section>
 
@@ -679,6 +812,7 @@ const uploadGalleryImage = async (event: Event, index: number) => {
                 <input
                   v-model="form.equipementRequis[index]"
                   type="text"
+                  placeholder="Ex: Chaussons, baudrier, casque"
                   class="w-full rounded-xl border border-white/10 bg-brand-900/80 px-3 py-2 text-white focus:border-secondaryBrand-400 focus:outline-none"
                   @blur="resetListIfEmpty(form.equipementRequis)"
                 />
@@ -703,6 +837,7 @@ const uploadGalleryImage = async (event: Event, index: number) => {
                 <input
                   v-model="form.equipementFourni[index]"
                   type="text"
+                  placeholder="Ex: Corde, dégaines, matériel collectif"
                   class="w-full rounded-xl border border-white/10 bg-brand-900/80 px-3 py-2 text-white focus:border-secondaryBrand-400 focus:outline-none"
                   @blur="resetListIfEmpty(form.equipementFourni)"
                 />
@@ -728,6 +863,7 @@ const uploadGalleryImage = async (event: Event, index: number) => {
               <input
                 v-model="form.prerequis[index]"
                 type="text"
+                placeholder="Ex: Être à l’aise en 5c"
                 class="w-full rounded-xl border border-white/10 bg-brand-900/80 px-3 py-2 text-white focus:border-secondaryBrand-400 focus:outline-none"
                 @blur="resetListIfEmpty(form.prerequis)"
               />
@@ -742,20 +878,22 @@ const uploadGalleryImage = async (event: Event, index: number) => {
         <div class="grid gap-4 md:grid-cols-2">
           <div class="space-y-2">
             <label class="text-xs uppercase tracking-[0.3em] text-brand-200/70">Hébergement / détails</label>
-            <textarea
-              v-model="form.hebergementDetails"
-              rows="3"
-              class="w-full rounded-2xl border border-white/10 bg-brand-900/80 px-3 py-2 text-white focus:border-secondaryBrand-400 focus:outline-none"
-            />
-          </div>
-          <div class="space-y-2">
-            <label class="text-xs uppercase tracking-[0.3em] text-brand-200/70">Repas / restauration</label>
-            <textarea
-              v-model="form.repasLabel"
-              rows="3"
-              class="w-full rounded-2xl border border-white/10 bg-brand-900/80 px-3 py-2 text-white focus:border-secondaryBrand-400 focus:outline-none"
-            />
-          </div>
+          <textarea
+            v-model="form.hebergementDetails"
+            rows="3"
+            placeholder="Ex: Gîte partagé à 5 min des falaises"
+            class="w-full rounded-2xl border border-white/10 bg-brand-900/80 px-3 py-2 text-white focus:border-secondaryBrand-400 focus:outline-none"
+          />
+        </div>
+        <div class="space-y-2">
+          <label class="text-xs uppercase tracking-[0.3em] text-brand-200/70">Repas / restauration</label>
+          <textarea
+            v-model="form.repasLabel"
+            rows="3"
+            placeholder="Ex: Pique-nique le midi, resto le soir"
+            class="w-full rounded-2xl border border-white/10 bg-brand-900/80 px-3 py-2 text-white focus:border-secondaryBrand-400 focus:outline-none"
+          />
+        </div>
         </div>
         <div class="space-y-2">
           <div class="flex flex-wrap items-center gap-2 text-xs uppercase tracking-[0.3em] text-brand-200/70">
@@ -765,6 +903,7 @@ const uploadGalleryImage = async (event: Event, index: number) => {
           <textarea
             v-model="form.inclus"
             rows="3"
+            placeholder="Ex: Encadrement + matériel collectif"
             class="w-full rounded-2xl border border-white/10 bg-brand-900/80 px-3 py-2 text-white focus:border-secondaryBrand-400 focus:outline-none"
           />
         </div>
@@ -776,6 +915,7 @@ const uploadGalleryImage = async (event: Event, index: number) => {
           <textarea
             v-model="form.nonInclus"
             rows="3"
+            placeholder="Ex: Transport, hébergement, repas"
             class="w-full rounded-2xl border border-white/10 bg-brand-900/80 px-3 py-2 text-white focus:border-secondaryBrand-400 focus:outline-none"
           />
         </div>
@@ -818,6 +958,7 @@ const uploadGalleryImage = async (event: Event, index: number) => {
                 <input
                   v-model="image.url"
                   type="text"
+                  placeholder="https://…"
                   class="w-full rounded-xl border border-white/10 bg-brand-900/80 px-3 py-2 text-white focus:border-secondaryBrand-400 focus:outline-none"
                 />
                 <div v-if="isClient" class="flex items-center gap-3 text-xs text-brand-200/70">
