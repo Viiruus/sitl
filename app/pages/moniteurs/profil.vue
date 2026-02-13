@@ -80,8 +80,14 @@ function normalizeVariants (variants?: any[] | null) {
       width: Number(variant?.width),
       size: Number.isFinite(Number(variant?.size)) ? Number(variant?.size) : undefined,
     }))
-    .filter((variant) => variant.url.startsWith('/uploads/') && Number.isFinite(variant.width) && variant.width > 0)
+    .filter((variant) => isStoredUploadPath(variant.url) && Number.isFinite(variant.width) && variant.width > 0)
     .sort((a, b) => a.width - b.width)
+}
+
+const isStoredUploadPath = (value?: string | null) => {
+  if (typeof value !== 'string') return false
+  const cleaned = value.trim().replace(/^(\.\/)+/, '')
+  return cleaned.startsWith('/uploads/') || cleaned.startsWith('uploads/')
 }
 
 const saveProfile = async () => {
@@ -93,7 +99,7 @@ const saveProfile = async () => {
       method: 'PUT',
       body: {
         ...form,
-        profileImageVariants: form.profileImageUrl.startsWith('/uploads/') ? form.profileImageVariants : [],
+        profileImageVariants: isStoredUploadPath(form.profileImageUrl) ? form.profileImageVariants : [],
       },
     })
     success.value = 'Profil mis à jour.'

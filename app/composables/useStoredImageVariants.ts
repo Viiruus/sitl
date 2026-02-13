@@ -6,13 +6,19 @@ export type StoredImageVariant = {
 
 const normalizeImageUrl = (src?: string | null) => {
   if (!src) return null
-  if (/^(https?:)?\/\//i.test(src) || src.startsWith('data:') || src.startsWith('blob:')) {
-    return src
+  const value = src.trim()
+  if (!value) return null
+  if (/^(https?:)?\/\//i.test(value) || value.startsWith('data:') || value.startsWith('blob:')) {
+    return value
   }
-  if (src.startsWith('/')) {
-    return src
+  if (value.startsWith('/')) {
+    return value
   }
-  return `/images/${src.replace(/^(\.\/)+/, '')}`
+  const cleaned = value.replace(/^(\.\/)+/, '')
+  if (cleaned.startsWith('uploads/') || cleaned.startsWith('images/')) {
+    return `/${cleaned}`
+  }
+  return `/images/${cleaned}`
 }
 
 export const normalizeStoredVariants = (variants: unknown): StoredImageVariant[] => {
