@@ -28,17 +28,15 @@
         </div>
       </div>
       <div class="hidden bg-brand-950 lg:absolute lg:inset-y-0 lg:right-0 lg:block lg:w-1/2 min-h-[50vh] lg:min-h-screen">
-        <NuxtImg
+        <img
           src="/images/escalade0.jpg"
           alt=""
           class="h-full w-full object-cover"
           width="1680"
           height="3648"
-          sizes="(min-width: 1024px) 50vw, 100vw"
-          quality="88"
-          preload
           fetchpriority="high"
           loading="eager"
+          decoding="async"
         />
       </div>
     </div>

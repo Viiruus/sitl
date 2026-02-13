@@ -3,13 +3,13 @@
     <!-- Hero with background -->
     <div class="relative overflow-hidden pb-16">
       <div class="absolute inset-0">
-        <NuxtImg
+        <img
           src="/images/emulation2.jpeg"
           alt="Les moniteurs de la Brigade du kiff"
           class="h-full w-full object-cover opacity-40"
-          sizes="100vw"
-          format="webp"
+          fetchpriority="high"
           loading="eager"
+          decoding="async"
         />
         <div class="absolute inset-0 bg-brand-950/70" />
         <div class="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-b from-transparent to-brand-950" />
