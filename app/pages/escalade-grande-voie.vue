@@ -286,13 +286,10 @@ const benefits = [
   }
 ]
 
-useHead({
-  title: 'Escalade grande voie - Brigade du kiff',
-  meta: [
-    {
-      name: 'description',
-      content: 'Tout savoir sur l’escalade en grande voie : pédagogie, manips de sécurité et stages dédiés pour gagner en autonomie.'
-    }
-  ]
+useSeoMeta({
+  title: 'Stage escalade grande voie | Aventures encadrées',
+  description:
+    'Stages grande voie pour progresser en autonomie : relais, manips et itinéraires encadrés par des moniteurs diplômés.',
+  robots: 'noindex, nofollow',
 })
 </script>

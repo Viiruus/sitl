@@ -4,6 +4,12 @@ const route = useRoute()
 const { openModal } = useAuthModal()
 const { loggedIn, user, fetch } = useUserSession()
 
+useSeoMeta({
+  title: 'Connexion grimpeur',
+  description: 'Connexion ou inscription grimpeur via WhatsApp.',
+  robots: 'noindex, nofollow',
+})
+
 onMounted(async () => {
   await fetch()
   if (loggedIn.value && user.value?.role === 'GUIDE') {

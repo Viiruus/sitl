@@ -18,6 +18,12 @@ const { data, pending, error, refresh } = await useFetch(() => (slug.value ? `/a
 const aventure = computed(() => data.value?.aventure || null)
 const sessions = computed(() => data.value?.sessions || [])
 const bookings = computed(() => data.value?.bookings || [])
+useSeoMeta(() => ({
+  title: aventure.value?.titre ? `Inscriptions : ${aventure.value.titre}` : 'Inscriptions aventure',
+  description: 'Gère les réservations et contacts pour cette aventure.',
+  robots: 'noindex, nofollow',
+}))
+
 const bookingsBySession = computed(() => {
   const map = new Map<number, { session: any; bookings: any[] }>()
   for (const session of sessions.value) {

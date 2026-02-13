@@ -1,9 +1,17 @@
 <script setup lang="ts">
 import { VueDatePicker } from '@vuepic/vue-datepicker'
 import { fr } from 'date-fns/locale'
+import { buildStoredSrcset, resolveStoredImageSrc } from '~/composables/useStoredImageVariants'
 import '@vuepic/vue-datepicker/dist/main.css'
 const route = useRoute()
 const { data, pending, error } = await useFetch('/api/aventures')
+
+useSeoMeta({
+  title: 'Tous les stages d’escalade | Aventures outdoor',
+  description:
+    'Découvre nos stages d’escalade en falaise, grande voie, bloc, trad et via ferrata. Moniteurs locaux et progression.',
+  robots: 'index, follow, max-image-preview:large',
+})
 
 const selectedDiscipline = ref<string | null>(null)
 const dateRangeFilter = ref<[Date | null, Date | null] | null>(null)
@@ -134,6 +142,22 @@ const filteredAventures = computed(() => {
   return adventures
 })
 
+const stageCoverSrc = (stage: any) => {
+  return resolveStoredImageSrc(stage?.coverImageUrl, stage?.coverImageVariants) || imageForDiscipline(stage?.discipline)
+}
+
+const stageCoverSrcset = (stage: any) => {
+  return buildStoredSrcset(stage?.coverImageVariants)
+}
+
+const guideAvatarSrc = (stage: any) => {
+  return resolveStoredImageSrc(stage?.guideImageUrl, stage?.guideImageVariants) || imageForDiscipline(stage?.discipline)
+}
+
+const guideAvatarSrcset = (stage: any) => {
+  return buildStoredSrcset(stage?.guideImageVariants)
+}
+
 
 </script>
 
@@ -145,10 +169,13 @@ const filteredAventures = computed(() => {
     <div class="relative pt-32 isolate overflow-hidden bg-brand-950 pt-14">
       
       <div class="mx-auto max-w-7xl px-6 lg:px-8">
-        <img 
-          src="/images/falaise-Calanques2.jpg" 
-          alt=""
+        <NuxtImg
+          src="/images/falaise-Calanques2.jpg"
+          alt="Stages d'escalade par les moniteurs de la Brigade du kiff"
           class="absolute inset-0 -z-10 size-full object-cover opacity-30"
+          sizes="100vw"
+          format="webp"
+          loading="eager"
         />
         <section class="relative isolate overflow-hidden py-24 sm:py-20">
           <div class="absolute inset-0 -z-10"></div>
@@ -250,9 +277,12 @@ const filteredAventures = computed(() => {
           >
             <div class="relative h-72 w-full overflow-hidden">
               <img
-                :src="a.coverImageUrl || imageForDiscipline(a.discipline)"
+                :src="stageCoverSrc(a)"
+                :srcset="stageCoverSrcset(a)"
                 :alt="a.titre"
                 class="size-full object-cover transition duration-500 hover:scale-105"
+                decoding="async"
+                sizes="(min-width: 1024px) 50vw, 100vw"
                 loading="lazy"
               />
               <div class="absolute inset-0 bg-gradient-to-t from-brand-950 via-brand-950/40 to-transparent"></div>
@@ -305,9 +335,13 @@ const filteredAventures = computed(() => {
               <div class="flex items-center justify-between text-sm text-white">
                 <div class="flex items-center gap-3 text-sm text-brand-100/80">
                   <img
-                    :src="a.guideImageUrl || imageForDiscipline(a.discipline)"
+                    :src="guideAvatarSrc(a)"
+                    :srcset="guideAvatarSrcset(a)"
                     :alt="a.guideName || 'Moniteur'"
                     class="h-10 w-10 rounded-full border border-white/20 bg-brand-900 object-cover"
+                    decoding="async"
+                    sizes="40px"
+                    loading="lazy"
                   />
                   <div>
                     <p class="text-xs uppercase tracking-[0.3em] text-brand-200/70">

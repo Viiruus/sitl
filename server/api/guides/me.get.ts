@@ -14,6 +14,7 @@ const mapGuide = (user: any) => ({
   instagramUrl: user.guideProfile?.instagramUrl || null,
   websiteUrl: user.guideProfile?.websiteUrl || null,
   profileImageUrl: user.guideProfile?.profileImageUrl || null,
+  profileImageVariants: user.guideProfile?.profileImageVariants || null,
   aventuresPubliees: user._count?.aventures ?? 0,
   prochainesSessions: user.aventures?.reduce((total: number, a: any) => total + (a.sessions?.length ?? 0), 0) ?? 0,
 })

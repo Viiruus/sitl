@@ -3,6 +3,12 @@ definePageMeta({
   middleware: 'climber-auth',
 })
 
+useSeoMeta({
+  title: 'Onboarding grimpeur',
+  description: 'Complète ton profil pour recevoir des stages d’escalade adaptés.',
+  robots: 'noindex, nofollow',
+})
+
 const { loggedIn, fetch, user } = useUserSession()
 const router = useRouter()
 

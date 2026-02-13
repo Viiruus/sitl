@@ -29,6 +29,7 @@ export default defineEventHandler(async (event) => {
               instagramUrl: true,
               websiteUrl: true,
               profileImageUrl: true,
+              profileImageVariants: true,
               professionalCardNumber: true,
             },
           },
@@ -100,6 +101,7 @@ export default defineEventHandler(async (event) => {
           guideProfile: {
             select: {
               profileImageUrl: true,
+              profileImageVariants: true,
             },
           },
         },
@@ -144,6 +146,7 @@ const mapGuide = (a: any) => {
           websiteUrl: gp.websiteUrl,
           professionalCardNumber: gp.professionalCardNumber,
           profileImageUrl: gp.profileImageUrl,
+          profileImageVariants: gp.profileImageVariants || null,
         }
       : null,
   }
@@ -160,10 +163,12 @@ const mapListAventure = (a: any) => ({
   jours: a.jours,
   prixParPersonne: a.prixParPersonne,
   coverImageUrl: a.coverImageUrl,
+  coverImageVariants: a.coverImageVariants || null,
   guideName:
     [a.guide?.firstName, a.guide?.lastName].filter(Boolean).join(' ') || null,
   guide: mapGuide(a),
   guideImageUrl: a.guide?.guideProfile?.profileImageUrl || null,
+  guideImageVariants: a.guide?.guideProfile?.profileImageVariants || null,
   sessions: mapSessions(a.sessions ?? []),
   nextSession: mapNextSession(a.sessions ?? []),
 })
@@ -199,6 +204,7 @@ const mapDetailAventure = (a: any, bookedSessionIds: Set<number>) => ({
     id: img.id,
     url: img.url,
     alt: img.alt,
+    variants: img.variants || null,
   })) ?? [],
 
   programmeJours: (a.programmeJours ?? [])

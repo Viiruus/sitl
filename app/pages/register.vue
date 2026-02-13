@@ -1,6 +1,12 @@
 <script setup lang="ts">
 const route = useRoute()
 
+useSeoMeta({
+  title: 'Créer un compte grimpeur',
+  description: 'Création de compte pour accéder aux stages d’escalade.',
+  robots: 'noindex, nofollow',
+})
+
 const email = ref('')
 const password = ref('')
 const source = computed(() => (route.query.source as string) || 'direct')

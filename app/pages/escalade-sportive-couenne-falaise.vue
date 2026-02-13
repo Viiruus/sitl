@@ -285,13 +285,10 @@ const benefits = [
   }
 ]
 
-useHead({
-  title: 'Escalade sportive en couenne & falaise - Brigade du skif',
-  meta: [
-    {
-      name: 'description',
-      content: 'Comprends ce qu’est l’escalade sportive en couenne, découvre ma proposition de valeur et trouve ton prochain stage falaise.'
-    }
-  ]
+useSeoMeta({
+  title: 'Stage escalade en falaise (couenne) | Aventures encadrées',
+  description:
+    'Stages d’escalade en falaise pour progresser en escalade sportive, avec des moniteurs diplômés et des groupes motivés.',
+  robots: 'noindex, nofollow',
 })
 </script>

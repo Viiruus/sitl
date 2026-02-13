@@ -40,6 +40,7 @@ const mapAventureForGuide = (a: any) => {
     jours: a.jours,
     prixParPersonne: a.prixParPersonne,
     coverImageUrl: a.coverImageUrl,
+    coverImageVariants: a.coverImageVariants || null,
     nextSession: nextSession
       ? {
           dateDebut: nextSession.dateDebut,
@@ -101,6 +102,7 @@ export default defineEventHandler(async (event) => {
 
   const allSessions = aventures.flatMap((a) => a.sessions || [])
   const nextSessionDate = findNextSession(allSessions)?.dateDebut ?? null
+  const firstAventureWithCover = aventures.find((a) => a.coverImageUrl)
 
   const uniqueDisciplines = Array.from(
     new Set(
@@ -123,10 +125,15 @@ export default defineEventHandler(async (event) => {
     websiteUrl: guide.guideProfile?.websiteUrl || null,
     professionalCardNumber: guide.guideProfile?.professionalCardNumber || null,
     profileImageUrl: guide.guideProfile?.profileImageUrl || null,
+    profileImageVariants: guide.guideProfile?.profileImageVariants || null,
     heroImageUrl:
       guide.guideProfile?.profileImageUrl ||
-      aventures.find((a) => a.coverImageUrl)?.coverImageUrl ||
+      firstAventureWithCover?.coverImageUrl ||
       "/images/escalade-grande-voie-calanques.jpg",
+    heroImageVariants:
+      guide.guideProfile?.profileImageVariants ||
+      firstAventureWithCover?.coverImageVariants ||
+      null,
     stats: {
       aventuresPubliees: aventures.length,
       sessionsPlanifiees: allSessions.length,

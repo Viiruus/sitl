@@ -16,6 +16,12 @@ const { data: aventureData, pending, error: fetchError } = await useFetch(
 
 const aventure = computed(() => aventureData.value?.aventure ?? null)
 
+useSeoMeta(() => ({
+  title: aventure.value?.titre ? `Éditer : ${aventure.value.titre}` : 'Éditer une aventure',
+  description: 'Mets à jour le contenu et les détails de ton aventure.',
+  robots: 'noindex, nofollow',
+}))
+
 const logout = async () => {
   await clear()
   await fetch()

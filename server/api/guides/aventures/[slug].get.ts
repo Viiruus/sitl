@@ -59,6 +59,7 @@ export default defineEventHandler(async (event) => {
       ageMax: aventure.ageMax ?? null,
       autonomieMini: aventure.autonomieMini || '',
       coverImageUrl: aventure.coverImageUrl || '',
+      coverImageVariants: aventure.coverImageVariants || null,
       equipementRequis: toList(aventure.equipementRequis),
       equipementFourni: toList(aventure.equipementFourni),
       hebergementDetails: aventure.hebergementDetails || '',
@@ -79,6 +80,7 @@ export default defineEventHandler(async (event) => {
         url: img.url,
         alt: img.alt || '',
         position: img.position ?? null,
+        variants: img.variants || null,
       })),
     },
   }

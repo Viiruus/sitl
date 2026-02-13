@@ -3,6 +3,12 @@ definePageMeta({
   middleware: 'guide-auth',
 })
 
+useSeoMeta({
+  title: 'Profil moniteur',
+  description: 'Gère ton profil public de moniteur.',
+  robots: 'noindex, nofollow',
+})
+
 const router = useRouter()
 const route = useRoute()
 const { clear, fetch } = useUserSession()
@@ -21,6 +27,7 @@ const form = reactive({
   websiteUrl: '',
   professionalCardNumber: '',
   profileImageUrl: '',
+  profileImageVariants: [] as { url: string; width: number; size?: number }[],
 })
 
 watch(
@@ -37,6 +44,7 @@ watch(
     form.websiteUrl = value.websiteUrl || ''
     form.professionalCardNumber = value.professionalCardNumber || ''
     form.profileImageUrl = value.profileImageUrl || ''
+    form.profileImageVariants = normalizeVariants(value.profileImageVariants || [])
   },
   { immediate: true },
 )
@@ -47,10 +55,34 @@ const error = ref<string | null>(null)
 const uploadError = ref<string | null>(null)
 const uploadingPhoto = ref(false)
 const isClient = ref(false)
+const ALLOWED_UPLOAD_MIME = ['image/jpeg', 'image/png', 'image/webp']
+const MAX_PROFILE_UPLOAD_BYTES = 3 * 1024 * 1024
 
 onMounted(() => {
   isClient.value = true
 })
+
+const validateProfileImage = (file: File) => {
+  if (!ALLOWED_UPLOAD_MIME.includes(file.type)) {
+    return 'Format non supporté. Utilise JPG, PNG ou WebP.'
+  }
+  if (file.size > MAX_PROFILE_UPLOAD_BYTES) {
+    return 'Image trop lourde. Limite: 3 Mo.'
+  }
+  return null
+}
+
+function normalizeVariants (variants?: any[] | null) {
+  if (!Array.isArray(variants)) return []
+  return variants
+    .map((variant: any) => ({
+      url: typeof variant?.url === 'string' ? variant.url.trim() : '',
+      width: Number(variant?.width),
+      size: Number.isFinite(Number(variant?.size)) ? Number(variant?.size) : undefined,
+    }))
+    .filter((variant) => variant.url.startsWith('/uploads/') && Number.isFinite(variant.width) && variant.width > 0)
+    .sort((a, b) => a.width - b.width)
+}
 
 const saveProfile = async () => {
   saving.value = true
@@ -59,7 +91,10 @@ const saveProfile = async () => {
   try {
     await $fetch('/api/guides/profile', {
       method: 'PUT',
-      body: { ...form },
+      body: {
+        ...form,
+        profileImageVariants: form.profileImageUrl.startsWith('/uploads/') ? form.profileImageVariants : [],
+      },
     })
     success.value = 'Profil mis à jour.'
     await refresh()
@@ -75,16 +110,24 @@ const uploadPhoto = async (event: Event) => {
   const file = target.files?.[0]
   if (!file) return
   uploadError.value = null
+  const fileError = validateProfileImage(file)
+  if (fileError) {
+    uploadError.value = fileError
+    target.value = ''
+    return
+  }
   uploadingPhoto.value = true
 
   try {
     const formData = new FormData()
     formData.append('file', file, file.name)
-    const response = await $fetch<{ url: string }>('/api/moniteurs/upload', {
+    formData.append('kind', 'profile')
+    const response = await $fetch<{ url: string; variants?: { url: string; width: number; size?: number }[] }>('/api/moniteurs/upload', {
       method: 'POST',
       body: formData,
     })
     form.profileImageUrl = response.url
+    form.profileImageVariants = normalizeVariants(response.variants || [])
     success.value = 'Photo mise à jour.'
   } catch (e: any) {
     uploadError.value = e?.data?.message || 'Échec du téléversement.'
@@ -174,7 +217,7 @@ const logout = async () => {
                 <label class="text-sm text-brand-100/80">Photo (URL)</label>
                 <input v-model="form.profileImageUrl" type="text" class="w-full rounded-xl border border-brand-800 bg-brand-900/80 px-3 py-2 text-white focus:border-secondaryBrand-400 focus:outline-none" />
                 <p class="text-xs text-brand-200/70">
-                  Tu peux coller l’URL d’une photo ou téléverser ton portrait.
+                  Tu peux coller l’URL d’une photo ou téléverser ton portrait (JPG/PNG/WebP, max 3 Mo).
                 </p>
                 <div v-if="isClient" class="space-y-2">
                   <label class="inline-flex items-center gap-3 rounded-full border border-white/20 px-4 py-2 text-sm font-semibold text-white/80 transition hover:bg-white/5 cursor-pointer">

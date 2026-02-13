@@ -3,7 +3,14 @@
     <!-- Hero with background -->
     <div class="relative overflow-hidden pb-16">
       <div class="absolute inset-0">
-        <img src="/images/emulation2.jpeg" alt="" class="h-full w-full object-cover opacity-40" />
+        <NuxtImg
+          src="/images/emulation2.jpeg"
+          alt="Les moniteurs de la Brigade du kiff"
+          class="h-full w-full object-cover opacity-40"
+          sizes="100vw"
+          format="webp"
+          loading="eager"
+        />
         <div class="absolute inset-0 bg-brand-950/70" />
         <div class="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-b from-transparent to-brand-950" />
       </div>
@@ -44,7 +51,11 @@
                   <img
                     class="absolute inset-0 h-full w-full object-cover"
                     :src="profileImageFor(moniteur)"
+                    :srcset="profileImageSrcset(moniteur)"
                     :alt="moniteur.fullName"
+                    decoding="async"
+                    sizes="(min-width: 1280px) 25vw, (min-width: 1024px) 33vw, 50vw"
+                    loading="lazy"
                   />
                 </div>
                 <div class="flex flex-col gap-3">
@@ -84,6 +95,19 @@
 </template>
 
 <script setup lang="ts">
+import { buildStoredSrcset, resolveStoredImageSrc } from '~/composables/useStoredImageVariants'
+
+useHead({
+  titleTemplate: '%s',
+})
+
+useSeoMeta({
+  title: 'Brigade du kiff | Collectif de moniteurs diplômés',
+  description:
+    'Un collectif de moniteurs d’escalade passionnés qui propose des stages et aventures outdoor partout en France.',
+  robots: 'index, follow, max-image-preview:large',
+})
+
 const { data, pending } = await useFetch('/api/moniteurs')
 const randomWeights = useState<Record<number, number>>('la-brigade-moniteurs-order', () => ({}))
 
@@ -121,8 +145,11 @@ const randomizedMoniteurs = computed(() => {
 const fallbackImage = '/images/escalade-grande-voie-calanques.jpg'
 
 const profileImageFor = (moniteur: any) => {
-  if (moniteur?.profileImageUrl) return moniteur.profileImageUrl
-  return fallbackImage
+  return resolveStoredImageSrc(moniteur?.profileImageUrl, moniteur?.profileImageVariants) || fallbackImage
+}
+
+const profileImageSrcset = (moniteur: any) => {
+  return buildStoredSrcset(moniteur?.profileImageVariants)
 }
 
 const locationLabelFor = (moniteur: any) => {

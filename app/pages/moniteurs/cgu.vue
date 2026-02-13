@@ -1,9 +1,8 @@
 <script setup lang="ts">
-useHead({
-  title: "CGU Moniteurs - Brigade du kiff",
-  meta: [
-    { name: 'robots', content: 'noindex, nofollow' },
-  ],
+useSeoMeta({
+  title: 'CGU Moniteurs',
+  description: "Conditions générales d'utilisation des moniteurs de la Brigade du Kiff.",
+  robots: 'noindex, nofollow',
 })
 </script>
 

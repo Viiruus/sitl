@@ -2,6 +2,12 @@
 const router = useRouter()
 const { loggedIn, user, fetch, clear } = useUserSession()
 
+useSeoMeta({
+  title: 'Espace moniteur | Inscription WhatsApp',
+  description: 'Créer son compte moniteur et se connecter via WhatsApp.',
+  robots: 'noindex, nofollow',
+})
+
 const phoneNumber = ref('')
 const code = ref('')
 const codeSent = ref(false)

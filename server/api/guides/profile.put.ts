@@ -1,6 +1,12 @@
 import { z } from 'zod'
 import { prisma } from '../../utils/prisma'
 
+const imageVariantSchema = z.object({
+  url: z.string().trim().startsWith('/uploads/'),
+  width: z.number().int().min(1),
+  size: z.number().int().min(0).optional(),
+})
+
 const bodySchema = z.object({
   firstName: z.string().trim().max(100).optional(),
   lastName: z.string().trim().max(100).optional(),
@@ -18,6 +24,7 @@ const bodySchema = z.object({
     z.string().trim().startsWith('data:'),
     z.literal(''),
   ]).optional(),
+  profileImageVariants: z.array(imageVariantSchema).max(16).optional(),
 })
 
 export default defineEventHandler(async (event) => {
@@ -35,6 +42,18 @@ export default defineEventHandler(async (event) => {
     if (value === undefined) return undefined
     const trimmed = value?.trim()
     return trimmed ? trimmed : null
+  }
+  const cleanVariants = (variants?: { url: string; width: number; size?: number }[] | null) => {
+    if (variants === undefined) return undefined
+    if (!variants || variants.length === 0) return null
+    const normalized = variants
+      .map((variant) => ({
+        url: variant.url.trim(),
+        width: variant.width,
+        ...(variant.size != null ? { size: variant.size } : {}),
+      }))
+      .filter((variant) => variant.url && variant.width > 0)
+    return normalized.length ? normalized : null
   }
 
   const user = await db.user.update({
@@ -59,6 +78,7 @@ export default defineEventHandler(async (event) => {
             websiteUrl: clean(body.websiteUrl),
             professionalCardNumber: clean(body.professionalCardNumber),
             profileImageUrl: clean(body.profileImageUrl),
+            profileImageVariants: cleanVariants(body.profileImageVariants),
           },
           create: {
             bio: clean(body.bio) ?? '',
@@ -67,6 +87,7 @@ export default defineEventHandler(async (event) => {
             websiteUrl: clean(body.websiteUrl) ?? null,
             professionalCardNumber: clean(body.professionalCardNumber) ?? null,
             profileImageUrl: clean(body.profileImageUrl) ?? null,
+            profileImageVariants: cleanVariants(body.profileImageVariants) ?? null,
             isPublic: true,
           },
         },
@@ -102,6 +123,7 @@ export default defineEventHandler(async (event) => {
       websiteUrl: user.guideProfile?.websiteUrl || null,
       professionalCardNumber: user.guideProfile?.professionalCardNumber || null,
       profileImageUrl: user.guideProfile?.profileImageUrl || null,
+      profileImageVariants: user.guideProfile?.profileImageVariants || null,
     },
   }
 })

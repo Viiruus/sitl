@@ -3,6 +3,12 @@
     middleware: 'climber-auth',
   })
 
+  useSeoMeta({
+    title: 'Mon profil grimpeur',
+    description: 'Gère ton profil grimpeur et tes inscriptions aux stages.',
+    robots: 'noindex, nofollow',
+  })
+
   const { loggedIn, fetch, user, clear } = useUserSession()
   const route = useRoute()
   const router = useRouter()

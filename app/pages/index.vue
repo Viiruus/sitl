@@ -28,7 +28,18 @@
         </div>
       </div>
       <div class="hidden bg-brand-950 lg:absolute lg:inset-y-0 lg:right-0 lg:block lg:w-1/2 min-h-[50vh] lg:min-h-screen">
-        <img class="h-full w-full object-cover" src="~/assets/images/escalade0.jpg" alt="" />
+        <NuxtImg
+          src="/images/escalade0.jpg"
+          alt=""
+          class="h-full w-full object-cover"
+          width="1680"
+          height="3648"
+          sizes="(min-width: 1024px) 50vw, 100vw"
+          quality="72"
+          preload
+          fetchpriority="high"
+          loading="eager"
+        />
       </div>
     </div>
   </div>
@@ -185,9 +196,13 @@
         >
           <div class="relative h-52">
             <img
-              :src="stage.coverImageUrl || imageForDiscipline(stage.discipline)"
+              :src="stageCoverSrc(stage)"
+              :srcset="stageCoverSrcset(stage)"
               :alt="stage.titre"
               class="size-full object-cover transition duration-500 hover:scale-105"
+              decoding="async"
+              sizes="(min-width: 1024px) 33vw, 100vw"
+              loading="lazy"
             />
             <div class="absolute inset-0 bg-gradient-to-t from-brand-950 via-brand-950/40 to-transparent"></div>
             <div class="absolute inset-4 flex flex-col justify-between">
@@ -244,9 +259,13 @@
             <div class="mt-6 flex items-center justify-between text-sm text-white">
               <div class="flex items-center gap-3 text-sm text-brand-100/80">
                 <img
-                  :src="stage.guideImageUrl || imageForDiscipline(stage.discipline)"
+                  :src="guideAvatarSrc(stage)"
+                  :srcset="guideAvatarSrcset(stage)"
                   :alt="stage.guideName || 'Moniteur'"
                   class="h-10 w-10 rounded-full border border-white/20 bg-brand-900 object-cover"
+                  decoding="async"
+                  sizes="40px"
+                  loading="lazy"
                 />
                 <div>
                   <p class="text-xs uppercase tracking-[0.3em] text-brand-200/70">
@@ -284,49 +303,41 @@
 
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { buildStoredSrcset, resolveStoredImageSrc } from '~/composables/useStoredImageVariants'
 
-const { data: aventuresData, pending: aventuresPending } = await useFetch('/api/aventures')
+useSeoMeta({
+  title: 'Aventures d’escalade encadrées | Falaise, grande voie, bloc, trad, via ferrata',
+  description:
+    'Des stages d’escalade outdoor pour progresser avec des moniteurs locaux. Choisis ton terrain de jeu et pars à l’aventure.',
+  robots: 'index, follow, max-image-preview:large',
+})
 
-  const upcomingStages = computed(() => {
-    const today = new Date()
-    today.setHours(0, 0, 0, 0)
+const { data: aventuresData, pending: aventuresPending } = useFetch('/api/aventures', {
+  query: {
+    mode: 'home',
+    limit: 3,
+  },
+  server: false,
+  default: () => ({ aventures: [] }),
+})
 
-    const list = (aventuresData.value?.aventures ?? [])
-      .map((stage: any) => {
-        const nextDate = stage.nextSession?.dateDebut ? new Date(stage.nextSession.dateDebut) : null
-        const hasSessions = Array.isArray(stage.sessions) && stage.sessions.length > 0
-        return { ...stage, nextSessionDate: nextDate, hasSessions }
-      })
-      .filter((stage: any) => {
-        if (stage.nextSessionDate) {
-          return stage.nextSessionDate.getTime() >= today.getTime()
-        }
-        // If there are sessions but none upcoming, drop it
-        if (stage.hasSessions) return false
-        // Keep undated stages
-        return true
-      })
+const upcomingStages = computed(() => aventuresData.value?.aventures ?? [])
 
-    const withNext = list
-      .filter((stage: any) => stage.nextSessionDate)
-      .sort((a: any, b: any) => (a.nextSessionDate as any) - (b.nextSessionDate as any))
+const stageCoverSrc = (stage: any) => {
+  return resolveStoredImageSrc(stage?.coverImageUrl, stage?.coverImageVariants) || imageForDiscipline(stage?.discipline)
+}
 
-    const withoutNext = list.filter((stage: any) => !stage.nextSessionDate)
-    const ordered = [...withNext, ...withoutNext]
+const stageCoverSrcset = (stage: any) => {
+  return buildStoredSrcset(stage?.coverImageVariants)
+}
 
-    return ordered.slice(0, 3)
-  })
+const guideAvatarSrc = (stage: any) => {
+  return resolveStoredImageSrc(stage?.guideImageUrl, stage?.guideImageVariants) || imageForDiscipline(stage?.discipline)
+}
 
-  const faqs = [
-    {
-      question: 'La différence entre l\'escalade en couenne et l\'escalade en grande voie ?',
-      answer: "L'escalade en couenne, appelée escalade sportive, consiste à grimper une voie d'une seule longueur, sur une falaise ou sur une paroi artificielle (salle d'escalade) complètement équipée avec des ancrages permanents, permettant au grimpeur de s'assurer à l'aide de dégaines. Il existe des voies de tous niveaux, facile à extrêmement difficile. Idéale pour l'initiation et pour progresser.\n\nL'escalade en grande voie consiste à grimper une voie de plusieurs longueurs, sur des grandes falaises plus ou moins équipées avec des points bétons. L'objectif est d'escalader en cordée jusqu'au sommet de la falaise. Cette pratique nécessite de connaître des manipulations et techniques particulières. Il existe des grandes voies de tous niveaux, pouvant durer de la demi-journée à plusieurs jours.",
-    },
-    {
-      question: "La différence entre l'escalade en tête et l'escalade en moulinette ?",
-      answer: "L'escalade en tête consiste à grimper en contribuant à son propre assurage. En plus d'être assurer par son assureur, le grimpeur en tête doit progressivement installer les dégaines et passer sa corde dans les dégaines afin d'assurer sa sécurité en cas de chute. Il n'y a pas de corde pré-installée. Il est donc important pour le grimpeur en tête de choisir une voie adaptée à son niveau et ne pas surestimer son niveau, car il devra arriver jusqu'au relais.\n\nL'escalade en moulinette consiste à grimper sur une corde déjà installée sur la falaise. Il est donc possible, en cas de difficulté, de redescendre à tout moment.",
-    },
-  ]
+const guideAvatarSrcset = (stage: any) => {
+  return buildStoredSrcset(stage?.guideImageVariants)
+}
 
 const rotatingBenefitWords = ['Progression', 'Immersion', 'Déconnexion', 'Reconnexion']
 const activeBenefitWordIndex = ref(0)

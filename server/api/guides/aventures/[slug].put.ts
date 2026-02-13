@@ -2,6 +2,11 @@ import { z } from 'zod'
 import { prisma } from '../../../utils/prisma'
 
 const stringListSchema = z.array(z.string().trim().min(1)).optional()
+const imageVariantSchema = z.object({
+  url: z.string().trim().startsWith('/uploads/'),
+  width: z.number().int().min(1),
+  size: z.number().int().min(0).optional(),
+})
 
 const imageUrlSchema = z
   .string()
@@ -19,11 +24,13 @@ const imageUrlSchema = z
   }, { message: 'URL d’image invalide' })
 
 const coverImageSchema = imageUrlSchema.or(z.literal(null)).optional()
+const coverImageVariantsSchema = z.array(imageVariantSchema).max(24).optional()
 
 const galleryImageSchema = z.object({
   url: imageUrlSchema,
   alt: z.string().trim().optional(),
   position: z.number().int().min(0).optional(),
+  variants: z.array(imageVariantSchema).max(24).optional(),
 })
 
 const programmeJourSchema = z.object({
@@ -50,6 +57,7 @@ const bodySchema = z
     ageMax: z.number().int().min(0).max(120).nullable().optional(),
     autonomieMini: z.string().trim().optional(),
     coverImageUrl: coverImageSchema,
+    coverImageVariants: coverImageVariantsSchema,
     equipementRequis: stringListSchema,
     equipementFourni: stringListSchema,
     hebergementDetails: z.string().trim().optional(),
@@ -114,6 +122,18 @@ const valueOrNull = (value?: string | null) => {
   return trimmed ? trimmed : null
 }
 
+const variantsOrNull = (value?: { url: string; width: number; size?: number }[] | null) => {
+  if (!value || !value.length) return null
+  const normalized = value
+    .map((entry) => ({
+      url: entry.url.trim(),
+      width: entry.width,
+      ...(entry.size != null ? { size: entry.size } : {}),
+    }))
+    .filter((entry) => entry.url && entry.width > 0)
+  return normalized.length ? normalized : null
+}
+
 export default defineEventHandler(async (event) => {
   const session = await getUserSession(event)
   const slug = event.context.params?.slug
@@ -158,6 +178,7 @@ export default defineEventHandler(async (event) => {
         ageMax: body.ageMax ?? null,
         autonomieMini: valueOrNull(body.autonomieMini ?? null),
         coverImageUrl: body.coverImageUrl?.trim() || null,
+        coverImageVariants: variantsOrNull(body.coverImageVariants ?? null),
         equipementRequis: listOrNull(body.equipementRequis ?? null),
         equipementFourni: listOrNull(body.equipementFourni ?? null),
         hebergementDetails: valueOrNull(body.hebergementDetails ?? null),
@@ -184,6 +205,7 @@ export default defineEventHandler(async (event) => {
             url: img.url.trim(),
             alt: valueOrNull(img.alt ?? null),
             position: img.position ?? index,
+            variants: variantsOrNull(img.variants ?? null),
           })),
         })
       }

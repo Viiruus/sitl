@@ -1,8 +1,50 @@
 // server/api/aventures.get.ts
 import { prisma } from "../utils/prisma";
 
-export default defineEventHandler(async () => {
+export default defineEventHandler(async (event) => {
   const db = await prisma();
+  const query = getQuery(event);
+  const mode = typeof query.mode === "string" ? query.mode : null;
+  const limit = parsePositiveInt(query.limit, 3);
+
+  if (mode === "home") {
+    const aventures = await db.aventure.findMany({
+      where: { estPublie: true },
+      select: {
+        id: true,
+        slug: true,
+        titre: true,
+        sousTitre: true,
+        discipline: true,
+        formule: true,
+        lieuLabel: true,
+        jours: true,
+        prixParPersonne: true,
+        coverImageUrl: true,
+        coverImageVariants: true,
+        guide: {
+          select: {
+            firstName: true,
+            lastName: true,
+            guideProfile: {
+              select: { profileImageUrl: true, profileImageVariants: true },
+            },
+          },
+        },
+        sessions: {
+          select: {
+            dateDebut: true,
+            dateFin: true,
+          },
+        },
+      },
+      orderBy: { createdAt: "desc" },
+    });
+
+    return {
+      aventures: selectHomepageAventures(aventures, limit),
+    };
+  }
 
   const aventures = await db.aventure.findMany({
     where: { estPublie: true },
@@ -12,7 +54,7 @@ export default defineEventHandler(async () => {
           firstName: true,
           lastName: true,
           guideProfile: {
-            select: { profileImageUrl: true },
+            select: { profileImageUrl: true, profileImageVariants: true },
           },
         },
       },
@@ -33,13 +75,70 @@ export default defineEventHandler(async () => {
       jours: a.jours,
       prixParPersonne: a.prixParPersonne,
       coverImageUrl: a.coverImageUrl,
+      coverImageVariants: a.coverImageVariants || null,
       guideName: [a.guide?.firstName, a.guide?.lastName].filter(Boolean).join(" ") || null,
       guideImageUrl: a.guide?.guideProfile?.profileImageUrl || null,
+      guideImageVariants: a.guide?.guideProfile?.profileImageVariants || null,
       hasSessions: a.sessions.length > 0,
       nextSession: findNextSession(a.sessions),
     })),
   };
 });
+
+const parsePositiveInt = (value: unknown, fallback: number) => {
+  if (typeof value !== "string") return fallback;
+  const parsed = Number.parseInt(value, 10);
+  if (Number.isNaN(parsed)) return fallback;
+  return Math.max(1, Math.min(parsed, 12));
+};
+
+const selectHomepageAventures = (aventures: any[], limit: number) => {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const todayMs = today.getTime();
+
+  const list = aventures
+    .map((a) => {
+      const nextSession = findNextSession(a.sessions);
+      const nextSessionDate = nextSession?.dateDebut ? new Date(nextSession.dateDebut).getTime() : null;
+      const hasSessions = Array.isArray(a.sessions) && a.sessions.length > 0;
+
+      return {
+        id: a.id,
+        slug: a.slug,
+        titre: a.titre,
+        sousTitre: a.sousTitre,
+        discipline: a.discipline,
+        formule: a.formule,
+        lieuLabel: a.lieuLabel,
+        jours: a.jours,
+        prixParPersonne: a.prixParPersonne,
+        coverImageUrl: a.coverImageUrl,
+        coverImageVariants: a.coverImageVariants || null,
+        guideName: [a.guide?.firstName, a.guide?.lastName].filter(Boolean).join(" ") || null,
+        guideImageUrl: a.guide?.guideProfile?.profileImageUrl || null,
+        guideImageVariants: a.guide?.guideProfile?.profileImageVariants || null,
+        hasSessions,
+        nextSession,
+        nextSessionDate,
+      };
+    })
+    .filter((stage) => {
+      if (stage.nextSessionDate) return stage.nextSessionDate >= todayMs;
+      if (stage.hasSessions) return false;
+      return true;
+    })
+    .sort((a, b) => {
+      if (a.nextSessionDate && b.nextSessionDate) return a.nextSessionDate - b.nextSessionDate;
+      if (a.nextSessionDate && !b.nextSessionDate) return -1;
+      if (!a.nextSessionDate && b.nextSessionDate) return 1;
+      return 0;
+    })
+    .slice(0, limit)
+    .map(({ nextSessionDate, ...stage }) => stage);
+
+  return list;
+};
 
 const findNextSession = (sessions: any[]) => {
   const today = new Date();

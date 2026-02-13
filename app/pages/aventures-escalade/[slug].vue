@@ -30,10 +30,14 @@
       <div class="relative isolate overflow-hidden bg-brand-950 pb-16 pt-40 sm:pt-48 lg:pt-56">
         <!-- Fond image -->
         <div class="absolute inset-0 -z-10">
-          <img
+          <NuxtImg
             :src="heroImage"
             :alt="stage.titre"
             class="h-full w-full object-cover"
+            sizes="100vw"
+            :provider="imageProviderFor(heroImage)"
+            format="webp"
+            loading="eager"
           />
           <div
             class="absolute inset-0 bg-gradient-to-b from-brand-950 via-brand-950/85 to-brand-950"
@@ -85,12 +89,12 @@
                 >
                   {{ stage.titre }}
                 </h1>
-                <p
+                <h2
                   v-if="stage.sousTitre"
                   class="text-sm text-brand-100/85 sm:text-base"
                 >
                   {{ stage.sousTitre }}
-                </p>
+              </h2>
 
                 <!-- STATS SECTION -->
                 <div class="pt-4 flex flex-wrap gap-3">
@@ -130,11 +134,15 @@
                   <div
                     class="h-20 w-20 flex-shrink-0 overflow-hidden rounded-full border-2 border-secondaryBrand-400 bg-brand-900"
                   >
-                    <img
+                    <NuxtImg
                       v-if="guideImage"
                       :src="guideImage"
                       :alt="guideFullName"
                       class="size-full object-cover"
+                      sizes="80px"
+                      :provider="imageProviderFor(guideImage)"
+                      format="webp"
+                      loading="lazy"
                     />
                   </div>
                   <div class="space-y-1">
@@ -176,7 +184,15 @@
                   class="relative h-28 w-full overflow-hidden rounded-xl bg-white/5 transition hover:opacity-100"
                   @click="() => openLightbox(idx)"
                 >
-                  <img :src="img.url" :alt="img.alt || stageTitle" class="size-full object-cover" loading="lazy" />
+                  <NuxtImg
+                    :src="img.url"
+                    :alt="img.alt || stageTitle"
+                    class="size-full object-cover"
+                    sizes="(min-width: 1024px) 120px, 33vw"
+                    :provider="imageProviderFor(img.url)"
+                    format="webp"
+                    loading="lazy"
+                  />
                 </button>
               </div>
             </div>
@@ -815,10 +831,14 @@
             >
               <div>{{ s.value?.sessions }}</div>
               <div class="relative h-52">
-                <img
-                  :src="s.coverImageUrl || imageForDiscipline(s.discipline)"
+                <NuxtImg
+                  :src="otherStageCoverImage(s)"
                   :alt="s.titre"
                   class="size-full object-cover transition duration-500 hover:scale-105"
+                  sizes="(min-width: 1024px) 33vw, 100vw"
+                  :provider="imageProviderFor(otherStageCoverImage(s))"
+                  format="webp"
+                  loading="lazy"
                 />
                 <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent" />
                 <div class="absolute inset-4 flex flex-col justify-between">
@@ -874,10 +894,14 @@
                 </p>
                 <div class="mt-6 flex items-center justify-between text-sm text-white">
                   <div class="flex items-center gap-3 text-sm text-brand-100/80">
-                    <img
-                      :src="s.guideImageUrl || imageForDiscipline(s.discipline)"
+                    <NuxtImg
+                      :src="otherStageGuideImage(s)"
                       :alt="s.guideName || 'Moniteur'"
                       class="h-10 w-10 rounded-full border border-white/20 bg-brand-900 object-cover"
+                      sizes="40px"
+                      :provider="imageProviderFor(otherStageGuideImage(s))"
+                      format="webp"
+                      loading="lazy"
                     />
                     <div>
                       <p class="text-xs uppercase tracking-[0.3em] text-brand-200/70">
@@ -934,11 +958,14 @@
           <div class="space-y-5 px-6 py-5">
             <div class="flex items-center gap-3 rounded-2xl border border-white/10 bg-brand-900/60 p-3">
               <div class="h-14 w-14 overflow-hidden rounded-full border border-secondaryBrand-400/70 bg-brand-900">
-                <img
+                <NuxtImg
                   v-if="guideImage"
                   :src="guideImage"
                   :alt="guideFullName || 'Moniteur'"
                   class="size-full object-cover"
+                  sizes="56px"
+                  format="webp"
+                  loading="lazy"
                 />
                 <div
                   v-else
@@ -1048,11 +1075,15 @@
           </svg>
         </button>
         <div class="relative w-full max-w-4xl">
-          <img
+          <NuxtImg
             v-if="currentGalleryImage"
             :src="currentGalleryImage.url"
             :alt="currentGalleryImage.alt || stageTitle"
             class="max-h-[80vh] w-full rounded-2xl object-contain"
+            sizes="100vw"
+            :provider="imageProviderFor(currentGalleryImage.url)"
+            format="webp"
+            loading="lazy"
           />
           <div class="mt-3 flex items-center justify-between text-xs text-white/80">
             <div class="flex gap-2">
@@ -1208,7 +1239,33 @@ const programmeJours = computed(() => {
   )
 })
 
-const galerieImages = computed(() => stage.value?.images || [])
+const normalizeImagePath = (src?: string | null) => {
+  if (!src) return null
+  if (/^(https?:)?\/\//i.test(src) || src.startsWith('data:') || src.startsWith('blob:')) {
+    return src
+  }
+  if (src.startsWith('/')) return src
+  return `/images/${src.replace(/^(\.\/)+/, '')}`
+}
+
+const imageProviderFor = (src?: string | null) => {
+  if (!src) return undefined
+  const normalized = normalizeImagePath(src)
+  if (!normalized) return undefined
+  if (/^(https?:)?\/\//i.test(normalized) || normalized.startsWith('data:') || normalized.startsWith('blob:')) {
+    return 'none'
+  }
+  return undefined
+}
+
+const galerieImages = computed(() =>
+  (stage.value?.images || [])
+    .map((img: any) => ({
+      ...img,
+      url: normalizeImagePath(img.url),
+    }))
+    .filter((img: any) => Boolean(img.url)),
+)
 const galleryIndex = ref(0)
 const showLightbox = ref(false)
 watch(
@@ -1303,13 +1360,12 @@ const heroImage = computed(() => {
   if (!stage.value) {
     return '/images/escalade-grande-voie-calanques.jpg'
   }
-  if (stage.value.coverImageUrl) {
-    return stage.value.coverImageUrl
-  }
-  if (Array.isArray(stage.value.images) && stage.value.images.length > 0) {
-    return stage.value.images[0].url
-  }
-  return imageForDiscipline(stage.value.discipline)
+  const raw =
+    stage.value.coverImageUrl ||
+    (Array.isArray(stage.value.images) && stage.value.images.length > 0
+      ? stage.value.images[0].url
+      : null)
+  return normalizeImagePath(raw) || imageForDiscipline(stage.value.discipline)
 })
 
 const mapEmbedUrl = computed(() => {
@@ -1330,7 +1386,7 @@ const guideProfileLink = computed(() =>
 )
 
 const guideImage = computed(
-  () => guide.value?.profile?.profileImageUrl || null,
+  () => normalizeImagePath(guide.value?.profile?.profileImageUrl) || null,
 )
 
 const guideBaseLocation = computed(
@@ -1419,6 +1475,12 @@ const formatSessionRange = (session?: { dateDebut?: string | Date; dateFin?: str
   const end = formatter.format(new Date(session.dateFin))
   return start === end ? start : `${start} → ${end}`
 }
+
+const otherStageCoverImage = (entry: any) =>
+  normalizeImagePath(entry?.coverImageUrl) || imageForDiscipline(entry?.discipline)
+
+const otherStageGuideImage = (entry: any) =>
+  normalizeImagePath(entry?.guideImageUrl) || imageForDiscipline(entry?.discipline)
 
 const { loggedIn, user } = useUserSession()
 const router = useRouter()
@@ -1783,23 +1845,33 @@ const handleSuggestionClick = async () => {
 }
 
 
-// SEO
-watchEffect(() => {
-  if (stage.value) {
-    useHead({
-      title: `${stage.value.titre} - Brigade du kiff`,
-      meta: [
-        {
-          name: 'description',
-          content:
-            resumeCeQuiTattend.value ||
-            stage.value.sousTitre ||
-            stage.value.pointsLocaux ||
-            '',
-        },
-      ],
-    })
-  }
+const seoTitle = computed(() => stage.value?.titre || 'Aventure escalade')
+const truncateSeo = (value: string, limit = 155) => {
+  if (value.length <= limit) return value
+  return `${value.slice(0, limit).trimEnd()}…`
+}
+
+const seoDescription = computed(() => {
+  const source =
+    stage.value?.sousTitre ||
+    resumeCeQuiTattend.value ||
+    stage.value?.pointsLocaux ||
+    'Des stages d’escalade outdoor pour progresser avec des moniteurs locaux.'
+  return truncateSeo(source)
+})
+const seoImage = computed(() => normalizeImagePath(stage.value?.coverImageUrl) || undefined)
+
+useHead({
+  titleTemplate: '%s | Brigade du kiff — Stages d’escalade',
+})
+
+useSeoMeta({
+  title: seoTitle,
+  description: seoDescription,
+  ogTitle: seoTitle,
+  ogDescription: seoDescription,
+  ogImage: seoImage,
+  robots: 'index, follow, max-image-preview:large',
 })
 </script>
 

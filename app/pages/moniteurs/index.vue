@@ -3,6 +3,12 @@ definePageMeta({
   middleware: 'guide-auth',
 })
 
+useSeoMeta({
+  title: 'Tableau de bord moniteur',
+  description: 'Gère tes aventures, sessions et inscriptions.',
+  robots: 'noindex, nofollow',
+})
+
 const router = useRouter()
 const route = useRoute()
 const { clear, fetch } = useUserSession()

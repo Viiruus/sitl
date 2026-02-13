@@ -147,7 +147,8 @@ model GuideProfile {
   professionalCardNumber String?
 
   // ✅ Nouveau : image principale du moniteur
-  profileImageUrl String?
+  profileImageUrl      String?
+  profileImageVariants Json?
 
   isPublic Boolean @default(false)
 
@@ -204,9 +205,10 @@ model Aventure {
   ageMax Int?
 
   // ✅ Images
-  coverImageUrl   String?
-  images          AventureImage[]
-  dateSuggestions AventureDateSuggestion[]
+  coverImageUrl      String?
+  coverImageVariants Json?
+  images             AventureImage[]
+  dateSuggestions    AventureDateSuggestion[]
 
   // ✅ Programme structuré
   programmeJours AventureJour[]
@@ -230,6 +232,7 @@ model AventureImage {
   kind     ImageKind @default(GALLERY)
   alt      String?
   position Int?
+  variants Json?
 
   createdAt DateTime @default(now())
 

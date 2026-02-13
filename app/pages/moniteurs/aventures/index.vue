@@ -3,6 +3,12 @@ definePageMeta({
   middleware: 'guide-auth',
 })
 
+useSeoMeta({
+  title: 'Mes aventures',
+  description: 'Crée, publie et gère tes aventures d’escalade.',
+  robots: 'noindex, nofollow',
+})
+
 const router = useRouter()
 const route = useRoute()
 const { clear, fetch } = useUserSession()

@@ -32,6 +32,7 @@ export default defineEventHandler(async () => {
       fullName: [guide.firstName, guide.lastName].filter(Boolean).join(" ") || "Moniteur local",
       bio: guide.guideProfile?.bio || null,
       profileImageUrl: guide.guideProfile?.profileImageUrl || null,
+      profileImageVariants: guide.guideProfile?.profileImageVariants || null,
       baseLocation: guide.guideProfile?.baseLocation || guide.department || null,
     })),
   }

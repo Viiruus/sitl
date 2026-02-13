@@ -3,8 +3,12 @@
     <div class="absolute inset-0 -z-10 overflow-hidden">
       <img
         :src="heroBackground"
+        :srcset="heroBackgroundSrcset"
         alt=""
         class="h-full w-full object-cover opacity-25"
+        decoding="async"
+        sizes="100vw"
+        loading="eager"
       />
       <div class="absolute inset-0 bg-gradient-to-b from-brand-900/80 via-brand-950/90 to-brand-950" />
       <svg
@@ -95,7 +99,11 @@
                 <img
                   class="w-full max-h-[44rem] rounded-2xl bg-gray-800 object-cover"
                   :src="moniteurPortrait"
-                  :alt="moniteurName || 'Portrait du moniteur'"
+                  :srcset="moniteurPortraitSrcset"
+                  :alt="seoTitle"
+                  decoding="async"
+                  sizes="(min-width: 1024px) 40vw, 100vw"
+                  loading="lazy"
                 />
                 <div class="mt-4 flex flex-wrap items-center justify-center gap-2">
                   <NuxtLink
@@ -164,9 +172,12 @@
             >
               <div class="relative h-72 w-full overflow-hidden">
                 <img
-                  :src="aventure.coverImageUrl || fallbackImageForDiscipline(aventure.discipline)"
+                  :src="aventureCoverSrc(aventure)"
+                  :srcset="aventureCoverSrcset(aventure)"
                   :alt="aventure.titre"
                   class="size-full object-cover transition duration-500 hover:scale-105"
+                  decoding="async"
+                  sizes="(min-width: 1024px) 50vw, 100vw"
                   loading="lazy"
                 />
                 <div class="absolute inset-0 bg-gradient-to-t from-brand-950 via-brand-950/40 to-transparent"></div>
@@ -221,8 +232,12 @@
                   <div class="flex items-center gap-3 text-sm text-brand-100/80">
                     <img
                       :src="moniteurPortrait || fallbackImageForDiscipline(aventure.discipline)"
+                      :srcset="moniteurPortraitSrcset"
                       :alt="moniteurName || 'Moniteur'"
                       class="h-10 w-10 rounded-full border border-white/20 bg-brand-900 object-cover"
+                      decoding="async"
+                      sizes="40px"
+                      loading="lazy"
                     />
                     <div>
                       <p class="text-xs uppercase tracking-[0.3em] text-brand-200/70">
@@ -260,7 +275,8 @@
 </template>
 
 <script setup lang="ts">
-import { HomeIcon, TruckIcon, ServerIcon } from '@heroicons/vue/24/solid'
+import { HomeIcon, TruckIcon } from '@heroicons/vue/24/solid'
+import { buildStoredSrcset, resolveStoredImageSrc } from '~/composables/useStoredImageVariants'
 
 const route = useRoute()
 const slug = computed(() => route.params.slug as string)
@@ -294,23 +310,6 @@ const filteredAventures = computed(() => {
       if (!a.nextDate && b.nextDate) return 1
       return 0
     })
-})
-
-useHead(() => {
-  const title = moniteur.value?.fullName
-    ? `${moniteur.value.fullName} | Moniteur d’escalade`
-    : 'Moniteur d’escalade'
-  return {
-    title,
-    meta: moniteur.value?.bio
-      ? [
-          {
-            name: 'description',
-            content: moniteur.value.bio.slice(0, 155),
-          },
-        ]
-      : [],
-  }
 })
 
 const disciplineLabels: Record<string, string> = {
@@ -352,7 +351,12 @@ const formatDisciplineLabel = (value?: string | null) => {
   return disciplineLabels[value] ?? value.replace(/_/g, ' ')
 }
 
-const moniteurName = computed(() => moniteur.value?.fullName || null)
+const moniteurName = computed(() => {
+  const fullName = moniteur.value?.fullName?.trim()
+  if (fullName) return fullName
+  const composed = [moniteur.value?.firstName, moniteur.value?.lastName].filter(Boolean).join(' ').trim()
+  return composed || null
+})
 const showFullBio = ref(false)
 const moniteurBioValue = computed(() => moniteur.value?.bio?.trim() || '')
 const moniteurBioFallback = computed(() => {
@@ -370,24 +374,50 @@ const moniteurBioPreview = computed(() => {
 const moniteurBioFull = computed(() => moniteurBioValue.value || moniteurBioFallback.value)
 const moniteurHasLongBio = computed(() => moniteurBioValue.value.length > 520)
 const moniteurBioText = computed(() => (showFullBio.value ? moniteurBioFull.value : moniteurBioPreview.value))
-const normalizeImagePath = (src?: string | null) => {
-  if (!src) return null
-  if (/^(https?:)?\/\//i.test(src) || src.startsWith('data:') || src.startsWith('blob:')) {
-    return src
-  }
-  if (src.startsWith('/')) {
-    return src
-  }
-  return `/images/${src.replace(/^(\.\/)+/, '')}`
-}
-
 const moniteurPortrait = computed(() => {
-  const src = normalizeImagePath(moniteur.value?.profileImageUrl)
+  const src = resolveStoredImageSrc(moniteur.value?.profileImageUrl, moniteur.value?.profileImageVariants)
   if (src) return src
   return heroBackground.value || '/images/escalade-grande-voie-calanques.jpg'
 })
-const heroBackground = computed(() => normalizeImagePath(moniteur.value?.heroImageUrl) || fallbackImageForDiscipline())
+const moniteurPortraitSrcset = computed(() => buildStoredSrcset(moniteur.value?.profileImageVariants))
+const heroBackground = computed(
+  () => resolveStoredImageSrc(moniteur.value?.heroImageUrl, moniteur.value?.heroImageVariants) || fallbackImageForDiscipline(),
+)
+const heroBackgroundSrcset = computed(() => buildStoredSrcset(moniteur.value?.heroImageVariants))
 const locationLabel = computed(() => moniteur.value?.baseLocation || moniteur.value?.department || 'France')
+
+const aventureCoverSrc = (aventure: any) => {
+  return resolveStoredImageSrc(aventure?.coverImageUrl, aventure?.coverImageVariants) || fallbackImageForDiscipline(aventure?.discipline)
+}
+
+const aventureCoverSrcset = (aventure: any) => {
+  return buildStoredSrcset(aventure?.coverImageVariants)
+}
+
+useHead({
+  titleTemplate: '%s',
+})
+
+const seoTitle = computed(() => {
+  const fullName = moniteurName.value
+  return fullName
+    ? `${fullName}, moniteur d'escalade de la Brigade du kiff`
+    : "Moniteur d'escalade de la Brigade du kiff"
+})
+const seoDescription = computed(
+  () =>
+    moniteur.value?.bio?.slice(0, 155) ||
+    'Collectif de moniteurs diplômés proposant des stages d’escalade outdoor.',
+)
+
+useSeoMeta({
+  title: seoTitle,
+  description: seoDescription,
+  ogTitle: seoTitle,
+  ogDescription: seoDescription,
+  ogImage: moniteurPortrait,
+  robots: 'index, follow, max-image-preview:large',
+})
 
 const moniteurWebsiteUrl = computed(() => {
   const card = moniteur.value?.professionalCardNumber || moniteur.value?.guideProfile?.professionalCardNumber

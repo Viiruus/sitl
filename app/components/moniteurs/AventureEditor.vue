@@ -1,5 +1,11 @@
 <script setup lang="ts">
 
+type StoredImageVariant = {
+  url: string
+  width: number
+  size?: number
+}
+
 type AdventureData = {
   slug: string
   estPublie: boolean
@@ -18,6 +24,7 @@ type AdventureData = {
   ageMax: number | null
   autonomieMini: string
   coverImageUrl: string
+  coverImageVariants?: StoredImageVariant[] | null
   equipementRequis: string[]
   equipementFourni: string[]
   hebergementDetails: string
@@ -26,7 +33,12 @@ type AdventureData = {
   objectifs: string
   prerequis: string[]
   repasLabel: string
-  images: { url: string; alt?: string | null; position?: number | null }[]
+  images: {
+    url: string
+    alt?: string | null
+    position?: number | null
+    variants?: StoredImageVariant[] | null
+  }[]
   programmeJours: {
     id?: number | null
     ordre?: number | null
@@ -110,39 +122,41 @@ const errorMessage = ref<string | null>(null)
 const uploadingCover = ref(false)
 const coverUploadError = ref<string | null>(null)
 const isClient = ref(false)
-const galleryImages = reactive<{ url: string; alt: string }[]>([{ url: '', alt: '' }])
+const coverImageVariants = ref<StoredImageVariant[]>([])
+const galleryImages = reactive<{ url: string; alt: string; variants: StoredImageVariant[] }[]>([
+  { url: '', alt: '', variants: [] },
+])
 const galleryUploadStates = reactive<Record<number, { loading: boolean; error: string | null }>>({})
+const ALLOWED_UPLOAD_MIME = ['image/jpeg', 'image/png', 'image/webp']
+const MAX_IMAGE_UPLOAD_BYTES = 5 * 1024 * 1024
 
 onMounted(() => {
   isClient.value = true
 })
 
-const resizeForUpload = async (file: File, maxWidth = 1400, maxHeight = 900) => {
-  // reduce payload size to avoid 413 on server (esp. data URLs on Vercel)
-  return new Promise<File>((resolve) => {
-    const img = new Image()
-    img.onload = () => {
-      const ratio = Math.min(1, maxWidth / img.width, maxHeight / img.height)
-      if (ratio >= 1) return resolve(file)
-      const canvas = document.createElement('canvas')
-      canvas.width = Math.round(img.width * ratio)
-      canvas.height = Math.round(img.height * ratio)
-      const ctx = canvas.getContext('2d')
-      if (!ctx) return resolve(file)
-      ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
-      canvas.toBlob(
-        (blob) => {
-          if (!blob) return resolve(file)
-          resolve(new File([blob], file.name.replace(/\.[^.]+$/, '') + '.jpg', { type: 'image/jpeg' }))
-        },
-        'image/jpeg',
-        0.82,
-      )
-    }
-    img.onerror = () => resolve(file)
-    img.src = URL.createObjectURL(file)
-  })
+const validateUploadFile = (file: File) => {
+  if (!ALLOWED_UPLOAD_MIME.includes(file.type)) {
+    return 'Format non supporté. Utilise JPG, PNG ou WebP.'
+  }
+  if (file.size > MAX_IMAGE_UPLOAD_BYTES) {
+    return 'Image trop lourde. Limite: 5 Mo.'
+  }
+  return null
 }
+
+const normalizeVariants = (variants?: any[] | null): StoredImageVariant[] => {
+  if (!Array.isArray(variants)) return []
+  return variants
+    .map((variant: any) => ({
+      url: typeof variant?.url === 'string' ? variant.url.trim() : '',
+      width: Number(variant?.width),
+      size: Number.isFinite(Number(variant?.size)) ? Number(variant?.size) : undefined,
+    }))
+    .filter((variant) => variant.url.startsWith('/uploads/') && Number.isFinite(variant.width) && variant.width > 0)
+    .sort((a, b) => a.width - b.width)
+}
+
+const isStoredUploadPath = (value?: string | null) => typeof value === 'string' && value.startsWith('/uploads/')
 
 const slugPreview = computed(() => currentSlug.value || generatingSlug(form.titre))
 
@@ -173,6 +187,7 @@ watch(
     form.ageMax = value.ageMax != null ? String(value.ageMax) : ''
     form.autonomieMini = value.autonomieMini || ''
     form.coverImageUrl = value.coverImageUrl || ''
+    coverImageVariants.value = normalizeVariants(value.coverImageVariants || [])
     form.equipementRequis = createList(value.equipementRequis, true)
     form.equipementFourni = createList(value.equipementFourni || null)
     form.hebergementDetails = value.hebergementDetails || ''
@@ -189,10 +204,14 @@ watch(
         ...value.images
           .slice()
           .sort((a, b) => (a.position ?? 0) - (b.position ?? 0))
-          .map((img) => ({ url: img.url || '', alt: img.alt || '' })),
+          .map((img) => ({
+            url: img.url || '',
+            alt: img.alt || '',
+            variants: normalizeVariants(img.variants || []),
+          })),
       )
     } else {
-      galleryImages.splice(0, galleryImages.length, { url: '', alt: '' })
+      galleryImages.splice(0, galleryImages.length, { url: '', alt: '', variants: [] })
     }
   },
   { immediate: true },
@@ -211,12 +230,12 @@ const removeListItem = (list: string[], index: number) => {
 }
 
 const addGalleryImage = () => {
-  galleryImages.push({ url: '', alt: '' })
+  galleryImages.push({ url: '', alt: '', variants: [] })
 }
 
 const removeGalleryImage = (index: number) => {
   if (galleryImages.length === 1) {
-    galleryImages[0] = { url: '', alt: '' }
+    galleryImages[0] = { url: '', alt: '', variants: [] }
     return
   }
   galleryImages.splice(index, 1)
@@ -308,6 +327,9 @@ const buildPayload = (publish: boolean) => ({
   ageMax: parseNumberField(form.ageMax),
   autonomieMini: form.autonomieMini.trim(),
   coverImageUrl: form.coverImageUrl.trim() || null,
+  coverImageVariants: isStoredUploadPath(form.coverImageUrl)
+    ? normalizeVariants(coverImageVariants.value)
+    : [],
   equipementRequis: toListPayload(form.equipementRequis),
   equipementFourni: toListPayload(form.equipementFourni),
   hebergementDetails: form.hebergementDetails.trim(),
@@ -337,6 +359,7 @@ const buildPayload = (publish: boolean) => ({
       url: img.url.trim(),
       alt: img.alt.trim(),
       position: index,
+      variants: isStoredUploadPath(img.url) ? normalizeVariants(img.variants) : [],
     }))
     .filter((img) => img.url),
 })
@@ -419,16 +442,23 @@ const uploadCoverImage = async (event: Event) => {
   const file = target.files?.[0]
   if (!file) return
   coverUploadError.value = null
+  const fileError = validateUploadFile(file)
+  if (fileError) {
+    coverUploadError.value = fileError
+    target.value = ''
+    return
+  }
   uploadingCover.value = true
   try {
-    const resized = await resizeForUpload(file)
     const formData = new FormData()
-    formData.append('file', resized, resized.name)
-    const response = await $fetch<{ url: string }>('/api/moniteurs/upload', {
+    formData.append('file', file, file.name)
+    formData.append('kind', 'cover')
+    const response = await $fetch<{ url: string; variants?: StoredImageVariant[] }>('/api/moniteurs/upload', {
       method: 'POST',
       body: formData,
     })
     form.coverImageUrl = response.url
+    coverImageVariants.value = normalizeVariants(response.variants || [])
     successMessage.value = 'Image de couverture mise à jour.'
   } catch (error: any) {
     coverUploadError.value = error?.data?.message || 'Échec du téléversement.'
@@ -444,16 +474,23 @@ const uploadGalleryImage = async (event: Event, index: number) => {
   if (!file) return
   galleryUploadStates[index] = galleryUploadStates[index] || { loading: false, error: null }
   galleryUploadStates[index].error = null
+  const fileError = validateUploadFile(file)
+  if (fileError) {
+    galleryUploadStates[index].error = fileError
+    target.value = ''
+    return
+  }
   galleryUploadStates[index].loading = true
   try {
-    const resized = await resizeForUpload(file)
     const formData = new FormData()
-    formData.append('file', resized, resized.name)
-    const response = await $fetch<{ url: string }>('/api/moniteurs/upload', {
+    formData.append('file', file, file.name)
+    formData.append('kind', 'gallery')
+    const response = await $fetch<{ url: string; variants?: StoredImageVariant[] }>('/api/moniteurs/upload', {
       method: 'POST',
       body: formData,
     })
     galleryImages[index].url = response.url
+    galleryImages[index].variants = normalizeVariants(response.variants || [])
     successMessage.value = 'Photo ajoutée à la galerie.'
   } catch (error: any) {
     galleryUploadStates[index].error = error?.data?.message || 'Échec du téléversement.'
@@ -649,7 +686,7 @@ const uploadGalleryImage = async (event: Event, index: number) => {
               class="w-full rounded-xl border border-white/10 bg-brand-900/80 px-3 py-2 text-white focus:border-secondaryBrand-400 focus:outline-none"
             />
             <p class="text-xs text-brand-200/70">
-              Colle l’URL d’une photo ou téléverse une image de couverture en haute résolution.
+              Colle l’URL d’une photo ou téléverse une image JPG/PNG/WebP (max 5 Mo). Les variantes optimisées sont générées automatiquement.
             </p>
             <div v-if="isClient" class="space-y-2">
               <label class="inline-flex cursor-pointer items-center gap-3 rounded-full border border-white/20 px-4 py-2 text-sm font-semibold text-white/80 transition hover:bg-white/5">
@@ -980,6 +1017,9 @@ const uploadGalleryImage = async (event: Event, index: number) => {
                     {{ galleryUploadStates[index]?.error }}
                   </span>
                 </div>
+                <p class="text-xs text-brand-200/60">
+                  Upload JPG/PNG/WebP, 5 Mo max par image.
+                </p>
               </div>
               <div class="space-y-2">
                 <label class="text-[11px] uppercase tracking-[0.3em] text-brand-200/70">Texte alternatif</label>
