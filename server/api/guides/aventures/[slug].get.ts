@@ -1,4 +1,5 @@
 import { prisma } from '../../../utils/prisma'
+import { sanitizePublicImageUrl, sanitizePublicImageVariants } from '../../../utils/public-image'
 
 const toList = (value: any) => {
   if (!value) return []
@@ -41,6 +42,14 @@ export default defineEventHandler(async (event) => {
 
   return {
     aventure: {
+      ...(() => {
+        const coverImageUrl = sanitizePublicImageUrl(aventure.coverImageUrl) || ''
+        const coverImageVariants = sanitizePublicImageVariants(aventure.coverImageVariants)
+        return {
+          coverImageUrl,
+          coverImageVariants,
+        }
+      })(),
       estPublie: aventure.estPublie,
       id: aventure.id,
       titre: aventure.titre,
@@ -58,8 +67,6 @@ export default defineEventHandler(async (event) => {
       ageMin: aventure.ageMin ?? null,
       ageMax: aventure.ageMax ?? null,
       autonomieMini: aventure.autonomieMini || '',
-      coverImageUrl: aventure.coverImageUrl || '',
-      coverImageVariants: aventure.coverImageVariants || null,
       equipementRequis: toList(aventure.equipementRequis),
       equipementFourni: toList(aventure.equipementFourni),
       hebergementDetails: aventure.hebergementDetails || '',
@@ -75,13 +82,15 @@ export default defineEventHandler(async (event) => {
         description: jour.description || '',
         lieuLabel: jour.lieuLabel || '',
       })),
-      images: (aventure.images ?? []).map((img) => ({
-        id: img.id,
-        url: img.url,
-        alt: img.alt || '',
-        position: img.position ?? null,
-        variants: img.variants || null,
-      })),
+      images: (aventure.images ?? [])
+        .map((img) => ({
+          id: img.id,
+          url: sanitizePublicImageUrl(img.url) || '',
+          alt: img.alt || '',
+          position: img.position ?? null,
+          variants: sanitizePublicImageVariants(img.variants),
+        }))
+        .filter((img) => Boolean(img.url)),
     },
   }
 })

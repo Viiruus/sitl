@@ -82,21 +82,15 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  const optimized = await optimizeImage(sourceBuffer, preset)
-
-  // On Vercel, return a compressed data URL because filesystem persistence is not guaranteed.
   if (isVercel) {
-    const base64 = optimized.buffer.toString('base64')
-    const dataUrl = `data:image/webp;base64,${base64}`
-    return {
-      url: dataUrl,
-      kind,
-      width: optimized.width,
-      height: optimized.height,
-      size: optimized.buffer.byteLength,
-      variants: [],
-    }
+    throw createError({
+      statusCode: 503,
+      statusMessage:
+        'Upload indisponible sur cet environnement Vercel sans stockage persistant. Configure un storage externe avant de téléverser des images.',
+    })
   }
+
+  const optimized = await optimizeImage(sourceBuffer, preset)
 
   const targetDir = PUBLIC_UPLOAD_DIR
   await fs.mkdir(targetDir, { recursive: true })

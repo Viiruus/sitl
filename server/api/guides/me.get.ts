@@ -1,6 +1,15 @@
 import { prisma } from '../../utils/prisma'
+import { sanitizePublicImageUrl, sanitizePublicImageVariants } from '../../utils/public-image'
 
 const mapGuide = (user: any) => ({
+  ...(() => {
+    const profileImageUrl = sanitizePublicImageUrl(user.guideProfile?.profileImageUrl)
+    const profileImageVariants = sanitizePublicImageVariants(user.guideProfile?.profileImageVariants)
+    return {
+      profileImageUrl,
+      profileImageVariants,
+    }
+  })(),
   id: user.id,
   email: user.email,
   role: user.role,
@@ -13,8 +22,6 @@ const mapGuide = (user: any) => ({
   bio: user.guideProfile?.bio || null,
   instagramUrl: user.guideProfile?.instagramUrl || null,
   websiteUrl: user.guideProfile?.websiteUrl || null,
-  profileImageUrl: user.guideProfile?.profileImageUrl || null,
-  profileImageVariants: user.guideProfile?.profileImageVariants || null,
   aventuresPubliees: user._count?.aventures ?? 0,
   prochainesSessions: user.aventures?.reduce((total: number, a: any) => total + (a.sessions?.length ?? 0), 0) ?? 0,
 })

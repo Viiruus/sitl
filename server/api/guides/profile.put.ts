@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import { prisma } from '../../utils/prisma'
+import { isInlineImageUrl } from '../../utils/public-image'
 
 const imageVariantSchema = z.object({
   url: z.string().trim().startsWith('/uploads/'),
@@ -21,7 +22,6 @@ const bodySchema = z.object({
     z.string().trim().url(),
     z.string().trim().startsWith('/uploads/'),
     z.string().trim().startsWith('/api/moniteurs/uploads/'),
-    z.string().trim().startsWith('data:'),
     z.literal(''),
   ]).optional(),
   profileImageVariants: z.array(imageVariantSchema).max(16).optional(),
@@ -42,6 +42,12 @@ export default defineEventHandler(async (event) => {
     if (value === undefined) return undefined
     const trimmed = value?.trim()
     return trimmed ? trimmed : null
+  }
+  const cleanImageUrl = (value?: string | null) => {
+    const trimmed = clean(value)
+    if (!trimmed) return trimmed
+    if (isInlineImageUrl(trimmed)) return null
+    return trimmed
   }
   const cleanVariants = (variants?: { url: string; width: number; size?: number }[] | null) => {
     if (variants === undefined) return undefined
@@ -77,7 +83,7 @@ export default defineEventHandler(async (event) => {
             instagramUrl: clean(body.instagramUrl),
             websiteUrl: clean(body.websiteUrl),
             professionalCardNumber: clean(body.professionalCardNumber),
-            profileImageUrl: clean(body.profileImageUrl),
+            profileImageUrl: cleanImageUrl(body.profileImageUrl),
             profileImageVariants: cleanVariants(body.profileImageVariants),
           },
           create: {
@@ -86,7 +92,7 @@ export default defineEventHandler(async (event) => {
             instagramUrl: clean(body.instagramUrl) ?? null,
             websiteUrl: clean(body.websiteUrl) ?? null,
             professionalCardNumber: clean(body.professionalCardNumber) ?? null,
-            profileImageUrl: clean(body.profileImageUrl) ?? null,
+            profileImageUrl: cleanImageUrl(body.profileImageUrl) ?? null,
             profileImageVariants: cleanVariants(body.profileImageVariants) ?? null,
             isPublic: true,
           },

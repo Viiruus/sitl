@@ -1,4 +1,5 @@
 import { prisma } from "../../utils/prisma"
+import { sanitizePublicImageUrl, sanitizePublicImageVariants } from "../../utils/public-image"
 
 const slugifyName = (firstName?: string | null, lastName?: string | null, fallback?: string | number | null) => {
   const base = [firstName, lastName].filter(Boolean).join(" ").trim()
@@ -29,6 +30,8 @@ const findNextSession = (sessions: any[]) => {
 }
 
 const mapAventureForGuide = (a: any) => {
+  const coverImageUrl = sanitizePublicImageUrl(a.coverImageUrl)
+  const coverImageVariants = sanitizePublicImageVariants(a.coverImageVariants)
   const nextSession = findNextSession(a.sessions ?? [])
   return {
     id: a.id,
@@ -39,8 +42,8 @@ const mapAventureForGuide = (a: any) => {
     lieuLabel: a.lieuLabel,
     jours: a.jours,
     prixParPersonne: a.prixParPersonne,
-    coverImageUrl: a.coverImageUrl,
-    coverImageVariants: a.coverImageVariants || null,
+    coverImageUrl,
+    coverImageVariants,
     nextSession: nextSession
       ? {
           dateDebut: nextSession.dateDebut,
@@ -102,7 +105,11 @@ export default defineEventHandler(async (event) => {
 
   const allSessions = aventures.flatMap((a) => a.sessions || [])
   const nextSessionDate = findNextSession(allSessions)?.dateDebut ?? null
-  const firstAventureWithCover = aventures.find((a) => a.coverImageUrl)
+  const firstAventureWithCover = aventures.find((a) => sanitizePublicImageUrl(a.coverImageUrl))
+  const profileImageUrl = sanitizePublicImageUrl(guide.guideProfile?.profileImageUrl)
+  const profileImageVariants = sanitizePublicImageVariants(guide.guideProfile?.profileImageVariants)
+  const firstAventureCoverUrl = sanitizePublicImageUrl(firstAventureWithCover?.coverImageUrl)
+  const firstAventureCoverVariants = sanitizePublicImageVariants(firstAventureWithCover?.coverImageVariants)
 
   const uniqueDisciplines = Array.from(
     new Set(
@@ -124,15 +131,15 @@ export default defineEventHandler(async (event) => {
     instagramUrl: guide.guideProfile?.instagramUrl || null,
     websiteUrl: guide.guideProfile?.websiteUrl || null,
     professionalCardNumber: guide.guideProfile?.professionalCardNumber || null,
-    profileImageUrl: guide.guideProfile?.profileImageUrl || null,
-    profileImageVariants: guide.guideProfile?.profileImageVariants || null,
+    profileImageUrl,
+    profileImageVariants,
     heroImageUrl:
-      guide.guideProfile?.profileImageUrl ||
-      firstAventureWithCover?.coverImageUrl ||
+      profileImageUrl ||
+      firstAventureCoverUrl ||
       "/images/escalade-grande-voie-calanques.jpg",
     heroImageVariants:
-      guide.guideProfile?.profileImageVariants ||
-      firstAventureWithCover?.coverImageVariants ||
+      profileImageVariants ||
+      firstAventureCoverVariants ||
       null,
     stats: {
       aventuresPubliees: aventures.length,

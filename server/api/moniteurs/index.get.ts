@@ -1,4 +1,5 @@
 import { prisma } from "../../utils/prisma"
+import { sanitizePublicImageUrl, sanitizePublicImageVariants } from "../../utils/public-image"
 
 const slugifyName = (firstName?: string | null, lastName?: string | null, fallback?: string | number | null) => {
   const base = [firstName, lastName].filter(Boolean).join(" ").trim()
@@ -25,14 +26,20 @@ export default defineEventHandler(async () => {
 
   return {
     moniteurs: guides.map((guide) => ({
+      ...(() => {
+        const profileImageUrl = sanitizePublicImageUrl(guide.guideProfile?.profileImageUrl)
+        const profileImageVariants = sanitizePublicImageVariants(guide.guideProfile?.profileImageVariants)
+        return {
+          profileImageUrl,
+          profileImageVariants,
+        }
+      })(),
       id: guide.id,
       slug: slugifyName(guide.firstName, guide.lastName, guide.id),
       firstName: guide.firstName,
       lastName: guide.lastName,
       fullName: [guide.firstName, guide.lastName].filter(Boolean).join(" ") || "Moniteur local",
       bio: guide.guideProfile?.bio || null,
-      profileImageUrl: guide.guideProfile?.profileImageUrl || null,
-      profileImageVariants: guide.guideProfile?.profileImageVariants || null,
       baseLocation: guide.guideProfile?.baseLocation || guide.department || null,
     })),
   }

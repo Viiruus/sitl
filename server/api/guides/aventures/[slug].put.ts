@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import { prisma } from '../../../utils/prisma'
+import { isInlineImageUrl } from '../../../utils/public-image'
 
 const stringListSchema = z.array(z.string().trim().min(1)).optional()
 const imageVariantSchema = z.object({
@@ -14,7 +15,6 @@ const imageUrlSchema = z
   .refine((value) => {
     if (!value) return false
     if (value.startsWith('/uploads/') || value.startsWith('/api/moniteurs/uploads/')) return true
-    if (value.startsWith('data:')) return true
     try {
       const url = new URL(value)
       return ['http:', 'https:'].includes(url.protocol)
@@ -122,6 +122,13 @@ const valueOrNull = (value?: string | null) => {
   return trimmed ? trimmed : null
 }
 
+const imageUrlOrNull = (value?: string | null) => {
+  const trimmed = valueOrNull(value)
+  if (!trimmed) return null
+  if (isInlineImageUrl(trimmed)) return null
+  return trimmed
+}
+
 const variantsOrNull = (value?: { url: string; width: number; size?: number }[] | null) => {
   if (!value || !value.length) return null
   const normalized = value
@@ -177,7 +184,7 @@ export default defineEventHandler(async (event) => {
         ageMin: body.ageMin ?? null,
         ageMax: body.ageMax ?? null,
         autonomieMini: valueOrNull(body.autonomieMini ?? null),
-        coverImageUrl: body.coverImageUrl?.trim() || null,
+        coverImageUrl: imageUrlOrNull(body.coverImageUrl ?? null),
         coverImageVariants: variantsOrNull(body.coverImageVariants ?? null),
         equipementRequis: listOrNull(body.equipementRequis ?? null),
         equipementFourni: listOrNull(body.equipementFourni ?? null),
@@ -199,15 +206,31 @@ export default defineEventHandler(async (event) => {
     if (body.images) {
       await tx.aventureImage.deleteMany({ where: { aventureId: existing.id } })
       if (body.images.length) {
-        await tx.aventureImage.createMany({
-          data: body.images.map((img, index) => ({
-            aventureId: existing.id,
-            url: img.url.trim(),
-            alt: valueOrNull(img.alt ?? null),
-            position: img.position ?? index,
-            variants: variantsOrNull(img.variants ?? null),
-          })),
-        })
+        const imageRows = body.images
+          .map((img, index) => {
+            const safeUrl = imageUrlOrNull(img.url)
+            if (!safeUrl) return null
+            return {
+              aventureId: existing.id,
+              url: safeUrl,
+              alt: valueOrNull(img.alt ?? null),
+              position: img.position ?? index,
+              variants: variantsOrNull(img.variants ?? null),
+            }
+          })
+          .filter((row): row is {
+            aventureId: number
+            url: string
+            alt: string | null
+            position: number
+            variants: { url: string; width: number; size?: number }[] | null
+          } => Boolean(row))
+
+        if (imageRows.length) {
+          await tx.aventureImage.createMany({
+            data: imageRows,
+          })
+        }
       }
     }
 

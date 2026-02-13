@@ -1,5 +1,6 @@
 // server/api/aventures.get.ts
 import { prisma } from "../utils/prisma";
+import { sanitizePublicImageUrl, sanitizePublicImageVariants } from "../utils/public-image";
 
 export default defineEventHandler(async (event) => {
   const db = await prisma();
@@ -65,6 +66,8 @@ export default defineEventHandler(async (event) => {
 
   return {
     aventures: aventures.map((a) => ({
+      ...sanitizePublicImageFieldSet(a.coverImageUrl, a.coverImageVariants, "cover"),
+      ...sanitizePublicImageFieldSet(a.guide?.guideProfile?.profileImageUrl, a.guide?.guideProfile?.profileImageVariants, "guide"),
       id: a.id,
       slug: a.slug,
       titre: a.titre,
@@ -74,11 +77,7 @@ export default defineEventHandler(async (event) => {
       lieuLabel: a.lieuLabel,
       jours: a.jours,
       prixParPersonne: a.prixParPersonne,
-      coverImageUrl: a.coverImageUrl,
-      coverImageVariants: a.coverImageVariants || null,
       guideName: [a.guide?.firstName, a.guide?.lastName].filter(Boolean).join(" ") || null,
-      guideImageUrl: a.guide?.guideProfile?.profileImageUrl || null,
-      guideImageVariants: a.guide?.guideProfile?.profileImageVariants || null,
       hasSessions: a.sessions.length > 0,
       nextSession: findNextSession(a.sessions),
     })),
@@ -104,6 +103,8 @@ const selectHomepageAventures = (aventures: any[], limit: number) => {
       const hasSessions = Array.isArray(a.sessions) && a.sessions.length > 0;
 
       return {
+        ...sanitizePublicImageFieldSet(a.coverImageUrl, a.coverImageVariants, "cover"),
+        ...sanitizePublicImageFieldSet(a.guide?.guideProfile?.profileImageUrl, a.guide?.guideProfile?.profileImageVariants, "guide"),
         id: a.id,
         slug: a.slug,
         titre: a.titre,
@@ -113,11 +114,7 @@ const selectHomepageAventures = (aventures: any[], limit: number) => {
         lieuLabel: a.lieuLabel,
         jours: a.jours,
         prixParPersonne: a.prixParPersonne,
-        coverImageUrl: a.coverImageUrl,
-        coverImageVariants: a.coverImageVariants || null,
         guideName: [a.guide?.firstName, a.guide?.lastName].filter(Boolean).join(" ") || null,
-        guideImageUrl: a.guide?.guideProfile?.profileImageUrl || null,
-        guideImageVariants: a.guide?.guideProfile?.profileImageVariants || null,
         hasSessions,
         nextSession,
         nextSessionDate,
@@ -155,4 +152,25 @@ const findNextSession = (sessions: any[]) => {
   const best = { ...future[0] };
   delete best._ts;
   return best;
+};
+
+const sanitizePublicImageFieldSet = (
+  url: unknown,
+  variants: unknown,
+  prefix: "cover" | "guide",
+) => {
+  const safeUrl = sanitizePublicImageUrl(url);
+  const safeVariants = sanitizePublicImageVariants(variants);
+
+  if (prefix === "cover") {
+    return {
+      coverImageUrl: safeUrl,
+      coverImageVariants: safeVariants,
+    };
+  }
+
+  return {
+    guideImageUrl: safeUrl,
+    guideImageVariants: safeVariants,
+  };
 };

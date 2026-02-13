@@ -1,5 +1,6 @@
 // server/api/aventures/[slug].get.ts
 import { prisma } from '../../utils/prisma'
+import { sanitizePublicImageUrl, sanitizePublicImageVariants } from '../../utils/public-image'
 
 export default defineEventHandler(async (event) => {
   const db = await prisma()
@@ -134,6 +135,8 @@ const slugifyName = (
 const mapGuide = (a: any) => {
   if (!a.guide) return null
   const gp = a.guide.guideProfile
+  const profileImageUrl = sanitizePublicImageUrl(gp?.profileImageUrl)
+  const profileImageVariants = sanitizePublicImageVariants(gp?.profileImageVariants)
   return {
     slug: slugifyName(a.guide.firstName, a.guide.lastName, a.guide.id),
     fullName: [a.guide.firstName, a.guide.lastName].filter(Boolean).join(' ') || null,
@@ -145,14 +148,26 @@ const mapGuide = (a: any) => {
           instagramUrl: gp.instagramUrl,
           websiteUrl: gp.websiteUrl,
           professionalCardNumber: gp.professionalCardNumber,
-          profileImageUrl: gp.profileImageUrl,
-          profileImageVariants: gp.profileImageVariants || null,
+          profileImageUrl,
+          profileImageVariants,
         }
       : null,
   }
 }
 
 const mapListAventure = (a: any) => ({
+  ...(() => {
+    const coverImageUrl = sanitizePublicImageUrl(a.coverImageUrl)
+    const coverImageVariants = sanitizePublicImageVariants(a.coverImageVariants)
+    const guideImageUrl = sanitizePublicImageUrl(a.guide?.guideProfile?.profileImageUrl)
+    const guideImageVariants = sanitizePublicImageVariants(a.guide?.guideProfile?.profileImageVariants)
+    return {
+      coverImageUrl,
+      coverImageVariants,
+      guideImageUrl,
+      guideImageVariants,
+    }
+  })(),
   id: a.id,
   slug: a.slug,
   titre: a.titre,
@@ -162,13 +177,9 @@ const mapListAventure = (a: any) => ({
   lieuLabel: a.lieuLabel,
   jours: a.jours,
   prixParPersonne: a.prixParPersonne,
-  coverImageUrl: a.coverImageUrl,
-  coverImageVariants: a.coverImageVariants || null,
   guideName:
     [a.guide?.firstName, a.guide?.lastName].filter(Boolean).join(' ') || null,
   guide: mapGuide(a),
-  guideImageUrl: a.guide?.guideProfile?.profileImageUrl || null,
-  guideImageVariants: a.guide?.guideProfile?.profileImageVariants || null,
   sessions: mapSessions(a.sessions ?? []),
   nextSession: mapNextSession(a.sessions ?? []),
 })
@@ -200,12 +211,14 @@ const mapDetailAventure = (a: any, bookedSessionIds: Set<number>) => ({
   ageMin: a.ageMin,
   ageMax: a.ageMax,
 
-  images: a.images?.map((img: any) => ({
-    id: img.id,
-    url: img.url,
-    alt: img.alt,
-    variants: img.variants || null,
-  })) ?? [],
+  images: (a.images ?? [])
+    .map((img: any) => ({
+      id: img.id,
+      url: sanitizePublicImageUrl(img.url),
+      alt: img.alt,
+      variants: sanitizePublicImageVariants(img.variants),
+    }))
+    .filter((img: any) => Boolean(img.url)),
 
   programmeJours: (a.programmeJours ?? [])
     .sort((j1: any, j2: any) => (j1.ordre ?? 0) - (j2.ordre ?? 0))

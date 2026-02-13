@@ -8,7 +8,7 @@ const normalizeImageUrl = (src?: string | null) => {
   if (!src) return null
   const value = src.trim()
   if (!value) return null
-  if (/^(https?:)?\/\//i.test(value) || value.startsWith('data:') || value.startsWith('blob:')) {
+  if (/^(https?:)?\/\//i.test(value) || value.startsWith('blob:')) {
     return value
   }
   if (value.startsWith('/')) {
