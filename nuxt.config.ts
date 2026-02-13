@@ -1,5 +1,6 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 const isProduction = process.env.NODE_ENV === 'production'
+const isVercelRuntime = process.env.VERCEL === '1' || Boolean(process.env.VERCEL_ENV)
 
 export default defineNuxtConfig({
   modules: ['@nuxtjs/tailwindcss', 'nuxt-headlessui', 'nuxt-auth-utils', '@nuxtjs/seo', '@nuxt/image'],
@@ -32,7 +33,7 @@ export default defineNuxtConfig({
   },
   image: {
     // Keep local DX simple while enabling optimized responsive images in production.
-    provider: isProduction ? 'ipx' : 'none',
+    provider: isVercelRuntime ? 'vercel' : (isProduction ? 'ipx' : 'none'),
     quality: 72,
     format: ['avif', 'webp'],
     screens: {
