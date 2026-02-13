@@ -35,7 +35,7 @@
           width="1680"
           height="3648"
           sizes="(min-width: 1024px) 50vw, 100vw"
-          quality="72"
+          quality="88"
           preload
           fetchpriority="high"
           loading="eager"

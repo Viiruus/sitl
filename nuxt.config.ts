@@ -34,8 +34,8 @@ export default defineNuxtConfig({
   image: {
     // Keep local DX simple while enabling optimized responsive images in production.
     provider: isVercelRuntime ? 'vercel' : (isProduction ? 'ipx' : 'none'),
-    quality: 72,
-    format: ['avif', 'webp'],
+    quality: 82,
+    format: ['webp'],
     screens: {
       xs: 320,
       sm: 640,
