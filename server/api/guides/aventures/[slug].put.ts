@@ -1,6 +1,5 @@
 import { z } from 'zod'
 import { prisma } from '../../../utils/prisma'
-import { isInlineImageUrl } from '../../../utils/public-image'
 
 const stringListSchema = z.array(z.string().trim().min(1)).optional()
 const imageVariantSchema = z.object({
@@ -15,6 +14,7 @@ const imageUrlSchema = z
   .refine((value) => {
     if (!value) return false
     if (value.startsWith('/uploads/') || value.startsWith('/api/moniteurs/uploads/')) return true
+    if (value.startsWith('data:')) return true
     try {
       const url = new URL(value)
       return ['http:', 'https:'].includes(url.protocol)
@@ -125,7 +125,6 @@ const valueOrNull = (value?: string | null) => {
 const imageUrlOrNull = (value?: string | null) => {
   const trimmed = valueOrNull(value)
   if (!trimmed) return null
-  if (isInlineImageUrl(trimmed)) return null
   return trimmed
 }
 

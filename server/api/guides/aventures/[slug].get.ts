@@ -43,8 +43,8 @@ export default defineEventHandler(async (event) => {
   return {
     aventure: {
       ...(() => {
-        const coverImageUrl = sanitizePublicImageUrl(aventure.coverImageUrl) || ''
-        const coverImageVariants = sanitizePublicImageVariants(aventure.coverImageVariants)
+        const coverImageUrl = sanitizePublicImageUrl(aventure.coverImageUrl, { allowInline: true }) || ''
+        const coverImageVariants = sanitizePublicImageVariants(aventure.coverImageVariants, { allowInline: true })
         return {
           coverImageUrl,
           coverImageVariants,
@@ -85,10 +85,10 @@ export default defineEventHandler(async (event) => {
       images: (aventure.images ?? [])
         .map((img) => ({
           id: img.id,
-          url: sanitizePublicImageUrl(img.url) || '',
+          url: sanitizePublicImageUrl(img.url, { allowInline: true }) || '',
           alt: img.alt || '',
           position: img.position ?? null,
-          variants: sanitizePublicImageVariants(img.variants),
+          variants: sanitizePublicImageVariants(img.variants, { allowInline: true }),
         }))
         .filter((img) => Boolean(img.url)),
     },

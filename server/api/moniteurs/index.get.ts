@@ -27,8 +27,8 @@ export default defineEventHandler(async () => {
   return {
     moniteurs: guides.map((guide) => ({
       ...(() => {
-        const profileImageUrl = sanitizePublicImageUrl(guide.guideProfile?.profileImageUrl)
-        const profileImageVariants = sanitizePublicImageVariants(guide.guideProfile?.profileImageVariants)
+        const profileImageUrl = sanitizePublicImageUrl(guide.guideProfile?.profileImageUrl, { allowInline: true })
+        const profileImageVariants = sanitizePublicImageVariants(guide.guideProfile?.profileImageVariants, { allowInline: true })
         return {
           profileImageUrl,
           profileImageVariants,

@@ -30,8 +30,8 @@ const findNextSession = (sessions: any[]) => {
 }
 
 const mapAventureForGuide = (a: any) => {
-  const coverImageUrl = sanitizePublicImageUrl(a.coverImageUrl)
-  const coverImageVariants = sanitizePublicImageVariants(a.coverImageVariants)
+  const coverImageUrl = sanitizePublicImageUrl(a.coverImageUrl, { allowInline: true })
+  const coverImageVariants = sanitizePublicImageVariants(a.coverImageVariants, { allowInline: true })
   const nextSession = findNextSession(a.sessions ?? [])
   return {
     id: a.id,
@@ -105,11 +105,11 @@ export default defineEventHandler(async (event) => {
 
   const allSessions = aventures.flatMap((a) => a.sessions || [])
   const nextSessionDate = findNextSession(allSessions)?.dateDebut ?? null
-  const firstAventureWithCover = aventures.find((a) => sanitizePublicImageUrl(a.coverImageUrl))
-  const profileImageUrl = sanitizePublicImageUrl(guide.guideProfile?.profileImageUrl)
-  const profileImageVariants = sanitizePublicImageVariants(guide.guideProfile?.profileImageVariants)
-  const firstAventureCoverUrl = sanitizePublicImageUrl(firstAventureWithCover?.coverImageUrl)
-  const firstAventureCoverVariants = sanitizePublicImageVariants(firstAventureWithCover?.coverImageVariants)
+  const firstAventureWithCover = aventures.find((a) => sanitizePublicImageUrl(a.coverImageUrl, { allowInline: true }))
+  const profileImageUrl = sanitizePublicImageUrl(guide.guideProfile?.profileImageUrl, { allowInline: true })
+  const profileImageVariants = sanitizePublicImageVariants(guide.guideProfile?.profileImageVariants, { allowInline: true })
+  const firstAventureCoverUrl = sanitizePublicImageUrl(firstAventureWithCover?.coverImageUrl, { allowInline: true })
+  const firstAventureCoverVariants = sanitizePublicImageVariants(firstAventureWithCover?.coverImageVariants, { allowInline: true })
 
   const uniqueDisciplines = Array.from(
     new Set(

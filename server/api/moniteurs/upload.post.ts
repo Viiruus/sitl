@@ -83,11 +83,17 @@ export default defineEventHandler(async (event) => {
   }
 
   if (isVercel) {
-    throw createError({
-      statusCode: 503,
-      statusMessage:
-        'Upload indisponible sur cet environnement Vercel sans stockage persistant. Configure un storage externe avant de téléverser des images.',
-    })
+    const optimized = await optimizeImage(sourceBuffer, preset)
+    const base64 = optimized.buffer.toString('base64')
+    const dataUrl = `data:image/webp;base64,${base64}`
+    return {
+      url: dataUrl,
+      kind,
+      width: optimized.width,
+      height: optimized.height,
+      size: optimized.buffer.byteLength,
+      variants: [],
+    }
   }
 
   const optimized = await optimizeImage(sourceBuffer, preset)

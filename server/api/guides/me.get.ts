@@ -3,8 +3,8 @@ import { sanitizePublicImageUrl, sanitizePublicImageVariants } from '../../utils
 
 const mapGuide = (user: any) => ({
   ...(() => {
-    const profileImageUrl = sanitizePublicImageUrl(user.guideProfile?.profileImageUrl)
-    const profileImageVariants = sanitizePublicImageVariants(user.guideProfile?.profileImageVariants)
+    const profileImageUrl = sanitizePublicImageUrl(user.guideProfile?.profileImageUrl, { allowInline: true })
+    const profileImageVariants = sanitizePublicImageVariants(user.guideProfile?.profileImageVariants, { allowInline: true })
     return {
       profileImageUrl,
       profileImageVariants,

@@ -135,8 +135,8 @@ const slugifyName = (
 const mapGuide = (a: any) => {
   if (!a.guide) return null
   const gp = a.guide.guideProfile
-  const profileImageUrl = sanitizePublicImageUrl(gp?.profileImageUrl)
-  const profileImageVariants = sanitizePublicImageVariants(gp?.profileImageVariants)
+  const profileImageUrl = sanitizePublicImageUrl(gp?.profileImageUrl, { allowInline: true })
+  const profileImageVariants = sanitizePublicImageVariants(gp?.profileImageVariants, { allowInline: true })
   return {
     slug: slugifyName(a.guide.firstName, a.guide.lastName, a.guide.id),
     fullName: [a.guide.firstName, a.guide.lastName].filter(Boolean).join(' ') || null,
@@ -157,10 +157,10 @@ const mapGuide = (a: any) => {
 
 const mapListAventure = (a: any) => ({
   ...(() => {
-    const coverImageUrl = sanitizePublicImageUrl(a.coverImageUrl)
-    const coverImageVariants = sanitizePublicImageVariants(a.coverImageVariants)
-    const guideImageUrl = sanitizePublicImageUrl(a.guide?.guideProfile?.profileImageUrl)
-    const guideImageVariants = sanitizePublicImageVariants(a.guide?.guideProfile?.profileImageVariants)
+    const coverImageUrl = sanitizePublicImageUrl(a.coverImageUrl, { allowInline: true })
+    const coverImageVariants = sanitizePublicImageVariants(a.coverImageVariants, { allowInline: true })
+    const guideImageUrl = sanitizePublicImageUrl(a.guide?.guideProfile?.profileImageUrl, { allowInline: true })
+    const guideImageVariants = sanitizePublicImageVariants(a.guide?.guideProfile?.profileImageVariants, { allowInline: true })
     return {
       coverImageUrl,
       coverImageVariants,
@@ -214,9 +214,9 @@ const mapDetailAventure = (a: any, bookedSessionIds: Set<number>) => ({
   images: (a.images ?? [])
     .map((img: any) => ({
       id: img.id,
-      url: sanitizePublicImageUrl(img.url),
+      url: sanitizePublicImageUrl(img.url, { allowInline: true }),
       alt: img.alt,
-      variants: sanitizePublicImageVariants(img.variants),
+      variants: sanitizePublicImageVariants(img.variants, { allowInline: true }),
     }))
     .filter((img: any) => Boolean(img.url)),
 

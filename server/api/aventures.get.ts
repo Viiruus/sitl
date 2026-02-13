@@ -66,8 +66,8 @@ export default defineEventHandler(async (event) => {
 
   return {
     aventures: aventures.map((a) => ({
-      ...sanitizePublicImageFieldSet(a.coverImageUrl, a.coverImageVariants, "cover"),
-      ...sanitizePublicImageFieldSet(a.guide?.guideProfile?.profileImageUrl, a.guide?.guideProfile?.profileImageVariants, "guide"),
+      ...sanitizePublicImageFieldSet(a.coverImageUrl, a.coverImageVariants, "cover", true),
+      ...sanitizePublicImageFieldSet(a.guide?.guideProfile?.profileImageUrl, a.guide?.guideProfile?.profileImageVariants, "guide", true),
       id: a.id,
       slug: a.slug,
       titre: a.titre,
@@ -103,8 +103,8 @@ const selectHomepageAventures = (aventures: any[], limit: number) => {
       const hasSessions = Array.isArray(a.sessions) && a.sessions.length > 0;
 
       return {
-        ...sanitizePublicImageFieldSet(a.coverImageUrl, a.coverImageVariants, "cover"),
-        ...sanitizePublicImageFieldSet(a.guide?.guideProfile?.profileImageUrl, a.guide?.guideProfile?.profileImageVariants, "guide"),
+        ...sanitizePublicImageFieldSet(a.coverImageUrl, a.coverImageVariants, "cover", true),
+        ...sanitizePublicImageFieldSet(a.guide?.guideProfile?.profileImageUrl, a.guide?.guideProfile?.profileImageVariants, "guide", true),
         id: a.id,
         slug: a.slug,
         titre: a.titre,
@@ -158,9 +158,10 @@ const sanitizePublicImageFieldSet = (
   url: unknown,
   variants: unknown,
   prefix: "cover" | "guide",
+  allowInline = false,
 ) => {
-  const safeUrl = sanitizePublicImageUrl(url);
-  const safeVariants = sanitizePublicImageVariants(variants);
+  const safeUrl = sanitizePublicImageUrl(url, { allowInline });
+  const safeVariants = sanitizePublicImageVariants(variants, { allowInline });
 
   if (prefix === "cover") {
     return {

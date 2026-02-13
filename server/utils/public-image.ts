@@ -4,6 +4,10 @@ export type PublicImageVariant = {
   size?: number
 }
 
+type SanitizeImageOptions = {
+  allowInline?: boolean
+}
+
 const ABSOLUTE_URL_RE = /^(https?:)?\/\//i
 
 const toTrimmedString = (value: unknown): string | null => {
@@ -24,10 +28,13 @@ const isBlobImageUrl = (value: unknown): boolean => {
   return trimmed.toLowerCase().startsWith('blob:')
 }
 
-export const sanitizePublicImageUrl = (value: unknown): string | null => {
+export const sanitizePublicImageUrl = (value: unknown, options?: SanitizeImageOptions): string | null => {
   const trimmed = toTrimmedString(value)
   if (!trimmed) return null
-  if (isInlineImageUrl(trimmed) || isBlobImageUrl(trimmed)) return null
+  if (isInlineImageUrl(trimmed)) {
+    return options?.allowInline ? trimmed : null
+  }
+  if (isBlobImageUrl(trimmed)) return null
 
   if (ABSOLUTE_URL_RE.test(trimmed)) return trimmed
   if (trimmed.startsWith('/')) return trimmed
@@ -45,12 +52,12 @@ export const sanitizePublicImageUrl = (value: unknown): string | null => {
   return `/images/${cleaned}`
 }
 
-export const sanitizePublicImageVariants = (value: unknown): PublicImageVariant[] | null => {
+export const sanitizePublicImageVariants = (value: unknown, options?: SanitizeImageOptions): PublicImageVariant[] | null => {
   if (!Array.isArray(value)) return null
 
   const variants = value
     .map((entry: any) => {
-      const url = sanitizePublicImageUrl(entry?.url)
+      const url = sanitizePublicImageUrl(entry?.url, options)
       const width = Number(entry?.width)
       if (!url || !Number.isFinite(width) || width <= 0) return null
       const sizeNumber = Number(entry?.size)

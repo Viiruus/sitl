@@ -1241,7 +1241,7 @@ const programmeJours = computed(() => {
 
 const normalizeImagePath = (src?: string | null) => {
   if (!src) return null
-  if (/^(https?:)?\/\//i.test(src) || src.startsWith('blob:')) {
+  if (/^(https?:)?\/\//i.test(src) || src.startsWith('data:') || src.startsWith('blob:')) {
     return src
   }
   if (src.startsWith('/')) return src
@@ -1252,7 +1252,7 @@ const imageProviderFor = (src?: string | null) => {
   if (!src) return undefined
   const normalized = normalizeImagePath(src)
   if (!normalized) return undefined
-  if (/^(https?:)?\/\//i.test(normalized) || normalized.startsWith('blob:')) {
+  if (/^(https?:)?\/\//i.test(normalized) || normalized.startsWith('data:') || normalized.startsWith('blob:')) {
     return 'none'
   }
   return undefined
