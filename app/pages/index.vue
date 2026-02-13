@@ -28,16 +28,25 @@
         </div>
       </div>
       <div class="hidden bg-brand-950 lg:absolute lg:inset-y-0 lg:right-0 lg:block lg:w-1/2 min-h-[50vh] lg:min-h-screen">
-        <img
-          src="/images/escalade0.jpg"
-          alt=""
-          class="h-full w-full object-cover"
-          width="1680"
-          height="3648"
-          fetchpriority="high"
-          loading="eager"
-          decoding="async"
-        />
+        <picture class="block h-full w-full">
+          <source
+            media="(min-width: 1024px)"
+            type="image/webp"
+            srcset="/images/optimized/escalade0-840.webp 840w, /images/optimized/escalade0-1120.webp 1120w, /images/optimized/escalade0-1680.webp 1680w"
+            sizes="50vw"
+          />
+          <source media="(min-width: 1024px)" srcset="/images/escalade0.jpg" />
+          <img
+            src="data:image/gif;base64,R0lGODlhAQABAAAAACwAAAAAAQABAAA="
+            alt=""
+            class="h-full w-full object-cover"
+            width="1680"
+            height="3648"
+            fetchpriority="high"
+            loading="eager"
+            decoding="async"
+          />
+        </picture>
       </div>
     </div>
   </div>
@@ -315,7 +324,6 @@ const { data: aventuresData, pending: aventuresPending } = useFetch('/api/aventu
     mode: 'home',
     limit: 3,
   },
-  server: false,
   default: () => ({ aventures: [] }),
 })
 

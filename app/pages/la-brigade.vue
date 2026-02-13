@@ -3,14 +3,23 @@
     <!-- Hero with background -->
     <div class="relative overflow-hidden pb-16">
       <div class="absolute inset-0">
-        <img
-          src="/images/emulation2.jpeg"
-          alt="Les moniteurs de la Brigade du kiff"
-          class="h-full w-full object-cover opacity-40"
-          fetchpriority="high"
-          loading="eager"
-          decoding="async"
-        />
+        <picture class="block h-full w-full">
+          <source
+            type="image/webp"
+            srcset="/images/optimized/emulation2-480.webp 480w, /images/optimized/emulation2-768.webp 768w, /images/optimized/emulation2-1024.webp 1024w, /images/optimized/emulation2-1440.webp 1440w, /images/optimized/emulation2-1920.webp 1920w"
+            sizes="100vw"
+          />
+          <img
+            src="/images/emulation2.jpeg"
+            alt="Les moniteurs de la Brigade du kiff"
+            class="h-full w-full object-cover opacity-40"
+            width="3824"
+            height="2602"
+            fetchpriority="high"
+            loading="eager"
+            decoding="async"
+          />
+        </picture>
         <div class="absolute inset-0 bg-brand-950/70" />
         <div class="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-b from-transparent to-brand-950" />
       </div>

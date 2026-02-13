@@ -169,14 +169,23 @@ const guideAvatarSrcset = (stage: any) => {
     <div class="relative pt-32 isolate overflow-hidden bg-brand-950 pt-14">
       
       <div class="mx-auto max-w-7xl px-6 lg:px-8">
-        <img
-          src="/images/falaise-Calanques2.jpg"
-          alt="Stages d'escalade par les moniteurs de la Brigade du kiff"
-          class="absolute inset-0 -z-10 size-full object-cover opacity-30"
-          fetchpriority="high"
-          loading="eager"
-          decoding="async"
-        />
+        <picture class="absolute inset-0 -z-10 block size-full">
+          <source
+            type="image/webp"
+            srcset="/images/optimized/falaise-calanques2-480.webp 480w, /images/optimized/falaise-calanques2-768.webp 768w, /images/optimized/falaise-calanques2-1024.webp 1024w, /images/optimized/falaise-calanques2-1440.webp 1440w, /images/optimized/falaise-calanques2-1920.webp 1920w"
+            sizes="100vw"
+          />
+          <img
+            src="/images/falaise-Calanques2.jpg"
+            alt="Stages d'escalade par les moniteurs de la Brigade du kiff"
+            class="size-full object-cover opacity-30"
+            width="4000"
+            height="1848"
+            fetchpriority="high"
+            loading="eager"
+            decoding="async"
+          />
+        </picture>
         <section class="relative isolate overflow-hidden py-24 sm:py-20">
           <div class="absolute inset-0 -z-10"></div>
           <div class="max-w-4xl space-y-6">
