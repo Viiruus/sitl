@@ -96,7 +96,7 @@ import { Bars3Icon, XMarkIcon } from '@heroicons/vue/24/outline'
 import AuthModal from './AuthModal.vue'
 
 const navigation = [
-  { name: 'Les stages', href: '/aventures-escalade' },
+  { name: 'Les stages', href: '/stages-escalade' },
   { name: 'La Brigade', href: '/la-brigade' },
 ]
 

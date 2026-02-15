@@ -71,9 +71,12 @@ export default defineNuxtConfig({
     '/moniteurs/aventures/**': { headers: { 'X-Robots-Tag': 'noindex, nofollow' } },
   },
   sitemap: {
+    sources: ['/api/__sitemap__/moniteurs', '/api/__sitemap__/stages'],
     exclude: [
       '/escalade-grande-voie',
       '/escalade-sportive-couenne-falaise',
+      '/aventures-escalade',
+      '/aventures-escalade/**',
       '/login',
       '/onboarding',
       '/register',

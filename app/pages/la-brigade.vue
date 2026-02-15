@@ -85,7 +85,7 @@
           </ul>
           <div class="mt-16 flex justify-center">
             <NuxtLink
-              to="/aventures-escalade"
+              to="/stages-escalade"
               class="inline-flex items-center gap-3 rounded-full bg-secondaryBrand-500/90 px-6 py-3 text-sm font-semibold uppercase tracking-[0.3em] text-brand-950 shadow-lg shadow-secondaryBrand-900/30 transition hover:bg-secondaryBrand-400"
             >
               Voir les aventures de la brigade

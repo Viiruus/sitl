@@ -50,7 +50,7 @@ const redirectAfterAuth = async () => {
         const payload = JSON.parse(raw)
         const pendingSlug = payload?.slug
         if (pendingSlug) {
-          const target = `/aventures-escalade/${pendingSlug}`
+          const target = `/stages-escalade/${pendingSlug}`
           if (route.path !== target) {
             await router.push(target)
           }
@@ -65,7 +65,7 @@ const redirectAfterAuth = async () => {
 
     const intentSlug = window.localStorage.getItem(pendingBookingIntentKey)
     if (intentSlug) {
-      const target = `/aventures-escalade/${intentSlug}`
+      const target = `/stages-escalade/${intentSlug}`
       if (route.path !== target) {
         await router.push(target)
       }

@@ -149,7 +149,7 @@
               <p class="mt-3 text-base text-gray-300">Découvre les prochains séjours imaginés par {{ moniteurName || 'ce guide' }}.</p>
             </div>
             <NuxtLink
-              to="/aventures-escalade"
+              to="/stages-escalade"
               class="inline-flex items-center gap-2 rounded-full border border-white/20 px-4 py-2 text-sm font-semibold text-white/70 transition hover:border-white hover:text-white"
             >
               Voir toutes les aventures
@@ -167,7 +167,7 @@
             <NuxtLink
               v-for="aventure in filteredAventures"
               :key="aventure.id"
-              :to="`/aventures-escalade/${aventure.slug}`"
+              :to="`/stages-escalade/${aventure.slug}`"
               class="group flex flex-col overflow-hidden rounded-3xl border border-white/10 bg-white/5 shadow-2xl shadow-black/40 ring-1 ring-white/10 transition hover:-translate-y-1 backdrop-blur focus:outline-none focus-visible:ring-2 focus-visible:ring-secondaryBrand-400"
             >
               <div class="relative h-72 w-full overflow-hidden">

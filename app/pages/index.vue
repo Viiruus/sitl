@@ -16,7 +16,7 @@
               <h1 class="text-5xl font-semibold tracking-tight text-pretty text-white sm:text-7xl">Vos aventures verticales commencent ici.</h1>
               <p class="mt-8 text-lg font-medium text-pretty text-gray-400 sm:text-xl/8">Escalade outdoor encadrée par nos moniteurs locaux passionnés</p>
               <div class="mt-10 flex items-center gap-x-6">
-                <NuxtLink to="/aventures-escalade" class="rounded-md bg-secondaryBrand-500 px-3.5 py-2.5 text-sm font-semibold text-white shadow-xs hover:bg-secondaryBrand-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500">
+                <NuxtLink to="/stages-escalade" class="rounded-md bg-secondaryBrand-500 px-3.5 py-2.5 text-sm font-semibold text-white shadow-xs hover:bg-secondaryBrand-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500">
                   Les prochains départs
                 </NuxtLink>
                 <NuxtLink to="/login" class="text-sm/6 font-semibold text-white">
@@ -76,7 +76,7 @@
         </p>
         <p>
           Rejoins la team et
-          <NuxtLink to="/aventures-escalade" class="font-semibold text-secondaryBrand-200 hover:text-secondaryBrand-400 underline underline-offset-4">
+          <NuxtLink to="/stages-escalade" class="font-semibold text-secondaryBrand-200 hover:text-secondaryBrand-400 underline underline-offset-4">
             inscris-toi
           </NuxtLink>
           à un prochain stage !
@@ -136,7 +136,7 @@
       </p>
       <p class="mt-4 text-base text-gray-600">
         Alors en selle,
-        <NuxtLink to="/aventures-escalade" class="font-semibold text-brand-700 hover:text-brand-900 underline underline-offset-4">
+        <NuxtLink to="/stages-escalade" class="font-semibold text-brand-700 hover:text-brand-900 underline underline-offset-4">
           rejoins l’aventure
         </NuxtLink>
         !
@@ -198,7 +198,7 @@
         <NuxtLink
           v-for="stage in upcomingStages"
           :key="stage.id"
-          :to="`/aventures-escalade/${stage.slug}`"
+          :to="`/stages-escalade/${stage.slug}`"
           class="group flex flex-col overflow-hidden rounded-3xl border border-white/10 bg-white/5 shadow-2xl shadow-black/40 ring-1 ring-white/10 transition hover:-translate-y-1"
         >
           <div class="relative h-52">
@@ -291,7 +291,7 @@
         </NuxtLink>
         <div class="md:col-span-3 flex justify-center">
           <NuxtLink
-            to="/aventures-escalade"
+            to="/stages-escalade"
             class="mt-12 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-5 py-3 text-sm font-semibold text-white transition hover:border-white/40 hover:bg-white/10"
           >
             Voir tous les stages
@@ -394,7 +394,7 @@ onBeforeUnmount(() => {
       description:
         'Escalade d’une longueur aussi appelée “couenne” ou “escalade de difficulté” qui vise à gravir une paroi de 10m à 50m en s’assurant à l’aide de dégaines sur des points fixes.',
       cta: 'Les stages falaise',
-      href: '/aventures-escalade?discipline=FALAISE',
+      href: '/stages-escalade?discipline=FALAISE',
       picto: '/images/couenne.png',
     },
     {
@@ -402,7 +402,7 @@ onBeforeUnmount(() => {
       description:
         'Enchaîne plusieurs longueurs (jusqu’à plusieurs centaines de mètres) encordé·e à 2 ou 3 personnes avec matériel et techniques spécifiques : relais, rappels, assurage…',
       cta: 'Les stages grande voie',
-      href: '/aventures-escalade?discipline=GRANDE_VOIE',
+      href: '/stages-escalade?discipline=GRANDE_VOIE',
       picto: '/images/grande-voie.png',
     },
     {
@@ -410,7 +410,7 @@ onBeforeUnmount(() => {
       description:
         "Progression équipée sur falaises avec barreaux, câbles et ponts. Un mix entre rando verticale et sensations en paroi.",
       cta: 'Les stages via ferrata',
-      href: '/aventures-escalade?discipline=VIA_FERRATA',
+      href: '/stages-escalade?discipline=VIA_FERRATA',
       picto: '/images/via-ferrata.svg',
     },
     {
@@ -418,7 +418,7 @@ onBeforeUnmount(() => {
       description:
         'En escalade traditionnelle, tu places toi-même tes protections dans les faiblesses du rocher à l’aide de coinceurs, friends, pitons ou sangles.',
       cta: 'Les stages trad',
-      href: '/aventures-escalade?discipline=TRAD',
+      href: '/stages-escalade?discipline=TRAD',
       picto: '/images/trad.png',
     },
     {
@@ -426,7 +426,7 @@ onBeforeUnmount(() => {
       description:
         'Sans corde et sur des blocs de moins de 5m, avec parade et crashpads pour amortir les chutes. Parfait pour travailler la gestuelle et la puissance.',
       cta: 'Les stages bloc',
-      href: '/aventures-escalade?discipline=BLOC',
+      href: '/stages-escalade?discipline=BLOC',
       picto: '/images/bloc.png',
     },
   ];

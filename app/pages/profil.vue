@@ -171,7 +171,7 @@
 
   const bookingAdventureLink = (booking: any) => {
     const slug = booking?.session?.aventure?.slug
-    return slug ? `/aventures-escalade/${slug}` : '/aventures-escalade'
+    return slug ? `/stages-escalade/${slug}` : '/stages-escalade'
   }
 
   const bookingLocationLabel = (booking: any) => {
@@ -327,7 +327,7 @@
               Mon compte
             </p>
             <NuxtLink
-              to="/aventures-escalade"
+              to="/stages-escalade"
               class="inline-flex items-center gap-2 rounded-full border border-brand-700 px-3 py-2 text-sm text-white hover:bg-brand-800/60 transition"
             >
               ← Revenir aux aventures
