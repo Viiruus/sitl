@@ -5,6 +5,26 @@
 
     <!-- Hero Section -->
     <div class="relative min-h-screen">
+      <div class="pointer-events-none absolute inset-0 lg:hidden">
+        <picture class="block h-full w-full">
+          <source
+            type="image/webp"
+            srcset="/images/optimized/escalade0-840.webp 840w, /images/optimized/escalade0-1120.webp 1120w, /images/optimized/escalade0-1680.webp 1680w"
+            sizes="100vw"
+          />
+          <img
+            src="/images/escalade0.jpg"
+            alt=""
+            class="h-full w-full object-cover opacity-45"
+            width="1680"
+            height="3648"
+            fetchpriority="high"
+            loading="eager"
+            decoding="async"
+          />
+        </picture>
+        <div class="absolute inset-0 bg-gradient-to-b from-brand-950/45 via-brand-950/70 to-brand-950/90" />
+      </div>
       <div class="mx-auto max-w-7xl">
         <div class="relative z-10 flex min-h-screen flex-col pt-14 lg:w-full lg:max-w-2xl">
           <svg class="absolute inset-y-0 right-8 hidden h-full w-80 translate-x-1/2 transform fill-brand-950 lg:block" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
