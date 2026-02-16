@@ -263,7 +263,7 @@
             <p class="mt-1 line-clamp-2 text-sm text-brand-100/80">
               {{ stage.sousTitre }}
             </p>
-            <div class="mt-6 flex items-center justify-between text-sm text-white">
+            <div class="mt-auto flex items-center justify-between pt-6 text-sm text-white">
               <div class="flex items-center gap-3 text-sm text-brand-100/80">
                 <img
                   :src="guideAvatarSrc(stage)"

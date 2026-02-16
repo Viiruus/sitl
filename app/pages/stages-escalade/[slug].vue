@@ -242,7 +242,7 @@
                         </h2>
                       </div>
                     </div>
-                    <p class="mt-3 text-sm text-brand-100/90">
+                    <p class="mt-3 text-sm text-brand-100/90 whitespace-pre-line">
                       {{ resumeCeQuiTattend || "Une aventure locale pour progresser en grimpe sans perdre le kif." }}
                     </p>
                   </div>
@@ -263,7 +263,7 @@
                           :key="item"
                           class="flex gap-2 rounded-2xl bg-brand-900/70 px-3 py-2"
                         >
-                          <span class="mt-2 h-1.5 w-1.5 rounded-full bg-brand-400" />
+                          <span class="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-brand-400" />
                           <span>{{ item }}</span>
                         </li>
                       </ul>
@@ -275,12 +275,19 @@
                       <h3 class="text-xl font-semibold uppercase tracking-wide text-white">
                         Objectifs
                       </h3>
-                      <p
-                        v-if="objectifsText"
-                        class="mt-2 text-sm text-brand-100/90 whitespace-pre-line"
+                      <ul
+                        v-if="objectifsList.length"
+                        class="mt-4 space-y-2 text-sm text-brand-100/90"
                       >
-                        {{ objectifsText }}
-                      </p>
+                        <li
+                          v-for="(item, index) in objectifsList"
+                          :key="`objectif-${index}`"
+                          class="flex gap-2 rounded-2xl bg-brand-900/70 px-3 py-2"
+                        >
+                          <span class="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-secondaryBrand-300" />
+                          <span>{{ item }}</span>
+                        </li>
+                      </ul>
                     </div>
                   </div>
                 </div>
@@ -370,7 +377,7 @@
                           class="flex gap-2"
                         >
                           <span
-                            class="mt-2 h-1.5 w-1.5 rounded-full bg-secondaryBrand-400"
+                            class="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-secondaryBrand-400"
                           />
                           <span class="text-sm">{{ item }}</span>
                         </li>
@@ -387,7 +394,7 @@
                           class="flex gap-2"
                         >
                           <span
-                            class="mt-2 h-1.5 w-1.5 rounded-full bg-brand-400"
+                            class="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-brand-400"
                           />
                           <span class="text-sm">{{ item }}</span>
                         </li>
@@ -1229,8 +1236,14 @@ const ageRange = computed(() => {
   return ''
 })
 
-const objectifsText = computed(() => (stage.value?.objectifs || '').trim())
-const hasObjectifsSection = computed(() => objectifsText.value.length > 0)
+const objectifsList = computed(() =>
+  (stage.value?.objectifs || '')
+    .replace(/\r\n/g, '\n')
+    .split('\n')
+    .map((item) => item.replace(/^\s*[-*•]\s*/, '').trim())
+    .filter(Boolean),
+)
+const hasObjectifsSection = computed(() => objectifsList.value.length > 0)
 
 const programmeJours = computed(() => {
   const jours = stage.value?.programmeJours || []

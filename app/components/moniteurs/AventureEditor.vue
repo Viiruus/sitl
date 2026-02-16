@@ -73,6 +73,16 @@ const createList = (list?: string[] | null, atLeastOne = false) => {
   return atLeastOne ? [''] : ['']
 }
 
+const createTextList = (value?: string | null) => {
+  if (!value) return ['']
+  const items = value
+    .replace(/\r\n/g, '\n')
+    .split('\n')
+    .map((item) => item.replace(/^\s*[-*•]\s*/, '').trim())
+    .filter(Boolean)
+  return items.length ? items : ['']
+}
+
 const createProgrammeList = (
   list?: { titre?: string | null; description?: string | null; lieuLabel?: string | null }[] | null,
 ) => {
@@ -107,7 +117,7 @@ const form = reactive({
   hebergementDetails: '',
   inclus: '',
   nonInclus: '',
-  objectifs: '',
+  objectifs: [''],
   prerequis: [''],
   repasLabel: '',
   programmeJours: [{ titre: '', description: '', lieuLabel: '' }],
@@ -197,7 +207,7 @@ watch(
     form.hebergementDetails = value.hebergementDetails || ''
     form.inclus = value.inclus || ''
     form.nonInclus = value.nonInclus || ''
-    form.objectifs = value.objectifs || ''
+    form.objectifs = createTextList(value.objectifs || '')
     form.prerequis = createList(value.prerequis || null)
     form.repasLabel = value.repasLabel || ''
     form.programmeJours = createProgrammeList(value.programmeJours || null)
@@ -339,7 +349,7 @@ const buildPayload = (publish: boolean) => ({
   hebergementDetails: form.hebergementDetails.trim(),
   inclus: form.inclus.trim(),
   nonInclus: form.nonInclus.trim(),
-  objectifs: form.objectifs.trim(),
+  objectifs: toListPayload(form.objectifs).join('\n'),
   prerequis: toListPayload(form.prerequis),
   repasLabel: form.repasLabel.trim(),
   programmeJours: form.programmeJours
@@ -756,13 +766,28 @@ const uploadGalleryImage = async (event: Event, index: number) => {
           />
         </div>
         <div class="space-y-2">
-          <label class="text-xs uppercase tracking-[0.3em] text-brand-200/70">Objectifs</label>
-          <textarea
-            v-model="form.objectifs"
-            rows="3"
-            placeholder="Ex: Gagner en autonomie, travailler la lecture de voie…"
-            class="w-full rounded-2xl border border-white/10 bg-brand-900/80 px-3 py-2 text-white focus:border-secondaryBrand-400 focus:outline-none"
-          />
+          <div class="flex items-center justify-between text-xs uppercase tracking-[0.3em] text-brand-200/70">
+            <span>Objectifs</span>
+            <button type="button" class="text-[10px] font-semibold text-secondaryBrand-300" @click="addListItem(form.objectifs)">
+              + Ajouter
+            </button>
+          </div>
+          <div class="space-y-2">
+            <div
+              v-for="(item, index) in form.objectifs"
+              :key="`obj-${index}`"
+              class="flex items-center gap-2"
+            >
+              <input
+                v-model="form.objectifs[index]"
+                type="text"
+                placeholder="Ex: Gagner en autonomie dans les manips de relais"
+                class="w-full rounded-xl border border-white/10 bg-brand-900/80 px-3 py-2 text-white focus:border-secondaryBrand-400 focus:outline-none"
+                @blur="resetListIfEmpty(form.objectifs)"
+              />
+              <button type="button" class="text-xs text-brand-300 hover:text-red-300" @click="removeListItem(form.objectifs, index)">×</button>
+            </div>
+          </div>
         </div>
       </section>
 
