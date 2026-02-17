@@ -149,7 +149,7 @@ const validateUploadFile = (file: File) => {
     return 'Format non supporté. Utilise JPG, PNG ou WebP.'
   }
   if (file.size > MAX_IMAGE_UPLOAD_BYTES) {
-    return 'Image trop lourde. Limite: 5 Mo.'
+    return 'Image trop lourde. Limite: 4,5 Mo.'
   }
   return null
 }
@@ -623,11 +623,11 @@ const uploadGalleryImage = async (event: Event, index: number) => {
               <label>Sous-titre</label>
               <span class="text-[10px] text-secondaryBrand-200">Requis pour publier</span>
             </div>
-            <input
+            <textarea
               v-model="form.sousTitre"
-              type="text"
+              rows="3"
               placeholder="Ex: Deux jours pour progresser en grande voie"
-              class="w-full rounded-xl border border-white/10 bg-brand-900/80 px-3 py-2 text-white focus:border-secondaryBrand-400 focus:outline-none"
+              class="w-full rounded-2xl border border-white/10 bg-brand-900/80 px-3 py-2 text-white focus:border-secondaryBrand-400 focus:outline-none"
             />
           </div>
           <div class="space-y-2">
@@ -700,7 +700,7 @@ const uploadGalleryImage = async (event: Event, index: number) => {
               class="w-full rounded-xl border border-white/10 bg-brand-900/80 px-3 py-2 text-white focus:border-secondaryBrand-400 focus:outline-none"
             />
             <p class="text-xs text-brand-200/70">
-              Colle l’URL d’une photo ou téléverse une image JPG/PNG/WebP (max 5 Mo). Les variantes optimisées sont générées automatiquement.
+              Colle l’URL d’une photo ou téléverse une image JPG/PNG/WebP (max 4,5 Mo). Les variantes optimisées sont générées automatiquement.
             </p>
             <div v-if="isClient" class="space-y-2">
               <label class="inline-flex cursor-pointer items-center gap-3 rounded-full border border-white/20 px-4 py-2 text-sm font-semibold text-white/80 transition hover:bg-white/5">
@@ -1047,7 +1047,7 @@ const uploadGalleryImage = async (event: Event, index: number) => {
                   </span>
                 </div>
                 <p class="text-xs text-brand-200/60">
-                  Upload JPG/PNG/WebP, 5 Mo max par image.
+                  Upload JPG/PNG/WebP, 4,5 Mo max par image.
                 </p>
               </div>
               <div class="space-y-2">

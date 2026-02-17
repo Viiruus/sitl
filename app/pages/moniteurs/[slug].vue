@@ -206,7 +206,7 @@
 
                   <div class="flex flex-col gap-3">
                     <h2 class="text-2xl font-semibold truncate">{{ aventure.titre }}</h2>
-                    <p v-if="aventure.sousTitre" class="text-sm text-brand-100/80">{{ aventure.sousTitre }}</p>
+                    <p v-if="aventure.sousTitre" class="text-sm whitespace-pre-line text-brand-100/80">{{ aventure.sousTitre }}</p>
                   </div>
 
                   <div class="flex flex-col gap-1 text-sm text-white">
