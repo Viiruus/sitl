@@ -4,7 +4,7 @@
       <div class="flex flex-col items-center text-center space-y-6">
         <img class="h-16" src="~/assets/images/brigade-du-kiff_black-logo.png" alt="Brigade du Kiff" />
         <p class="text-sm/6 text-balance text-gray-600">Vos aventures verticales commencent ici.</p>
-        <!--<div class="flex justify-center gap-x-6">
+        <div class="flex justify-center gap-x-6">
           <a
             v-for="item in footerNavigation.social"
             :key="item.name"
@@ -16,7 +16,7 @@
             <span class="sr-only">{{ item.name }}</span>
             <component :is="item.icon" class="size-6" aria-hidden="true" />
           </a>
-        </div>-->
+        </div>
         <p class="pt-4 text-sm/6 text-gray-600">&copy; 2026 - Brigade du kiff.</p>
       </div>
     </div>
