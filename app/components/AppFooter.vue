@@ -30,7 +30,7 @@ const footerNavigation = {
   social: [
     {
       name: 'Instagram',
-      href: 'https://www.instagram.com/brigadedukiff',
+      href: 'https://www.instagram.com/brigadedukiff_com',
       icon: defineComponent({
         render: () =>
           h('svg', { fill: 'currentColor', viewBox: '0 0 24 24' }, [
@@ -44,7 +44,7 @@ const footerNavigation = {
     },
     {
       name: 'Facebook',
-      href: 'https://www.facebook.com/BrigadeDuKiff',
+      href: 'https://www.facebook.com/brigadedukiff.escalade',
       icon: defineComponent({
         render: () =>
           h('svg', { fill: 'currentColor', viewBox: '0 0 24 24' }, [
