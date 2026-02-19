@@ -91,7 +91,7 @@
                 </h1>
                 <h2
                   v-if="stage.sousTitre"
-                  class="text-sm text-brand-100/85 whitespace-pre-line sm:text-base"
+                  class="text-sm text-brand-100/85 sm:text-base"
                 >
                   {{ stage.sousTitre }}
               </h2>
@@ -896,7 +896,7 @@
                 <h3 class="mt-2 text-xl font-semibold text-white">
                   {{ s.titre }}
                 </h3>
-                <p class="mt-1 line-clamp-2 whitespace-pre-line text-sm text-brand-100/80">
+                <p class="mt-1 line-clamp-2 text-sm text-brand-100/80">
                   {{ s.sousTitre }}
                 </p>
                 <div class="mt-6 flex items-center justify-between text-sm text-white">

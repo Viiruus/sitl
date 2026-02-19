@@ -623,11 +623,11 @@ const uploadGalleryImage = async (event: Event, index: number) => {
               <label>Sous-titre</label>
               <span class="text-[10px] text-secondaryBrand-200">Requis pour publier</span>
             </div>
-            <textarea
+            <input
               v-model="form.sousTitre"
-              rows="3"
+              type="text"
               placeholder="Ex: Deux jours pour progresser en grande voie"
-              class="w-full rounded-2xl border border-white/10 bg-brand-900/80 px-3 py-2 text-white focus:border-secondaryBrand-400 focus:outline-none"
+              class="w-full rounded-xl border border-white/10 bg-brand-900/80 px-3 py-2 text-white focus:border-secondaryBrand-400 focus:outline-none"
             />
           </div>
           <div class="space-y-2">

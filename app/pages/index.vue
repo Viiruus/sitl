@@ -280,7 +280,7 @@
             <h3 class="mt-2 text-xl font-semibold text-white">
               {{ stage.titre }}
             </h3>
-            <p class="mt-1 line-clamp-2 whitespace-pre-line text-sm text-brand-100/80">
+            <p class="mt-1 line-clamp-2 text-sm text-brand-100/80">
               {{ stage.sousTitre }}
             </p>
             <div class="mt-auto flex items-center justify-between pt-6 text-sm text-white">

@@ -320,7 +320,7 @@ const guideAvatarSrcset = (stage: any) => {
 
                 <div class="flex flex-col gap-3">
                   <h2 class="text-2xl font-semibold truncate">{{ a.titre }}</h2>
-                  <p v-if="a.sousTitre" class="text-sm whitespace-pre-line text-brand-100/80">{{ a.sousTitre }}</p>
+                  <p v-if="a.sousTitre" class="text-sm text-brand-100/80">{{ a.sousTitre }}</p>
                 </div>
                 <div class="flex flex-col gap-1 text-sm text-white">
                   <span class="inline-flex items-center gap-2 font-semibold text-xs text-white">
