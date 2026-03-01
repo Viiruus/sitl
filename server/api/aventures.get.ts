@@ -3,6 +3,7 @@ import { prisma } from "../utils/prisma";
 import { sanitizePublicImageUrl, sanitizePublicImageVariants } from "../utils/public-image";
 
 export default defineEventHandler(async (event) => {
+  setHeader(event, "cache-control", "no-store");
   const db = await prisma();
   const query = getQuery(event);
   const mode = typeof query.mode === "string" ? query.mode : null;
@@ -14,6 +15,7 @@ export default defineEventHandler(async (event) => {
       select: {
         id: true,
         slug: true,
+        estPublie: true,
         titre: true,
         sousTitre: true,
         discipline: true,
@@ -70,6 +72,7 @@ export default defineEventHandler(async (event) => {
       ...sanitizePublicImageFieldSet(a.guide?.guideProfile?.profileImageUrl, a.guide?.guideProfile?.profileImageVariants, "guide", true),
       id: a.id,
       slug: a.slug,
+      estPublie: a.estPublie,
       titre: a.titre,
       sousTitre: a.sousTitre,
       discipline: a.discipline,
@@ -107,6 +110,7 @@ const selectHomepageAventures = (aventures: any[], limit: number) => {
         ...sanitizePublicImageFieldSet(a.guide?.guideProfile?.profileImageUrl, a.guide?.guideProfile?.profileImageVariants, "guide", true),
         id: a.id,
         slug: a.slug,
+        estPublie: a.estPublie,
         titre: a.titre,
         sousTitre: a.sousTitre,
         discipline: a.discipline,

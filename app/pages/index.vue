@@ -347,7 +347,9 @@ const { data: aventuresData, pending: aventuresPending } = useFetch('/api/aventu
   default: () => ({ aventures: [] }),
 })
 
-const upcomingStages = computed(() => aventuresData.value?.aventures ?? [])
+const upcomingStages = computed(() =>
+  (aventuresData.value?.aventures ?? []).filter((stage: any) => stage?.estPublie === true),
+)
 
 const stageCoverSrc = (stage: any) => {
   return resolveStoredImageSrc(stage?.coverImageUrl, stage?.coverImageVariants) || imageForDiscipline(stage?.discipline)

@@ -34,8 +34,12 @@ const formatDisciplineLabel = (value: string) => {
   return disciplineLabels[value] ?? value?.replace(/_/g, ' ') ?? 'Autre'
 }
 
+const publishedAventures = computed(() =>
+  (data.value?.aventures ?? []).filter((aventure: any) => aventure?.estPublie === true),
+)
+
 const disciplineOptions = computed(() => {
-  const adventures = data.value?.aventures ?? []
+  const adventures = publishedAventures.value
   const seen = new Set<string>()
   const options = adventures.reduce<{ value: string; label: string }[]>((acc, aventure) => {
     if (aventure.discipline && !seen.has(aventure.discipline)) {
@@ -94,7 +98,7 @@ const filteredAventures = computed(() => {
   const today = new Date()
   today.setHours(0, 0, 0, 0)
 
-  let adventures = (data.value?.aventures ?? [])
+  let adventures = publishedAventures.value
     .map((aventure: any) => {
       const nextDate = aventure.nextSession?.dateDebut ? new Date(aventure.nextSession.dateDebut).getTime() : null
       const hasSessions = Array.isArray(aventure.sessions) && aventure.sessions.length > 0

@@ -71,6 +71,14 @@ type SessionFormState = {
 
 const sessionForms = reactive<Record<string, SessionFormState>>({})
 
+type AdventureActionState = {
+  depublishing: boolean
+  deleting: boolean
+  error: string | null
+}
+
+const adventureActions = reactive<Record<string, AdventureActionState>>({})
+
 const ensureSessionForm = (slug: string) => {
   if (!sessionForms[slug]) {
     sessionForms[slug] = {
@@ -84,6 +92,17 @@ const ensureSessionForm = (slug: string) => {
     }
   }
   return sessionForms[slug]
+}
+
+const ensureAdventureActionState = (slug: string) => {
+  if (!adventureActions[slug]) {
+    adventureActions[slug] = {
+      depublishing: false,
+      deleting: false,
+      error: null,
+    }
+  }
+  return adventureActions[slug]
 }
 
 const toggleSessionForm = (slug: string) => {
@@ -134,6 +153,59 @@ const handleCreateSession = async (aventure: any) => {
     form.error = error?.data?.message || 'Impossible de créer la session.'
   } finally {
     form.loading = false
+  }
+}
+
+const handleDepublishAdventure = async (aventure: any) => {
+  const actionState = ensureAdventureActionState(aventure.slug)
+  actionState.error = null
+  if (actionState.depublishing || actionState.deleting) {
+    return
+  }
+  if (typeof window !== 'undefined') {
+    const confirmed = window.confirm('Êtes-vous sûr de vouloir dé-publier votre stage ? Il retournera à l\'état de brouillon.')
+    if (!confirmed) {
+      return
+    }
+  }
+  actionState.depublishing = true
+  try {
+    await $fetch(`/api/guides/aventures/${aventure.slug}/status`, {
+      method: 'PUT',
+      body: {
+        estPublie: false,
+      },
+    })
+    await refreshAventures?.()
+  } catch (error: any) {
+    actionState.error = error?.data?.message || 'Impossible de dé-publier ce stage.'
+  } finally {
+    actionState.depublishing = false
+  }
+}
+
+const handleDeleteAdventure = async (aventure: any) => {
+  const actionState = ensureAdventureActionState(aventure.slug)
+  actionState.error = null
+  if (actionState.depublishing || actionState.deleting) {
+    return
+  }
+  if (typeof window !== 'undefined') {
+    const confirmed = window.confirm('Êtes-vous sûr de vouloir supprimer ce stage ?')
+    if (!confirmed) {
+      return
+    }
+  }
+  actionState.deleting = true
+  try {
+    await $fetch(`/api/guides/aventures/${aventure.slug}`, {
+      method: 'DELETE',
+    })
+    await refreshAventures?.()
+  } catch (error: any) {
+    actionState.error = error?.data?.message || 'Impossible de supprimer ce stage.'
+  } finally {
+    actionState.deleting = false
   }
 }
 </script>
@@ -211,6 +283,26 @@ const handleCreateSession = async (aventure: any) => {
                     >
                       Gérer les inscriptions
                     </NuxtLink>
+                    <button
+                      v-if="aventure.estPublie"
+                      type="button"
+                      class="inline-flex items-center justify-center rounded-full border border-amber-300/70 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-amber-100 transition hover:border-amber-200 disabled:opacity-50"
+                      :disabled="adventureActions[aventure.slug]?.depublishing || adventureActions[aventure.slug]?.deleting"
+                      @click="handleDepublishAdventure(aventure)"
+                    >
+                      Dé-publier
+                    </button>
+                    <button
+                      type="button"
+                      class="inline-flex items-center justify-center rounded-full border border-red-400/70 bg-red-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-red-200 transition hover:border-red-300 hover:bg-red-500/20 disabled:opacity-50"
+                      :disabled="adventureActions[aventure.slug]?.deleting || adventureActions[aventure.slug]?.depublishing"
+                      @click="handleDeleteAdventure(aventure)"
+                    >
+                      Supprimer
+                    </button>
+                    <p v-if="adventureActions[aventure.slug]?.error" class="text-right text-xs text-red-300">
+                      {{ adventureActions[aventure.slug]?.error }}
+                    </p>
                   </div>
                 </div>
               </div>

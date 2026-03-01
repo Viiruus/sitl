@@ -170,6 +170,7 @@ const mapListAventure = (a: any) => ({
   })(),
   id: a.id,
   slug: a.slug,
+  estPublie: a.estPublie,
   titre: a.titre,
   sousTitre: a.sousTitre,
   discipline: a.discipline,

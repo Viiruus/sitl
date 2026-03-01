@@ -1139,7 +1139,9 @@ const { data, pending, error } = await useFetch(`/api/aventures/${slug}`)
 
 const stage = computed(() => data.value?.aventure)
 const stageTitle = computed(() => stage.value?.titre || 'Aventure')
-const otherStages = computed(() => data.value?.autres ?? [])
+const otherStages = computed(() =>
+  (data.value?.autres ?? []).filter((aventure: any) => aventure?.estPublie === true),
+)
 const filteredOtherStages = computed(() => {
   const today = new Date()
   today.setHours(0, 0, 0, 0)

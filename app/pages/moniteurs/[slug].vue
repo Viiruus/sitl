@@ -289,7 +289,9 @@ const { data, pending, error } = await useAsyncData(
 )
 
 const moniteur = computed(() => data.value?.moniteur ?? null)
-const aventures = computed(() => data.value?.aventures ?? [])
+const aventures = computed(() =>
+  (data.value?.aventures ?? []).filter((aventure: any) => aventure?.estPublie === true),
+)
 const filteredAventures = computed(() => {
   const today = new Date()
   today.setHours(0, 0, 0, 0)

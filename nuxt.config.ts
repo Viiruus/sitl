@@ -59,7 +59,6 @@ export default defineNuxtConfig({
     '/_ipx/**': { headers: { 'cache-control': 'public, max-age=31536000, immutable' } },
     '/images/**': { headers: { 'cache-control': 'public, max-age=31536000, immutable' } },
     '/uploads/**': { headers: { 'cache-control': 'public, max-age=31536000, immutable' } },
-    '/api/aventures': { swr: 300 },
     '/login': { headers: { 'X-Robots-Tag': 'noindex, nofollow' } },
     '/onboarding': { headers: { 'X-Robots-Tag': 'noindex, nofollow' } },
     '/register': { headers: { 'X-Robots-Tag': 'noindex, nofollow' } },
