@@ -120,7 +120,14 @@ useSeoMeta({
 const { data, pending } = await useFetch('/api/moniteurs')
 const randomWeights = useState<Record<number, number>>('la-brigade-moniteurs-order', () => ({}))
 
-const moniteurs = computed(() => data.value?.moniteurs ?? [])
+const moniteurs = computed(() => {
+  const list = data.value?.moniteurs ?? []
+  return list.filter((moniteur: any) => {
+    const firstName = typeof moniteur?.firstName === 'string' ? moniteur.firstName.trim() : ''
+    const lastName = typeof moniteur?.lastName === 'string' ? moniteur.lastName.trim() : ''
+    return Boolean(firstName || lastName)
+  })
+})
 
 watch(
   () => moniteurs.value,
