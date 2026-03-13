@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { getAssociationMembershipOffer } from '../../shared/constants/association-membership'
+import { getAssociationMembershipOffer } from '~~/shared/constants/association-membership'
 
 definePageMeta({
   middleware: 'climber-auth',
