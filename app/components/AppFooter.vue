@@ -17,6 +17,14 @@
             <component :is="item.icon" class="size-6" aria-hidden="true" />
           </a>
         </div>
+        <div class="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-gray-600">
+          <NuxtLink to="/mentions-legales" class="hover:text-gray-800">
+            Mentions légales
+          </NuxtLink>
+          <NuxtLink to="/politique-de-confidentialite" class="hover:text-gray-800">
+            Politique de confidentialité
+          </NuxtLink>
+        </div>
         <p class="pt-4 text-sm/6 text-gray-600">&copy; 2026 - Brigade du kiff.</p>
       </div>
     </div>
