@@ -1,6 +1,7 @@
 // server/api/onboarding.post.ts
 import { z } from 'zod'
 import { prisma } from '../utils/prisma'
+import { recordAssociationMembership } from '../utils/association-membership'
 
 // Schéma de validation/typage des données reçues du front
 const onboardingSchema = z.object({
@@ -15,6 +16,9 @@ const onboardingSchema = z.object({
       errorMap: () => ({ message: 'Merci de valider les CGU.' }),
     })
     .optional(),
+  associationMembershipAccepted: z.literal(true, {
+    errorMap: () => ({ message: "Merci de valider l'adhésion à l'association." }),
+  }),
   whatsappOptIn: z.boolean().optional(),
 
   // Pratique
@@ -121,6 +125,13 @@ export default defineEventHandler(async (event) => {
       onboarded: true,
       onboardingStep: 2,
     },
+  })
+
+  await recordAssociationMembership(db, {
+    userId: user.id,
+    role: 'CLIMBER',
+    source: 'climber-onboarding',
+    accepted: body.associationMembershipAccepted,
   })
 
   // 5) Mettre à jour la session (pour que user.onboarded soit à jour côté front)

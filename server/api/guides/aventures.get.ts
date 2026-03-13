@@ -18,6 +18,9 @@ export default defineEventHandler(async (event) => {
   if (session.user.role !== 'GUIDE') {
     throw createError({ statusCode: 403, statusMessage: 'Accès réservé aux moniteurs' })
   }
+  if (!session.user.onboarded) {
+    throw createError({ statusCode: 403, statusMessage: 'Finalise ton inscription moniteur avant d’accéder au dashboard.' })
+  }
 
   const db = await prisma()
   const guideId = Number(session.user.id)

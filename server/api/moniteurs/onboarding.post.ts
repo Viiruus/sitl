@@ -1,11 +1,15 @@
 import { z } from 'zod'
 import { prisma } from '../../utils/prisma'
+import { recordAssociationMembership } from '../../utils/association-membership'
 
 const bodySchema = z.object({
   firstName: z.string().trim().min(1, 'Prénom requis').max(100),
   lastName: z.string().trim().min(1, 'Nom requis').max(100),
   cguAccepted: z.literal(true, {
     errorMap: () => ({ message: 'Merci de valider les CGU.' }),
+  }),
+  associationMembershipAccepted: z.literal(true, {
+    errorMap: () => ({ message: "Merci de valider l'adhésion à l'association." }),
   }),
 })
 
@@ -29,6 +33,13 @@ export default defineEventHandler(async (event) => {
       onboarded: true,
       onboardingStep: 1,
     },
+  })
+
+  await recordAssociationMembership(db, {
+    userId: user.id,
+    role: 'GUIDE',
+    source: 'guide-onboarding',
+    accepted: body.associationMembershipAccepted,
   })
 
   await setUserSession(event, {

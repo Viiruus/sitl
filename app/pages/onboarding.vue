@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { getAssociationMembershipOffer } from '../../shared/constants/association-membership'
+
 definePageMeta({
   middleware: 'climber-auth',
 })
@@ -22,6 +24,7 @@ const form = reactive({
   firstName: '',
   lastName: '',
   cguAccepted: false,
+  associationMembershipAccepted: false,
 
   // Pratique
   typesOfClimbing: [] as string[], // ['bloc', 'sport', 'multi', 'trad']
@@ -51,6 +54,8 @@ const form = reactive({
   // Vision du voyage
   tripStyles: [] as string[], // ['aventure','confort']
 })
+
+const membershipOffer = getAssociationMembershipOffer()
 
 const loading = ref(false)
 const error = ref<string | null>(null)
@@ -91,7 +96,7 @@ const prevStep = () => {
 
 const canGoNext = computed(() => {
   if (step.value === 1) {
-    return Boolean(form.firstName.trim()) && Boolean(form.lastName.trim()) && form.cguAccepted
+    return Boolean(form.firstName.trim()) && Boolean(form.lastName.trim()) && form.cguAccepted && form.associationMembershipAccepted
   }
   return true
 })
@@ -249,6 +254,35 @@ const submit = async () => {
               />
               <label for="cgu" class="text-sm text-brand-100/85">
                 J’ai lu et j’accepte les CGU.
+              </label>
+            </div>
+            <div class="flex items-start gap-3 rounded-2xl border border-brand-800 bg-brand-950/50 p-4">
+              <input
+                id="association-membership"
+                v-model="form.associationMembershipAccepted"
+                type="checkbox"
+                class="mt-1 h-4 w-4 rounded border-brand-700 text-secondaryBrand-500 focus:ring-secondaryBrand-500"
+              />
+              <label for="association-membership" class="text-sm text-brand-100/85">
+                Je souhaite adhérer à l'association Brigade du kiff pour l'année {{ membershipOffer.year }} pour la somme de {{ membershipOffer.amountLabel }}
+                et j’ai pris connaissance des
+                <a
+                  :href="membershipOffer.statutesUrl"
+                  target="_blank"
+                  rel="noopener"
+                  class="text-secondaryBrand-200 underline hover:text-secondaryBrand-100"
+                >
+                  statuts
+                </a>
+                et du
+                <a
+                  :href="membershipOffer.internalRulesUrl"
+                  target="_blank"
+                  rel="noopener"
+                  class="text-secondaryBrand-200 underline hover:text-secondaryBrand-100"
+                >
+                  règlement intérieur
+                </a>.
               </label>
             </div>
           </div>

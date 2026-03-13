@@ -14,13 +14,48 @@ function secret() {
 
 export function normalizePhoneNumber(raw: string): string {
   const trimmed = raw.trim()
-  // remove spaces, hyphens, parentheses
-  let normalized = trimmed.replace(/[\s()-]/g, '')
-  // convert leading 00 to +
+  if (!trimmed) return ''
+
+  // keep a possible leading "+" and strip formatting noise everywhere else
+  let normalized = trimmed.replace(/[^\d+]/g, '')
   if (normalized.startsWith('00')) {
     normalized = `+${normalized.slice(2)}`
   }
-  return normalized
+
+  const hasPlus = normalized.startsWith('+')
+  const digits = normalized.replace(/\D/g, '')
+  if (!digits) return ''
+
+  // Canonicalise common French inputs:
+  // +336..., 336..., 06..., 6... => +336...
+  if (digits.startsWith('33') && digits.length === 11) {
+    return `+${digits}`
+  }
+  if (digits.startsWith('0') && digits.length === 10) {
+    return `+33${digits.slice(1)}`
+  }
+  if (!hasPlus && digits.length === 9) {
+    return `+33${digits}`
+  }
+
+  return hasPlus ? `+${digits}` : digits
+}
+
+export function buildPhoneLookupVariants(raw: string): string[] {
+  const canonical = normalizePhoneNumber(raw)
+  if (!canonical) return []
+
+  const variants = new Set<string>([canonical])
+  const digits = canonical.replace(/^\+/, '')
+
+  variants.add(digits)
+
+  if (digits.startsWith('33') && digits.length === 11) {
+    variants.add(`0${digits.slice(2)}`)
+    variants.add(digits.slice(2))
+  }
+
+  return [...variants].filter(Boolean)
 }
 
 type OtpPayload = {

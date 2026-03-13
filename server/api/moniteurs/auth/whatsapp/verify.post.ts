@@ -1,6 +1,6 @@
 import { z } from 'zod'
 import { prisma } from '../../../../utils/prisma'
-import { normalizePhoneNumber, verifyOtpToken } from '../../../../utils/whatsapp-otp'
+import { buildPhoneLookupVariants, normalizePhoneNumber, verifyOtpToken } from '../../../../utils/whatsapp-otp'
 
 const bodySchema = z.object({
   phoneNumber: z.string().min(6, 'Numéro requis'),
@@ -43,8 +43,13 @@ export default defineEventHandler(async (event) => {
 
   const db = await prisma()
 
+  const phoneLookupVariants = buildPhoneLookupVariants(normalized)
   let user = await db.user.findFirst({
-    where: { phoneNumber: normalized },
+    where: {
+      phoneNumber: {
+        in: phoneLookupVariants,
+      },
+    },
     include: { guideProfile: true },
   })
 
@@ -80,6 +85,12 @@ export default defineEventHandler(async (event) => {
           },
         },
       },
+      include: { guideProfile: true },
+    })
+  } else if (user.phoneNumber !== verifiedPhone) {
+    user = await db.user.update({
+      where: { id: user.id },
+      data: { phoneNumber: verifiedPhone },
       include: { guideProfile: true },
     })
   } else if (!user.guideProfile) {

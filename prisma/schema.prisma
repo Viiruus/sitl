@@ -130,9 +130,30 @@ model User {
   // 👇 pour les grimpeurs qui réservent
   bookings Booking[]
   dateSuggestions AventureDateSuggestion[]
+  associationMemberships AssociationMembership[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model AssociationMembership {
+  id Int @id @default(autoincrement())
+
+  userId Int
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  membershipYear Int
+  amountCents    Int
+  currency       String   @default("EUR")
+  roleSnapshot   UserRole
+  source         String?
+  acceptedAt     DateTime @default(now())
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, membershipYear])
+  @@index([membershipYear])
 }
 
 model GuideProfile {

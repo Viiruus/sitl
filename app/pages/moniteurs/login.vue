@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { getAssociationMembershipOffer } from '../../../shared/constants/association-membership'
+
 const router = useRouter()
 const { loggedIn, user, fetch, clear } = useUserSession()
 
@@ -16,11 +18,13 @@ const needsOnboarding = ref(false)
 const guideFirstName = ref('')
 const guideLastName = ref('')
 const cguAccepted = ref(false)
+const associationMembershipAccepted = ref(false)
 
 const loading = ref(false)
 const sending = ref(false)
 const error = ref<string | null>(null)
 const success = ref<string | null>(null)
+const membershipOffer = getAssociationMembershipOffer()
 
 onMounted(async () => {
   await fetch()
@@ -28,8 +32,13 @@ onMounted(async () => {
   if (loggedIn.value && user.value?.role !== 'GUIDE') {
     await clear()
     await fetch()
-  } else if (loggedIn.value && user.value?.role === 'GUIDE') {
+  } else if (loggedIn.value && user.value?.role === 'GUIDE' && user.value?.onboarded) {
     router.push('/moniteurs')
+  } else if (loggedIn.value && user.value?.role === 'GUIDE' && !user.value?.onboarded) {
+    needsOnboarding.value = true
+    guideFirstName.value = user.value?.firstName || ''
+    guideLastName.value = user.value?.lastName || ''
+    phoneNumber.value = user.value?.phoneNumber || ''
   }
 })
 
@@ -113,6 +122,7 @@ const submitOnboarding = async () => {
         firstName: guideFirstName.value,
         lastName: guideLastName.value,
         cguAccepted: cguAccepted.value,
+        associationMembershipAccepted: associationMembershipAccepted.value,
       },
     })
     await redirectAfterAuth()
@@ -261,6 +271,35 @@ const logout = async () => {
                 </NuxtLink>.
               </span>
             </label>
+            <label class="flex items-start gap-3 text-xs text-brand-100/80">
+              <input
+                v-model="associationMembershipAccepted"
+                type="checkbox"
+                class="mt-0.5 h-4 w-4 rounded border-brand-700 bg-brand-900 text-secondaryBrand-400 focus:ring-secondaryBrand-400"
+                required
+              />
+              <span>
+                Je souhaite adhérer à l'association Brigade du kiff pour l'année {{ membershipOffer.year }} pour la somme de {{ membershipOffer.amountLabel }}
+                et j’ai pris connaissance des
+                <a
+                  :href="membershipOffer.statutesUrl"
+                  target="_blank"
+                  rel="noopener"
+                  class="text-secondaryBrand-200 underline hover:text-secondaryBrand-100"
+                >
+                  statuts
+                </a>
+                et du
+                <a
+                  :href="membershipOffer.internalRulesUrl"
+                  target="_blank"
+                  rel="noopener"
+                  class="text-secondaryBrand-200 underline hover:text-secondaryBrand-100"
+                >
+                  règlement intérieur
+                </a>.
+              </span>
+            </label>
           </div>
 
           <p v-if="success" class="text-sm text-emerald-200">{{ success }}</p>
@@ -269,7 +308,7 @@ const logout = async () => {
           <button
             type="submit"
             class="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-secondaryBrand-500/90 px-4 py-3 text-sm font-semibold text-brand-950 shadow-lg shadow-secondaryBrand-900/30 transition hover:bg-secondaryBrand-400 disabled:opacity-50"
-            :disabled="loading || sending || (needsOnboarding && !cguAccepted)"
+            :disabled="loading || sending || (needsOnboarding && (!cguAccepted || !associationMembershipAccepted))"
           >
             <span v-if="loading || sending" class="h-4 w-4 animate-spin rounded-full border-2 border-brand-900 border-t-transparent" />
             <span>

@@ -8,4 +8,8 @@ export default defineNuxtRouteMiddleware(async () => {
   if (!loggedIn.value || user.value?.role !== 'GUIDE') {
     return navigateTo('/moniteurs/login')
   }
+
+  if (!user.value?.onboarded) {
+    return navigateTo('/moniteurs/login')
+  }
 })
