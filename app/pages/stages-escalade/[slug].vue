@@ -30,14 +30,13 @@
       <div class="relative isolate overflow-hidden bg-brand-950 pb-16 pt-40 sm:pt-48 lg:pt-56">
         <!-- Fond image -->
         <div class="absolute inset-0 -z-10">
-          <NuxtImg
+          <img
             :src="heroImage"
             :alt="stage.titre"
             class="h-full w-full object-cover"
             sizes="100vw"
-            :provider="imageProviderFor(heroImage)"
-            format="webp"
             loading="eager"
+            decoding="async"
           />
           <div
             class="absolute inset-0 bg-gradient-to-b from-brand-950 via-brand-950/85 to-brand-950"
@@ -134,15 +133,14 @@
                   <div
                     class="h-20 w-20 flex-shrink-0 overflow-hidden rounded-full border-2 border-secondaryBrand-400 bg-brand-900"
                   >
-                    <NuxtImg
+                    <img
                       v-if="guideImage"
                       :src="guideImage"
                       :alt="guideFullName"
                       class="size-full object-cover"
                       sizes="80px"
-                      :provider="imageProviderFor(guideImage)"
-                      format="webp"
                       loading="lazy"
+                      decoding="async"
                     />
                   </div>
                   <div class="space-y-1">
@@ -184,14 +182,13 @@
                   class="relative h-28 w-full overflow-hidden rounded-xl bg-white/5 transition hover:opacity-100"
                   @click="() => openLightbox(idx)"
                 >
-                  <NuxtImg
+                  <img
                     :src="img.url"
                     :alt="img.alt || stageTitle"
                     class="size-full object-cover"
                     sizes="(min-width: 1024px) 120px, 33vw"
-                    :provider="imageProviderFor(img.url)"
-                    format="webp"
                     loading="lazy"
+                    decoding="async"
                   />
                 </button>
               </div>
@@ -838,14 +835,13 @@
             >
               <div>{{ s.value?.sessions }}</div>
               <div class="relative h-52">
-                <NuxtImg
+                <img
                   :src="otherStageCoverImage(s)"
                   :alt="s.titre"
                   class="size-full object-cover transition duration-500 hover:scale-105"
                   sizes="(min-width: 1024px) 33vw, 100vw"
-                  :provider="imageProviderFor(otherStageCoverImage(s))"
-                  format="webp"
                   loading="lazy"
+                  decoding="async"
                 />
                 <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent" />
                 <div class="absolute inset-4 flex flex-col justify-between">
@@ -901,14 +897,13 @@
                 </p>
                 <div class="mt-6 flex items-center justify-between text-sm text-white">
                   <div class="flex items-center gap-3 text-sm text-brand-100/80">
-                    <NuxtImg
+                    <img
                       :src="otherStageGuideImage(s)"
                       :alt="s.guideName || 'Moniteur'"
                       class="h-10 w-10 rounded-full border border-white/20 bg-brand-900 object-cover"
                       sizes="40px"
-                      :provider="imageProviderFor(otherStageGuideImage(s))"
-                      format="webp"
                       loading="lazy"
+                      decoding="async"
                     />
                     <div>
                       <p class="text-xs uppercase tracking-[0.3em] text-brand-200/70">
@@ -965,14 +960,14 @@
           <div class="space-y-5 px-6 py-5">
             <div class="flex items-center gap-3 rounded-2xl border border-white/10 bg-brand-900/60 p-3">
               <div class="h-14 w-14 overflow-hidden rounded-full border border-secondaryBrand-400/70 bg-brand-900">
-                <NuxtImg
+                <img
                   v-if="guideImage"
                   :src="guideImage"
                   :alt="guideFullName || 'Moniteur'"
                   class="size-full object-cover"
                   sizes="56px"
-                  format="webp"
                   loading="lazy"
+                  decoding="async"
                 />
                 <div
                   v-else
@@ -1082,15 +1077,14 @@
           </svg>
         </button>
         <div class="relative w-full max-w-4xl">
-          <NuxtImg
+          <img
             v-if="currentGalleryImage"
             :src="currentGalleryImage.url"
             :alt="currentGalleryImage.alt || stageTitle"
             class="max-h-[80vh] w-full rounded-2xl object-contain"
             sizes="100vw"
-            :provider="imageProviderFor(currentGalleryImage.url)"
-            format="webp"
             loading="lazy"
+            decoding="async"
           />
           <div class="mt-3 flex items-center justify-between text-xs text-white/80">
             <div class="flex gap-2">
@@ -1261,16 +1255,6 @@ const normalizeImagePath = (src?: string | null) => {
   }
   if (src.startsWith('/')) return src
   return `/images/${src.replace(/^(\.\/)+/, '')}`
-}
-
-const imageProviderFor = (src?: string | null) => {
-  if (!src) return undefined
-  const normalized = normalizeImagePath(src)
-  if (!normalized) return undefined
-  if (/^(https?:)?\/\//i.test(normalized) || normalized.startsWith('data:') || normalized.startsWith('blob:')) {
-    return 'none'
-  }
-  return undefined
 }
 
 const galerieImages = computed(() =>
