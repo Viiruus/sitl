@@ -83,17 +83,10 @@ export default defineEventHandler(async (event) => {
   }
 
   if (isVercel) {
-    const optimized = await optimizeImage(sourceBuffer, preset)
-    const base64 = optimized.buffer.toString('base64')
-    const dataUrl = `data:image/webp;base64,${base64}`
-    return {
-      url: dataUrl,
-      kind,
-      width: optimized.width,
-      height: optimized.height,
-      size: optimized.buffer.byteLength,
-      variants: [],
-    }
+    throw createError({
+      statusCode: 503,
+      statusMessage: 'Le televersement d’images n’est pas encore configure en production. Utilise temporairement une URL d’image externe.',
+    })
   }
 
   const optimized = await optimizeImage(sourceBuffer, preset)

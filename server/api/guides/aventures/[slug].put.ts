@@ -14,7 +14,6 @@ const imageUrlSchema = z
   .refine((value) => {
     if (!value) return false
     if (value.startsWith('/uploads/') || value.startsWith('/api/moniteurs/uploads/')) return true
-    if (value.startsWith('data:')) return true
     try {
       const url = new URL(value)
       return ['http:', 'https:'].includes(url.protocol)
@@ -70,47 +69,6 @@ const bodySchema = z
     images: z.array(galleryImageSchema).optional(),
     programmeJours: z.array(programmeJourSchema).optional(),
   })
-  .superRefine((data, ctx) => {
-    if (!data.estPublie) {
-      return
-    }
-
-    const assertFilled = (value: string | undefined | null, path: (string | number)[], message: string) => {
-      if (!value || !value.trim()) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          path,
-          message,
-        })
-      }
-    }
-
-    if (!data.sousTitre || data.sousTitre.trim().length < 3) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ['sousTitre'],
-        message: 'Ajoute un sous-titre (3 caractères min).',
-      })
-    }
-    assertFilled(data.niveauMinimum, ['niveauMinimum'], 'Précise le niveau minimum.')
-    if (!data.descriptionCourte || data.descriptionCourte.trim().length < 10) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ['descriptionCourte'],
-        message: 'Ajoute une description courte (10 caractères min).',
-      })
-    }
-    assertFilled(data.coverImageUrl, ['coverImageUrl'], 'Ajoute une image de couverture.')
-    if (!data.equipementRequis || data.equipementRequis.length === 0) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ['equipementRequis'],
-        message: 'Ajoute au moins un élément pour l’équipement requis.',
-      })
-    }
-    assertFilled(data.inclus, ['inclus'], 'Décris ce qui est inclus.')
-    assertFilled(data.nonInclus, ['nonInclus'], 'Décris ce qui n’est pas inclus.')
-  })
 
 const listOrNull = (value?: string[] | null) => {
   if (!value || value.length === 0) return null
@@ -140,6 +98,59 @@ const variantsOrNull = (value?: { url: string; width: number; size?: number }[] 
   return normalized.length ? normalized : null
 }
 
+const jsonListToStrings = (value: unknown) => {
+  if (!Array.isArray(value)) return []
+  return value.map((entry) => String(entry).trim()).filter(Boolean)
+}
+
+const assertPublishedAdventureFields = (data: {
+  estPublie: boolean
+  sousTitre?: string | null
+  niveauMinimum?: string | null
+  descriptionCourte?: string | null
+  coverImageUrl?: string | null
+  equipementRequis?: string[]
+  inclus?: string | null
+  nonInclus?: string | null
+}) => {
+  if (!data.estPublie) return
+
+  const issues: { path: string[]; message: string }[] = []
+  const isFilled = (value?: string | null) => Boolean(value && value.trim())
+
+  if (!data.sousTitre || data.sousTitre.trim().length < 3) {
+    issues.push({ path: ['sousTitre'], message: 'Ajoute un sous-titre (3 caractères min).' })
+  }
+  if (!isFilled(data.niveauMinimum)) {
+    issues.push({ path: ['niveauMinimum'], message: 'Précise le niveau minimum.' })
+  }
+  if (!data.descriptionCourte || data.descriptionCourte.trim().length < 10) {
+    issues.push({ path: ['descriptionCourte'], message: 'Ajoute une description courte (10 caractères min).' })
+  }
+  if (!isFilled(data.coverImageUrl)) {
+    issues.push({ path: ['coverImageUrl'], message: 'Ajoute une image de couverture.' })
+  }
+  if (!data.equipementRequis || data.equipementRequis.length === 0) {
+    issues.push({ path: ['equipementRequis'], message: 'Ajoute au moins un élément pour l’équipement requis.' })
+  }
+  if (!isFilled(data.inclus)) {
+    issues.push({ path: ['inclus'], message: 'Décris ce qui est inclus.' })
+  }
+  if (!isFilled(data.nonInclus)) {
+    issues.push({ path: ['nonInclus'], message: 'Décris ce qui n’est pas inclus.' })
+  }
+
+  if (issues.length) {
+    throw createError({
+      statusCode: 422,
+      statusMessage: issues[0].message,
+      data: {
+        issues,
+      },
+    })
+  }
+}
+
 export default defineEventHandler(async (event) => {
   const session = await getUserSession(event)
   const slug = event.context.params?.slug
@@ -159,11 +170,34 @@ export default defineEventHandler(async (event) => {
 
   const existing = await db.aventure.findFirst({
     where: { slug, guideId: Number(session.user.id) },
-    select: { id: true },
+    select: {
+      id: true,
+      estPublie: true,
+      sousTitre: true,
+      niveauMinimum: true,
+      descriptionCourte: true,
+      coverImageUrl: true,
+      equipementRequis: true,
+      inclus: true,
+      nonInclus: true,
+    },
   })
   if (!existing) {
     throw createError({ statusCode: 404, statusMessage: 'Aventure introuvable' })
   }
+
+  const nextPublishedState = body.estPublie ?? existing.estPublie
+
+  assertPublishedAdventureFields({
+    estPublie: nextPublishedState,
+    sousTitre: body.sousTitre ?? existing.sousTitre,
+    niveauMinimum: body.niveauMinimum ?? existing.niveauMinimum,
+    descriptionCourte: body.descriptionCourte ?? existing.descriptionCourte,
+    coverImageUrl: body.coverImageUrl === undefined ? existing.coverImageUrl : body.coverImageUrl,
+    equipementRequis: body.equipementRequis ?? jsonListToStrings(existing.equipementRequis),
+    inclus: body.inclus ?? existing.inclus,
+    nonInclus: body.nonInclus ?? existing.nonInclus,
+  })
 
   const updated = await db.$transaction(async (tx) => {
     const updatedAventure = await tx.aventure.update({
@@ -183,8 +217,12 @@ export default defineEventHandler(async (event) => {
         ageMin: body.ageMin ?? null,
         ageMax: body.ageMax ?? null,
         autonomieMini: valueOrNull(body.autonomieMini ?? null),
-        coverImageUrl: imageUrlOrNull(body.coverImageUrl ?? null),
-        coverImageVariants: variantsOrNull(body.coverImageVariants ?? null),
+        ...(body.coverImageUrl !== undefined
+          ? {
+              coverImageUrl: imageUrlOrNull(body.coverImageUrl ?? null),
+              coverImageVariants: variantsOrNull(body.coverImageVariants ?? null),
+            }
+          : {}),
         equipementRequis: listOrNull(body.equipementRequis ?? null),
         equipementFourni: listOrNull(body.equipementFourni ?? null),
         hebergementDetails: valueOrNull(body.hebergementDetails ?? null),
@@ -193,7 +231,7 @@ export default defineEventHandler(async (event) => {
         objectifs: valueOrNull(body.objectifs ?? null),
         prerequis: listOrNull(body.prerequis ?? null),
         repasLabel: valueOrNull(body.repasLabel ?? null),
-        estPublie: body.estPublie ?? false,
+        estPublie: nextPublishedState,
       },
       select: {
         id: true,

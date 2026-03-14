@@ -172,7 +172,17 @@ const isStoredUploadPath = (value?: string | null) => {
   return cleaned.startsWith('/uploads/') || cleaned.startsWith('uploads/')
 }
 
+const isInlineOrBlobImageUrl = (value?: string | null) => {
+  if (typeof value !== 'string') return false
+  const trimmed = value.trim().toLowerCase()
+  return trimmed.startsWith('data:') || trimmed.startsWith('blob:')
+}
+
 const slugPreview = computed(() => currentSlug.value || generatingSlug(form.titre))
+const hasLegacyInlineCover = computed(() => isInlineOrBlobImageUrl(form.coverImageUrl))
+const inlineGalleryImageCount = computed(() => galleryImages.filter((image) => isInlineOrBlobImageUrl(image.url)).length)
+const hasLegacyInlineGallery = computed(() => inlineGalleryImageCount.value > 0)
+const hasLegacyInlineMedia = computed(() => hasLegacyInlineCover.value || hasLegacyInlineGallery.value)
 
 const resetListIfEmpty = (list: string[]) => {
   if (!list.length) {
@@ -326,6 +336,14 @@ const ensureAdventureExists = async () => {
 }
 
 const buildPayload = (publish: boolean) => ({
+  ...(hasLegacyInlineCover.value
+    ? {}
+    : {
+        coverImageUrl: form.coverImageUrl.trim() || null,
+        coverImageVariants: isStoredUploadPath(form.coverImageUrl)
+          ? normalizeVariants(coverImageVariants.value)
+          : [],
+      }),
   titre: form.titre.trim(),
   discipline: form.discipline as AdventureData['discipline'],
   lieuLabel: form.lieuLabel.trim(),
@@ -340,10 +358,6 @@ const buildPayload = (publish: boolean) => ({
   ageMin: parseNumberField(form.ageMin),
   ageMax: parseNumberField(form.ageMax),
   autonomieMini: form.autonomieMini.trim(),
-  coverImageUrl: form.coverImageUrl.trim() || null,
-  coverImageVariants: isStoredUploadPath(form.coverImageUrl)
-    ? normalizeVariants(coverImageVariants.value)
-    : [],
   equipementRequis: toListPayload(form.equipementRequis),
   equipementFourni: toListPayload(form.equipementFourni),
   hebergementDetails: form.hebergementDetails.trim(),
@@ -368,14 +382,18 @@ const buildPayload = (publish: boolean) => ({
     })
     .filter(Boolean),
   estPublie: publish,
-  images: galleryImages
-    .map((img, index) => ({
-      url: img.url.trim(),
-      alt: img.alt.trim(),
-      position: index,
-      variants: isStoredUploadPath(img.url) ? normalizeVariants(img.variants) : [],
-    }))
-    .filter((img) => img.url),
+  ...(hasLegacyInlineGallery.value
+    ? {}
+    : {
+        images: galleryImages
+          .map((img, index) => ({
+            url: img.url.trim(),
+            alt: img.alt.trim(),
+            position: index,
+            variants: isStoredUploadPath(img.url) ? normalizeVariants(img.variants) : [],
+          }))
+          .filter((img) => img.url),
+      }),
 })
 
 const validatePublish = () => {
@@ -383,7 +401,7 @@ const validatePublish = () => {
   if (!form.sousTitre.trim()) missing.push('Sous-titre')
   if (!form.niveauMinimum.trim()) missing.push('Niveau minimum')
   if (!form.descriptionCourte.trim() || form.descriptionCourte.trim().length < 10) missing.push('Description courte')
-  if (!form.coverImageUrl.trim()) missing.push('Image de couverture')
+  if (!form.coverImageUrl.trim() || hasLegacyInlineCover.value) missing.push('Image de couverture')
   if (!toListPayload(form.equipementRequis).length) missing.push('Équipement requis')
   if (!form.inclus.trim()) missing.push('Inclus')
   if (!form.nonInclus.trim()) missing.push('Non inclus')
@@ -529,17 +547,38 @@ const uploadGalleryImage = async (event: Event, index: number) => {
           Complète toutes les infos pour rendre ton stage irrésistible.
         </p>
       </div>
-      <div class="flex items-center gap-3">
+      <div class="flex flex-col items-start gap-3 sm:items-end">
         <span
           class="inline-flex items-center rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-wide"
           :class="isPublished ? 'border-secondaryBrand-400 text-secondaryBrand-200' : 'border-yellow-400/60 text-yellow-200'"
         >
           {{ isPublished ? 'Publié' : 'Brouillon' }}
         </span>
+        <button
+          type="button"
+          class="inline-flex items-center gap-2 rounded-2xl bg-secondaryBrand-500/90 px-5 py-2.5 text-sm font-semibold text-brand-950 shadow-lg shadow-secondaryBrand-900/30 transition hover:bg-secondaryBrand-400 disabled:opacity-50"
+          :disabled="saving || publishing"
+          @click="saveDraft"
+        >
+          <span v-if="saving" class="h-4 w-4 animate-spin rounded-full border-2 border-brand-900 border-t-transparent" />
+          <span>Enregistrer</span>
+        </button>
       </div>
     </div>
 
     <form class="mt-8 space-y-8" @submit.prevent="saveDraft">
+      <div
+        v-if="hasLegacyInlineMedia"
+        class="rounded-2xl border border-yellow-400/30 bg-yellow-400/10 p-4 text-sm text-yellow-100"
+      >
+        Cette aventure contient encore des images anciennes stockées inline.
+        Elles ne sont plus renvoyées à l’enregistrement pour éviter l’erreur 413.
+        Remplace-les par une URL d’image ou un nouveau téléversement.
+        <span v-if="hasLegacyInlineGallery">
+          {{ inlineGalleryImageCount }} image<span v-if="inlineGalleryImageCount > 1">s</span> de galerie sont concernées.
+        </span>
+      </div>
+
       <section class="space-y-4 rounded-2xl bg-brand-900/50 p-6 ring-1 ring-white/5">
         <h2 class="text-xl font-semibold">Informations principales</h2>
         <div class="grid gap-4 md:grid-cols-2">
