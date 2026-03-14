@@ -2,12 +2,6 @@ import { z } from 'zod'
 import { prisma } from '../../../utils/prisma'
 
 const stringListSchema = z.array(z.string().trim().min(1)).optional()
-const imageVariantSchema = z.object({
-  url: z.string().trim().startsWith('/uploads/'),
-  width: z.number().int().min(1),
-  size: z.number().int().min(0).optional(),
-})
-
 const imageUrlSchema = z
   .string()
   .trim()
@@ -21,6 +15,12 @@ const imageUrlSchema = z
       return false
     }
   }, { message: 'URL d’image invalide' })
+
+const imageVariantSchema = z.object({
+  url: imageUrlSchema,
+  width: z.number().int().min(1),
+  size: z.number().int().min(0).optional(),
+})
 
 const coverImageSchema = imageUrlSchema.or(z.literal(null)).optional()
 const coverImageVariantsSchema = z.array(imageVariantSchema).max(24).optional()

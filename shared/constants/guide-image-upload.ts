@@ -70,3 +70,17 @@ export function buildGuideBlobPath(input: {
   const safeFilename = sanitizeGuideUploadFilename(input.filename)
   return `guides/${input.userId}/${input.kind}/${safeFilename}`
 }
+
+export function isManagedGuideImageUrl(value?: string | null) {
+  if (typeof value !== 'string') return false
+  const trimmed = value.trim()
+  if (!trimmed) return false
+  if (trimmed.startsWith('/uploads/') || trimmed.startsWith('/api/moniteurs/uploads/')) return true
+
+  try {
+    const url = new URL(trimmed)
+    return ['http:', 'https:'].includes(url.protocol)
+  } catch {
+    return false
+  }
+}

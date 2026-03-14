@@ -1,8 +1,14 @@
 import { z } from 'zod'
 import { prisma } from '../../utils/prisma'
 
+const imageUrlSchema = z.union([
+  z.string().trim().url(),
+  z.string().trim().startsWith('/uploads/'),
+  z.string().trim().startsWith('/api/moniteurs/uploads/'),
+])
+
 const imageVariantSchema = z.object({
-  url: z.string().trim().startsWith('/uploads/'),
+  url: imageUrlSchema,
   width: z.number().int().min(1),
   size: z.number().int().min(0).optional(),
 })
@@ -18,9 +24,7 @@ const bodySchema = z.object({
   websiteUrl: z.string().url().optional().or(z.literal('')),
   professionalCardNumber: z.string().trim().max(100).optional().or(z.literal('')),
   profileImageUrl: z.union([
-    z.string().trim().url(),
-    z.string().trim().startsWith('/uploads/'),
-    z.string().trim().startsWith('/api/moniteurs/uploads/'),
+    imageUrlSchema,
     z.string().trim().startsWith('data:'),
     z.literal(''),
   ]).optional(),
