@@ -32,6 +32,7 @@
         <div class="absolute inset-0 -z-10">
           <img
             :src="heroImage"
+            :srcset="heroImageSrcset"
             :alt="stage.titre"
             class="h-full w-full object-cover"
             sizes="100vw"
@@ -136,6 +137,7 @@
                     <img
                       v-if="guideImage"
                       :src="guideImage"
+                      :srcset="guideImageSrcset"
                       :alt="guideFullName"
                       class="size-full object-cover"
                       sizes="80px"
@@ -184,6 +186,7 @@
                 >
                   <img
                     :src="img.url"
+                    :srcset="imageSrcset(img)"
                     :alt="img.alt || stageTitle"
                     class="size-full object-cover"
                     sizes="(min-width: 1024px) 120px, 33vw"
@@ -837,6 +840,7 @@
               <div class="relative h-52">
                 <img
                   :src="otherStageCoverImage(s)"
+                  :srcset="otherStageCoverSrcset(s)"
                   :alt="s.titre"
                   class="size-full object-cover transition duration-500 hover:scale-105"
                   sizes="(min-width: 1024px) 33vw, 100vw"
@@ -899,6 +903,7 @@
                   <div class="flex items-center gap-3 text-sm text-brand-100/80">
                     <img
                       :src="otherStageGuideImage(s)"
+                      :srcset="otherStageGuideSrcset(s)"
                       :alt="s.guideName || 'Moniteur'"
                       class="h-10 w-10 rounded-full border border-white/20 bg-brand-900 object-cover"
                       sizes="40px"
@@ -963,6 +968,7 @@
                 <img
                   v-if="guideImage"
                   :src="guideImage"
+                  :srcset="guideImageSrcset"
                   :alt="guideFullName || 'Moniteur'"
                   class="size-full object-cover"
                   sizes="56px"
@@ -1080,6 +1086,7 @@
           <img
             v-if="currentGalleryImage"
             :src="currentGalleryImage.url"
+            :srcset="imageSrcset(currentGalleryImage)"
             :alt="currentGalleryImage.alt || stageTitle"
             class="max-h-[80vh] w-full rounded-2xl object-contain"
             sizes="100vw"
@@ -1366,6 +1373,14 @@ const heroImage = computed(() => {
       : null)
   return normalizeImagePath(raw) || imageForDiscipline(stage.value.discipline)
 })
+const heroImageSrcset = computed(() => {
+  if (!stage.value) return undefined
+  if (stage.value.coverImageUrl) {
+    return buildStoredSrcset(stage.value.coverImageVariants)
+  }
+  const firstImage = Array.isArray(stage.value.images) ? stage.value.images[0] : null
+  return buildStoredSrcset(firstImage?.variants)
+})
 
 const mapEmbedUrl = computed(() => {
   const label = stage.value?.lieuLabel || stage.value?.region || stage.value?.titre
@@ -1385,8 +1400,9 @@ const guideProfileLink = computed(() =>
 )
 
 const guideImage = computed(
-  () => normalizeImagePath(guide.value?.profile?.profileImageUrl) || null,
+  () => resolveStoredImageSrc(guide.value?.profile?.profileImageUrl, guide.value?.profile?.profileImageVariants) || null,
 )
+const guideImageSrcset = computed(() => buildStoredSrcset(guide.value?.profile?.profileImageVariants))
 
 const guideBaseLocation = computed(
   () =>
@@ -1476,10 +1492,19 @@ const formatSessionRange = (session?: { dateDebut?: string | Date; dateFin?: str
 }
 
 const otherStageCoverImage = (entry: any) =>
-  normalizeImagePath(entry?.coverImageUrl) || imageForDiscipline(entry?.discipline)
+  resolveStoredImageSrc(entry?.coverImageUrl, entry?.coverImageVariants) || imageForDiscipline(entry?.discipline)
+
+const otherStageCoverSrcset = (entry: any) =>
+  buildStoredSrcset(entry?.coverImageVariants)
 
 const otherStageGuideImage = (entry: any) =>
-  normalizeImagePath(entry?.guideImageUrl) || imageForDiscipline(entry?.discipline)
+  resolveStoredImageSrc(entry?.guideImageUrl, entry?.guideImageVariants) || imageForDiscipline(entry?.discipline)
+
+const otherStageGuideSrcset = (entry: any) =>
+  buildStoredSrcset(entry?.guideImageVariants)
+
+const imageSrcset = (entry?: { variants?: unknown } | null) =>
+  buildStoredSrcset(entry?.variants)
 
 const { loggedIn, user } = useUserSession()
 const router = useRouter()

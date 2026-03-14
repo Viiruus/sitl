@@ -40,8 +40,11 @@ export const buildStoredSrcset = (variants: unknown): string | undefined => {
 }
 
 export const resolveStoredImageSrc = (src?: string | null, variants?: unknown): string | null => {
+  const normalizedVariants = normalizeStoredVariants(variants)
+  if (normalizedVariants.length) {
+    return normalizedVariants[normalizedVariants.length - 1].url
+  }
   const normalizedSrc = normalizeImageUrl(src)
   if (normalizedSrc) return normalizedSrc
-  const normalizedVariants = normalizeStoredVariants(variants)
-  return normalizedVariants.length ? normalizedVariants[normalizedVariants.length - 1].url : null
+  return null
 }
