@@ -3,12 +3,14 @@ import { randomUUID } from 'node:crypto'
 import { join } from 'pathe'
 import { readMultipartFormData } from 'h3'
 import sharp from 'sharp'
+import {
+  GUIDE_UPLOAD_ALLOWED_MIME,
+  GUIDE_UPLOAD_PRESETS,
+  parseGuideUploadKind,
+} from '../../../shared/constants/guide-image-upload'
 
-const ALLOWED_MIME = ['image/jpeg', 'image/png', 'image/webp']
 const MEBIBYTE = 1024 * 1024
 const VARIANT_QUALITY_DELTA = 8
-
-type UploadKind = 'profile' | 'cover' | 'gallery'
 
 type UploadPreset = {
   maxUploadBytes: number
@@ -16,30 +18,6 @@ type UploadPreset = {
   maxHeight: number
   quality: number
   variantWidths: number[]
-}
-
-const PRESETS: Record<UploadKind, UploadPreset> = {
-  profile: {
-    maxUploadBytes: 4 * MEBIBYTE,
-    maxWidth: 1024,
-    maxHeight: 1024,
-    quality: 78,
-    variantWidths: [96, 192, 384, 768],
-  },
-  cover: {
-    maxUploadBytes: 5 * MEBIBYTE,
-    maxWidth: 1920,
-    maxHeight: 1280,
-    quality: 76,
-    variantWidths: [640, 960, 1280, 1600, 1920],
-  },
-  gallery: {
-    maxUploadBytes: 5 * MEBIBYTE,
-    maxWidth: 1600,
-    maxHeight: 1600,
-    quality: 74,
-    variantWidths: [480, 768, 1024, 1280, 1600],
-  },
 }
 
 const isVercel = process.env.VERCEL === '1' || Boolean(process.env.VERCEL_ENV)
@@ -65,14 +43,14 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 400, statusMessage: 'Fichier invalide' })
   }
 
-  if (filePart.type && !ALLOWED_MIME.includes(filePart.type)) {
+  if (filePart.type && !GUIDE_UPLOAD_ALLOWED_MIME.includes(filePart.type as (typeof GUIDE_UPLOAD_ALLOWED_MIME)[number])) {
     throw createError({ statusCode: 415, statusMessage: 'Format non supporté' })
   }
 
-  const kind = parseUploadKind(
+  const kind = parseGuideUploadKind(
     form.find((item) => item.name === 'kind')?.data?.toString('utf8').trim().toLowerCase(),
   )
-  const preset = PRESETS[kind]
+  const preset = GUIDE_UPLOAD_PRESETS[kind] as UploadPreset
   const sourceBuffer = Buffer.from(filePart.data)
 
   if (sourceBuffer.byteLength > preset.maxUploadBytes) {
@@ -117,13 +95,6 @@ export default defineEventHandler(async (event) => {
     variants,
   }
 })
-
-const parseUploadKind = (value?: string): UploadKind => {
-  if (value === 'profile' || value === 'cover' || value === 'gallery') {
-    return value
-  }
-  return 'gallery'
-}
 
 const formatMiB = (bytes: number) => {
   return (bytes / MEBIBYTE).toFixed(0)

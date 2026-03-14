@@ -28,6 +28,7 @@ export default defineNuxtConfig({
   pages: true,
   runtimeConfig: {
     public: {
+      blobUploadsEnabled: Boolean(process.env.BLOB_READ_WRITE_TOKEN),
       publicUrl: process.env.PUBLIC_URL || 'http://localhost:3000',
     },
   },

@@ -1,4 +1,9 @@
 <script setup lang="ts">
+import {
+  GUIDE_UPLOAD_ALLOWED_MIME,
+  GUIDE_UPLOAD_PRESETS,
+} from '~~/shared/constants/guide-image-upload'
+
 definePageMeta({
   middleware: 'guide-auth',
 })
@@ -55,18 +60,17 @@ const error = ref<string | null>(null)
 const uploadError = ref<string | null>(null)
 const uploadingPhoto = ref(false)
 const isClient = ref(false)
-const ALLOWED_UPLOAD_MIME = ['image/jpeg', 'image/png', 'image/webp']
-const MAX_PROFILE_UPLOAD_BYTES = 4 * 1024 * 1024
+const { uploadGuideImage } = useGuideImageUpload()
 
 onMounted(() => {
   isClient.value = true
 })
 
 const validateProfileImage = (file: File) => {
-  if (!ALLOWED_UPLOAD_MIME.includes(file.type)) {
+  if (!GUIDE_UPLOAD_ALLOWED_MIME.includes(file.type as (typeof GUIDE_UPLOAD_ALLOWED_MIME)[number])) {
     return 'Format non supporté. Utilise JPG, PNG ou WebP.'
   }
-  if (file.size > MAX_PROFILE_UPLOAD_BYTES) {
+  if (file.size > GUIDE_UPLOAD_PRESETS.profile.maxUploadBytes) {
     return 'Image trop lourde. Limite: 4 Mo.'
   }
   return null
@@ -125,12 +129,9 @@ const uploadPhoto = async (event: Event) => {
   uploadingPhoto.value = true
 
   try {
-    const formData = new FormData()
-    formData.append('file', file, file.name)
-    formData.append('kind', 'profile')
-    const response = await $fetch<{ url: string; variants?: { url: string; width: number; size?: number }[] }>('/api/moniteurs/upload', {
-      method: 'POST',
-      body: formData,
+    const response = await uploadGuideImage({
+      file,
+      kind: 'profile',
     })
     form.profileImageUrl = response.url
     form.profileImageVariants = normalizeVariants(response.variants || [])

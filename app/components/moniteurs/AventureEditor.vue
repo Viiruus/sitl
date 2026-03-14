@@ -1,4 +1,8 @@
 <script setup lang="ts">
+import {
+  GUIDE_UPLOAD_ALLOWED_MIME,
+  GUIDE_UPLOAD_PRESETS,
+} from '~~/shared/constants/guide-image-upload'
 
 type StoredImageVariant = {
   url: string
@@ -137,18 +141,17 @@ const galleryImages = reactive<{ url: string; alt: string; variants: StoredImage
   { url: '', alt: '', variants: [] },
 ])
 const galleryUploadStates = reactive<Record<number, { loading: boolean; error: string | null }>>({})
-const ALLOWED_UPLOAD_MIME = ['image/jpeg', 'image/png', 'image/webp']
-const MAX_IMAGE_UPLOAD_BYTES = 5 * 1024 * 1024
+const { uploadGuideImage } = useGuideImageUpload()
 
 onMounted(() => {
   isClient.value = true
 })
 
-const validateUploadFile = (file: File) => {
-  if (!ALLOWED_UPLOAD_MIME.includes(file.type)) {
+const validateUploadFile = (file: File, kind: 'cover' | 'gallery') => {
+  if (!GUIDE_UPLOAD_ALLOWED_MIME.includes(file.type as (typeof GUIDE_UPLOAD_ALLOWED_MIME)[number])) {
     return 'Format non supporté. Utilise JPG, PNG ou WebP.'
   }
-  if (file.size > MAX_IMAGE_UPLOAD_BYTES) {
+  if (file.size > GUIDE_UPLOAD_PRESETS[kind].maxUploadBytes) {
     return 'Image trop lourde. Limite: 4,5 Mo.'
   }
   return null
@@ -474,7 +477,7 @@ const uploadCoverImage = async (event: Event) => {
   const file = target.files?.[0]
   if (!file) return
   coverUploadError.value = null
-  const fileError = validateUploadFile(file)
+  const fileError = validateUploadFile(file, 'cover')
   if (fileError) {
     coverUploadError.value = fileError
     target.value = ''
@@ -482,12 +485,9 @@ const uploadCoverImage = async (event: Event) => {
   }
   uploadingCover.value = true
   try {
-    const formData = new FormData()
-    formData.append('file', file, file.name)
-    formData.append('kind', 'cover')
-    const response = await $fetch<{ url: string; variants?: StoredImageVariant[] }>('/api/moniteurs/upload', {
-      method: 'POST',
-      body: formData,
+    const response = await uploadGuideImage({
+      file,
+      kind: 'cover',
     })
     form.coverImageUrl = response.url
     coverImageVariants.value = normalizeVariants(response.variants || [])
@@ -506,7 +506,7 @@ const uploadGalleryImage = async (event: Event, index: number) => {
   if (!file) return
   galleryUploadStates[index] = galleryUploadStates[index] || { loading: false, error: null }
   galleryUploadStates[index].error = null
-  const fileError = validateUploadFile(file)
+  const fileError = validateUploadFile(file, 'gallery')
   if (fileError) {
     galleryUploadStates[index].error = fileError
     target.value = ''
@@ -514,12 +514,9 @@ const uploadGalleryImage = async (event: Event, index: number) => {
   }
   galleryUploadStates[index].loading = true
   try {
-    const formData = new FormData()
-    formData.append('file', file, file.name)
-    formData.append('kind', 'gallery')
-    const response = await $fetch<{ url: string; variants?: StoredImageVariant[] }>('/api/moniteurs/upload', {
-      method: 'POST',
-      body: formData,
+    const response = await uploadGuideImage({
+      file,
+      kind: 'gallery',
     })
     galleryImages[index].url = response.url
     galleryImages[index].variants = normalizeVariants(response.variants || [])
