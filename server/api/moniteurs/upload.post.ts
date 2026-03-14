@@ -20,7 +20,7 @@ type UploadPreset = {
 
 const PRESETS: Record<UploadKind, UploadPreset> = {
   profile: {
-    maxUploadBytes: 3 * MEBIBYTE,
+    maxUploadBytes: 4 * MEBIBYTE,
     maxWidth: 1024,
     maxHeight: 1024,
     quality: 78,

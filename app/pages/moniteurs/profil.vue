@@ -56,7 +56,7 @@ const uploadError = ref<string | null>(null)
 const uploadingPhoto = ref(false)
 const isClient = ref(false)
 const ALLOWED_UPLOAD_MIME = ['image/jpeg', 'image/png', 'image/webp']
-const MAX_PROFILE_UPLOAD_BYTES = 3 * 1024 * 1024
+const MAX_PROFILE_UPLOAD_BYTES = 4 * 1024 * 1024
 
 onMounted(() => {
   isClient.value = true
@@ -67,7 +67,7 @@ const validateProfileImage = (file: File) => {
     return 'Format non supporté. Utilise JPG, PNG ou WebP.'
   }
   if (file.size > MAX_PROFILE_UPLOAD_BYTES) {
-    return 'Image trop lourde. Limite: 3 Mo.'
+    return 'Image trop lourde. Limite: 4 Mo.'
   }
   return null
 }
@@ -223,7 +223,7 @@ const logout = async () => {
                 <label class="text-sm text-brand-100/80">Photo (URL)</label>
                 <input v-model="form.profileImageUrl" type="text" class="w-full rounded-xl border border-brand-800 bg-brand-900/80 px-3 py-2 text-white focus:border-secondaryBrand-400 focus:outline-none" />
                 <p class="text-xs text-brand-200/70">
-                  Tu peux coller l’URL d’une photo ou téléverser ton portrait (JPG/PNG/WebP, max 3 Mo).
+                  Tu peux coller l’URL d’une photo ou téléverser ton portrait (JPG/PNG/WebP, max 4 Mo).
                 </p>
                 <div v-if="isClient" class="space-y-2">
                   <label class="inline-flex items-center gap-3 rounded-full border border-white/20 px-4 py-2 text-sm font-semibold text-white/80 transition hover:bg-white/5 cursor-pointer">
