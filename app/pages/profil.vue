@@ -393,6 +393,12 @@
                   Les moniteurs te contacteront directement pour constituer les groupes.
                 </p>
               </div>
+              <NuxtLink
+                to="/stages-escalade"
+                class="inline-flex items-center justify-center gap-2 rounded-full border border-secondaryBrand-300/60 bg-secondaryBrand-400/15 px-4 py-2 text-sm font-semibold text-secondaryBrand-100 transition hover:bg-secondaryBrand-400/25"
+              >
+                Voir les stages
+              </NuxtLink>
             </div>
 
             <div v-if="shareMessage || shareError" class="rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm">

@@ -682,7 +682,7 @@ const submit = async () => {
             <button
               v-if="step < maxStep"
               type="button"
-              class="px-4 py-2 rounded-lg bg-secondaryBrand-500 text-brand-950 text-xs font-medium hover:bg-secondaryBrand-400 transition"
+              class="px-4 py-2 rounded-lg bg-secondaryBrand-500 text-brand-950 text-xs font-medium transition disabled:cursor-not-allowed disabled:opacity-50 hover:bg-secondaryBrand-400 disabled:hover:bg-secondaryBrand-500"
               :disabled="step === 1 && !canGoNext"
               @click="nextStep"
             >
