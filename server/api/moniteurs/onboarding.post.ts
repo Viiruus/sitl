@@ -54,6 +54,7 @@ export default defineEventHandler(async (event) => {
           parameters: [
             {
               type: 'text',
+              parameter_name: 'firstname',
               text: user.firstName || body.firstName.trim(),
             },
           ],
