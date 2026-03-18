@@ -181,14 +181,17 @@ function buildAuthenticationTemplatePayload(phone: string, code: string, buttonS
 
   const activeButtonSubType = buttonSubType ?? template.buttonSubType
   if (activeButtonSubType) {
+    const normalizedButtonSubType =
+      activeButtonSubType.toLowerCase() === 'copy_code' ? 'url' : activeButtonSubType
+
     components.push({
       type: 'button',
-      sub_type: activeButtonSubType,
-      index: '0',
+      sub_type: normalizedButtonSubType,
+      index: 0,
       parameters: [
         {
-          type: 'payload',
-          payload: code,
+          type: 'text',
+          text: code,
         },
       ],
     })
@@ -211,6 +214,7 @@ function buildAuthenticationTemplatePayload(phone: string, code: string, buttonS
 export async function sendOtpViaWhatsapp(phone: string, code: string): Promise<WhatsAppOtpSendResult> {
   const token = process.env.WHATSAPP_CLOUD_TOKEN
   const phoneId = process.env.WHATSAPP_PHONE_NUMBER_ID
+  const tokenFingerprint = token ? `${token.slice(0, 4)}...${token.slice(-4)} (len:${token.length})` : 'missing'
 
   if (!token || !phoneId) {
     return {
@@ -258,10 +262,11 @@ export async function sendOtpViaWhatsapp(phone: string, code: string): Promise<W
       statusCode: result.statusCode,
       vercelEnv: process.env.VERCEL_ENV || 'local',
       phoneId,
+      tokenFingerprint,
       templateName: templateConfig.name,
       templateLanguage: templateConfig.language,
       buttonSubType: templateConfig.buttonSubType || 'copy_code(auto-fallback)',
-      raw: result.raw,
+      raw: typeof result.raw === 'string' ? result.raw : JSON.stringify(result.raw),
     })
 
     return {
