@@ -50,11 +50,10 @@ export default defineEventHandler(async (event) => {
       language: process.env.WHATSAPP_OTP_TEMPLATE_LANGUAGE || 'fr',
       components: [
         {
-          type: 'body',
+          type: 'header',
           parameters: [
             {
               type: 'text',
-              parameter_name: 'firstname',
               text: user.firstName || body.firstName.trim(),
             },
           ],
