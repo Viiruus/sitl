@@ -48,6 +48,20 @@ enum ImageKind {
   GALLERY
 }
 
+enum WhatsAppOtpPurpose {
+  GUIDE_LOGIN
+  CLIMBER_LOGIN
+}
+
+enum WhatsAppOtpStatus {
+  PENDING
+  CONSUMED
+  EXPIRED
+  MAX_ATTEMPTS
+  INVALIDATED
+  SEND_FAILED
+}
+
 model User {
   id Int @id @default(autoincrement())
 
@@ -131,9 +145,47 @@ model User {
   bookings Booking[]
   dateSuggestions AventureDateSuggestion[]
   associationMemberships AssociationMembership[]
+  whatsappOtpChallenges WhatsAppOtpChallenge[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model WhatsAppOtpChallenge {
+  id Int @id @default(autoincrement())
+
+  userId Int?
+  user   User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  purpose     WhatsAppOtpPurpose
+  status      WhatsAppOtpStatus @default(PENDING)
+  publicToken String            @unique
+
+  phoneNumber String
+  source      String?
+
+  codeHash    String
+  attempts    Int @default(0)
+  maxAttempts Int @default(5)
+
+  templateName  String?
+  messageId     String? @unique
+  messageStatus String?
+  failureReason String?
+
+  expiresAt     DateTime
+  consumedAt    DateTime?
+  invalidatedAt DateTime?
+  lastAttemptAt DateTime?
+  sentAt        DateTime?
+
+  lastWebhookPayload Json?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([purpose, phoneNumber, status])
+  @@index([expiresAt])
 }
 
 model AssociationMembership {

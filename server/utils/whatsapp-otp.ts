@@ -1,6 +1,11 @@
 import crypto from 'node:crypto'
 
 const OTP_TTL_MS = 10 * 60 * 1000 // 10 minutes
+const OTP_MAX_ATTEMPTS = 5
+
+type WhatsAppOtpSendResult =
+  | { ok: true; messageId: string | null; raw: any }
+  | { ok: false; reason: 'not_configured' | 'send_failed'; message: string; statusCode?: number; raw?: any }
 
 function secret() {
   return (
@@ -110,7 +115,94 @@ export function verifyOtpToken(token: string, code: string) {
   return { ok: true as const, phone: payload.phone, source: payload.source ?? null }
 }
 
-export async function sendOtpViaWhatsapp(phone: string, code: string) {
+export function getOtpTtlMs() {
+  return OTP_TTL_MS
+}
+
+export function getOtpMaxAttempts() {
+  return OTP_MAX_ATTEMPTS
+}
+
+export function generateOtpCode() {
+  return crypto.randomInt(100000, 999999).toString()
+}
+
+export function createPublicOtpToken() {
+  return crypto.randomBytes(24).toString('base64url')
+}
+
+export function hashOtpCode(code: string) {
+  return crypto.createHmac('sha256', secret()).update(code).digest('hex')
+}
+
+export function verifyOtpCodeHash(codeHash: string, code: string) {
+  const expected = Buffer.from(codeHash, 'hex')
+  const actual = Buffer.from(hashOtpCode(code), 'hex')
+  if (expected.length !== actual.length) return false
+  return crypto.timingSafeEqual(expected, actual)
+}
+
+export function isWhatsAppOtpDevFallbackEnabled() {
+  return (
+    process.env.NODE_ENV !== 'production' ||
+    process.env.VERCEL_ENV === 'preview' ||
+    process.env.WHATSAPP_DEV_CODE === 'true' ||
+    process.env.WHATSAPP_GUIDE_DEV_CODE === 'true'
+  )
+}
+
+export function getWhatsAppOtpTemplateConfig() {
+  return {
+    name: process.env.WHATSAPP_OTP_TEMPLATE_NAME || 'otp_code',
+    language: process.env.WHATSAPP_OTP_TEMPLATE_LANGUAGE || 'fr',
+    buttonSubType: process.env.WHATSAPP_OTP_TEMPLATE_BUTTON_SUB_TYPE || '',
+  }
+}
+
+function buildAuthenticationTemplatePayload(phone: string, code: string, buttonSubType?: string) {
+  const template = getWhatsAppOtpTemplateConfig()
+  const components: any[] = [
+    {
+      type: 'body',
+      parameters: [
+        {
+          type: 'text',
+          text: code,
+        },
+      ],
+    },
+  ]
+
+  const activeButtonSubType = buttonSubType ?? template.buttonSubType
+  if (activeButtonSubType) {
+    components.push({
+      type: 'button',
+      sub_type: activeButtonSubType,
+      index: '0',
+      parameters: [
+        {
+          type: 'payload',
+          payload: code,
+        },
+      ],
+    })
+  }
+
+  return {
+    messaging_product: 'whatsapp',
+    to: phone,
+    type: 'template',
+    template: {
+      name: template.name,
+      language: {
+        code: template.language,
+      },
+      components,
+    },
+  }
+}
+
+export async function sendOtpViaWhatsapp(phone: string, code: string): Promise<WhatsAppOtpSendResult> {
   const token = process.env.WHATSAPP_CLOUD_TOKEN
   const phoneId = process.env.WHATSAPP_PHONE_NUMBER_ID
 
@@ -122,33 +214,63 @@ export async function sendOtpViaWhatsapp(phone: string, code: string) {
     }
   }
 
-  const payload = {
-    messaging_product: 'whatsapp',
-    to: phone,
-    type: 'text',
-    text: {
-      preview_url: false,
-      body: `Ton code de connexion Brigade du kiff : ${code}\n\nIl expire dans 10 minutes.`,
-    },
-  }
+  const attemptSend = async (buttonSubType?: string) => {
+    const payload = buildAuthenticationTemplatePayload(phone, code, buttonSubType)
+    const res = await fetch(`https://graph.facebook.com/v20.0/${phoneId}/messages`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    })
 
-  const res = await fetch(`https://graph.facebook.com/v20.0/${phoneId}/messages`, {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${token}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(payload),
-  })
+    const rawText = await res.text()
+    let raw: any = null
+    try {
+      raw = rawText ? JSON.parse(rawText) : null
+    } catch {
+      raw = rawText || null
+    }
 
-  if (!res.ok) {
-    const detail = await res.text()
     return {
-      ok: false as const,
-      reason: 'send_failed' as const,
-      message: detail,
+      ok: res.ok,
+      statusCode: res.status,
+      raw,
     }
   }
 
-  return { ok: true as const }
+  const templateConfig = getWhatsAppOtpTemplateConfig()
+  let result = await attemptSend(templateConfig.buttonSubType || undefined)
+
+  if (!result.ok && !templateConfig.buttonSubType) {
+    result = await attemptSend('copy_code')
+  }
+
+  if (!result.ok) {
+    return {
+      ok: false as const,
+      reason: 'send_failed' as const,
+      message: typeof result.raw === 'string' ? result.raw : JSON.stringify(result.raw),
+      statusCode: result.statusCode,
+      raw: result.raw,
+    }
+  }
+
+  const messageId = result.raw?.messages?.[0]?.id ?? null
+  return { ok: true as const, messageId, raw: result.raw }
+}
+
+export function verifyMetaWebhookSignature(rawBody: string, signatureHeader?: string | null) {
+  const appSecret = process.env.WHATSAPP_APP_SECRET || process.env.META_APP_SECRET
+  if (!appSecret) return true
+  if (!signatureHeader?.startsWith('sha256=')) return false
+
+  const expected = crypto.createHmac('sha256', appSecret).update(rawBody).digest('hex')
+  const received = signatureHeader.slice('sha256='.length)
+  const expectedBuffer = Buffer.from(expected, 'hex')
+  const receivedBuffer = Buffer.from(received, 'hex')
+
+  if (expectedBuffer.length !== receivedBuffer.length) return false
+  return crypto.timingSafeEqual(expectedBuffer, receivedBuffer)
 }
