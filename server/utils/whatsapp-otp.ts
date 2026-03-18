@@ -143,9 +143,15 @@ export function verifyOtpCodeHash(codeHash: string, code: string) {
 }
 
 export function isWhatsAppOtpDevFallbackEnabled() {
+  const isDeployedEnvironment =
+    process.env.VERCEL === '1' ||
+    process.env.VERCEL_ENV === 'preview' ||
+    process.env.VERCEL_ENV === 'production'
+
+  if (isDeployedEnvironment) return false
+
   return (
     process.env.NODE_ENV !== 'production' ||
-    process.env.VERCEL_ENV === 'preview' ||
     process.env.WHATSAPP_DEV_CODE === 'true' ||
     process.env.WHATSAPP_GUIDE_DEV_CODE === 'true'
   )

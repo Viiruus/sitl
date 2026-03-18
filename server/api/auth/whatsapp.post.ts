@@ -1,5 +1,10 @@
 import { z } from 'zod'
-import { normalizePhoneNumber, generateOtpToken, sendOtpViaWhatsapp } from '../../utils/whatsapp-otp'
+import {
+  normalizePhoneNumber,
+  generateOtpToken,
+  isWhatsAppOtpDevFallbackEnabled,
+  sendOtpViaWhatsapp,
+} from '../../utils/whatsapp-otp'
 
 const bodySchema = z.object({
   phoneNumber: z.string().min(6, 'Numéro requis'),
@@ -19,11 +24,7 @@ export default defineEventHandler(async (event) => {
   const sendResult = await sendOtpViaWhatsapp(normalized, code)
 
   if (!sendResult.ok) {
-    const allowDevCode =
-      process.env.NODE_ENV !== 'production' ||
-      process.env.VERCEL_ENV === 'preview' ||
-      process.env.WHATSAPP_DEV_CODE === 'true'
-    // En dev/preview, renvoyer le code pour faciliter les tests si WhatsApp n’est pas configuré.
+    const allowDevCode = isWhatsAppOtpDevFallbackEnabled()
     if (allowDevCode) {
       return {
         ok: true,
