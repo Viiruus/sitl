@@ -142,13 +142,16 @@ export function verifyOtpCodeHash(codeHash: string, code: string) {
   return crypto.timingSafeEqual(expected, actual)
 }
 
-export function isWhatsAppOtpDevFallbackEnabled() {
-  const isDeployedEnvironment =
+export function isWhatsAppOtpPersistentModeEnabled() {
+  return (
     process.env.VERCEL === '1' ||
     process.env.VERCEL_ENV === 'preview' ||
     process.env.VERCEL_ENV === 'production'
+  )
+}
 
-  if (isDeployedEnvironment) return false
+export function isWhatsAppOtpDevFallbackEnabled() {
+  if (isWhatsAppOtpPersistentModeEnabled()) return false
 
   return (
     process.env.NODE_ENV !== 'production' ||

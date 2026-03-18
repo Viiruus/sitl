@@ -3,8 +3,10 @@ import {
   normalizePhoneNumber,
   generateOtpToken,
   isWhatsAppOtpDevFallbackEnabled,
+  isWhatsAppOtpPersistentModeEnabled,
   sendOtpViaWhatsapp,
 } from '../../utils/whatsapp-otp'
+import { requestClimberWhatsappOtp } from '../../utils/whatsapp-climber-otp'
 
 const bodySchema = z.object({
   phoneNumber: z.string().min(6, 'Numéro requis'),
@@ -18,6 +20,13 @@ export default defineEventHandler(async (event) => {
   const normalized = normalizePhoneNumber(phoneNumber)
   if (!normalized || normalized.length < 6) {
     throw createError({ statusCode: 400, statusMessage: 'Numéro de téléphone invalide.' })
+  }
+
+  if (isWhatsAppOtpPersistentModeEnabled()) {
+    return requestClimberWhatsappOtp({
+      phoneNumber: normalized,
+      source: source || 'direct',
+    })
   }
 
   const { code, token } = generateOtpToken(normalized, source)
