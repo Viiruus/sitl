@@ -1,6 +1,7 @@
 import { z } from 'zod'
 import { prisma } from '../../utils/prisma'
 import { recordAssociationMembership } from '../../utils/association-membership'
+import { sendTemplateViaWhatsapp } from '../../utils/whatsapp-otp'
 
 const bodySchema = z.object({
   firstName: z.string().trim().min(1, 'Prénom requis').max(100),
@@ -41,6 +42,37 @@ export default defineEventHandler(async (event) => {
     source: 'guide-onboarding',
     accepted: body.associationMembershipAccepted,
   })
+
+  if (user.phoneNumber && user.whatsappOptIn) {
+    const result = await sendTemplateViaWhatsapp({
+      phone: user.phoneNumber,
+      templateName: process.env.WHATSAPP_GUIDE_WELCOME_TEMPLATE_NAME || 'welcome_guide',
+      language: process.env.WHATSAPP_OTP_TEMPLATE_LANGUAGE || 'fr',
+      components: [
+        {
+          type: 'body',
+          parameters: [
+            {
+              type: 'text',
+              parameter_name: 'firstname',
+              text: user.firstName || body.firstName.trim(),
+            },
+          ],
+        },
+      ],
+      logLabel: 'whatsapp-guide-welcome',
+    })
+
+    if (!result.ok) {
+      console.error('[whatsapp-guide-welcome] Non-blocking send failure', {
+        guideId: user.id,
+        phoneNumber: user.phoneNumber,
+        reason: result.reason,
+        statusCode: result.statusCode,
+        raw: typeof result.raw === 'string' ? result.raw : JSON.stringify(result.raw),
+      })
+    }
+  }
 
   await setUserSession(event, {
     user: {

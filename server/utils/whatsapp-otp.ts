@@ -7,6 +7,14 @@ type WhatsAppOtpSendResult =
   | { ok: true; messageId: string | null; raw: any }
   | { ok: false; reason: 'not_configured' | 'send_failed'; message: string; statusCode?: number; raw?: any }
 
+type WhatsAppTemplateSendInput = {
+  phone: string
+  templateName: string
+  language?: string | null
+  components?: any[]
+  logLabel?: string
+}
+
 function secret() {
   return (
     process.env.WHATSAPP_AUTH_SECRET ||
@@ -214,10 +222,12 @@ function buildAuthenticationTemplatePayload(phone: string, code: string, buttonS
   }
 }
 
-export async function sendOtpViaWhatsapp(phone: string, code: string): Promise<WhatsAppOtpSendResult> {
+async function sendTemplateRequest(input: WhatsAppTemplateSendInput): Promise<WhatsAppOtpSendResult> {
   const token = process.env.WHATSAPP_CLOUD_TOKEN
   const phoneId = process.env.WHATSAPP_PHONE_NUMBER_ID
   const tokenFingerprint = token ? `${token.slice(0, 4)}...${token.slice(-4)} (len:${token.length})` : 'missing'
+  const languageCode = input.language || getWhatsAppOtpTemplateConfig().language
+  const logLabel = input.logLabel || 'whatsapp-template'
 
   if (!token || !phoneId) {
     return {
@@ -227,62 +237,85 @@ export async function sendOtpViaWhatsapp(phone: string, code: string): Promise<W
     }
   }
 
-  const attemptSend = async (buttonSubType?: string) => {
-    const payload = buildAuthenticationTemplatePayload(phone, code, buttonSubType)
-    const res = await fetch(`https://graph.facebook.com/v20.0/${phoneId}/messages`, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json',
+  const payload = {
+    messaging_product: 'whatsapp',
+    to: input.phone,
+    type: 'template',
+    template: {
+      name: input.templateName,
+      language: {
+        code: languageCode,
       },
-      body: JSON.stringify(payload),
-    })
+      ...(input.components?.length ? { components: input.components } : {}),
+    },
+  }
 
-    const rawText = await res.text()
-    let raw: any = null
-    try {
-      raw = rawText ? JSON.parse(rawText) : null
-    } catch {
-      raw = rawText || null
-    }
+  const res = await fetch(`https://graph.facebook.com/v20.0/${phoneId}/messages`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(payload),
+  })
 
-    return {
-      ok: res.ok,
+  const rawText = await res.text()
+  let raw: any = null
+  try {
+    raw = rawText ? JSON.parse(rawText) : null
+  } catch {
+    raw = rawText || null
+  }
+
+  if (!res.ok) {
+    console.error(`[${logLabel}] Meta send failed`, {
       statusCode: res.status,
-      raw,
-    }
-  }
-
-  const templateConfig = getWhatsAppOtpTemplateConfig()
-  let result = await attemptSend(templateConfig.buttonSubType || undefined)
-
-  if (!result.ok && !templateConfig.buttonSubType) {
-    result = await attemptSend('copy_code')
-  }
-
-  if (!result.ok) {
-    console.error('[whatsapp-otp] Meta send failed', {
-      statusCode: result.statusCode,
       vercelEnv: process.env.VERCEL_ENV || 'local',
       phoneId,
       tokenFingerprint,
-      templateName: templateConfig.name,
-      templateLanguage: templateConfig.language,
-      buttonSubType: templateConfig.buttonSubType || 'copy_code(auto-fallback)',
-      raw: typeof result.raw === 'string' ? result.raw : JSON.stringify(result.raw),
+      templateName: input.templateName,
+      templateLanguage: languageCode,
+      raw: typeof raw === 'string' ? raw : JSON.stringify(raw),
     })
 
     return {
       ok: false as const,
       reason: 'send_failed' as const,
-      message: typeof result.raw === 'string' ? result.raw : JSON.stringify(result.raw),
-      statusCode: result.statusCode,
-      raw: result.raw,
+      message: typeof raw === 'string' ? raw : JSON.stringify(raw),
+      statusCode: res.status,
+      raw,
     }
   }
 
-  const messageId = result.raw?.messages?.[0]?.id ?? null
-  return { ok: true as const, messageId, raw: result.raw }
+  const messageId = raw?.messages?.[0]?.id ?? null
+  return { ok: true as const, messageId, raw }
+}
+
+export async function sendTemplateViaWhatsapp(input: WhatsAppTemplateSendInput): Promise<WhatsAppOtpSendResult> {
+  return sendTemplateRequest(input)
+}
+
+export async function sendOtpViaWhatsapp(phone: string, code: string): Promise<WhatsAppOtpSendResult> {
+  const templateConfig = getWhatsAppOtpTemplateConfig()
+  let result = await sendTemplateRequest({
+    phone,
+    templateName: templateConfig.name,
+    language: templateConfig.language,
+    components: buildAuthenticationTemplatePayload(phone, code, templateConfig.buttonSubType || undefined).template.components,
+    logLabel: 'whatsapp-otp',
+  })
+
+  if (!result.ok && !templateConfig.buttonSubType) {
+    result = await sendTemplateRequest({
+      phone,
+      templateName: templateConfig.name,
+      language: templateConfig.language,
+      components: buildAuthenticationTemplatePayload(phone, code, 'copy_code').template.components,
+      logLabel: 'whatsapp-otp',
+    })
+  }
+
+  return result
 }
 
 export function verifyMetaWebhookSignature(rawBody: string, signatureHeader?: string | null) {
