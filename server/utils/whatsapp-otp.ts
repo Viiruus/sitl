@@ -254,6 +254,15 @@ export async function sendOtpViaWhatsapp(phone: string, code: string): Promise<W
   }
 
   if (!result.ok) {
+    console.error('[whatsapp-otp] Meta send failed', {
+      statusCode: result.statusCode,
+      phoneId,
+      templateName: templateConfig.name,
+      templateLanguage: templateConfig.language,
+      buttonSubType: templateConfig.buttonSubType || 'copy_code(auto-fallback)',
+      raw: result.raw,
+    })
+
     return {
       ok: false as const,
       reason: 'send_failed' as const,
