@@ -56,6 +56,18 @@ async function findExistingGuideUser(normalizedPhone: string) {
   })
 }
 
+async function findGuideUserByDerivedEmail(normalizedPhone: string) {
+  const db = await prisma()
+  return db.user.findUnique({
+    where: {
+      email: derivedEmailFromPhone(normalizedPhone),
+    },
+    include: {
+      guideProfile: true,
+    },
+  })
+}
+
 export async function requestGuideWhatsappOtp(input: {
   phoneNumber: string
   source?: string | null
@@ -235,6 +247,17 @@ export async function verifyGuideWhatsappOtp(input: {
   }
 
   if (!user) {
+    user = await findGuideUserByDerivedEmail(normalizedPhone)
+  }
+
+  if (user && user.role !== 'GUIDE') {
+    throw createError({
+      statusCode: 403,
+      statusMessage: 'Ce numéro est associé à un compte grimpeur. Utilise la connexion grimpeur.',
+    })
+  }
+
+  if (!user) {
     const email = derivedEmailFromPhone(normalizedPhone)
     user = await db.user.create({
       data: {
@@ -259,10 +282,13 @@ export async function verifyGuideWhatsappOtp(input: {
       },
       include: { guideProfile: true },
     })
-  } else if (user.phoneNumber !== normalizedPhone) {
+  } else if (user.phoneNumber !== normalizedPhone || !user.whatsappOptIn) {
     user = await db.user.update({
       where: { id: user.id },
-      data: { phoneNumber: normalizedPhone },
+      data: {
+        phoneNumber: normalizedPhone,
+        whatsappOptIn: true,
+      },
       include: { guideProfile: true },
     })
   } else if (!user.guideProfile) {

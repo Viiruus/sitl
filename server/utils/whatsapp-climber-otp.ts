@@ -32,6 +32,15 @@ async function findExistingClimberUser(normalizedPhone: string) {
   })
 }
 
+async function findClimberUserByDerivedEmail(normalizedPhone: string) {
+  const db = await prisma()
+  return db.user.findUnique({
+    where: {
+      email: derivedEmailFromPhone(normalizedPhone),
+    },
+  })
+}
+
 export async function requestClimberWhatsappOtp(input: {
   phoneNumber: string
   source?: string | null
@@ -198,6 +207,17 @@ export async function verifyClimberWhatsappOtp(input: {
   }
 
   if (!user) {
+    user = await findClimberUserByDerivedEmail(normalizedPhone)
+  }
+
+  if (user && user.role !== 'CLIMBER') {
+    throw createError({
+      statusCode: 403,
+      statusMessage: 'Ce numéro est associé à un compte moniteur. Utilise la connexion guide.',
+    })
+  }
+
+  if (!user) {
     const email = derivedEmailFromPhone(normalizedPhone)
     user = await db.user.create({
       data: {
@@ -211,10 +231,13 @@ export async function verifyClimberWhatsappOtp(input: {
         role: 'CLIMBER',
       },
     })
-  } else if (user.phoneNumber !== normalizedPhone) {
+  } else if (user.phoneNumber !== normalizedPhone || !user.whatsappOptIn) {
     user = await db.user.update({
       where: { id: user.id },
-      data: { phoneNumber: normalizedPhone },
+      data: {
+        phoneNumber: normalizedPhone,
+        whatsappOptIn: true,
+      },
     })
   }
 
