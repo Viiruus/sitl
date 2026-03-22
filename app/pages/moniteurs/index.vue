@@ -143,10 +143,10 @@ const logout = async () => {
               </p>
               <div class="text-sm text-brand-200/70">
                 <template v-if="profileComplete">
-                  Tous les champs requis remplis
+                  Ton profil est visible sur le site.
                 </template>
                 <template v-else>
-                  Manque :
+                  Pour être visible sur le site, renseigne au minimum :
                   <span class="font-medium text-secondaryBrand-200">
                     {{ missingProfileFields.map(formatFieldLabel).join(', ') }}
                   </span>

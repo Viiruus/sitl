@@ -159,6 +159,9 @@ const logout = async () => {
           <h1 class="mt-2 text-3xl font-semibold">
             Mets à jour ce que les grimpeurs voient
           </h1>
+          <p class="mt-3 max-w-3xl text-sm text-brand-100/75">
+            Pour que ton profil soit visible sur le site, renseigne au minimum ton prénom, ton nom, ta photo de profil, ton camp de base et ta bio.
+          </p>
           <form class="mt-6 space-y-6" @submit.prevent="saveProfile">
             <div class="grid gap-4 md:grid-cols-2">
               <div class="space-y-2">

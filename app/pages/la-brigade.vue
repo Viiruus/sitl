@@ -125,7 +125,7 @@ const moniteurs = computed(() => {
   return list.filter((moniteur: any) => {
     const firstName = typeof moniteur?.firstName === 'string' ? moniteur.firstName.trim() : ''
     const lastName = typeof moniteur?.lastName === 'string' ? moniteur.lastName.trim() : ''
-    return Boolean(firstName || lastName)
+    return Boolean(firstName && lastName)
   })
 })
 

@@ -29,12 +29,14 @@ export default defineEventHandler(async () => {
   return {
     moniteurs: guides
       .map((guide) => {
+        const firstName = guide.firstName?.trim() || null
+        const lastName = guide.lastName?.trim() || null
         const profileImageUrl = sanitizePublicImageUrl(guide.guideProfile?.profileImageUrl, { allowInline: true })
         const profileImageVariants = sanitizePublicImageVariants(guide.guideProfile?.profileImageVariants, { allowInline: true })
         const bio = guide.guideProfile?.bio?.trim() || null
         const baseLocation = guide.guideProfile?.baseLocation?.trim() || guide.department?.trim() || null
 
-        if (!profileImageUrl || !bio || !baseLocation) {
+        if (!firstName || !lastName || !profileImageUrl || !bio || !baseLocation) {
           return null
         }
 
@@ -42,10 +44,10 @@ export default defineEventHandler(async () => {
           profileImageUrl,
           profileImageVariants,
           id: guide.id,
-          slug: slugifyName(guide.firstName, guide.lastName, guide.id),
-          firstName: guide.firstName,
-          lastName: guide.lastName,
-          fullName: [guide.firstName, guide.lastName].filter(Boolean).join(" ") || "Moniteur local",
+          slug: slugifyName(firstName, lastName, guide.id),
+          firstName,
+          lastName,
+          fullName: `${firstName} ${lastName}`,
           bio,
           baseLocation,
         }
