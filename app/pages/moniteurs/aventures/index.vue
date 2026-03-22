@@ -53,6 +53,30 @@ const formatPeriod = (start?: string | Date | null, end?: string | Date | null) 
   return startStr === endStr ? startStr : `${startStr} → ${endStr}`
 }
 
+const MS_PER_DAY = 24 * 60 * 60 * 1000
+
+const toUtcDayTimestamp = (value: Date) => Date.UTC(
+  value.getUTCFullYear(),
+  value.getUTCMonth(),
+  value.getUTCDate(),
+)
+
+const getInclusiveDaySpan = (start: Date, end: Date) => {
+  return Math.floor((toUtcDayTimestamp(end) - toUtcDayTimestamp(start)) / MS_PER_DAY) + 1
+}
+
+const addDaysToDateInput = (dateInput: string, daysToAdd: number) => {
+  if (!dateInput) return ''
+  const [year, month, day] = dateInput.split('-').map(Number)
+  if (!year || !month || !day) return ''
+  const utcDate = new Date(Date.UTC(year, month - 1, day))
+  utcDate.setUTCDate(utcDate.getUTCDate() + daysToAdd)
+  const nextYear = utcDate.getUTCFullYear()
+  const nextMonth = String(utcDate.getUTCMonth() + 1).padStart(2, '0')
+  const nextDay = String(utcDate.getUTCDate()).padStart(2, '0')
+  return `${nextYear}-${nextMonth}-${nextDay}`
+}
+
 const logout = async () => {
   await clear()
   await fetch()
@@ -72,6 +96,7 @@ type SessionFormState = {
 const sessionForms = reactive<Record<string, SessionFormState>>({})
 
 type AdventureActionState = {
+  publishing: boolean
   depublishing: boolean
   deleting: boolean
   error: string | null
@@ -97,6 +122,7 @@ const ensureSessionForm = (slug: string) => {
 const ensureAdventureActionState = (slug: string) => {
   if (!adventureActions[slug]) {
     adventureActions[slug] = {
+      publishing: false,
       depublishing: false,
       deleting: false,
       error: null,
@@ -110,6 +136,14 @@ const toggleSessionForm = (slug: string) => {
   form.open = !form.open
   form.error = null
   form.success = null
+}
+
+const updateSessionDateRange = (aventure: any, startDateInput: string) => {
+  const form = ensureSessionForm(aventure.slug)
+  form.dateDebut = startDateInput
+  form.dateFin = startDateInput
+    ? addDaysToDateInput(startDateInput, Math.max(0, Number(aventure.jours || 1) - 1))
+    : ''
 }
 
 const handleCreateSession = async (aventure: any) => {
@@ -126,6 +160,11 @@ const handleCreateSession = async (aventure: any) => {
   }
   if (endDate && endDate < startDate) {
     form.error = 'La date de fin doit être après la date de début.'
+    return
+  }
+  const inclusiveDaySpan = getInclusiveDaySpan(startDate, endDate || startDate)
+  if (inclusiveDaySpan !== aventure.jours) {
+    form.error = `La session doit couvrir exactement ${aventure.jours} jour${aventure.jours > 1 ? 's' : ''}.`
     return
   }
   const places = Number(form.placesTotales)
@@ -159,7 +198,7 @@ const handleCreateSession = async (aventure: any) => {
 const handleDepublishAdventure = async (aventure: any) => {
   const actionState = ensureAdventureActionState(aventure.slug)
   actionState.error = null
-  if (actionState.depublishing || actionState.deleting) {
+  if (actionState.publishing || actionState.depublishing || actionState.deleting) {
     return
   }
   if (typeof window !== 'undefined') {
@@ -184,10 +223,32 @@ const handleDepublishAdventure = async (aventure: any) => {
   }
 }
 
+const handlePublishAdventure = async (aventure: any) => {
+  const actionState = ensureAdventureActionState(aventure.slug)
+  actionState.error = null
+  if (actionState.publishing || actionState.depublishing || actionState.deleting) {
+    return
+  }
+  actionState.publishing = true
+  try {
+    await $fetch(`/api/guides/aventures/${aventure.slug}/status`, {
+      method: 'PUT',
+      body: {
+        estPublie: true,
+      },
+    })
+    await refreshAventures?.()
+  } catch (error: any) {
+    actionState.error = error?.data?.message || 'Impossible de publier ce stage.'
+  } finally {
+    actionState.publishing = false
+  }
+}
+
 const handleDeleteAdventure = async (aventure: any) => {
   const actionState = ensureAdventureActionState(aventure.slug)
   actionState.error = null
-  if (actionState.depublishing || actionState.deleting) {
+  if (actionState.publishing || actionState.depublishing || actionState.deleting) {
     return
   }
   if (typeof window !== 'undefined') {
@@ -284,10 +345,25 @@ const handleDeleteAdventure = async (aventure: any) => {
                       Gérer les inscriptions
                     </NuxtLink>
                     <button
+                      v-if="!aventure.estPublie"
+                      type="button"
+                      class="inline-flex items-center justify-center rounded-full border border-secondaryBrand-300/70 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-secondaryBrand-100 transition hover:border-secondaryBrand-200 disabled:cursor-not-allowed disabled:opacity-40"
+                      :disabled="!aventure.sessions.length || adventureActions[aventure.slug]?.publishing || adventureActions[aventure.slug]?.deleting || adventureActions[aventure.slug]?.depublishing"
+                      @click="handlePublishAdventure(aventure)"
+                    >
+                      Publier
+                    </button>
+                    <p
+                      v-if="!aventure.estPublie && !aventure.sessions.length"
+                      class="text-right text-[11px] text-amber-300"
+                    >
+                      Ajoute une session pour publier.
+                    </p>
+                    <button
                       v-if="aventure.estPublie"
                       type="button"
                       class="inline-flex items-center justify-center rounded-full border border-amber-300/70 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-amber-100 transition hover:border-amber-200 disabled:opacity-50"
-                      :disabled="adventureActions[aventure.slug]?.depublishing || adventureActions[aventure.slug]?.deleting"
+                      :disabled="adventureActions[aventure.slug]?.publishing || adventureActions[aventure.slug]?.depublishing || adventureActions[aventure.slug]?.deleting"
                       @click="handleDepublishAdventure(aventure)"
                     >
                       Dé-publier
@@ -295,7 +371,7 @@ const handleDeleteAdventure = async (aventure: any) => {
                     <button
                       type="button"
                       class="inline-flex items-center justify-center rounded-full border border-red-400/70 bg-red-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-red-200 transition hover:border-red-300 hover:bg-red-500/20 disabled:opacity-50"
-                      :disabled="adventureActions[aventure.slug]?.deleting || adventureActions[aventure.slug]?.depublishing"
+                      :disabled="adventureActions[aventure.slug]?.publishing || adventureActions[aventure.slug]?.deleting || adventureActions[aventure.slug]?.depublishing"
                       @click="handleDeleteAdventure(aventure)"
                     >
                       Supprimer
@@ -333,21 +409,27 @@ const handleDeleteAdventure = async (aventure: any) => {
                 class="mt-4 space-y-3 rounded-2xl border border-secondaryBrand-300/30 bg-brand-900/60 p-4"
               >
                 <p class="text-sm font-semibold text-secondaryBrand-100">Ajouter une session</p>
+                <p class="text-xs text-brand-200/70">
+                  Cette aventure dure {{ aventure.jours }} jour{{ aventure.jours > 1 ? 's' : '' }}. La session doit couvrir exactement cette durée.
+                </p>
                 <div class="grid gap-3 sm:grid-cols-3">
                   <div class="space-y-1">
                     <label class="text-[11px] uppercase tracking-[0.3em] text-brand-200/70">Date début</label>
                     <input
-                      v-model="sessionForms[aventure.slug].dateDebut"
+                      :value="sessionForms[aventure.slug].dateDebut"
                       type="date"
                       class="w-full rounded-xl border border-white/10 bg-brand-950/70 px-3 py-2 text-white focus:border-secondaryBrand-400 focus:outline-none"
+                      @input="updateSessionDateRange(aventure, ($event.target as HTMLInputElement).value)"
                     />
                   </div>
                   <div class="space-y-1">
                     <label class="text-[11px] uppercase tracking-[0.3em] text-brand-200/70">Date fin</label>
                     <input
-                      v-model="sessionForms[aventure.slug].dateFin"
+                      :value="sessionForms[aventure.slug].dateFin"
                       type="date"
-                      class="w-full rounded-xl border border-white/10 bg-brand-950/70 px-3 py-2 text-white focus:border-secondaryBrand-400 focus:outline-none"
+                      readonly
+                      disabled
+                      class="w-full cursor-not-allowed rounded-xl border border-white/10 bg-brand-900/40 px-3 py-2 text-white/70"
                     />
                   </div>
                 </div>

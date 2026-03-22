@@ -15,6 +15,7 @@ useSeoMeta({
 
 const selectedDiscipline = ref<string | null>(null)
 const dateRangeFilter = ref<[Date | null, Date | null] | null>(null)
+const durationFilter = ref<'all' | 'single' | 'multi'>('all')
 const dateFilterFormats = {
   input: 'dd/MM/yyyy',
   preview: 'dd/MM/yyyy',
@@ -131,6 +132,15 @@ const filteredAventures = computed(() => {
         return true
       })
     }
+  }
+
+  if (durationFilter.value !== 'all') {
+    adventures = adventures.filter((aventure: any) => {
+      const days = Number(aventure?.jours || 0)
+      if (!Number.isFinite(days) || days < 1) return false
+      if (durationFilter.value === 'single') return days === 1
+      return days > 1
+    })
   }
 
   adventures.sort((a: any, b: any) => {
@@ -260,6 +270,38 @@ const guideAvatarSrcset = (stage: any) => {
             <div class="space-y-3 rounded-2xl border border-white/15 bg-brand-900/50 p-4 text-sm text-brand-100 shadow-lg shadow-black/30 backdrop-blur">
               <div class="flex flex-wrap items-center justify-between gap-3">
                 <p class="text-xs uppercase tracking-[0.3em] text-brand-200/70">Filtrer par dates</p>
+              </div>
+              <div class="inline-flex rounded-2xl border border-white/15 bg-white/5 p-1">
+                <button
+                  type="button"
+                  class="rounded-xl px-3 py-2 text-xs font-semibold uppercase tracking-[0.2em] transition"
+                  :class="durationFilter === 'all'
+                    ? 'bg-secondaryBrand-500 text-brand-950'
+                    : 'text-brand-100/75 hover:text-white'"
+                  @click="durationFilter = 'all'"
+                >
+                  Tous
+                </button>
+                <button
+                  type="button"
+                  class="rounded-xl px-3 py-2 text-xs font-semibold uppercase tracking-[0.2em] transition"
+                  :class="durationFilter === 'single'
+                    ? 'bg-secondaryBrand-500 text-brand-950'
+                    : 'text-brand-100/75 hover:text-white'"
+                  @click="durationFilter = 'single'"
+                >
+                  1 jour
+                </button>
+                <button
+                  type="button"
+                  class="rounded-xl px-3 py-2 text-xs font-semibold uppercase tracking-[0.2em] transition"
+                  :class="durationFilter === 'multi'
+                    ? 'bg-secondaryBrand-500 text-brand-950'
+                    : 'text-brand-100/75 hover:text-white'"
+                  @click="durationFilter = 'multi'"
+                >
+                  Plusieurs jours
+                </button>
               </div>
               <ClientOnly>
                 <VueDatePicker

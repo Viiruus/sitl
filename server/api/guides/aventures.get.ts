@@ -49,6 +49,7 @@ export default defineEventHandler(async (event) => {
         lieuLabel: a.lieuLabel,
         estPublie: a.estPublie,
         prixParPersonne: a.prixParPersonne,
+        jours: a.jours,
         sessions: (a.sessions ?? []).map(mapSession),
         bookingsCount: (a.sessions ?? []).reduce(
           (total, session) => total + (session.reservations?.length || 0),

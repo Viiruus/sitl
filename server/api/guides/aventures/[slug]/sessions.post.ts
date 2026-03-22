@@ -21,6 +21,18 @@ const bodySchema = z
     return data.dateFin >= data.dateDebut
   }, { message: 'La date de fin doit être après la date de début', path: ['dateFin'] })
 
+const MS_PER_DAY = 24 * 60 * 60 * 1000
+
+const toUtcDayTimestamp = (value: Date) => Date.UTC(
+  value.getUTCFullYear(),
+  value.getUTCMonth(),
+  value.getUTCDate(),
+)
+
+const getInclusiveDaySpan = (start: Date, end: Date) => {
+  return Math.floor((toUtcDayTimestamp(end) - toUtcDayTimestamp(start)) / MS_PER_DAY) + 1
+}
+
 export default defineEventHandler(async (event) => {
   const session = await getUserSession(event)
   const slug = event.context.params?.slug
@@ -40,18 +52,27 @@ export default defineEventHandler(async (event) => {
 
   const aventure = await db.aventure.findFirst({
     where: { slug, guideId: Number(session.user.id) },
-    select: { id: true },
+    select: { id: true, jours: true },
   })
 
   if (!aventure) {
     throw createError({ statusCode: 404, statusMessage: 'Aventure introuvable' })
   }
 
+  const sessionEndDate = body.dateFin ?? body.dateDebut
+  const inclusiveDaySpan = getInclusiveDaySpan(body.dateDebut, sessionEndDate)
+  if (inclusiveDaySpan !== aventure.jours) {
+    throw createError({
+      statusCode: 422,
+      statusMessage: `Cette session doit couvrir exactement ${aventure.jours} jour${aventure.jours > 1 ? 's' : ''}.`,
+    })
+  }
+
   const created = await db.aventureSession.create({
     data: {
       aventureId: aventure.id,
       dateDebut: body.dateDebut,
-      dateFin: body.dateFin ?? body.dateDebut,
+      dateFin: sessionEndDate,
       statut: 'OUVERT',
       placesTotales: body.placesTotales,
     },

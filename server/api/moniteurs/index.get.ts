@@ -16,7 +16,9 @@ export default defineEventHandler(async () => {
   const db = await prisma()
 
   const guides = await db.user.findMany({
-    where: { role: "GUIDE" },
+    where: {
+      role: "GUIDE",
+    },
     include: { guideProfile: true },
     orderBy: [
       { firstName: "asc" },
@@ -25,22 +27,29 @@ export default defineEventHandler(async () => {
   })
 
   return {
-    moniteurs: guides.map((guide) => ({
-      ...(() => {
+    moniteurs: guides
+      .map((guide) => {
         const profileImageUrl = sanitizePublicImageUrl(guide.guideProfile?.profileImageUrl, { allowInline: true })
         const profileImageVariants = sanitizePublicImageVariants(guide.guideProfile?.profileImageVariants, { allowInline: true })
+        const bio = guide.guideProfile?.bio?.trim() || null
+        const baseLocation = guide.guideProfile?.baseLocation?.trim() || guide.department?.trim() || null
+
+        if (!profileImageUrl || !bio || !baseLocation) {
+          return null
+        }
+
         return {
           profileImageUrl,
           profileImageVariants,
+          id: guide.id,
+          slug: slugifyName(guide.firstName, guide.lastName, guide.id),
+          firstName: guide.firstName,
+          lastName: guide.lastName,
+          fullName: [guide.firstName, guide.lastName].filter(Boolean).join(" ") || "Moniteur local",
+          bio,
+          baseLocation,
         }
-      })(),
-      id: guide.id,
-      slug: slugifyName(guide.firstName, guide.lastName, guide.id),
-      firstName: guide.firstName,
-      lastName: guide.lastName,
-      fullName: [guide.firstName, guide.lastName].filter(Boolean).join(" ") || "Moniteur local",
-      bio: guide.guideProfile?.bio || null,
-      baseLocation: guide.guideProfile?.baseLocation || guide.department || null,
-    })),
+      })
+      .filter(Boolean),
   }
 })

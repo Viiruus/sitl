@@ -97,7 +97,9 @@ const requestCode = async () => {
     })
     codeSent.value = true
     otpToken.value = res?.token || null
-    success.value = 'Code envoyé sur WhatsApp.'
+    success.value = res?.devCode
+      ? `Code de test : ${res.devCode}`
+      : 'Code envoyé sur WhatsApp.'
   } catch (e: any) {
     error.value = e?.data?.message || 'Une erreur est survenue.'
   }

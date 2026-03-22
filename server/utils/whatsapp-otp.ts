@@ -158,6 +158,10 @@ export function isWhatsAppOtpPersistentModeEnabled() {
   )
 }
 
+export function shouldBypassRealWhatsAppSend() {
+  return !isWhatsAppOtpPersistentModeEnabled()
+}
+
 export function isWhatsAppOtpDevFallbackEnabled() {
   if (isWhatsAppOtpPersistentModeEnabled()) return false
 

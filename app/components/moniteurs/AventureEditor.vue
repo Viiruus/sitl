@@ -51,6 +51,11 @@ type AdventureData = {
     description?: string | null
     lieuLabel?: string | null
   }[]
+  sessions?: {
+    id?: number | null
+    dateDebut?: string | null
+    dateFin?: string | null
+  }[]
 }
 
 const props = defineProps<{
@@ -185,6 +190,8 @@ const hasLegacyInlineCover = computed(() => isInlineOrBlobImageUrl(form.coverIma
 const inlineGalleryImageCount = computed(() => galleryImages.filter((image) => isInlineOrBlobImageUrl(image.url)).length)
 const hasLegacyInlineGallery = computed(() => inlineGalleryImageCount.value > 0)
 const hasLegacyInlineMedia = computed(() => hasLegacyInlineCover.value || hasLegacyInlineGallery.value)
+const sessionCount = computed(() => props.initialData?.sessions?.length || 0)
+const hasSessions = computed(() => sessionCount.value > 0)
 
 const resetListIfEmpty = (list: string[]) => {
   if (!list.length) {
@@ -400,6 +407,7 @@ const buildPayload = (publish: boolean) => ({
 
 const validatePublish = () => {
   const missing: string[] = []
+  if (!hasSessions.value) missing.push('Au moins une session planifiée')
   if (!form.sousTitre.trim()) missing.push('Sous-titre')
   if (!form.niveauMinimum.trim()) missing.push('Niveau minimum')
   if (!form.descriptionCourte.trim() || form.descriptionCourte.trim().length < 10) missing.push('Description courte')
@@ -1120,16 +1128,6 @@ const uploadGalleryImage = async (event: Event, index: number) => {
         >
           <span v-if="saving" class="h-4 w-4 animate-spin rounded-full border-2 border-brand-900 border-t-transparent" />
           <span>Enregistrer</span>
-        </button>
-        <button
-          v-if="!isPublished"
-          type="button"
-          class="inline-flex items-center gap-2 rounded-2xl border border-secondaryBrand-400/70 px-6 py-3 text-sm font-semibold text-secondaryBrand-200 transition hover:border-secondaryBrand-200 disabled:opacity-50"
-          :disabled="publishing || saving"
-          @click="publishAdventure"
-        >
-          <span v-if="publishing" class="h-4 w-4 animate-spin rounded-full border-2 border-secondaryBrand-200 border-t-transparent" />
-          <span>Publier l’aventure</span>
         </button>
       </div>
 

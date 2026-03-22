@@ -5,6 +5,7 @@ import {
   isWhatsAppOtpDevFallbackEnabled,
   isWhatsAppOtpPersistentModeEnabled,
   sendOtpViaWhatsapp,
+  shouldBypassRealWhatsAppSend,
 } from '../../utils/whatsapp-otp'
 import { requestClimberWhatsappOtp } from '../../utils/whatsapp-climber-otp'
 
@@ -30,6 +31,16 @@ export default defineEventHandler(async (event) => {
   }
 
   const { code, token } = generateOtpToken(normalized, source)
+
+  if (shouldBypassRealWhatsAppSend()) {
+    return {
+      ok: true,
+      token,
+      devCode: code,
+      notice: 'Mode local: code OTP généré localement.',
+    }
+  }
+
   const sendResult = await sendOtpViaWhatsapp(normalized, code)
 
   if (!sendResult.ok) {

@@ -180,6 +180,11 @@ export default defineEventHandler(async (event) => {
       equipementRequis: true,
       inclus: true,
       nonInclus: true,
+      sessions: {
+        select: {
+          id: true,
+        },
+      },
     },
   })
   if (!existing) {
@@ -198,6 +203,13 @@ export default defineEventHandler(async (event) => {
     inclus: body.inclus ?? existing.inclus,
     nonInclus: body.nonInclus ?? existing.nonInclus,
   })
+
+  if (nextPublishedState && existing.sessions.length === 0) {
+    throw createError({
+      statusCode: 422,
+      statusMessage: 'Ajoute au moins une session avant de publier ce stage.',
+    })
+  }
 
   const updated = await db.$transaction(async (tx) => {
     const updatedAventure = await tx.aventure.update({

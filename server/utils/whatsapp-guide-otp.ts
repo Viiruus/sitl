@@ -9,6 +9,7 @@ import {
   hashOtpCode,
   isWhatsAppOtpDevFallbackEnabled,
   normalizePhoneNumber,
+  shouldBypassRealWhatsAppSend,
   sendOtpViaWhatsapp,
   verifyOtpCodeHash,
 } from './whatsapp-otp'
@@ -119,6 +120,24 @@ export async function requestGuideWhatsappOtp(input: {
       expiresAt,
     },
   })
+
+  if (shouldBypassRealWhatsAppSend()) {
+    await db.whatsAppOtpChallenge.update({
+      where: { id: challenge.id },
+      data: {
+        messageStatus: 'local',
+        failureReason: null,
+      },
+    })
+
+    return {
+      ok: true as const,
+      token: publicToken,
+      expiresAt,
+      devCode: code,
+      notice: 'Mode local: code OTP généré localement.',
+    }
+  }
 
   const sendResult = await sendOtpViaWhatsapp(normalizedPhone, code)
   if (!sendResult.ok) {
