@@ -39,7 +39,7 @@ useSeoMeta({
             </p>
             <p>
               RNA : W732012328<br>
-              SIREN / SIRET : en cours d’attribution
+              SIRET : 102 428 349 00017
             </p>
           </section>
 

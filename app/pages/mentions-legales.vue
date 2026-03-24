@@ -47,8 +47,8 @@ useSeoMeta({
           </section>
 
           <section class="space-y-3">
-            <h2 class="text-lg font-semibold text-white">SIREN / SIRET</h2>
-            <p>En cours d’attribution</p>
+            <h2 class="text-lg font-semibold text-white">SIRET</h2>
+            <p>102 428 349 00017</p>
           </section>
 
           <section class="space-y-3">
