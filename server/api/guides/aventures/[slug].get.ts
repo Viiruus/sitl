@@ -56,6 +56,8 @@ export default defineEventHandler(async (event) => {
       slug: aventure.slug,
       discipline: aventure.discipline,
       lieuLabel: aventure.lieuLabel,
+      latitude: aventure.latitude ?? null,
+      longitude: aventure.longitude ?? null,
       prixParPersonne: aventure.prixParPersonne,
       jours: aventure.jours,
       placesMin: aventure.placesMin,

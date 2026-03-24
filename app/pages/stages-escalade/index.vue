@@ -16,6 +16,7 @@ useSeoMeta({
 const selectedDiscipline = ref<string | null>(null)
 const dateRangeFilter = ref<[Date | null, Date | null] | null>(null)
 const durationFilter = ref<'all' | 'single' | 'multi'>('all')
+const activeView = ref<'list' | 'map'>('list')
 const dateFilterFormats = {
   input: 'dd/MM/yyyy',
   preview: 'dd/MM/yyyy',
@@ -172,6 +173,53 @@ const guideAvatarSrcset = (stage: any) => {
   return buildStoredSrcset(stage?.guideImageVariants)
 }
 
+const hasStageCoordinates = (stage: any) => {
+  return (
+    typeof stage?.latitude === 'number' &&
+    typeof stage?.longitude === 'number' &&
+    Number.isFinite(stage.latitude) &&
+    Number.isFinite(stage.longitude) &&
+    stage.latitude >= -90 &&
+    stage.latitude <= 90 &&
+    stage.longitude >= -180 &&
+    stage.longitude <= 180
+  )
+}
+
+const formatMapPrice = (price?: number | null) => {
+  if (typeof price !== 'number' || Number.isNaN(price)) return null
+  return `${price} € / pers`
+}
+
+const mapStages = computed(() =>
+  filteredAventures.value
+    .filter((stage: any) => hasStageCoordinates(stage))
+    .map((stage: any) => ({
+      id: stage.id,
+      slug: stage.slug,
+      title: stage.titre,
+      discipline: stage.discipline,
+      latitude: stage.latitude,
+      longitude: stage.longitude,
+      locationLabel: stage.lieuLabel,
+      sessionLabel: stage.nextSession ? formatSessionRange(stage.nextSession) : 'Date à confirmer',
+      priceLabel: formatMapPrice(stage.prixParPersonne),
+      url: `/stages-escalade/${stage.slug}`,
+    })),
+)
+
+const stagesWithoutCoordinatesCount = computed(
+  () => filteredAventures.value.length - mapStages.value.length,
+)
+
+const mapLegend = [
+  { value: 'FALAISE', label: 'Falaise', letter: 'F', color: 'bg-[#d65245]' },
+  { value: 'GRANDE_VOIE', label: 'Grande voie', letter: 'G', color: 'bg-[#b86b2f]' },
+  { value: 'BLOC', label: 'Bloc', letter: 'B', color: 'bg-[#4f9fcf]' },
+  { value: 'TRAD', label: 'Trad', letter: 'T', color: 'bg-[#202020]' },
+  { value: 'VIA_FERRATA', label: 'Via ferrata', letter: 'V', color: 'bg-[#6b8e23]' },
+]
+
 
 </script>
 
@@ -227,6 +275,37 @@ const guideAvatarSrcset = (stage: any) => {
 
       <div v-else class="space-y-6">
         <section class="space-y-4 pb-8 mb-8 border-b border-white/10">
+          <div class="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/15 bg-brand-900/50 p-4 shadow-lg shadow-black/30 backdrop-blur">
+            <div>
+              <p class="text-xs uppercase tracking-[0.3em] text-brand-200/70">Affichage</p>
+              <p class="mt-1 text-sm text-brand-100/80">
+                La liste reste l’affichage principal. La carte arrive en seconde option pour visualiser les stages localisés.
+              </p>
+            </div>
+            <div class="inline-flex rounded-2xl border border-white/15 bg-white/5 p-1">
+              <button
+                type="button"
+                class="rounded-xl px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] transition"
+                :class="activeView === 'list'
+                  ? 'bg-secondaryBrand-500 text-brand-950'
+                  : 'text-brand-100/75 hover:text-white'"
+                @click="activeView = 'list'"
+              >
+                Liste
+              </button>
+              <button
+                type="button"
+                class="rounded-xl px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] transition"
+                :class="activeView === 'map'
+                  ? 'bg-secondaryBrand-500 text-brand-950'
+                  : 'text-brand-100/75 hover:text-white'"
+                @click="activeView = 'map'"
+              >
+                Carte
+              </button>
+            </div>
+          </div>
+
           <div class="grid gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(220px,1.2fr)]">
             <div class="space-y-4 rounded-2xl border border-white/15 bg-brand-900/50 p-4 shadow-lg shadow-black/30 backdrop-blur">
               <div class="flex flex-wrap items-center justify-between gap-3">
@@ -323,7 +402,48 @@ const guideAvatarSrcset = (stage: any) => {
           </div>
         </section>
 
-        <div class="grid gap-6 md:grid-cols-2">
+        <div v-if="activeView === 'map'" class="space-y-5">
+          <div class="rounded-3xl border border-white/10 bg-white/5 p-5 shadow-2xl shadow-black/30 backdrop-blur">
+            <div class="flex flex-wrap items-start justify-between gap-4">
+              <div class="space-y-2">
+                <p class="text-xs uppercase tracking-[0.3em] text-brand-200/70">Carte des stages</p>
+              </div>
+              <div class="flex flex-wrap gap-3">
+                <span
+                  v-for="item in mapLegend"
+                  :key="item.value"
+                  class="inline-flex items-center gap-2 rounded-full border border-white/10 bg-brand-950/70 px-3 py-1.5 text-xs text-white"
+                >
+                  <span
+                    class="inline-flex h-6 w-6 items-center justify-center rounded-full text-[11px] font-extrabold text-white"
+                    :class="item.color"
+                  >
+                    {{ item.letter }}
+                  </span>
+                  {{ item.label }}
+                </span>
+              </div>
+            </div>
+
+            <div v-if="mapStages.length" class="mt-5 overflow-hidden rounded-3xl ring-1 ring-white/10">
+              <StagesMap :stages="mapStages" />
+            </div>
+
+            <p v-else class="mt-5 rounded-2xl border border-white/10 bg-brand-950/60 px-4 py-3 text-sm text-brand-100/80">
+              Aucun stage filtré n’a encore de coordonnées GPS. Renseigne latitude et longitude dans la fiche moniteur pour l’afficher ici.
+            </p>
+
+            <p
+              v-if="mapStages.length && stagesWithoutCoordinatesCount > 0"
+              class="mt-4 text-sm text-brand-200/75"
+            >
+              {{ stagesWithoutCoordinatesCount }} stage<span v-if="stagesWithoutCoordinatesCount > 1">s</span> filtré<span v-if="stagesWithoutCoordinatesCount > 1">s</span>
+              n’apparaît<span v-if="stagesWithoutCoordinatesCount > 1">ssent</span> pas encore sur la carte faute de coordonnées GPS.
+            </p>
+          </div>
+        </div>
+
+        <div v-else class="grid gap-6 md:grid-cols-2">
           <NuxtLink
             v-for="a in filteredAventures"
             :key="a.id"

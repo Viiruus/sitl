@@ -178,6 +178,8 @@ const mapListAventure = (a: any) => ({
   discipline: a.discipline,
   formule: a.formule,
   lieuLabel: a.lieuLabel,
+  latitude: a.latitude,
+  longitude: a.longitude,
   jours: a.jours,
   prixParPersonne: a.prixParPersonne,
   guideName:
@@ -189,6 +191,7 @@ const mapListAventure = (a: any) => ({
 
 const mapDetailAventure = (a: any, bookedSessionIds: Set<number>) => ({
   ...mapListAventure(a),
+  pays: a.pays,
   region: a.region,
   inclus: a.inclus,
   nonInclus: a.nonInclus,

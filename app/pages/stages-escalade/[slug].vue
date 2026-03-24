@@ -433,6 +433,13 @@
                       {{ stage.pointRdv }}
                     </p>
                     <p
+                      v-if="stageCoordinateLabel"
+                      class="text-sm text-brand-100/90"
+                    >
+                      <span class="font-semibold text-sm">Point GPS :</span>
+                      {{ stageCoordinateLabel }}
+                    </p>
+                    <p
                       v-if="stage.pointsLocaux"
                       class="text-sm text-brand-100/90 whitespace-pre-line"
                     >
@@ -486,11 +493,12 @@
                         Localisation
                       </p>
                       <p class="text-sm text-brand-100/85">
-                        {{ stage.lieuLabel }}
+                        {{ stageLocationLabel }}
                       </p>
                     </div>
                     <NuxtLink
-                      :to="`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(stage.lieuLabel || '')}`"
+                      v-if="stageGoogleMapsUrl"
+                      :to="stageGoogleMapsUrl"
                       target="_blank"
                       rel="noopener"
                       class="text-xs font-semibold text-secondaryBrand-300 hover:text-secondaryBrand-200 underline"
@@ -1175,6 +1183,7 @@ import {
 import '@vuepic/vue-datepicker/dist/main.css'
 const route = useRoute()
 const slug = route.params.slug as string
+const runtimeConfig = useRuntimeConfig()
 
 const { data, pending, error } = await useFetch(`/api/aventures/${slug}`)
 
@@ -1430,9 +1439,59 @@ const heroImageSrcset = computed(() => {
 })
 
 const mapEmbedUrl = computed(() => {
-  const label = stage.value?.lieuLabel || stage.value?.region || stage.value?.titre
+  if (hasStageCoordinates.value) {
+    return `https://www.google.com/maps?q=${stage.value?.latitude},${stage.value?.longitude}&z=11&output=embed`
+  }
+  const label = stage.value?.pointRdv || stage.value?.lieuLabel || stage.value?.region || stage.value?.titre
   if (!label) return null
   return `https://www.google.com/maps?q=${encodeURIComponent(label)}&output=embed`
+})
+
+const hasStageCoordinates = computed(() => {
+  const latitude = stage.value?.latitude
+  const longitude = stage.value?.longitude
+  return (
+    typeof latitude === 'number' &&
+    typeof longitude === 'number' &&
+    Number.isFinite(latitude) &&
+    Number.isFinite(longitude) &&
+    latitude >= -90 &&
+    latitude <= 90 &&
+    longitude >= -180 &&
+    longitude <= 180
+  )
+})
+
+const formatCoordinate = (value?: number | null) => {
+  if (typeof value !== 'number' || Number.isNaN(value)) return null
+  return new Intl.NumberFormat('en-US', {
+    minimumFractionDigits: 5,
+    maximumFractionDigits: 5,
+  }).format(value)
+}
+
+const stageCoordinateLabel = computed(() => {
+  if (!hasStageCoordinates.value) return null
+  const latitude = formatCoordinate(stage.value?.latitude)
+  const longitude = formatCoordinate(stage.value?.longitude)
+  if (!latitude || !longitude) return null
+  return `${latitude}, ${longitude}`
+})
+
+const stageLocationLabel = computed(() =>
+  joinTextValues([stage.value?.lieuLabel, stage.value?.region], ' · ') ||
+  stage.value?.pointRdv ||
+  stage.value?.titre ||
+  'Lieu à confirmer',
+)
+
+const stageGoogleMapsUrl = computed(() => {
+  if (hasStageCoordinates.value) {
+    return `https://www.google.com/maps/search/?api=1&query=${stage.value?.latitude},${stage.value?.longitude}`
+  }
+  const label = stage.value?.pointRdv || stage.value?.lieuLabel || stage.value?.region || stage.value?.titre
+  if (!label) return null
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(label)}`
 })
 
 // ----- Guide / moniteur -----
@@ -2005,17 +2064,122 @@ const seoDescription = computed(() => {
   return truncateSeo(source)
 })
 const seoImage = computed(() => normalizeImagePath(stage.value?.coverImageUrl) || undefined)
-
-useHead({
-  titleTemplate: '%s | Brigade du kiff — Stages d’escalade',
+const siteBaseUrl = computed(() => runtimeConfig.public.publicUrl || 'https://brigadedukiff.com')
+const stageCanonicalUrl = computed(() => {
+  try {
+    return new URL(`/stages-escalade/${slug}`, siteBaseUrl.value).toString()
+  } catch {
+    return `/stages-escalade/${slug}`
+  }
 })
+const seoImageAbsolute = computed(() => {
+  const image = seoImage.value
+  if (!image) return undefined
+  if (/^https?:\/\//i.test(image)) return image
+  try {
+    return new URL(image, siteBaseUrl.value).toString()
+  } catch {
+    return image
+  }
+})
+
+const compactObject = <T extends Record<string, any>>(value: T): Partial<T> =>
+  Object.fromEntries(
+    Object.entries(value).filter(([, entry]) => entry !== undefined && entry !== null && entry !== ''),
+  ) as Partial<T>
+
+const eventStructuredData = computed(() => {
+  if (!stage.value) return null
+
+  const sessions = (stage.value.sessions || []).filter((session: any) => session?.dateDebut)
+  if (!sessions.length) return null
+
+  const organizationId = `${siteBaseUrl.value.replace(/\/$/, '')}/#organization`
+  const address = compactObject({
+    '@type': 'PostalAddress',
+    streetAddress: stage.value.pointRdv || stage.value.lieuLabel || undefined,
+    addressLocality: stage.value.lieuLabel || undefined,
+    addressRegion: stage.value.region || undefined,
+    addressCountry: stage.value.pays || 'FR',
+  })
+
+  const location = compactObject({
+    '@type': 'Place',
+    name: stage.value.lieuLabel || stage.value.pointRdv || stage.value.titre,
+    address: Object.keys(address).length ? address : undefined,
+    geo: hasStageCoordinates.value
+      ? {
+          '@type': 'GeoCoordinates',
+          latitude: stage.value.latitude,
+          longitude: stage.value.longitude,
+        }
+      : undefined,
+  })
+
+  return {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'Organization',
+        '@id': organizationId,
+        name: 'Brigade du kiff',
+        url: siteBaseUrl.value,
+      },
+      ...sessions.map((session: any) =>
+        compactObject({
+          '@type': 'Event',
+          name: stage.value?.titre,
+          startDate: session.dateDebut,
+          endDate: session.dateFin || session.dateDebut,
+          eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
+          eventStatus: 'https://schema.org/EventScheduled',
+          description:
+            stage.value?.descriptionCourte ||
+            stage.value?.sousTitre ||
+            resumeCeQuiTattend.value ||
+            undefined,
+          image: seoImageAbsolute.value ? [seoImageAbsolute.value] : undefined,
+          url: stageCanonicalUrl.value,
+          location: Object.keys(location).length ? location : undefined,
+          organizer: {
+            '@id': organizationId,
+          },
+          offers:
+            typeof stage.value?.prixParPersonne === 'number'
+              ? {
+                  '@type': 'Offer',
+                  price: String(stage.value.prixParPersonne),
+                  priceCurrency: stage.value?.devise || 'EUR',
+                  availability: 'https://schema.org/InStock',
+                  url: stageCanonicalUrl.value,
+                }
+              : undefined,
+        }),
+      ),
+    ],
+  }
+})
+
+useHead(() => ({
+  titleTemplate: '%s | Brigade du kiff — Stages d’escalade',
+  script: eventStructuredData.value
+    ? [
+        {
+          key: 'stage-event-jsonld',
+          type: 'application/ld+json',
+          innerHTML: JSON.stringify(eventStructuredData.value),
+        },
+      ]
+    : [],
+}))
 
 useSeoMeta({
   title: seoTitle,
   description: seoDescription,
   ogTitle: seoTitle,
   ogDescription: seoDescription,
-  ogImage: seoImage,
+  ogImage: seoImageAbsolute,
+  ogUrl: stageCanonicalUrl,
   robots: 'index, follow, max-image-preview:large',
 })
 </script>

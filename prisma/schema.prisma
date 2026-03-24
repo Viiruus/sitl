@@ -307,6 +307,8 @@ model Aventure {
   repasLabel         String?
   transportLabel     String?
   pointRdv           String?
+  latitude           Float?
+  longitude          Float?
   langues            Json?
 
   ageMin Int?

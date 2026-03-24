@@ -537,6 +537,8 @@ async function seedAventures(guides: any[]) {
     formule: AventureFormule
     disciplinesComplementaires?: string[]
     lieuLabel: string
+    latitude?: number
+    longitude?: number
     region?: string
     jours: number
     placesMax: number
@@ -577,6 +579,8 @@ async function seedAventures(guides: any[]) {
       formule: "GRIMPE_SEULEMENT",
       disciplinesComplementaires: ['FALAISE'],
       lieuLabel: 'Orpierre, Hautes-Alpes',
+      latitude: 44.3139,
+      longitude: 5.6898,
       region: 'Provence-Alpes-Côte d’Azur',
       jours: 4,
       placesMax: 6,
@@ -700,6 +704,8 @@ async function seedAventures(guides: any[]) {
       discipline: "GRANDE_VOIE",
       formule: "GRIMPE_SEULEMENT",
       lieuLabel: 'Presles, Vercors',
+      latitude: 45.0898,
+      longitude: 5.3936,
       region: 'Auvergne-Rhône-Alpes',
       jours: 2,
       placesMax: 4,
@@ -797,6 +803,8 @@ async function seedAventures(guides: any[]) {
       discipline: "FALAISE",
       formule: "GRIMPE_SEULEMENT",
       lieuLabel: 'Massif des Bauges',
+      latitude: 45.6507,
+      longitude: 6.1697,
       region: 'Auvergne-Rhône-Alpes',
       jours: 3,
       placesMax: 8,
@@ -894,6 +902,8 @@ async function seedAventures(guides: any[]) {
       discipline: "BLOC",
       formule: "GRIMPE_SEULEMENT",
       lieuLabel: 'Forêt de Fontainebleau',
+      latitude: 48.4048,
+      longitude: 2.7016,
       region: 'Île-de-France',
       jours: 1,
       placesMax: 10,
@@ -966,6 +976,8 @@ async function seedAventures(guides: any[]) {
       formule: "GRIMPE_SEULEMENT",
       disciplinesComplementaires: ['FALAISE'],
       lieuLabel: 'Falaises du Pays basque',
+      latitude: 43.3065,
+      longitude: -1.4271,
       region: 'Nouvelle-Aquitaine',
       jours: 2,
       placesMax: 4,
@@ -1056,6 +1068,8 @@ async function seedAventures(guides: any[]) {
       discipline: "FALAISE",
       formule: "GRIMPE_SEULEMENT",
       lieuLabel: 'Buoux, Luberon',
+      latitude: 43.8443,
+      longitude: 5.3173,
       region: 'Provence-Alpes-Côte d’Azur',
       jours: 2,
       placesMax: 6,
@@ -1159,6 +1173,8 @@ async function seedAventures(guides: any[]) {
       formule: "GRIMPE_SEULEMENT",
       disciplinesComplementaires: ['FALAISE'],
       lieuLabel: 'Roc des Bœufs, Bauges',
+      latitude: 45.7758,
+      longitude: 6.1801,
       region: 'Auvergne-Rhône-Alpes',
       jours: 3,
       placesMax: 5,
@@ -1270,6 +1286,8 @@ async function seedAventures(guides: any[]) {
       discipline: "VIA_FERRATA",
       formule: "GRIMPE_SEULEMENT",
       lieuLabel: 'Via ferrata du Verdon',
+      latitude: 43.7799,
+      longitude: 6.3612,
       region: 'Provence-Alpes-Côte d’Azur',
       jours: 2,
       placesMax: 8,
@@ -1369,6 +1387,8 @@ async function seedAventures(guides: any[]) {
         formule: a.formule,
         disciplinesComplementaires: a.disciplinesComplementaires ?? [],
         lieuLabel: a.lieuLabel,
+        latitude: a.latitude ?? null,
+        longitude: a.longitude ?? null,
         pays: 'France',
         region: a.region,
         jours: a.jours,
@@ -1405,6 +1425,8 @@ async function seedAventures(guides: any[]) {
         formule: a.formule,
         disciplinesComplementaires: a.disciplinesComplementaires ?? [],
         lieuLabel: a.lieuLabel,
+        latitude: a.latitude ?? null,
+        longitude: a.longitude ?? null,
         pays: 'France',
         region: a.region,
         jours: a.jours,

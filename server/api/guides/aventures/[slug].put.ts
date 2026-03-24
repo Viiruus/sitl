@@ -39,11 +39,15 @@ const programmeJourSchema = z.object({
   lieuLabel: z.string().trim().min(1).optional(),
 })
 
+const coordinateSchema = z.number().min(-180).max(180).nullable().optional()
+
 const bodySchema = z
   .object({
     titre: z.string().trim().min(3),
     discipline: z.enum(['FALAISE', 'GRANDE_VOIE', 'BLOC', 'TRAD', 'VIA_FERRATA']),
     lieuLabel: z.string().trim().min(3),
+    latitude: coordinateSchema,
+    longitude: coordinateSchema,
     prixParPersonne: z.number().int().min(0),
     jours: z.number().int().min(1).max(30),
     placesMin: z.number().int().min(0).max(20),
@@ -167,6 +171,24 @@ export default defineEventHandler(async (event) => {
   }
 
   const body = bodySchema.parse(await readBody(event))
+  if ((body.latitude == null) !== (body.longitude == null)) {
+    throw createError({
+      statusCode: 422,
+      statusMessage: 'Renseigne la latitude et la longitude ensemble.',
+    })
+  }
+  if (body.latitude != null && (body.latitude < -90 || body.latitude > 90)) {
+    throw createError({
+      statusCode: 422,
+      statusMessage: 'La latitude doit être comprise entre -90 et 90.',
+    })
+  }
+  if (body.longitude != null && (body.longitude < -180 || body.longitude > 180)) {
+    throw createError({
+      statusCode: 422,
+      statusMessage: 'La longitude doit être comprise entre -180 et 180.',
+    })
+  }
   if (body.placesMin > body.placesMax) {
     throw createError({
       statusCode: 422,
@@ -225,6 +247,8 @@ export default defineEventHandler(async (event) => {
         titre: body.titre,
         discipline: body.discipline,
         lieuLabel: body.lieuLabel,
+        latitude: body.latitude ?? null,
+        longitude: body.longitude ?? null,
         prixParPersonne: body.prixParPersonne,
         jours: body.jours,
         placesMin: body.placesMin,

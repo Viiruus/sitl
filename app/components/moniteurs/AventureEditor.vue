@@ -17,6 +17,8 @@ type AdventureData = {
   titre: string
   discipline: 'FALAISE' | 'GRANDE_VOIE' | 'BLOC' | 'TRAD' | 'VIA_FERRATA'
   lieuLabel: string
+  latitude: number | null
+  longitude: number | null
   prixParPersonne: number
   jours: number
   placesMin: number
@@ -111,6 +113,8 @@ const form = reactive({
   titre: '',
   discipline: 'FALAISE',
   lieuLabel: '',
+  latitude: '',
+  longitude: '',
   prixParPersonne: '',
   jours: '',
   placesMin: '',
@@ -192,6 +196,18 @@ const hasLegacyInlineCover = computed(() => isInlineOrBlobImageUrl(form.coverIma
 const inlineGalleryImageCount = computed(() => galleryImages.filter((image) => isInlineOrBlobImageUrl(image.url)).length)
 const hasLegacyInlineGallery = computed(() => inlineGalleryImageCount.value > 0)
 const hasLegacyInlineMedia = computed(() => hasLegacyInlineCover.value || hasLegacyInlineGallery.value)
+const latitudeValue = computed(() => parseNumberField(form.latitude))
+const longitudeValue = computed(() => parseNumberField(form.longitude))
+const hasCoordinates = computed(() => latitudeValue.value != null && longitudeValue.value != null)
+const googleMapsEditorLink = computed(() => {
+  if (hasCoordinates.value) {
+    return `https://www.google.com/maps/search/?api=1&query=${latitudeValue.value},${longitudeValue.value}`
+  }
+  if (form.lieuLabel.trim()) {
+    return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(form.lieuLabel.trim())}`
+  }
+  return null
+})
 const sessionCount = computed(() => props.initialData?.sessions?.length || 0)
 const hasSessions = computed(() => sessionCount.value > 0)
 
@@ -210,6 +226,8 @@ watch(
     form.titre = value.titre
     form.discipline = value.discipline
     form.lieuLabel = value.lieuLabel
+    form.latitude = value.latitude != null ? String(value.latitude) : ''
+    form.longitude = value.longitude != null ? String(value.longitude) : ''
     form.prixParPersonne = value.prixParPersonne
     form.jours = value.jours
     form.placesMin = value.placesMin
@@ -305,6 +323,17 @@ const validateBaseFields = () => {
   if (!form.lieuLabel.trim()) {
     throw new Error('Ajoute un lieu.')
   }
+  const latitude = parseNumberField(form.latitude)
+  const longitude = parseNumberField(form.longitude)
+  if ((latitude == null) !== (longitude == null)) {
+    throw new Error('Renseigne la latitude et la longitude ensemble.')
+  }
+  if (latitude != null && (latitude < -90 || latitude > 90)) {
+    throw new Error('La latitude doit être comprise entre -90 et 90.')
+  }
+  if (longitude != null && (longitude < -180 || longitude > 180)) {
+    throw new Error('La longitude doit être comprise entre -180 et 180.')
+  }
   const priceValue = parseNumberField(form.prixParPersonne)
   if (priceValue == null || priceValue < 0) {
     throw new Error('Indique un prix par personne.')
@@ -367,6 +396,8 @@ const buildPayload = (publish: boolean) => ({
   titre: form.titre.trim(),
   discipline: form.discipline as AdventureData['discipline'],
   lieuLabel: form.lieuLabel.trim(),
+  latitude: parseNumberField(form.latitude),
+  longitude: parseNumberField(form.longitude),
   prixParPersonne: parseNumberField(form.prixParPersonne) ?? 0,
   jours: parseNumberField(form.jours) ?? 0,
   placesMin: parseNumberField(form.placesMin) ?? 0,
@@ -681,6 +712,45 @@ const uploadGalleryImage = async (event: Event, index: number) => {
               class="w-full rounded-xl border border-white/10 bg-brand-900/80 px-3 py-2 text-white focus:border-secondaryBrand-400 focus:outline-none"
             />
           </div>
+        </div>
+
+        <div class="grid gap-4 md:grid-cols-2">
+          <div class="space-y-2">
+            <label class="text-xs uppercase tracking-[0.3em] text-brand-200/70">Latitude GPS</label>
+            <input
+              v-model="form.latitude"
+              type="number"
+              step="any"
+              inputmode="decimal"
+              placeholder="Ex: 44.9142"
+              class="w-full rounded-xl border border-white/10 bg-brand-900/80 px-3 py-2 text-white focus:border-secondaryBrand-400 focus:outline-none"
+            />
+          </div>
+          <div class="space-y-2">
+            <label class="text-xs uppercase tracking-[0.3em] text-brand-200/70">Longitude GPS</label>
+            <input
+              v-model="form.longitude"
+              type="number"
+              step="any"
+              inputmode="decimal"
+              placeholder="Ex: 5.3431"
+              class="w-full rounded-xl border border-white/10 bg-brand-900/80 px-3 py-2 text-white focus:border-secondaryBrand-400 focus:outline-none"
+            />
+          </div>
+        </div>
+        <div class="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/10 bg-brand-950/40 px-4 py-3 text-sm text-brand-100/80">
+          <p>
+            Ajoute un vrai point GPS pour activer la carte, améliorer le lien Google Maps et enrichir le référencement local.
+          </p>
+          <a
+            v-if="googleMapsEditorLink"
+            :href="googleMapsEditorLink"
+            target="_blank"
+            rel="noopener"
+            class="inline-flex items-center gap-2 rounded-full border border-secondaryBrand-400/40 px-3 py-1.5 text-xs font-semibold text-secondaryBrand-200 transition hover:border-secondaryBrand-300 hover:text-secondaryBrand-100"
+          >
+            Ouvrir dans Google Maps
+          </a>
         </div>
       </section>
 
