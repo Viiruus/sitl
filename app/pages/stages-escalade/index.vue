@@ -430,7 +430,7 @@ const mapLegend = [
             </div>
 
             <p v-else class="mt-5 rounded-2xl border border-white/10 bg-brand-950/60 px-4 py-3 text-sm text-brand-100/80">
-              Aucun stage filtré n’a encore de coordonnées GPS. Renseigne latitude et longitude dans la fiche moniteur pour l’afficher ici.
+              Aucun stage filtré n’a encore de coordonnées GPS.
             </p>
 
             <p
