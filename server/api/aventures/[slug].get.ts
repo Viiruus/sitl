@@ -32,6 +32,7 @@ export default defineEventHandler(async (event) => {
               profileImageUrl: true,
               profileImageVariants: true,
               professionalCardNumber: true,
+              stageTermsAndConditions: true,
             },
           },
         },
@@ -148,6 +149,7 @@ const mapGuide = (a: any) => {
           instagramUrl: gp.instagramUrl,
           websiteUrl: gp.websiteUrl,
           professionalCardNumber: gp.professionalCardNumber,
+          stageTermsAndConditions: gp.stageTermsAndConditions,
           profileImageUrl,
           profileImageVariants,
         }

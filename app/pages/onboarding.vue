@@ -13,6 +13,7 @@ useSeoMeta({
 
 const { loggedIn, fetch, user } = useUserSession()
 const router = useRouter()
+const pendingGuideContactPathKey = 'bdk_pending_guide_contact_path'
 
 // Étapes
 const step = ref(1)
@@ -113,6 +114,14 @@ const submit = async () => {
     })
 
     success.value = 'Profil enregistré ✅'
+    if (typeof window !== 'undefined') {
+      const contactPath = window.localStorage.getItem(pendingGuideContactPathKey)
+      if (contactPath) {
+        window.localStorage.removeItem(pendingGuideContactPathKey)
+        await router.push(contactPath.includes('?') ? `${contactPath}&contact=1` : `${contactPath}?contact=1`)
+        return
+      }
+    }
     router.push('/profil')
   } catch (e: any) {
     error.value = e?.data?.message || 'Une erreur est survenue.'

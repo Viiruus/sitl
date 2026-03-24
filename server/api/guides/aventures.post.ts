@@ -13,6 +13,7 @@ const createSchema = z.object({
   lieuLabel: z.string().trim().min(3),
   prixParPersonne: z.number().int().min(0),
   jours: z.number().int().min(1).max(30),
+  placesMin: z.number().int().min(0).max(20),
   placesMax: z.number().int().min(1).max(20),
 })
 
@@ -27,6 +28,12 @@ export default defineEventHandler(async (event) => {
 
   const db = await prisma()
   const body = createSchema.parse(await readBody(event))
+  if (body.placesMin > body.placesMax) {
+    throw createError({
+      statusCode: 422,
+      statusMessage: 'Le minimum de participants ne peut pas dépasser le maximum.',
+    })
+  }
 
   // Validate unique slug
   const existing = await db.aventure.findUnique({
@@ -44,6 +51,7 @@ export default defineEventHandler(async (event) => {
       lieuLabel: body.lieuLabel,
       prixParPersonne: body.prixParPersonne,
       jours: body.jours,
+      placesMin: body.placesMin,
       placesMax: body.placesMax,
       guideId: Number(session.user.id),
     },

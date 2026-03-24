@@ -4,6 +4,7 @@ import {
   GUIDE_UPLOAD_PRESETS,
   isManagedGuideImageUrl,
 } from '~~/shared/constants/guide-image-upload'
+import { buildDefaultGuideStageTerms } from '~~/shared/constants/guide-stage-terms'
 
 definePageMeta({
   middleware: 'guide-auth',
@@ -29,6 +30,7 @@ const form = reactive({
   whatsappOptIn: true,
   baseLocation: '',
   bio: '',
+  stageTermsAndConditions: '',
   instagramUrl: '',
   websiteUrl: '',
   professionalCardNumber: '',
@@ -40,12 +42,17 @@ watch(
   () => guide.value,
   (value) => {
     if (!value) return
+    const currentGuideName = [value.firstName, value.lastName].filter(Boolean).join(' ').trim() || null
     form.firstName = value.firstName || ''
     form.lastName = value.lastName || ''
     form.phoneNumber = value.phoneNumber || ''
     form.whatsappOptIn = Boolean(value.whatsappOptIn)
     form.baseLocation = value.baseLocation || ''
     form.bio = value.bio || ''
+    form.stageTermsAndConditions = value.stageTermsAndConditions || buildDefaultGuideStageTerms({
+      guideName: currentGuideName,
+      professionalCardNumber: value.professionalCardNumber || null,
+    })
     form.instagramUrl = value.instagramUrl || ''
     form.websiteUrl = value.websiteUrl || ''
     form.professionalCardNumber = value.professionalCardNumber || ''
@@ -87,6 +94,14 @@ function normalizeVariants (variants?: any[] | null) {
     }))
     .filter((variant) => isManagedGuideImageUrl(variant.url) && Number.isFinite(variant.width) && variant.width > 0)
     .sort((a, b) => a.width - b.width)
+}
+
+const resetStageTermsToDefault = () => {
+  const currentGuideName = [form.firstName, form.lastName].filter(Boolean).join(' ').trim() || null
+  form.stageTermsAndConditions = buildDefaultGuideStageTerms({
+    guideName: currentGuideName,
+    professionalCardNumber: form.professionalCardNumber || null,
+  })
 }
 
 const saveProfile = async () => {
@@ -270,6 +285,29 @@ const logout = async () => {
                 v-model="form.bio"
                 rows="4"
                 class="w-full rounded-xl border border-brand-800 bg-brand-900/80 px-3 py-2 text-white focus:border-secondaryBrand-400 focus:outline-none"
+              ></textarea>
+            </div>
+
+            <div class="space-y-3 rounded-2xl border border-white/10 bg-brand-900/40 p-5">
+              <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <label class="text-sm font-medium text-brand-100/80">Conditions générales de vente (CGV)</label>
+                  <p class="mt-1 text-xs text-brand-200/70">
+                    Modèle à adapter à ton activité. Les variables de stage restent dynamiques sur la fiche publique et les champs non renseignés restent affichés entre crochets.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  class="inline-flex items-center justify-center rounded-full border border-white/15 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-white/80 transition hover:bg-white/5"
+                  @click="resetStageTermsToDefault"
+                >
+                  Réinitialiser le modèle
+                </button>
+              </div>
+              <textarea
+                v-model="form.stageTermsAndConditions"
+                rows="18"
+                class="w-full rounded-xl border border-brand-800 bg-brand-900/80 px-3 py-3 text-sm text-white focus:border-secondaryBrand-400 focus:outline-none"
               ></textarea>
             </div>
 

@@ -46,6 +46,7 @@ const bodySchema = z
     lieuLabel: z.string().trim().min(3),
     prixParPersonne: z.number().int().min(0),
     jours: z.number().int().min(1).max(30),
+    placesMin: z.number().int().min(0).max(20),
     placesMax: z.number().int().min(1).max(20),
     sousTitre: z.string().trim().optional(),
     transportLabel: z.string().trim().optional(),
@@ -166,6 +167,12 @@ export default defineEventHandler(async (event) => {
   }
 
   const body = bodySchema.parse(await readBody(event))
+  if (body.placesMin > body.placesMax) {
+    throw createError({
+      statusCode: 422,
+      statusMessage: 'Le minimum de participants ne peut pas dépasser le maximum.',
+    })
+  }
   const db = await prisma()
 
   const existing = await db.aventure.findFirst({
@@ -220,6 +227,7 @@ export default defineEventHandler(async (event) => {
         lieuLabel: body.lieuLabel,
         prixParPersonne: body.prixParPersonne,
         jours: body.jours,
+        placesMin: body.placesMin,
         placesMax: body.placesMax,
         sousTitre: valueOrNull(body.sousTitre ?? null),
         transportLabel: valueOrNull(body.transportLabel ?? null),

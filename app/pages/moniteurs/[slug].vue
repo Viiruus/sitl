@@ -91,6 +91,22 @@
                       </span>
                     </li>
                   </ul>
+                  <!-- Contact WhatsApp temporairement masqué le temps de corriger le setup Meta.
+                  <div class="mt-8 space-y-3">
+                    <button
+                      type="button"
+                      class="inline-flex items-center justify-center gap-3 rounded-full bg-[#25D366] px-5 py-3 text-sm font-semibold text-brand-950 shadow-lg shadow-[#25D366]/30 transition hover:translate-y-[-1px] hover:shadow-xl"
+                      @click="handleGuideContactClick"
+                    >
+                      <svg class="h-5 w-5" viewBox="0 0 32 32" fill="currentColor" aria-hidden="true">
+                        <path
+                          d="M16 3C9.4 3 4 8.2 4 14.7c0 2.4.7 4.6 2 6.5L4 29l8-1.8c1.3.4 2.7.6 4 .6 6.6 0 12-5.2 12-11.7C28 8.2 22.6 3 16 3Zm0 2c5.5 0 10 4.3 10 9.7S21.5 24.4 16 24.4c-1.3 0-2.5-.2-3.7-.7l-.8-.3-.8.2-3.9.9 1.1-3.3.2-.7-.5-.6c-1.1-1.6-1.6-3.4-1.6-5.3C6 9.3 10.5 5 16 5Zm5.2 10.9c-.3-.1-1.8-.9-2-1-.3-.1-.5-.1-.7.1-.2.3-.8 1-.9 1.1-.2.2-.3.2-.6.1-.3-.1-1.2-.4-2.2-1.4-.8-.8-1.4-1.7-1.6-2-.2-.3 0-.4.1-.6.1-.2.3-.3.4-.5.1-.1.2-.3.3-.5.1-.2 0-.4 0-.5 0-.1-.7-1.7-1-2.3-.3-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.3-.3.3-1 1-1 2.4s1.1 2.8 1.2 3c.1.2 2.1 3.3 5 4.5.7.3 1.2.5 1.6.6.7.2 1.4.2 1.9.1.6-.1 1.8-.7 2-1.3.2-.6.2-1.2.2-1.3 0-.1-.2-.1-.5-.2Z"
+                        />
+                      </svg>
+                      Contacter {{ moniteurContactFirstName }}
+                    </button>
+                  </div>
+                  -->
                 </div>
               </div>
             </div>
@@ -271,6 +287,84 @@
 
       <AppFooter />
     </div>
+
+    <teleport to="body">
+      <transition name="fade">
+        <div
+          v-if="contactModalOpen"
+          class="fixed inset-0 z-50 flex items-center justify-center px-4 py-10"
+        >
+          <div class="absolute inset-0 bg-black/70 backdrop-blur-sm" @click="closeGuideContactModal" />
+
+          <div class="relative w-full max-w-2xl rounded-3xl border border-brand-800 bg-brand-900/95 p-6 shadow-2xl backdrop-blur md:p-8">
+            <button
+              type="button"
+              class="absolute right-4 top-4 rounded-full border border-white/10 bg-white/5 p-2 text-white hover:bg-white/10"
+              @click="closeGuideContactModal"
+            >
+              <span class="sr-only">Fermer</span>
+              <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 6l12 12M18 6l-12 12" />
+              </svg>
+            </button>
+
+            <div class="space-y-3">
+              <p class="text-[11px] uppercase tracking-[0.3em] text-secondaryBrand-300">
+                Contact moniteur
+              </p>
+              <h2 class="text-2xl font-semibold text-white">
+                Envoyer un message WhatsApp à {{ moniteurContactFirstName }}
+              </h2>
+              <p class="max-w-xl text-sm text-brand-100/75">
+                Ton message sera transmis au moniteur via le WhatsApp de Brigade du kiff, avec ton prénom, ton nom et ton numéro.
+              </p>
+            </div>
+
+            <form class="mt-6 space-y-4" @submit.prevent="submitGuideContact">
+              <div class="space-y-2">
+                <label class="block text-sm text-brand-100/80">Ta demande</label>
+                <textarea
+                  v-model="contactMessage"
+                  rows="6"
+                  maxlength="2000"
+                  class="w-full rounded-2xl border border-brand-800 bg-brand-950/70 px-4 py-3 text-sm text-white placeholder:text-brand-200/40 focus:border-secondaryBrand-400 focus:outline-none"
+                  placeholder="Exemple : Bonjour, je cherche un stage grande voie en mai pour progresser en tête. Est-ce que tu proposes quelque chose d’adapté ?"
+                ></textarea>
+                <div class="flex items-center justify-between text-xs text-brand-200/65">
+                  <span>Minimum 10 caractères.</span>
+                  <span>{{ contactMessage.length }}/2000</span>
+                </div>
+              </div>
+
+              <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <button
+                  type="submit"
+                  class="inline-flex items-center justify-center gap-3 rounded-full bg-[#25D366] px-5 py-3 text-sm font-semibold text-brand-950 shadow-lg shadow-[#25D366]/30 transition hover:translate-y-[-1px] hover:shadow-xl disabled:cursor-not-allowed disabled:opacity-60"
+                  :disabled="contactSending || contactMessage.trim().length < 10"
+                >
+                  <span v-if="contactSending" class="h-4 w-4 animate-spin rounded-full border-2 border-brand-900 border-t-transparent" />
+                  <span>{{ contactSending ? 'Envoi en cours…' : 'Envoyer la demande' }}</span>
+                </button>
+                <button
+                  type="button"
+                  class="inline-flex items-center justify-center rounded-full border border-white/15 px-5 py-3 text-sm font-semibold text-white/80 transition hover:bg-white/5"
+                  @click="closeGuideContactModal"
+                >
+                  Annuler
+                </button>
+              </div>
+
+              <p v-if="contactSuccess" class="text-sm text-secondaryBrand-200">
+                {{ contactSuccess }}
+              </p>
+              <p v-if="contactError" class="text-sm text-red-300">
+                {{ contactError }}
+              </p>
+            </form>
+          </div>
+        </div>
+      </transition>
+    </teleport>
   </div>
 </template>
 
@@ -279,7 +373,11 @@ import { HomeIcon, TruckIcon } from '@heroicons/vue/24/solid'
 import { buildStoredSrcset, resolveStoredImageSrc } from '~/composables/useStoredImageVariants'
 
 const route = useRoute()
+const router = useRouter()
 const slug = computed(() => route.params.slug as string)
+const { loggedIn, user, fetch: fetchUserSession } = useUserSession()
+const { openModal } = useAuthModal()
+const pendingGuideContactPathKey = 'bdk_pending_guide_contact_path'
 
 const { data, pending, error } = await useAsyncData(
   () => $fetch(`/api/moniteurs/${slug.value}`),
@@ -387,6 +485,12 @@ const heroBackground = computed(
 )
 const heroBackgroundSrcset = computed(() => buildStoredSrcset(moniteur.value?.heroImageVariants))
 const locationLabel = computed(() => moniteur.value?.baseLocation || moniteur.value?.department || 'France')
+const moniteurContactFirstName = computed(() => moniteur.value?.firstName?.trim() || 'ce moniteur')
+const contactModalOpen = ref(false)
+const contactMessage = ref('')
+const contactSending = ref(false)
+const contactError = ref<string | null>(null)
+const contactSuccess = ref<string | null>(null)
 
 const aventureCoverSrc = (aventure: any) => {
   return resolveStoredImageSrc(aventure?.coverImageUrl, aventure?.coverImageVariants) || fallbackImageForDiscipline(aventure?.discipline)
@@ -506,6 +610,82 @@ const featureList = computed(() => [
     description: nextSessionLabel.value,
   },
 ])
+
+const clearGuideContactQuery = async () => {
+  if (route.query.contact !== '1') return
+  const query = { ...route.query }
+  delete query.contact
+  await router.replace({ query })
+}
+
+const storePendingGuideContact = () => {
+  if (typeof window === 'undefined') return
+  window.localStorage.setItem(pendingGuideContactPathKey, route.path)
+}
+
+const closeGuideContactModal = () => {
+  contactModalOpen.value = false
+  contactError.value = null
+  contactSuccess.value = null
+}
+
+const handleGuideContactClick = async () => {
+  await fetchUserSession()
+
+  if (!loggedIn.value || user.value?.role === 'GUIDE') {
+    storePendingGuideContact()
+    openModal()
+    return
+  }
+
+  contactError.value = null
+  contactSuccess.value = null
+  contactModalOpen.value = true
+}
+
+const submitGuideContact = async () => {
+  contactError.value = null
+  contactSuccess.value = null
+  contactSending.value = true
+
+  try {
+    const response: any = await $fetch(`/api/moniteurs/${slug.value}/contact`, {
+      method: 'POST',
+      body: {
+        message: contactMessage.value,
+      },
+    })
+    contactSuccess.value = response?.message || `Ton message a bien été envoyé à ${moniteurContactFirstName.value}.`
+    contactMessage.value = ''
+  } catch (e: any) {
+    contactError.value = e?.data?.message || 'Impossible d’envoyer ta demande pour le moment.'
+  } finally {
+    contactSending.value = false
+  }
+}
+
+watch(
+  [() => route.query.contact, loggedIn, () => user.value?.role],
+  async ([contact, isLoggedIn, role]) => {
+    if (contact !== '1') return
+    if (!isLoggedIn || role === 'GUIDE') {
+      storePendingGuideContact()
+      openModal()
+      await clearGuideContactQuery()
+      return
+    }
+
+    contactError.value = null
+    contactSuccess.value = null
+    contactModalOpen.value = true
+    await clearGuideContactQuery()
+  },
+  { immediate: true },
+)
+
+onMounted(() => {
+  fetchUserSession()
+})
 
 
 const formatFullDate = (dateInput: string | number | Date) => {

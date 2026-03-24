@@ -14,6 +14,7 @@ const codeSent = ref(false)
 const otpToken = ref<string | null>(null)
 const pendingBookingKey = 'bdk_pending_booking'
 const pendingBookingIntentKey = 'bdk_pending_booking_intent'
+const pendingGuideContactPathKey = 'bdk_pending_guide_contact_path'
 const skipPendingClear = ref(false)
 
 const source = computed(() => (route.query.source as string) || 'direct')
@@ -33,6 +34,7 @@ watch(open, (val) => {
     if (!skipPendingClear.value && !loggedIn.value && typeof window !== 'undefined') {
       window.localStorage.removeItem(pendingBookingKey)
       window.localStorage.removeItem(pendingBookingIntentKey)
+      window.localStorage.removeItem(pendingGuideContactPathKey)
     }
     skipPendingClear.value = false
   }
@@ -70,6 +72,16 @@ const redirectAfterAuth = async () => {
         await router.push(target)
       }
       window.localStorage.removeItem(pendingBookingIntentKey)
+      return
+    }
+
+    const contactPath = window.localStorage.getItem(pendingGuideContactPathKey)
+    if (contactPath) {
+      const target = contactPath.includes('?') ? `${contactPath}&contact=1` : `${contactPath}?contact=1`
+      if (route.fullPath !== target) {
+        await router.push(target)
+      }
+      window.localStorage.removeItem(pendingGuideContactPathKey)
       return
     }
   }

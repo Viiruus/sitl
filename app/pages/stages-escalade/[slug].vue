@@ -110,6 +110,13 @@
                     <span class="text-[10px] uppercase tracking-[0.25em] text-secondaryBrand-200/90">Places max</span>
                     <span class="font-semibold">{{ stage.placesMax }}</span>
                   </div>
+                  <div
+                    v-if="stage.placesMin > 0"
+                    class="inline-flex items-center gap-2 rounded-full bg-brand-900/70 px-3 py-2 text-sm text-white ring-1 ring-white/10"
+                  >
+                    <span class="text-[10px] uppercase tracking-[0.25em] text-secondaryBrand-200/90">Départ confirmé dès</span>
+                    <span class="font-semibold">{{ stage.placesMin }} pers.</span>
+                  </div>
                   <div class="inline-flex items-center gap-2 rounded-full bg-brand-900/70 px-3 py-2 text-sm text-white ring-1 ring-white/10">
                     <span class="text-[10px] uppercase tracking-[0.25em] text-secondaryBrand-200/90">Tarif / pers</span>
                     <span class="font-semibold">{{ stage.prixParPersonne }} €</span>
@@ -504,6 +511,29 @@
                   </div>
                 </div>
               </section>
+
+              <section
+                v-else-if="activeTab === 'cgv'"
+                class="space-y-6"
+              >
+                <div class="rounded-3xl bg-brand-900/50 p-6 ring-1 ring-white/10">
+                  <div class="flex flex-wrap items-start justify-between gap-4">
+                    <div>
+                      <h3 class="text-xl font-semibold uppercase tracking-wide text-white">
+                        Conditions générales de vente
+                      </h3>
+                      <p class="mt-2 text-sm text-brand-100/80">
+                        Ces CGV s’appliquent au stage tel qu’il est présenté sur cette fiche. Les variables entre crochets correspondent aux informations que le moniteur n’a pas encore précisées.
+                      </p>
+                    </div>
+                  </div>
+                  <div class="mt-5 rounded-2xl bg-brand-950/60 p-5 ring-1 ring-white/10">
+                    <p class="whitespace-pre-line text-sm leading-7 text-brand-100/90">
+                      {{ resolvedGuideStageTerms }}
+                    </p>
+                  </div>
+                </div>
+              </section>
             </div>
 
             <div class="space-y-6">
@@ -561,6 +591,12 @@
                     Choisis le ou les créneaux qui te conviennent le mieux.
                     <br/>
                     Le moniteur de la Brigade du kiff te recontacte pour organiser le stage.
+                  </p>
+                  <p
+                    v-if="stage?.placesMin > 0"
+                    class="mt-2 text-xs font-semibold text-gray-700"
+                  >
+                    Départ confirmé à partir de {{ stage.placesMin }} participant<span v-if="stage.placesMin > 1">s</span>.
                   </p>
 
                   <!-- Messages -->
@@ -1132,6 +1168,10 @@
 <script setup lang="ts">
 import { VueDatePicker } from '@vuepic/vue-datepicker'
 import { fr as dateFnsFr } from 'date-fns/locale'
+import {
+  buildDefaultGuideStageTerms,
+  replaceGuideStageTermsVariables,
+} from '~~/shared/constants/guide-stage-terms'
 import '@vuepic/vue-datepicker/dist/main.css'
 const route = useRoute()
 const slug = route.params.slug as string
@@ -1201,6 +1241,7 @@ const tabs = [
   { id: 'overview', label: 'Vue d’ensemble' },
   { id: 'programme', label: 'Programme' },
   { id: 'infos', label: 'Infos pratiques' },
+  { id: 'cgv', label: 'CGV' },
 ] as const
 
 const activeTab = ref<(typeof tabs)[number]['id']>('overview')
@@ -1237,6 +1278,12 @@ const ageRange = computed(() => {
   if (s.ageMin) return `À partir de ${s.ageMin} ans`
   if (s.ageMax) return `Jusqu’à ${s.ageMax} ans`
   return ''
+})
+
+const minimumAgeLabel = computed(() => {
+  const ageMin = stage.value?.ageMin
+  if (typeof ageMin !== 'number' || ageMin <= 0) return null
+  return `${ageMin} ans`
 })
 
 const objectifsList = computed(() =>
@@ -1423,6 +1470,80 @@ const guideInstagramUrl = computed(
 
 const guideWebsiteUrl = computed(
   () => guide.value?.profile?.websiteUrl || null,
+)
+
+const joinTextValues = (values: Array<string | null | undefined>, separator = ', ') => {
+  const filtered = values
+    .map((value) => (typeof value === 'string' ? value.trim() : value))
+    .filter((value): value is string => Boolean(value))
+  return filtered.length ? filtered.join(separator) : null
+}
+
+const formatPriceLabel = (value?: number | null) => {
+  if (typeof value !== 'number' || Number.isNaN(value)) return null
+  return new Intl.NumberFormat('fr-FR', {
+    style: 'currency',
+    currency: 'EUR',
+    maximumFractionDigits: 0,
+  }).format(value)
+}
+
+const sessionDateLabels = computed(() => {
+  const sessions = stage.value?.sessions || []
+  const labels = sessions
+    .filter((session: any) => session?.dateDebut)
+    .map((session: any) => formatSessionRange(session))
+    .filter(Boolean)
+  return labels.length ? labels : null
+})
+
+const guideStageTermsRaw = computed(() => {
+  const rawTerms = guide.value?.profile?.stageTermsAndConditions
+  if (typeof rawTerms === 'string' && rawTerms.trim()) {
+    return rawTerms
+  }
+
+  return buildDefaultGuideStageTerms({
+    guideName: guideFullName.value,
+    professionalCardNumber: guide.value?.professionalCardNumber || null,
+  })
+})
+
+const resolvedGuideStageTerms = computed(() =>
+  replaceGuideStageTermsVariables(guideStageTermsRaw.value, {
+    MONITEUR_NOM: guideFullName.value,
+    'MONITEUR_NOM or ENTITE_CONCERNEE': guideFullName.value,
+    CARTE_PRO_EDUCATEUR: guide.value?.professionalCardNumber || null,
+    NOM_DU_STAGE: stage.value?.titre,
+    DESCRIPTION_STAGE:
+      stage.value?.descriptionCourte ||
+      stage.value?.descriptionLongue ||
+      stage.value?.sousTitre ||
+      null,
+    DISCIPLINE: formatDisciplineLabel(stage.value?.discipline),
+    NIVEAU_REQUIS: stage.value?.niveauMinimum || null,
+    AGE_MINIMUM: minimumAgeLabel.value,
+    PRE_REQUIS: joinTextValues(prerequisList.value),
+    LIEU: joinTextValues([stage.value?.lieuLabel, stage.value?.region]),
+    DATES: joinTextValues(sessionDateLabels.value || [], ' ; '),
+    DUREE:
+      typeof stage.value?.jours === 'number'
+        ? `${stage.value.jours} jour${stage.value.jours > 1 ? 's' : ''}`
+        : null,
+    EFFECTIF_MIN:
+      typeof stage.value?.placesMin === 'number'
+        ? (stage.value.placesMin > 0 ? String(stage.value.placesMin) : 'Aucun minimum')
+        : null,
+    EFFECTIF_MAX:
+      typeof stage.value?.placesMax === 'number' && stage.value.placesMax > 0
+        ? String(stage.value.placesMax)
+        : null,
+    PRIX_TTC: formatPriceLabel(stage.value?.prixParPersonne),
+    CE_QUI_EST_INCLUS: stage.value?.inclus || null,
+    CE_QUI_N_EST_PAS_INCLUS: stage.value?.nonInclus || null,
+    MATERIEL_FOURNI: joinTextValues(equipementFourniList.value),
+    MATERIEL_A_PREVOIR_PAR_CLIENT: joinTextValues(equipementRequisList.value),
+  }),
 )
 
 // Format helpers

@@ -19,6 +19,7 @@ type AdventureData = {
   lieuLabel: string
   prixParPersonne: number
   jours: number
+  placesMin: number
   placesMax: number
   sousTitre: string
   transportLabel: string
@@ -112,6 +113,7 @@ const form = reactive({
   lieuLabel: '',
   prixParPersonne: '',
   jours: '',
+  placesMin: '',
   placesMax: '',
   sousTitre: '',
   transportLabel: '',
@@ -210,6 +212,7 @@ watch(
     form.lieuLabel = value.lieuLabel
     form.prixParPersonne = value.prixParPersonne
     form.jours = value.jours
+    form.placesMin = value.placesMin
     form.placesMax = value.placesMax
     form.sousTitre = value.sousTitre || ''
     form.transportLabel = value.transportLabel || ''
@@ -314,6 +317,13 @@ const validateBaseFields = () => {
   if (placesValue == null || placesValue < 1) {
     throw new Error('Indique le nombre de places.')
   }
+  const minPlacesValue = parseNumberField(form.placesMin) ?? 0
+  if (minPlacesValue < 0) {
+    throw new Error('Le minimum de participants ne peut pas être négatif.')
+  }
+  if (minPlacesValue > placesValue) {
+    throw new Error('Le minimum de participants ne peut pas dépasser le nombre de places.')
+  }
 }
 
 const ensureAdventureExists = async () => {
@@ -335,6 +345,7 @@ const ensureAdventureExists = async () => {
       lieuLabel: form.lieuLabel.trim(),
       prixParPersonne: parseNumberField(form.prixParPersonne) ?? 0,
       jours: parseNumberField(form.jours) ?? 0,
+      placesMin: parseNumberField(form.placesMin) ?? 0,
       placesMax: parseNumberField(form.placesMax) ?? 0,
     },
   })
@@ -358,6 +369,7 @@ const buildPayload = (publish: boolean) => ({
   lieuLabel: form.lieuLabel.trim(),
   prixParPersonne: parseNumberField(form.prixParPersonne) ?? 0,
   jours: parseNumberField(form.jours) ?? 0,
+  placesMin: parseNumberField(form.placesMin) ?? 0,
   placesMax: parseNumberField(form.placesMax) ?? 0,
   sousTitre: form.sousTitre.trim(),
   transportLabel: form.transportLabel.trim(),
@@ -632,7 +644,7 @@ const uploadGalleryImage = async (event: Event, index: number) => {
           </div>
         </div>
 
-        <div class="grid gap-4 md:grid-cols-2">
+        <div class="grid gap-4 md:grid-cols-3">
           <div class="space-y-2">
             <label class="text-xs uppercase tracking-[0.3em] text-brand-200/70">Durée (jours)</label>
             <input
@@ -643,6 +655,20 @@ const uploadGalleryImage = async (event: Event, index: number) => {
               placeholder="Ex: 2"
               class="w-full rounded-xl border border-white/10 bg-brand-900/80 px-3 py-2 text-white focus:border-secondaryBrand-400 focus:outline-none"
             />
+          </div>
+          <div class="space-y-2">
+            <label class="text-xs uppercase tracking-[0.3em] text-brand-200/70">Participants minimum</label>
+            <input
+              v-model="form.placesMin"
+              min="0"
+              max="20"
+              type="number"
+              placeholder="Ex: 4"
+              class="w-full rounded-xl border border-white/10 bg-brand-900/80 px-3 py-2 text-white focus:border-secondaryBrand-400 focus:outline-none"
+            />
+            <p class="text-xs text-brand-200/60">
+              Indique 0 si le stage peut partir sans minimum.
+            </p>
           </div>
           <div class="space-y-2">
             <label class="text-xs uppercase tracking-[0.3em] text-brand-200/70">Places max</label>

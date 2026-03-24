@@ -1,3 +1,4 @@
+import { consumeGuideContactWebhookPayload } from '../../../utils/whatsapp-guide-contact'
 import { consumeGuideWhatsappWebhookPayload } from '../../../utils/whatsapp-guide-otp'
 import { verifyMetaWebhookSignature } from '../../../utils/whatsapp-otp'
 
@@ -23,6 +24,7 @@ export default defineEventHandler(async (event) => {
     return { ok: true, ignored: true }
   }
 
+  await consumeGuideContactWebhookPayload(payload)
   await consumeGuideWhatsappWebhookPayload(payload)
   return { ok: true }
 })

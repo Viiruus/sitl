@@ -20,6 +20,7 @@ const bodySchema = z.object({
   whatsappOptIn: z.boolean().optional(),
   baseLocation: z.string().trim().max(160).optional().or(z.literal('')),
   bio: z.string().trim().max(2000).optional().or(z.literal('')),
+  stageTermsAndConditions: z.string().trim().max(20000).optional().or(z.literal('')),
   instagramUrl: z.string().url().optional().or(z.literal('')),
   websiteUrl: z.string().url().optional().or(z.literal('')),
   professionalCardNumber: z.string().trim().max(100).optional().or(z.literal('')),
@@ -77,6 +78,7 @@ export default defineEventHandler(async (event) => {
         upsert: {
           update: {
             bio: clean(body.bio),
+            stageTermsAndConditions: clean(body.stageTermsAndConditions),
             baseLocation: clean(body.baseLocation),
             instagramUrl: clean(body.instagramUrl),
             websiteUrl: clean(body.websiteUrl),
@@ -86,6 +88,7 @@ export default defineEventHandler(async (event) => {
           },
           create: {
             bio: clean(body.bio) ?? '',
+            stageTermsAndConditions: clean(body.stageTermsAndConditions) ?? null,
             baseLocation: clean(body.baseLocation) ?? null,
             instagramUrl: clean(body.instagramUrl) ?? null,
             websiteUrl: clean(body.websiteUrl) ?? null,
@@ -123,6 +126,7 @@ export default defineEventHandler(async (event) => {
       whatsappOptIn: user.whatsappOptIn,
       baseLocation: user.guideProfile?.baseLocation || null,
       bio: user.guideProfile?.bio || null,
+      stageTermsAndConditions: user.guideProfile?.stageTermsAndConditions || null,
       instagramUrl: user.guideProfile?.instagramUrl || null,
       websiteUrl: user.guideProfile?.websiteUrl || null,
       professionalCardNumber: user.guideProfile?.professionalCardNumber || null,

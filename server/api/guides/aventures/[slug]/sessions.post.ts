@@ -33,6 +33,21 @@ const getInclusiveDaySpan = (start: Date, end: Date) => {
   return Math.floor((toUtcDayTimestamp(end) - toUtcDayTimestamp(start)) / MS_PER_DAY) + 1
 }
 
+const formatSessionDate = (value: Date) => {
+  return new Intl.DateTimeFormat('fr-FR', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+    timeZone: 'UTC',
+  }).format(value)
+}
+
+const formatSessionPeriod = (start: Date, end: Date) => {
+  const startLabel = formatSessionDate(start)
+  const endLabel = formatSessionDate(end)
+  return startLabel === endLabel ? startLabel : `${startLabel} → ${endLabel}`
+}
+
 export default defineEventHandler(async (event) => {
   const session = await getUserSession(event)
   const slug = event.context.params?.slug
@@ -65,6 +80,41 @@ export default defineEventHandler(async (event) => {
     throw createError({
       statusCode: 422,
       statusMessage: `Cette session doit couvrir exactement ${aventure.jours} jour${aventure.jours > 1 ? 's' : ''}.`,
+    })
+  }
+
+  const conflictingSession = await db.aventureSession.findFirst({
+    where: {
+      statut: {
+        not: 'ANNULE',
+      },
+      aventure: {
+        guideId: Number(session.user.id),
+      },
+      dateDebut: {
+        lte: sessionEndDate,
+      },
+      dateFin: {
+        gte: body.dateDebut,
+      },
+    },
+    select: {
+      id: true,
+      dateDebut: true,
+      dateFin: true,
+      aventure: {
+        select: {
+          titre: true,
+          slug: true,
+        },
+      },
+    },
+  })
+
+  if (conflictingSession) {
+    throw createError({
+      statusCode: 409,
+      statusMessage: `Une session est déjà planifiée sur cette période pour "${conflictingSession.aventure.titre}" (${formatSessionPeriod(conflictingSession.dateDebut, conflictingSession.dateFin)}).`,
     })
   }
 

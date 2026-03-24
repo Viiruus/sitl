@@ -146,6 +146,8 @@ model User {
   dateSuggestions AventureDateSuggestion[]
   associationMemberships AssociationMembership[]
   whatsappOtpChallenges WhatsAppOtpChallenge[]
+  guideContactRequestsSent GuideContactRequest[] @relation("GuideContactRequestsSent")
+  guideContactRequestsReceived GuideContactRequest[] @relation("GuideContactRequestsReceived")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -218,6 +220,7 @@ model GuideProfile {
   instagramUrl String?
   websiteUrl   String?
   professionalCardNumber String?
+  stageTermsAndConditions String?
 
   // ✅ Nouveau : image principale du moniteur
   profileImageUrl      String?
@@ -227,6 +230,38 @@ model GuideProfile {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model GuideContactRequest {
+  id Int @id @default(autoincrement())
+
+  guideId Int
+  guide User @relation("GuideContactRequestsReceived", fields: [guideId], references: [id], onDelete: Cascade)
+
+  climberId Int
+  climber User @relation("GuideContactRequestsSent", fields: [climberId], references: [id], onDelete: Cascade)
+
+  message        String
+  messagePreview String
+
+  climberNameSnapshot  String?
+  climberPhoneSnapshot String
+  guidePhoneSnapshot   String
+
+  templateName  String?
+  messageId     String? @unique
+  messageStatus String?
+  failureReason String?
+
+  sentAt DateTime?
+
+  lastWebhookPayload Json?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([guideId, createdAt])
+  @@index([climberId, createdAt])
 }
 
 model Aventure {

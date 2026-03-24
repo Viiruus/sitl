@@ -58,6 +58,7 @@ export default defineEventHandler(async (event) => {
       lieuLabel: aventure.lieuLabel,
       prixParPersonne: aventure.prixParPersonne,
       jours: aventure.jours,
+      placesMin: aventure.placesMin,
       placesMax: aventure.placesMax,
       sousTitre: aventure.sousTitre || '',
       transportLabel: aventure.transportLabel || '',
