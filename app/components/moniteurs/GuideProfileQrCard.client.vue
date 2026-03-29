@@ -15,16 +15,17 @@ const downloadPending = ref(false)
 
 const CANVAS_SIZE = 280
 const SVG_PIXEL_SIZE = 8
+const QR_COLOR = '#ffcf00'
 
-const buildQrSvgMarkup = (whiteColor: string) => {
+const buildQrSvgMarkup = () => {
   try {
     qrError.value = null
     return renderSVG(props.profileUrl, {
       ecc: 'M',
       border: 2,
       pixelSize: SVG_PIXEL_SIZE,
-      whiteColor,
-      blackColor: '#111827',
+      whiteColor: 'transparent',
+      blackColor: QR_COLOR,
     })
   } catch {
     qrError.value = 'Impossible de generer le QR code.'
@@ -32,17 +33,11 @@ const buildQrSvgMarkup = (whiteColor: string) => {
   }
 }
 
-const qrSvgMarkup = computed(() => buildQrSvgMarkup('#ffffff'))
-const qrTransparentSvgMarkup = computed(() => buildQrSvgMarkup('transparent'))
+const qrSvgMarkup = computed(() => buildQrSvgMarkup())
 
 const qrSvgDataUrl = computed(() => {
   if (!qrSvgMarkup.value) return null
   return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(qrSvgMarkup.value)}`
-})
-
-const qrTransparentSvgDataUrl = computed(() => {
-  if (!qrTransparentSvgMarkup.value) return null
-  return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(qrTransparentSvgMarkup.value)}`
 })
 
 const triggerDownload = (url: string) => {
@@ -74,11 +69,11 @@ const canvasToBlob = (canvas: HTMLCanvasElement) =>
   })
 
 const downloadQrCode = async () => {
-  if (!qrTransparentSvgDataUrl.value) return
+  if (!qrSvgDataUrl.value) return
 
   downloadPending.value = true
   try {
-    const image = await loadImage(qrTransparentSvgDataUrl.value)
+    const image = await loadImage(qrSvgDataUrl.value)
     const canvas = document.createElement('canvas')
     canvas.width = image.naturalWidth || CANVAS_SIZE
     canvas.height = image.naturalHeight || CANVAS_SIZE
@@ -140,7 +135,7 @@ const downloadQrCode = async () => {
         </p>
       </div>
 
-      <div class="self-center rounded-[2rem] bg-white p-4 shadow-2xl shadow-black/30">
+      <div class="self-center rounded-[2rem] bg-white/5 p-4 shadow-2xl shadow-black/30 ring-1 ring-white/10">
         <img
           v-if="qrSvgDataUrl"
           :src="qrSvgDataUrl"
