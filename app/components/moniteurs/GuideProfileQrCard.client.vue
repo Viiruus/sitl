@@ -16,25 +16,33 @@ const downloadPending = ref(false)
 const CANVAS_SIZE = 280
 const SVG_PIXEL_SIZE = 8
 
-const qrSvgMarkup = computed(() => {
+const buildQrSvgMarkup = (whiteColor: string) => {
   try {
     qrError.value = null
     return renderSVG(props.profileUrl, {
       ecc: 'M',
       border: 2,
       pixelSize: SVG_PIXEL_SIZE,
-      whiteColor: '#ffffff',
+      whiteColor,
       blackColor: '#111827',
     })
   } catch {
     qrError.value = 'Impossible de generer le QR code.'
     return null
   }
-})
+}
+
+const qrSvgMarkup = computed(() => buildQrSvgMarkup('#ffffff'))
+const qrTransparentSvgMarkup = computed(() => buildQrSvgMarkup('transparent'))
 
 const qrSvgDataUrl = computed(() => {
   if (!qrSvgMarkup.value) return null
   return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(qrSvgMarkup.value)}`
+})
+
+const qrTransparentSvgDataUrl = computed(() => {
+  if (!qrTransparentSvgMarkup.value) return null
+  return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(qrTransparentSvgMarkup.value)}`
 })
 
 const triggerDownload = (url: string) => {
@@ -66,11 +74,11 @@ const canvasToBlob = (canvas: HTMLCanvasElement) =>
   })
 
 const downloadQrCode = async () => {
-  if (!qrSvgDataUrl.value) return
+  if (!qrTransparentSvgDataUrl.value) return
 
   downloadPending.value = true
   try {
-    const image = await loadImage(qrSvgDataUrl.value)
+    const image = await loadImage(qrTransparentSvgDataUrl.value)
     const canvas = document.createElement('canvas')
     canvas.width = image.naturalWidth || CANVAS_SIZE
     canvas.height = image.naturalHeight || CANVAS_SIZE
@@ -80,8 +88,6 @@ const downloadQrCode = async () => {
       throw new Error('Impossible de preparer le QR code.')
     }
 
-    context.fillStyle = '#ffffff'
-    context.fillRect(0, 0, canvas.width, canvas.height)
     context.drawImage(image, 0, 0)
 
     const blob = await canvasToBlob(canvas)
