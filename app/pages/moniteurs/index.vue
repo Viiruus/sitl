@@ -11,12 +11,28 @@ useSeoMeta({
 
 const router = useRouter()
 const route = useRoute()
+const runtimeConfig = useRuntimeConfig()
 const { clear, fetch } = useUserSession()
 
 const { data, pending, refresh } = await useFetch('/api/guides/me')
 const guide = computed(() => data.value?.guide ?? null)
 const { data: aventuresData } = await useFetch('/api/guides/aventures')
 const aventures = computed(() => aventuresData.value?.aventures ?? [])
+const guideProfilePath = computed(() => {
+  const slug = guide.value?.slug
+  return slug ? `/moniteurs/${slug}` : null
+})
+const guideProfileUrl = computed(() => {
+  if (!guideProfilePath.value) return null
+  const origin = import.meta.client && window.location?.origin
+    ? window.location.origin
+    : (runtimeConfig.public.publicUrl || 'http://localhost:3000')
+  return new URL(guideProfilePath.value, origin).toString()
+})
+const guideQrFileName = computed(() => {
+  const slug = guide.value?.slug
+  return slug ? `qr-code-${slug}` : 'qr-code-profil-moniteur'
+})
 const requiredProfileFields = computed(() => ['firstName', 'lastName', 'baseLocation', 'bio', 'profileImageUrl'] as const)
 const missingProfileFields = computed(() => {
   const g = guide.value
@@ -172,6 +188,13 @@ const logout = async () => {
             </li>
           </ul>
         </div>
+
+        <MoniteursGuideProfileQrCard
+          v-if="guideProfileUrl"
+          :profile-url="guideProfileUrl"
+          :guide-name="guide?.fullName"
+          :file-name="guideQrFileName"
+        />
       </main>
     </div>
   </div>

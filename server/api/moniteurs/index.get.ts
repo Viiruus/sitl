@@ -1,16 +1,6 @@
 import { prisma } from "../../utils/prisma"
 import { sanitizePublicImageUrl, sanitizePublicImageVariants } from "../../utils/public-image"
-
-const slugifyName = (firstName?: string | null, lastName?: string | null, fallback?: string | number | null) => {
-  const base = [firstName, lastName].filter(Boolean).join(" ").trim()
-  if (!base) return fallback ? String(fallback) : ""
-  return base
-    .normalize("NFD")
-    .replace(/\p{Diacritic}/gu, "")
-    .replace(/[^a-zA-Z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "")
-    .toLowerCase()
-}
+import { buildGuideSlug } from "~~/shared/utils/guide-slug"
 
 export default defineEventHandler(async () => {
   const db = await prisma()
@@ -44,7 +34,7 @@ export default defineEventHandler(async () => {
           profileImageUrl,
           profileImageVariants,
           id: guide.id,
-          slug: slugifyName(firstName, lastName, guide.id),
+          slug: buildGuideSlug(firstName, lastName, guide.id),
           firstName,
           lastName,
           fullName: `${firstName} ${lastName}`,

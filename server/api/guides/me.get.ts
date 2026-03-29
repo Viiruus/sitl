@@ -1,5 +1,6 @@
 import { prisma } from '../../utils/prisma'
 import { sanitizePublicImageUrl, sanitizePublicImageVariants } from '../../utils/public-image'
+import { buildGuideSlug } from '~~/shared/utils/guide-slug'
 
 const mapGuide = (user: any) => ({
   ...(() => {
@@ -18,6 +19,7 @@ const mapGuide = (user: any) => ({
   firstName: user.firstName,
   lastName: user.lastName,
   fullName: [user.firstName, user.lastName].filter(Boolean).join(' ') || 'Moniteur',
+  slug: buildGuideSlug(user.firstName, user.lastName, user.id),
   baseLocation: user.guideProfile?.baseLocation || null,
   bio: user.guideProfile?.bio || null,
   stageTermsAndConditions: user.guideProfile?.stageTermsAndConditions || null,

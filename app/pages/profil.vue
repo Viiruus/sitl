@@ -1,4 +1,6 @@
 <script setup lang="ts">
+  import { buildGuideSlug } from '~~/shared/utils/guide-slug'
+
   definePageMeta({
     middleware: 'climber-auth',
   })
@@ -224,21 +226,10 @@
     return [guide?.firstName, guide?.lastName].filter(Boolean).join(' ') || 'Moniteur local'
   }
 
-  const slugifyName = (firstName?: string | null, lastName?: string | null, fallback?: string | number | null) => {
-    const base = [firstName, lastName].filter(Boolean).join(' ').trim()
-    if (!base) return fallback ? String(fallback) : ''
-    return base
-      .normalize('NFD')
-      .replace(/\p{Diacritic}/gu, '')
-      .replace(/[^a-zA-Z0-9]+/g, '-')
-      .replace(/^-+|-+$/g, '')
-      .toLowerCase()
-  }
-
   const bookingGuideProfileUrl = (booking: any) => {
     const aventure = booking?.session?.aventure
     const guide = aventure?.guide
-    const slug = slugifyName(guide?.firstName, guide?.lastName, guide?.id)
+    const slug = buildGuideSlug(guide?.firstName, guide?.lastName, guide?.id)
     return slug ? `/moniteurs/${slug}` : '/la-brigade'
   }
 

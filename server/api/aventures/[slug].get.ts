@@ -1,6 +1,7 @@
 // server/api/aventures/[slug].get.ts
 import { prisma } from '../../utils/prisma'
 import { sanitizePublicImageUrl, sanitizePublicImageVariants } from '../../utils/public-image'
+import { buildGuideSlug } from '~~/shared/utils/guide-slug'
 
 export default defineEventHandler(async (event) => {
   const db = await prisma()
@@ -118,28 +119,13 @@ export default defineEventHandler(async (event) => {
   }
 })
 
-const slugifyName = (
-  firstName?: string | null,
-  lastName?: string | null,
-  fallback?: string | number | null,
-) => {
-  const base = [firstName, lastName].filter(Boolean).join(' ').trim()
-  if (!base) return fallback ? String(fallback) : ''
-  return base
-    .normalize('NFD')
-    .replace(/\p{Diacritic}/gu, '')
-    .replace(/[^a-zA-Z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '')
-    .toLowerCase()
-}
-
 const mapGuide = (a: any) => {
   if (!a.guide) return null
   const gp = a.guide.guideProfile
   const profileImageUrl = sanitizePublicImageUrl(gp?.profileImageUrl, { allowInline: true })
   const profileImageVariants = sanitizePublicImageVariants(gp?.profileImageVariants, { allowInline: true })
   return {
-    slug: slugifyName(a.guide.firstName, a.guide.lastName, a.guide.id),
+    slug: buildGuideSlug(a.guide.firstName, a.guide.lastName, a.guide.id),
     fullName: [a.guide.firstName, a.guide.lastName].filter(Boolean).join(' ') || null,
     professionalCardNumber: gp?.professionalCardNumber || null,
     profile: gp

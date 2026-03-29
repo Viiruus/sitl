@@ -1,16 +1,6 @@
 import { prisma } from "../../utils/prisma"
 import { sanitizePublicImageUrl, sanitizePublicImageVariants } from "../../utils/public-image"
-
-const slugifyName = (firstName?: string | null, lastName?: string | null, fallback?: string | number | null) => {
-  const base = [firstName, lastName].filter(Boolean).join(" ").trim()
-  if (!base) return fallback ? String(fallback) : ""
-  return base
-    .normalize("NFD")
-    .replace(/\p{Diacritic}/gu, "")
-    .replace(/[^a-zA-Z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "")
-    .toLowerCase()
-}
+import { buildGuideSlug } from "~~/shared/utils/guide-slug"
 
 const findNextSession = (sessions: any[]) => {
   const today = new Date()
@@ -85,7 +75,7 @@ export default defineEventHandler(async (event) => {
     })
     guide =
       candidateGuides.find(
-        (candidate) => slugifyName(candidate.firstName, candidate.lastName, candidate.id) === normalizedSlug,
+        (candidate) => buildGuideSlug(candidate.firstName, candidate.lastName, candidate.id) === normalizedSlug,
       ) || null
   }
 
@@ -122,7 +112,7 @@ export default defineEventHandler(async (event) => {
 
   const moniteur = {
     id: guide.id,
-    slug: slugifyName(guide.firstName, guide.lastName, guide.id),
+    slug: buildGuideSlug(guide.firstName, guide.lastName, guide.id),
     firstName: guide.firstName,
     lastName: guide.lastName,
     fullName: [guide.firstName, guide.lastName].filter(Boolean).join(" ") || null,
