@@ -91,7 +91,6 @@
                       </span>
                     </li>
                   </ul>
-                  <!-- Contact WhatsApp temporairement masqué le temps de corriger le setup Meta.
                   <div class="mt-8 space-y-3">
                     <button
                       type="button"
@@ -106,7 +105,6 @@
                       Contacter {{ moniteurContactFirstName }}
                     </button>
                   </div>
-                  -->
                 </div>
               </div>
             </div>
