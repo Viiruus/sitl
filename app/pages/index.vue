@@ -87,19 +87,16 @@
       </div>
       <div class="mt-6 space-y-4 text-base leading-relaxed text-brand-100/85">
         <p>
-          La Brigade du kiff, c’est une équipe passionnée par escalade mais surtout par les humains.
-          Notre objectif est de te faire passer un moment inoubliable en pleine nature et en bonne compagnie.
+          La Brigade du kiff est un collectif de moniteur.ices d'escalade diplômé.e.s d'état réunis sous la forme
+          d'une association pour te proposer les meilleurs expériences d’escalade en milieux naturels.
         </p>
         <p>
-          Viens grimper dans les spots les plus canons mais surtout les plus adaptés à ta pratique.
-          Et ce n’est pas tout : notre priorité c’est ta progression. Nos moniteurs sont déterminés à te faire performer.
-        </p>
-        <p>
-          Rejoins la team et
+          Nous sélectionnons les spots avec soin pour te faire kiffer et progresser dans les conditions les plus
+          adaptées. Rejoins l’aventure en
           <NuxtLink to="/stages-escalade" class="font-semibold text-secondaryBrand-200 hover:text-secondaryBrand-400 underline underline-offset-4">
-            inscris-toi
+            t’inscrivant à un prochain stage
           </NuxtLink>
-          à un prochain stage !
+          !
         </p>
       </div>
 
@@ -145,19 +142,18 @@
         L’escalade sous toutes ses formes
       </h2>
       <p class="mt-4 text-base text-gray-600">
-        L’escalade est une pratique sportive exceptionnellement riche.
+        L’escalade est une pratique sportive exceptionnellement riche… Pour coller au mieux à tes attentes et faciliter
+        ta progression, nous proposons 5 grandes catégories.
       </p>
       <p class="mt-4 text-base text-gray-600">
-        Chez la Brigade du kiff, nous avons souhaité les organiser en 4 grandes catégories même s’il existe une infinie de sensibilités différentes…
-        <br/>
-        Qu’il s’agisse d’une bambée de plusieurs centaines de mètres en terrain d’aventure ou d’un bloc déversant hyper technique, ce n’est pas la même discipline !
-        <br/>
-        Pourtant, toutes ces spécificités se complètent et font de toi un meilleur grimpeur ou une meilleure grimpeuse.
+        Et oui ! Qu’il s’agisse d’une bambée de plusieurs centaines de mètres en terrain d’aventure ou d’un bloc
+        déversant hyper technique, ce n’est pas la même discipline !
       </p>
       <p class="mt-4 text-base text-gray-600">
-        Alors en selle,
+        Pourtant, toutes ces spécificités se complètent et font de toi un meilleur grimpeur ou une meilleure
+        grimpeuse. Alors profite de l’expérience de nos moniteur.ices en
         <NuxtLink to="/stages-escalade" class="font-semibold text-brand-700 hover:text-brand-900 underline underline-offset-4">
-          rejoins l’aventure
+          rejoignant un prochain stage
         </NuxtLink>
         !
       </p>
@@ -333,7 +329,7 @@ import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { buildStoredSrcset, resolveStoredImageSrc } from '~/composables/useStoredImageVariants'
 
 useSeoMeta({
-  title: 'Aventures d’escalade encadrées | Falaise, grande voie, bloc, trad, via ferrata',
+  title: 'Aventures d’escalade encadrées | Falaise, grande voie, bloc, terrain d\'aventure, via ferrata',
   description:
     'Des stages d’escalade outdoor pour progresser avec des moniteurs locaux. Choisis ton terrain de jeu et pars à l’aventure.',
   robots: 'index, follow, max-image-preview:large',
@@ -436,11 +432,11 @@ onBeforeUnmount(() => {
       picto: '/images/via-ferrata.svg',
     },
     {
-      title: 'Trad',
+      title: 'Terrain d\'aventure',
       description:
-        'En escalade traditionnelle, tu places toi-même tes protections dans les faiblesses du rocher à l’aide de coinceurs, friends, pitons ou sangles.',
-      cta: 'Les stages trad',
-      href: '/stages-escalade?discipline=TRAD',
+        'Dans l\'escalade en terrain d\'aventure, tu places toi-même tes protections dans les faiblesses du rocher à l’aide de coinceurs, friends, pitons ou sangles.',
+      cta: 'Les stages en terrain d\'aventure',
+      href: '/stages-escalade?discipline=TERRAIN_AVENTURE',
       picto: '/images/trad.png',
     },
     {
@@ -457,7 +453,7 @@ onBeforeUnmount(() => {
     GRANDE_VOIE: 'Grande voie',
     FALAISE: 'Falaise',
     BLOC: 'Bloc',
-    TRAD: 'Trad',
+    TRAD: 'Terrain d\'aventure',
     VIA_FERRATA: 'Via ferrata',
   }
 

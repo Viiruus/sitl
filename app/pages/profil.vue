@@ -912,7 +912,7 @@
                         : 'bg-brand-950/40 text-brand-100/80 border-brand-700'"
                       @click="toggleInArray(form.typesOfClimbing, 'trad')"
                     >
-                      Trad
+                      Terrain d'aventure
                     </button>
                     <button
                       type="button"
@@ -1205,7 +1205,7 @@
                     class="space-y-3 rounded-2xl border border-brand-800/70 bg-brand-950/30 p-4"
                   >
                     <p class="text-sm font-semibold uppercase tracking-[0.3em] text-brand-200/80">
-                      Trad
+                      Terrain d'aventure
                     </p>
                     <div class="space-y-2">
                       <p class="text-sm font-medium text-brand-100/90">

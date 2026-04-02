@@ -647,7 +647,7 @@ const uploadGalleryImage = async (event: Event, index: number) => {
               <option value="FALAISE">Falaise</option>
               <option value="GRANDE_VOIE">Grande voie</option>
               <option value="BLOC">Bloc</option>
-              <option value="TRAD">Trad</option>
+              <option value="TRAD">Terrain d'aventure</option>
               <option value="VIA_FERRATA">Via ferrata</option>
             </select>
           </div>

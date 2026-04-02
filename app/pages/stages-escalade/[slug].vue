@@ -1610,7 +1610,7 @@ const disciplineLabels: Record<string, string> = {
   GRANDE_VOIE: 'Grande voie',
   FALAISE: 'Falaise',
   BLOC: 'Bloc',
-  TRAD: 'Trad',
+  TRAD: 'Terrain d\'aventure',
   VIA_FERRATA: 'Via ferrata',
 }
 

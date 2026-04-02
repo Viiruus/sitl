@@ -282,7 +282,7 @@ const benefits = [
   },
   {
     title: 'Sites variés',
-    description: 'Des itinéraires équipés aux aventures en trad, on choisit ensemble la falaise qui correspond à tes envies.'
+    description: 'Des itinéraires équipés aux aventures en terrain d\'aventure, on choisit ensemble la falaise qui correspond à tes envies.'
   }
 ]
 

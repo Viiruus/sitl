@@ -69,7 +69,7 @@ const disciplineTheme: Record<string, { color: string; label: string; letter: st
   FALAISE: { color: '#d65245', label: 'Falaise', letter: 'F' },
   GRANDE_VOIE: { color: '#b86b2f', label: 'Grande voie', letter: 'G' },
   BLOC: { color: '#4f9fcf', label: 'Bloc', letter: 'B' },
-  TRAD: { color: '#202020', label: 'Trad', letter: 'T' },
+  TRAD: { color: '#202020', label: 'Terrain d\'aventure', letter: 'T' },
   VIA_FERRATA: { color: '#6b8e23', label: 'Via ferrata', letter: 'V' },
 }
 

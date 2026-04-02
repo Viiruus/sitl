@@ -1,34 +1,33 @@
 <script setup lang="ts">
-import { VueDatePicker } from '@vuepic/vue-datepicker'
-import { fr } from 'date-fns/locale'
 import { buildStoredSrcset, resolveStoredImageSrc } from '~/composables/useStoredImageVariants'
-import '@vuepic/vue-datepicker/dist/main.css'
 const route = useRoute()
 const { data, pending, error } = await useFetch('/api/aventures')
 
 useSeoMeta({
   title: 'Tous les stages d’escalade | Aventures outdoor',
   description:
-    'Découvre nos stages d’escalade en falaise, grande voie, bloc, trad et via ferrata. Moniteurs locaux et progression.',
+    'Découvre nos stages d’escalade en falaise, grande voie, bloc, terrain d\'aventure et via ferrata. Moniteurs locaux et progression.',
   robots: 'index, follow, max-image-preview:large',
 })
 
 const selectedDiscipline = ref<string | null>(null)
-const dateRangeFilter = ref<[Date | null, Date | null] | null>(null)
 const durationFilter = ref<'all' | 'single' | 'multi'>('all')
 const activeView = ref<'list' | 'map'>('list')
-const dateFilterFormats = {
-  input: 'dd/MM/yyyy',
-  preview: 'dd/MM/yyyy',
+const disciplineQueryAliases: Record<string, string> = {
+  TERRAIN_AVENTURE: 'TRAD',
 }
 
-const frLocale = fr
+const normalizeDisciplineFilter = (value?: string | null) => {
+  if (!value) return null
+  const normalized = value.toUpperCase()
+  return disciplineQueryAliases[normalized] ?? normalized
+}
 
 const disciplineLabels: Record<string, string> = {
   GRANDE_VOIE: 'Grande voie',
   FALAISE: 'Falaise',
   BLOC: 'Bloc',
-  TRAD: 'Trad',
+  TRAD: 'Terrain d\'aventure',
   VIA_FERRATA: 'Via ferrata',
 }
 
@@ -71,7 +70,7 @@ const iconPathForDiscipline = (value?: string | null) => {
 
 const initialQueryDiscipline = route.query.discipline
 if (typeof initialQueryDiscipline === 'string') {
-  selectedDiscipline.value = initialQueryDiscipline.toUpperCase()
+  selectedDiscipline.value = normalizeDisciplineFilter(initialQueryDiscipline)
 }
 
 // ✅ Helper manquant pour la fallback image selon la discipline
@@ -118,21 +117,6 @@ const filteredAventures = computed(() => {
     adventures = adventures.filter(
       (aventure) => aventure.discipline === selectedDiscipline.value
     )
-  }
-
-  if (dateRangeFilter.value) {
-    const [start, end] = dateRangeFilter.value
-    const startTime = start ? new Date(start).setHours(0, 0, 0, 0) : null
-    const endTime = end ? new Date(end).setHours(23, 59, 59, 999) : null
-    if (startTime || endTime) {
-      adventures = adventures.filter((aventure: any) => {
-        const nextDate = aventure.nextDate ?? null
-        if (!nextDate) return false
-        if (startTime && nextDate < startTime) return false
-        if (endTime && nextDate > endTime) return false
-        return true
-      })
-    }
   }
 
   if (durationFilter.value !== 'all') {
@@ -216,7 +200,7 @@ const mapLegend = [
   { value: 'FALAISE', label: 'Falaise', letter: 'F', color: 'bg-[#d65245]' },
   { value: 'GRANDE_VOIE', label: 'Grande voie', letter: 'G', color: 'bg-[#b86b2f]' },
   { value: 'BLOC', label: 'Bloc', letter: 'B', color: 'bg-[#4f9fcf]' },
-  { value: 'TRAD', label: 'Trad', letter: 'T', color: 'bg-[#202020]' },
+  { value: 'TRAD', label: 'Terrain d\'aventure', letter: 'T', color: 'bg-[#202020]' },
   { value: 'VIA_FERRATA', label: 'Via ferrata', letter: 'V', color: 'bg-[#6b8e23]' },
 ]
 
@@ -250,14 +234,12 @@ const mapLegend = [
         </picture>
         <section class="relative isolate overflow-hidden py-24 sm:py-20">
           <div class="absolute inset-0 -z-10"></div>
-          <div class="max-w-4xl space-y-6">
+          <div class="max-w-5xl space-y-6">
             <h1 class="text-4xl font-semibold tracking-tight text-pretty text-white sm:text-5xl">
-              L’aventure escalade par et pour les meilleur·e·s
+              Embarque pour ta prochaine aventure d'escalade
             </h1>
             <p class="text-base text-brand-100/80">
-              Choisis un stage, inscris-toi et entre directement en contact avec la monitrice ou le moniteur de l’aventure.
-              <br/>
-              Tu organises ton séjour et tu pars à l’aventure. La Brigade du kiff, c’est l’assurance d’une expérience unique accompagnée par les meilleur·e·s.
+              Choisis un stage, inscris-toi et entre directement en contact avec la monitrice ou le moniteur de l’aventure. Tu organises ton séjour et tu comptes les dodos jusqu’au départ 🤩
             </p>
           </div>
         </section>
@@ -274,131 +256,110 @@ const mapLegend = [
       </div>
 
       <div v-else class="space-y-6">
-        <section class="space-y-4 pb-8 mb-8 border-b border-white/10">
-          <div class="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/15 bg-brand-900/50 p-4 shadow-lg shadow-black/30 backdrop-blur">
-            <div>
-              <p class="text-xs uppercase tracking-[0.3em] text-brand-200/70">Affichage</p>
-              <p class="mt-1 text-sm text-brand-100/80">
-                La liste reste l’affichage principal. La carte arrive en seconde option pour visualiser les stages localisés.
-              </p>
-            </div>
-            <div class="inline-flex rounded-2xl border border-white/15 bg-white/5 p-1">
-              <button
-                type="button"
-                class="rounded-xl px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] transition"
-                :class="activeView === 'list'
-                  ? 'bg-secondaryBrand-500 text-brand-950'
-                  : 'text-brand-100/75 hover:text-white'"
-                @click="activeView = 'list'"
-              >
-                Liste
-              </button>
-              <button
-                type="button"
-                class="rounded-xl px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] transition"
-                :class="activeView === 'map'
-                  ? 'bg-secondaryBrand-500 text-brand-950'
-                  : 'text-brand-100/75 hover:text-white'"
-                @click="activeView = 'map'"
-              >
-                Carte
-              </button>
-            </div>
-          </div>
+        <section class="mb-6 border-b border-white/10 pb-6">
+          <div class="rounded-2xl border border-white/15 bg-brand-900/50 p-3 shadow-lg shadow-black/30 backdrop-blur">
+            <div class="grid gap-3 xl:grid-cols-3 xl:items-start">
+              <div class="space-y-2">
+                <div class="flex flex-wrap items-center justify-between gap-2">
+                  <p class="text-xs uppercase tracking-[0.3em] text-brand-200/70">Discipline</p>
+                  <button
+                    v-if="selectedDiscipline"
+                    type="button"
+                    class="rounded-full border border-secondaryBrand-300 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.3em] text-secondaryBrand-100 transition hover:bg-secondaryBrand-500/20"
+                    @click="selectedDiscipline = null"
+                  >
+                    Réinitialiser
+                  </button>
+                </div>
+                <div class="flex flex-wrap gap-2">
+                  <button
+                    v-for="option in disciplineOptions"
+                    :key="option.value"
+                    type="button"
+                    class="group flex items-center gap-2 rounded-xl border px-2.5 py-1.5 text-xs transition"
+                    :class="selectedDiscipline === option.value
+                      ? 'border-secondaryBrand-400 bg-secondaryBrand-500/20 text-white'
+                      : 'border-brand-800 bg-brand-900/80 text-brand-100'"
+                    @click="selectedDiscipline = option.value"
+                  >
+                    <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-secondaryBrand-400/80 transition duration-300 ease-out group-hover:scale-105 group-hover:shadow-lg group-hover:shadow-secondaryBrand-500/40">
+                      <img
+                        :src="iconPathForDiscipline(option.value)"
+                        :alt="option.label"
+                        class="h-6 w-6 object-contain"
+                        loading="lazy"
+                      />
+                    </span>
+                    <span class="font-medium leading-tight">{{ option.label }}</span>
+                  </button>
+                </div>
+              </div>
 
-          <div class="grid gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(220px,1.2fr)]">
-            <div class="space-y-4 rounded-2xl border border-white/15 bg-brand-900/50 p-4 shadow-lg shadow-black/30 backdrop-blur">
-              <div class="flex flex-wrap items-center justify-between gap-3">
-                <p class="text-xs uppercase tracking-[0.3em] text-brand-200/70">Filtrer par discipline</p>
-                <button
-                  v-if="selectedDiscipline"
-                  type="button"
-                  class="rounded-full border border-secondaryBrand-300 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.3em] text-secondaryBrand-100 transition hover:bg-secondaryBrand-500/20"
-                  @click="selectedDiscipline = null"
-                >
-                  Réinitialiser
-                </button>
+              <div class="space-y-2">
+                <p class="text-xs uppercase tracking-[0.3em] text-brand-200/70">Durée</p>
+                <div class="inline-flex rounded-2xl border border-white/15 bg-white/5 p-1">
+                  <button
+                    type="button"
+                    class="rounded-xl px-2.5 py-1.5 text-[11px] font-semibold uppercase tracking-[0.2em] transition"
+                    :class="durationFilter === 'all'
+                      ? 'bg-secondaryBrand-500 text-brand-950'
+                      : 'text-brand-100/75 hover:text-white'"
+                    @click="durationFilter = 'all'"
+                  >
+                    Tous
+                  </button>
+                  <button
+                    type="button"
+                    class="rounded-xl px-2.5 py-1.5 text-[11px] font-semibold uppercase tracking-[0.2em] transition"
+                    :class="durationFilter === 'single'
+                      ? 'bg-secondaryBrand-500 text-brand-950'
+                      : 'text-brand-100/75 hover:text-white'"
+                    @click="durationFilter = 'single'"
+                  >
+                    1 jour
+                  </button>
+                  <button
+                    type="button"
+                    class="rounded-xl px-2.5 py-1.5 text-[11px] font-semibold uppercase tracking-[0.2em] transition"
+                    :class="durationFilter === 'multi'
+                      ? 'bg-secondaryBrand-500 text-brand-950'
+                      : 'text-brand-100/75 hover:text-white'"
+                    @click="durationFilter = 'multi'"
+                  >
+                    Plusieurs jours
+                  </button>
+                </div>
               </div>
-              <div class="flex flex-wrap gap-3">
-                <button
-                  v-for="option in disciplineOptions"
-                  :key="option.value"
-                  type="button"
-                  class="group flex items-center gap-3 rounded-2xl border px-3 py-2 text-sm transition"
-                  :class="selectedDiscipline === option.value
-                    ? 'border-secondaryBrand-400 bg-secondaryBrand-500/20 text-white'
-                    : 'border-brand-800 bg-brand-900/80 text-brand-100'"
-                  @click="selectedDiscipline = option.value"
-                >
-                  <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-secondaryBrand-400/80 transition duration-300 ease-out group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-secondaryBrand-500/40 group-hover:rotate-1">
-                    <img
-                      :src="iconPathForDiscipline(option.value)"
-                      :alt="option.label"
-                      class="h-8 w-8 object-contain"
-                      loading="lazy"
-                    />
-                  </span>
-                  <span class="font-medium">{{ option.label }}</span>
-                </button>
-                <p v-if="!disciplineOptions.length" class="text-xs text-brand-200/70">
-                  Les disciplines apparaîtront dès que des aventures seront publiées.
-                </p>
-              </div>
-            </div>
 
-            <div class="space-y-3 rounded-2xl border border-white/15 bg-brand-900/50 p-4 text-sm text-brand-100 shadow-lg shadow-black/30 backdrop-blur">
-              <div class="flex flex-wrap items-center justify-between gap-3">
-                <p class="text-xs uppercase tracking-[0.3em] text-brand-200/70">Filtrer par dates</p>
+              <div class="space-y-2">
+                <p class="text-xs uppercase tracking-[0.3em] text-brand-200/70">Affichage</p>
+                <div class="inline-flex rounded-2xl border border-white/15 bg-white/5 p-1">
+                  <button
+                    type="button"
+                    class="rounded-xl px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.2em] transition"
+                    :class="activeView === 'list'
+                      ? 'bg-secondaryBrand-500 text-brand-950'
+                      : 'text-brand-100/75 hover:text-white'"
+                    @click="activeView = 'list'"
+                  >
+                    Liste
+                  </button>
+                  <button
+                    type="button"
+                    class="rounded-xl px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.2em] transition"
+                    :class="activeView === 'map'
+                      ? 'bg-secondaryBrand-500 text-brand-950'
+                      : 'text-brand-100/75 hover:text-white'"
+                    @click="activeView = 'map'"
+                  >
+                    Carte
+                  </button>
+                </div>
               </div>
-              <div class="inline-flex rounded-2xl border border-white/15 bg-white/5 p-1">
-                <button
-                  type="button"
-                  class="rounded-xl px-3 py-2 text-xs font-semibold uppercase tracking-[0.2em] transition"
-                  :class="durationFilter === 'all'
-                    ? 'bg-secondaryBrand-500 text-brand-950'
-                    : 'text-brand-100/75 hover:text-white'"
-                  @click="durationFilter = 'all'"
-                >
-                  Tous
-                </button>
-                <button
-                  type="button"
-                  class="rounded-xl px-3 py-2 text-xs font-semibold uppercase tracking-[0.2em] transition"
-                  :class="durationFilter === 'single'
-                    ? 'bg-secondaryBrand-500 text-brand-950'
-                    : 'text-brand-100/75 hover:text-white'"
-                  @click="durationFilter = 'single'"
-                >
-                  1 jour
-                </button>
-                <button
-                  type="button"
-                  class="rounded-xl px-3 py-2 text-xs font-semibold uppercase tracking-[0.2em] transition"
-                  :class="durationFilter === 'multi'
-                    ? 'bg-secondaryBrand-500 text-brand-950'
-                    : 'text-brand-100/75 hover:text-white'"
-                  @click="durationFilter = 'multi'"
-                >
-                  Plusieurs jours
-                </button>
-              </div>
-              <ClientOnly>
-                <VueDatePicker
-                  class="dp-no-time-toggle"
-                  v-model="dateRangeFilter"
-                  range
-                  :auto-apply="true"
-                  :action-row="false"
-                  :enable-time-picker="false"
-                  :formats="dateFilterFormats"
-                  :teleport="true"
-                  :locale="frLocale"
-                  placeholder="JJ/MM/AAAA → JJ/MM/AAAA"
-                  input-class-name="w-full rounded-2xl border border-white/20 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-white/60 focus:border-secondaryBrand-400 focus:outline-none focus:ring-2 focus:ring-secondaryBrand-400/40"
-                  :disabled="pending"
-                />
-              </ClientOnly>
             </div>
+            <p v-if="!disciplineOptions.length" class="mt-3 text-xs text-brand-200/70">
+              Les disciplines apparaîtront dès que des aventures seront publiées.
+            </p>
           </div>
         </section>
 
