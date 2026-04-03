@@ -1,4 +1,9 @@
 import { prisma } from '../../../utils/prisma'
+import {
+  formatBookingStageDate,
+  sendGuideStageDatePropositionViaWhatsapp,
+} from '../../../utils/whatsapp-booking-subscription'
+import { normalizePhoneNumber } from '../../../utils/whatsapp-otp'
 
 export default defineEventHandler(async (event) => {
   const db = await prisma()
@@ -27,7 +32,18 @@ export default defineEventHandler(async (event) => {
 
   const aventure = await db.aventure.findUnique({
     where: { slug },
-    select: { id: true },
+    select: {
+      id: true,
+      titre: true,
+      lieuLabel: true,
+      guide: {
+        select: {
+          id: true,
+          phoneNumber: true,
+          whatsappOptIn: true,
+        },
+      },
+    },
   })
 
   if (!aventure) {
@@ -71,7 +87,12 @@ export default defineEventHandler(async (event) => {
 
   const userExists = await db.user.findUnique({
     where: { id: userId },
-    select: { id: true },
+    select: {
+      id: true,
+      firstName: true,
+      lastName: true,
+      phoneNumber: true,
+    },
   })
 
   if (!userExists) {
@@ -90,6 +111,43 @@ export default defineEventHandler(async (event) => {
       comment: body.comment?.slice(0, 500) ?? null,
     },
   })
+
+  const normalizedGuidePhone = normalizePhoneNumber(aventure.guide?.phoneNumber || '')
+  const normalizedClimberPhone = normalizePhoneNumber(userExists.phoneNumber || session.user.phoneNumber || '')
+
+  if (aventure.guide?.whatsappOptIn && normalizedGuidePhone && normalizedClimberPhone) {
+    const stageDate = formatBookingStageDate(startDate, endDate ?? startDate)
+
+    try {
+      const result = await sendGuideStageDatePropositionViaWhatsapp({
+        phoneNumber: normalizedGuidePhone,
+        stageTitle: aventure.titre,
+        stageLocalization: aventure.lieuLabel || 'Lieu à confirmer',
+        climberFirstName: userExists.firstName,
+        climberLastName: userExists.lastName,
+        climberPhoneNumber: normalizedClimberPhone,
+        stageDate,
+      })
+
+      if (!result.ok) {
+        console.error('[whatsapp-guide-stage-date-proposition] Non-blocking send failure', {
+          suggestionId: suggestion.id,
+          guideId: aventure.guide?.id,
+          phoneNumber: normalizedGuidePhone,
+          reason: result.reason,
+          statusCode: result.statusCode,
+          raw: typeof result.raw === 'string' ? result.raw : JSON.stringify(result.raw),
+        })
+      }
+    } catch (error) {
+      console.error('[whatsapp-guide-stage-date-proposition] Non-blocking send exception', {
+        suggestionId: suggestion.id,
+        guideId: aventure.guide?.id,
+        phoneNumber: normalizedGuidePhone,
+        error,
+      })
+    }
+  }
 
   return {
     suggestion,

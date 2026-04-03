@@ -2,6 +2,7 @@
 import { z } from 'zod'
 import { prisma } from '../utils/prisma'
 import { recordAssociationMembership } from '../utils/association-membership'
+import { sendTemplateViaWhatsapp } from '../utils/whatsapp-otp'
 
 // Schéma de validation/typage des données reçues du front
 const onboardingSchema = z.object({
@@ -133,6 +134,39 @@ export default defineEventHandler(async (event) => {
     source: 'climber-onboarding',
     accepted: body.associationMembershipAccepted,
   })
+
+  if (user.phoneNumber && user.whatsappOptIn) {
+    const climberFirstName = user.firstName || body.firstName?.trim?.() || 'grimpeur'
+
+    const result = await sendTemplateViaWhatsapp({
+      phone: user.phoneNumber,
+      templateName: process.env.WHATSAPP_CLIMBER_WELCOME_TEMPLATE_NAME || 'welcome_climber',
+      language: process.env.WHATSAPP_OTP_TEMPLATE_LANGUAGE || 'fr',
+      components: [
+        {
+          type: 'header',
+          parameters: [
+            {
+              type: 'text',
+              parameter_name: 'firstname',
+              text: climberFirstName,
+            },
+          ],
+        },
+      ],
+      logLabel: 'whatsapp-climber-welcome',
+    })
+
+    if (!result.ok) {
+      console.error('[whatsapp-climber-welcome] Non-blocking send failure', {
+        climberId: user.id,
+        phoneNumber: user.phoneNumber,
+        reason: result.reason,
+        statusCode: result.statusCode,
+        raw: typeof result.raw === 'string' ? result.raw : JSON.stringify(result.raw),
+      })
+    }
+  }
 
   // 5) Mettre à jour la session (pour que user.onboarded soit à jour côté front)
   await setUserSession(event, {

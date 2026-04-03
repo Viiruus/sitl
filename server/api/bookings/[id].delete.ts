@@ -1,4 +1,9 @@
 import { prisma } from '../../utils/prisma'
+import {
+  formatBookingStageDate,
+  sendGuideClimberStageCancelationViaWhatsapp,
+} from '../../utils/whatsapp-booking-subscription'
+import { normalizePhoneNumber } from '../../utils/whatsapp-otp'
 
 export default defineEventHandler(async (event) => {
   const db = await prisma()
@@ -27,7 +32,23 @@ export default defineEventHandler(async (event) => {
   const booking = await db.booking.findUnique({
     where: { id: bookingId },
     include: {
-      session: true,
+      session: {
+        include: {
+          aventure: {
+            include: {
+              guide: {
+                select: {
+                  id: true,
+                  firstName: true,
+                  lastName: true,
+                  phoneNumber: true,
+                  whatsappOptIn: true,
+                },
+              },
+            },
+          },
+        },
+      },
     },
   })
 
@@ -42,6 +63,17 @@ export default defineEventHandler(async (event) => {
   if (booking.statut === 'ANNULEE') {
     return { ok: true, message: 'Déjà annulée.' }
   }
+
+  const climber = await db.user.findUnique({
+    where: { id: booking.userId },
+    select: {
+      id: true,
+      role: true,
+      firstName: true,
+      lastName: true,
+      phoneNumber: true,
+    },
+  })
 
   // Mettre à jour le statut
   await db.booking.update({
@@ -61,6 +93,46 @@ export default defineEventHandler(async (event) => {
         },
       },
     })
+  }
+
+  const guide = booking.session?.aventure?.guide
+  const normalizedGuidePhone = normalizePhoneNumber(guide?.phoneNumber || '')
+  const normalizedClimberPhone = normalizePhoneNumber(climber?.phoneNumber || sessionAuth.user.phoneNumber || '')
+
+  if (guide?.whatsappOptIn && normalizedGuidePhone && normalizedClimberPhone) {
+    const stageTitle = booking.session.aventure.titre
+    const stageLocalization = booking.session.aventure.lieuLabel || 'Lieu à confirmer'
+    const stageDate = formatBookingStageDate(booking.session.dateDebut, booking.session.dateFin)
+
+    try {
+      const result = await sendGuideClimberStageCancelationViaWhatsapp({
+        phoneNumber: normalizedGuidePhone,
+        stageTitle,
+        stageLocalization,
+        stageDate,
+        climberFirstName: climber?.firstName,
+        climberLastName: climber?.lastName,
+        climberPhoneNumber: normalizedClimberPhone,
+      })
+
+      if (!result.ok) {
+        console.error('[whatsapp-guide-climber-stage-cancelation] Non-blocking send failure', {
+          bookingId,
+          guideId: guide.id,
+          phoneNumber: normalizedGuidePhone,
+          reason: result.reason,
+          statusCode: result.statusCode,
+          raw: typeof result.raw === 'string' ? result.raw : JSON.stringify(result.raw),
+        })
+      }
+    } catch (error) {
+      console.error('[whatsapp-guide-climber-stage-cancelation] Non-blocking send exception', {
+        bookingId,
+        guideId: guide.id,
+        phoneNumber: normalizedGuidePhone,
+        error,
+      })
+    }
   }
 
   return { ok: true, message: 'Pré-inscription annulée.' }

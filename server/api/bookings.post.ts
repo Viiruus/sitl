@@ -1,5 +1,11 @@
 // server/api/bookings.post.ts
 import { prisma } from '../utils/prisma'
+import {
+  formatBookingStageDate,
+  sendClimberSubscriptionOkViaWhatsapp,
+  sendGuideNewSubscriptionViaWhatsapp,
+} from '../utils/whatsapp-booking-subscription'
+import { normalizePhoneNumber } from '../utils/whatsapp-otp'
 
 export default defineEventHandler(async (event) => {
   const db = await prisma()
@@ -37,10 +43,43 @@ export default defineEventHandler(async (event) => {
     })
   }
 
+  const climber = await db.user.findUnique({
+    where: { id: userId },
+    select: {
+      id: true,
+      role: true,
+      firstName: true,
+      lastName: true,
+      phoneNumber: true,
+      whatsappOptIn: true,
+    },
+  })
+
+  if (!climber || climber.role === 'GUIDE') {
+    throw createError({
+      statusCode: 403,
+      statusMessage: "Seuls les grimpeurs peuvent s'inscrire à une date.",
+    })
+  }
+
   // Vérifier que la session existe
   const dbSession = await db.aventureSession.findUnique({
     where: { id: sessionId },
-    include: { aventure: true },
+    include: {
+      aventure: {
+        include: {
+          guide: {
+            select: {
+              id: true,
+              firstName: true,
+              lastName: true,
+              phoneNumber: true,
+              whatsappOptIn: true,
+            },
+          },
+        },
+      },
+    },
   })
 
   if (!dbSession) {
@@ -110,6 +149,88 @@ export default defineEventHandler(async (event) => {
       },
     },
   })
+
+  const runtimeConfig = useRuntimeConfig(event)
+  const stageTitle = dbSession.aventure.titre
+  const stageLocalization = dbSession.aventure.lieuLabel || 'Lieu à confirmer'
+  const stageDate = formatBookingStageDate(dbSession.dateDebut, dbSession.dateFin)
+  const stageUrl = (() => {
+    const baseUrl = runtimeConfig.public.publicUrl || 'https://brigadedukiff.com'
+    try {
+      return new URL(`/stages-escalade/${dbSession.aventure.slug}`, baseUrl).toString()
+    } catch {
+      return `/stages-escalade/${dbSession.aventure.slug}`
+    }
+  })()
+
+  const normalizedClimberPhone = normalizePhoneNumber(climber.phoneNumber || sessionAuth.user.phoneNumber || '')
+  const normalizedGuidePhone = normalizePhoneNumber(dbSession.aventure.guide?.phoneNumber || '')
+
+  const notificationJobs: Promise<void>[] = []
+
+  if (normalizedGuidePhone && normalizedClimberPhone && dbSession.aventure.guide?.whatsappOptIn) {
+    notificationJobs.push(
+      sendGuideNewSubscriptionViaWhatsapp({
+        phoneNumber: normalizedGuidePhone,
+        stageTitle,
+        stageLocalization,
+        stageDate,
+        climberFirstName: climber.firstName,
+        climberLastName: climber.lastName,
+        climberPhoneNumber: normalizedClimberPhone,
+      }).then((result) => {
+        if (!result.ok) {
+          console.error('[whatsapp-guide-new-subscription] Non-blocking send failure', {
+            bookingId: booking.id,
+            guideId: dbSession.aventure.guide?.id,
+            phoneNumber: normalizedGuidePhone,
+            reason: result.reason,
+            statusCode: result.statusCode,
+            raw: typeof result.raw === 'string' ? result.raw : JSON.stringify(result.raw),
+          })
+        }
+      }).catch((error) => {
+        console.error('[whatsapp-guide-new-subscription] Non-blocking send exception', {
+          bookingId: booking.id,
+          guideId: dbSession.aventure.guide?.id,
+          phoneNumber: normalizedGuidePhone,
+          error,
+        })
+      }),
+    )
+  }
+
+  if (normalizedClimberPhone && climber.whatsappOptIn) {
+    notificationJobs.push(
+      sendClimberSubscriptionOkViaWhatsapp({
+        phoneNumber: normalizedClimberPhone,
+        stageTitle,
+        stageLocalization,
+        stageDate,
+        stageUrl,
+      }).then((result) => {
+        if (!result.ok) {
+          console.error('[whatsapp-climber-subscription-ok] Non-blocking send failure', {
+            bookingId: booking.id,
+            climberId: climber.id,
+            phoneNumber: normalizedClimberPhone,
+            reason: result.reason,
+            statusCode: result.statusCode,
+            raw: typeof result.raw === 'string' ? result.raw : JSON.stringify(result.raw),
+          })
+        }
+      }).catch((error) => {
+        console.error('[whatsapp-climber-subscription-ok] Non-blocking send exception', {
+          bookingId: booking.id,
+          climberId: climber.id,
+          phoneNumber: normalizedClimberPhone,
+          error,
+        })
+      }),
+    )
+  }
+
+  await Promise.allSettled(notificationJobs)
 
   return {
     booking,
