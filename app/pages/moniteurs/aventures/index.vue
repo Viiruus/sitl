@@ -13,16 +13,23 @@ const router = useRouter()
 const route = useRoute()
 const { clear, fetch } = useUserSession()
 
-const [{ data: guideData }, { data: adventuresData, pending: adventuresPending, refresh: refreshAventures }, { data: suggestionsData, pending: suggestionsPending }] =
+const [
+  { data: guideData },
+  { data: adventuresData, pending: adventuresPending, refresh: refreshAventures },
+  { data: suggestionsData, pending: suggestionsPending },
+  { data: contactRequestsData, pending: contactRequestsPending },
+] =
   await Promise.all([
     useFetch('/api/guides/me'),
     useFetch('/api/guides/aventures'),
     useFetch('/api/guides/suggestions'),
+    useFetch('/api/guides/contact-requests'),
   ])
 
 const guide = computed(() => guideData.value?.guide ?? null)
 const aventures = computed(() => adventuresData.value?.aventures ?? [])
 const suggestions = computed(() => suggestionsData.value?.suggestions ?? [])
+const contactRequests = computed(() => contactRequestsData.value?.contactRequests ?? [])
 const bookings = computed(() => [])
 
 const disciplineLabels: Record<string, string> = {
@@ -41,6 +48,18 @@ const formatDate = (value?: string | Date | null) => {
     day: 'numeric',
     month: 'long',
     year: 'numeric',
+  })
+  return formatter.format(new Date(value))
+}
+
+const formatDateTime = (value?: string | Date | null) => {
+  if (!value) return 'Date à définir'
+  const formatter = new Intl.DateTimeFormat('fr-FR', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
   })
   return formatter.format(new Date(value))
 }
@@ -269,6 +288,31 @@ const handleDeleteAdventure = async (aventure: any) => {
     actionState.deleting = false
   }
 }
+
+const contactRequestName = (request: any) => {
+  const fallback = request?.climberNameSnapshot?.trim()
+  const fullName = [request?.climber?.firstName, request?.climber?.lastName].filter(Boolean).join(' ').trim()
+  return fallback || fullName || 'Grimpeur'
+}
+
+const contactRequestPhone = (request: any) => request?.climberPhoneSnapshot || null
+
+const contactRequestStatusLabel = (value?: string | null) => {
+  switch (value) {
+    case 'accepted':
+      return 'Envoyé sur WhatsApp'
+    case 'delivered':
+      return 'Distribué'
+    case 'read':
+      return 'Lu'
+    case 'failed':
+      return 'Échec d’envoi'
+    case 'sent':
+      return 'Envoyé'
+    default:
+      return 'Enregistré'
+  }
+}
 </script>
 
 <template>
@@ -489,6 +533,47 @@ const handleDeleteAdventure = async (aventure: any) => {
               </p>
               <p v-if="suggestion.comment" class="mt-2 text-sm text-brand-100/70">
                 {{ suggestion.comment }}
+              </p>
+            </article>
+          </div>
+        </section>
+
+        <section id="demandes-particulieres" class="rounded-3xl bg-white/5 p-8 ring-1 ring-white/10">
+          <p class="text-sm uppercase tracking-[0.3em] text-secondaryBrand-300">
+            Demandes particulières
+          </p>
+          <h2 class="mt-2 text-2xl font-semibold">Les messages reçus depuis ton profil</h2>
+
+          <div v-if="contactRequestsPending" class="mt-6 space-y-3">
+            <div v-for="n in 3" :key="n" class="h-28 animate-pulse rounded-2xl bg-white/5" />
+          </div>
+          <div v-else-if="!contactRequests.length" class="mt-6 rounded-2xl border border-dashed border-white/20 p-6 text-sm text-brand-100/70">
+            Aucune demande particulière pour le moment. Les messages envoyés depuis ton bouton WhatsApp apparaîtront ici.
+          </div>
+          <div v-else class="mt-6 space-y-4">
+            <article
+              v-for="request in contactRequests"
+              :key="request.id"
+              class="rounded-2xl border border-white/10 bg-white/5 p-5"
+            >
+              <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                <div>
+                  <p class="font-semibold">
+                    {{ contactRequestName(request) }}
+                  </p>
+                  <div class="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-xs text-brand-200/80">
+                    <span v-if="contactRequestPhone(request)">{{ contactRequestPhone(request) }}</span>
+                  </div>
+                </div>
+                <div class="text-sm text-brand-100/80 sm:text-right">
+                  <p>{{ formatDateTime(request.createdAt) }}</p>
+                  <p class="mt-1 text-xs uppercase tracking-[0.2em] text-secondaryBrand-200/80">
+                    {{ contactRequestStatusLabel(request.messageStatus) }}
+                  </p>
+                </div>
+              </div>
+              <p class="mt-4 whitespace-pre-line text-sm text-brand-100/85">
+                {{ request.message }}
               </p>
             </article>
           </div>

@@ -40,7 +40,7 @@
                 <h1 class="mt-2 text-4xl font-semibold tracking-tight text-pretty text-white sm:text-5xl">
                   {{ moniteurName || 'Moniteur local' }}
                 </h1>
-                <div class="mt-6 max-w-xl text-base/7 text-gray-300 sm:text-lg/8">
+                <div class="mt-6 max-w-xl text-sm/7 text-gray-300 sm:text-base/8">
                   <p class="whitespace-pre-line">
                     {{ moniteurBioText }}
                   </p>
@@ -91,19 +91,26 @@
                       </span>
                     </li>
                   </ul>
-                  <div class="mt-8 space-y-3">
-                    <button
-                      type="button"
-                      class="inline-flex items-center justify-center gap-3 rounded-full bg-[#25D366] px-5 py-3 text-sm font-semibold text-brand-950 shadow-lg shadow-[#25D366]/30 transition hover:translate-y-[-1px] hover:shadow-xl"
-                      @click="handleGuideContactClick"
-                    >
-                      <svg class="h-5 w-5" viewBox="0 0 32 32" fill="currentColor" aria-hidden="true">
-                        <path
-                          d="M16 3C9.4 3 4 8.2 4 14.7c0 2.4.7 4.6 2 6.5L4 29l8-1.8c1.3.4 2.7.6 4 .6 6.6 0 12-5.2 12-11.7C28 8.2 22.6 3 16 3Zm0 2c5.5 0 10 4.3 10 9.7S21.5 24.4 16 24.4c-1.3 0-2.5-.2-3.7-.7l-.8-.3-.8.2-3.9.9 1.1-3.3.2-.7-.5-.6c-1.1-1.6-1.6-3.4-1.6-5.3C6 9.3 10.5 5 16 5Zm5.2 10.9c-.3-.1-1.8-.9-2-1-.3-.1-.5-.1-.7.1-.2.3-.8 1-.9 1.1-.2.2-.3.2-.6.1-.3-.1-1.2-.4-2.2-1.4-.8-.8-1.4-1.7-1.6-2-.2-.3 0-.4.1-.6.1-.2.3-.3.4-.5.1-.1.2-.3.3-.5.1-.2 0-.4 0-.5 0-.1-.7-1.7-1-2.3-.3-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.3-.3.3-1 1-1 2.4s1.1 2.8 1.2 3c.1.2 2.1 3.3 5 4.5.7.3 1.2.5 1.6.6.7.2 1.4.2 1.9.1.6-.1 1.8-.7 2-1.3.2-.6.2-1.2.2-1.3 0-.1-.2-.1-.5-.2Z"
-                        />
-                      </svg>
-                      Contacter {{ moniteurContactFirstName }}
-                    </button>
+                  <div class="mt-8 rounded-3xl border border-white/10 bg-white/5 p-6 ring-1 ring-white/5">
+                    <p class="text-sm font-medium text-brand-100/85">
+                      Tu souhaites rentrer directement en contact avec ce.tte moniteur.ice pour du coaching personnalisé,
+                      l’organisation d’une prestation spécifique (entreprise, scolaire, anniversaire, mariage, …), la
+                      préparation d’une expédition ?
+                    </p>
+                    <div class="mt-5">
+                      <button
+                        type="button"
+                        class="inline-flex items-center justify-center gap-3 rounded-full bg-[#25D366] px-5 py-3 text-sm font-semibold text-brand-950 shadow-lg shadow-[#25D366]/30 transition hover:translate-y-[-1px] hover:shadow-xl"
+                        @click="handleGuideContactClick"
+                      >
+                        <svg class="h-5 w-5" viewBox="0 0 32 32" fill="currentColor" aria-hidden="true">
+                          <path
+                            d="M16 3C9.4 3 4 8.2 4 14.7c0 2.4.7 4.6 2 6.5L4 29l8-1.8c1.3.4 2.7.6 4 .6 6.6 0 12-5.2 12-11.7C28 8.2 22.6 3 16 3Zm0 2c5.5 0 10 4.3 10 9.7S21.5 24.4 16 24.4c-1.3 0-2.5-.2-3.7-.7l-.8-.3-.8.2-3.9.9 1.1-3.3.2-.7-.5-.6c-1.1-1.6-1.6-3.4-1.6-5.3C6 9.3 10.5 5 16 5Zm5.2 10.9c-.3-.1-1.8-.9-2-1-.3-.1-.5-.1-.7.1-.2.3-.8 1-.9 1.1-.2.2-.3.2-.6.1-.3-.1-1.2-.4-2.2-1.4-.8-.8-1.4-1.7-1.6-2-.2-.3 0-.4.1-.6.1-.2.3-.3.4-.5.1-.1.2-.3.3-.5.1-.2 0-.4 0-.5 0-.1-.7-1.7-1-2.3-.3-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.3-.3.3-1 1-1 2.4s1.1 2.8 1.2 3c.1.2 2.1 3.3 5 4.5.7.3 1.2.5 1.6.6.7.2 1.4.2 1.9.1.6-.1 1.8-.7 2-1.3.2-.6.2-1.2.2-1.3 0-.1-.2-.1-.5-.2Z"
+                          />
+                        </svg>
+                        Contacter {{ moniteurContactFirstName }}
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
