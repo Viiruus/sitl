@@ -201,7 +201,7 @@
         Les prochains stages d'escalade
       </h2>
       <p class="mt-2 text-lg/8 text-brand-100/80">
-        Embarque pour notre prochaine aventure.
+        Embarque pour ta prochaine aventure.
       </p>
 
       <div v-if="aventuresPending" class="mt-12 text-sm text-brand-100/70">

@@ -258,8 +258,8 @@ const mapLegend = [
       <div v-else class="space-y-6">
         <section class="mb-6 border-b border-white/10 pb-6">
           <div class="rounded-2xl border border-white/15 bg-brand-900/50 p-3 shadow-lg shadow-black/30 backdrop-blur">
-            <div class="grid gap-3 xl:grid-cols-3 xl:items-start">
-              <div class="space-y-2">
+            <div class="grid gap-3 xl:grid-cols-6 xl:items-start">
+              <div class="space-y-2 xl:col-span-3">
                 <div class="flex flex-wrap items-center justify-between gap-2">
                   <p class="text-xs uppercase tracking-[0.3em] text-brand-200/70">Discipline</p>
                   <button
@@ -295,7 +295,7 @@ const mapLegend = [
                 </div>
               </div>
 
-              <div class="space-y-2">
+              <div class="space-y-2 xl:col-span-2">
                 <p class="text-xs uppercase tracking-[0.3em] text-brand-200/70">Durée</p>
                 <div class="inline-flex rounded-2xl border border-white/15 bg-white/5 p-1">
                   <button
@@ -331,7 +331,7 @@ const mapLegend = [
                 </div>
               </div>
 
-              <div class="space-y-2">
+              <div class="space-y-2 xl:col-span-1">
                 <p class="text-xs uppercase tracking-[0.3em] text-brand-200/70">Affichage</p>
                 <div class="inline-flex rounded-2xl border border-white/15 bg-white/5 p-1">
                   <button

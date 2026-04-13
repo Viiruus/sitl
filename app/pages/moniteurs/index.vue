@@ -27,7 +27,9 @@ const guideProfileUrl = computed(() => {
   const origin = import.meta.client && window.location?.origin
     ? window.location.origin
     : (runtimeConfig.public.publicUrl || 'http://localhost:3000')
-  return new URL(guideProfilePath.value, origin).toString()
+  const url = new URL(guideProfilePath.value, origin)
+  url.searchParams.set('source', 'qrcode')
+  return url.toString()
 })
 const guideQrFileName = computed(() => {
   const slug = guide.value?.slug
