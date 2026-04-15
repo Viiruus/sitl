@@ -16,6 +16,20 @@ import {
 
 const GUIDE_LOGIN_PURPOSE = 'GUIDE_LOGIN'
 
+function logGuideOtp(event: string, payload: Record<string, unknown>) {
+  console.info(`[whatsapp-guide-otp] ${event}`, payload)
+}
+
+function serializeForLog(value: unknown) {
+  if (value === undefined) return undefined
+  if (typeof value === 'string') return value
+  try {
+    return JSON.stringify(value)
+  } catch {
+    return '[unserializable]'
+  }
+}
+
 function derivedEmailFromPhone(phone: string) {
   const cleaned = phone.replace(/[^a-zA-Z0-9]/g, '')
   return `wa-guide-${cleaned || 'user'}@whatsapp.local`
@@ -74,12 +88,36 @@ export async function requestGuideWhatsappOtp(input: {
   source?: string | null
 }) {
   const normalizedPhone = normalizePhoneNumber(input.phoneNumber)
+  logGuideOtp('request_received', {
+    phoneNumber: input.phoneNumber,
+    normalizedPhone,
+    source: input.source || 'guide',
+  })
+
   if (!normalizedPhone || normalizedPhone.length < 6) {
+    logGuideOtp('request_rejected_invalid_phone', {
+      phoneNumber: input.phoneNumber,
+      normalizedPhone,
+      source: input.source || 'guide',
+    })
     throw createError({ statusCode: 400, statusMessage: 'Numéro de téléphone invalide.' })
   }
 
   const existingUser = await findExistingGuideUser(normalizedPhone)
+  logGuideOtp('existing_user_lookup', {
+    normalizedPhone,
+    foundUserId: existingUser?.id || null,
+    foundUserRole: existingUser?.role || null,
+    foundUserEmail: existingUser?.email || null,
+  })
+
   if (existingUser && existingUser.role !== 'GUIDE') {
+    logGuideOtp('request_rejected_climber_collision', {
+      normalizedPhone,
+      foundUserId: existingUser.id,
+      foundUserRole: existingUser.role,
+      foundUserEmail: existingUser.email,
+    })
     throw createError({
       statusCode: 403,
       statusMessage: 'Ce numéro est associé à un compte grimpeur. Utilise la connexion grimpeur.',
@@ -121,6 +159,15 @@ export async function requestGuideWhatsappOtp(input: {
     },
   })
 
+  logGuideOtp('challenge_created', {
+    challengeId: challenge.id,
+    normalizedPhone,
+    source: input.source || 'guide',
+    templateName: challenge.templateName,
+    expiresAt: challenge.expiresAt.toISOString(),
+    linkedUserId: challenge.userId || null,
+  })
+
   if (shouldBypassRealWhatsAppSend()) {
     await db.whatsAppOtpChallenge.update({
       where: { id: challenge.id },
@@ -139,9 +186,28 @@ export async function requestGuideWhatsappOtp(input: {
     }
   }
 
+  logGuideOtp('send_attempt', {
+    challengeId: challenge.id,
+    normalizedPhone,
+    templateName: templateConfig.name,
+    templateLanguage: templateConfig.language,
+    buttonSubType: templateConfig.buttonSubType || null,
+    expiresAt: expiresAt.toISOString(),
+  })
+
   const sendResult = await sendOtpViaWhatsapp(normalizedPhone, code)
   if (!sendResult.ok) {
     const allowDevFallback = isWhatsAppOtpDevFallbackEnabled()
+    logGuideOtp('send_failed', {
+      challengeId: challenge.id,
+      normalizedPhone,
+      reason: sendResult.reason,
+      statusCode: sendResult.statusCode || null,
+      raw: serializeForLog(sendResult.raw),
+      message: sendResult.message,
+      allowDevFallback,
+    })
+
     await db.whatsAppOtpChallenge.update({
       where: { id: challenge.id },
       data: {
@@ -180,6 +246,14 @@ export async function requestGuideWhatsappOtp(input: {
     },
   })
 
+  logGuideOtp('send_accepted', {
+    challengeId: challenge.id,
+    normalizedPhone,
+    messageId: sendResult.messageId,
+    raw: serializeForLog(sendResult.raw),
+    sentAt: now.toISOString(),
+  })
+
   return {
     ok: true as const,
     token: publicToken,
@@ -194,13 +268,36 @@ export async function verifyGuideWhatsappOtp(input: {
   source?: string | null
 }) {
   const normalizedPhone = normalizePhoneNumber(input.phoneNumber)
+  logGuideOtp('verify_attempt_received', {
+    phoneNumber: input.phoneNumber,
+    normalizedPhone,
+    token: input.token,
+    source: input.source || 'guide',
+  })
+
   if (!normalizedPhone || normalizedPhone.length < 6) {
+    logGuideOtp('verify_rejected_invalid_phone', {
+      phoneNumber: input.phoneNumber,
+      normalizedPhone,
+      source: input.source || 'guide',
+    })
     throw createError({ statusCode: 400, statusMessage: 'Numéro de téléphone invalide.' })
   }
 
   const db = await prisma()
   const challenge = await db.whatsAppOtpChallenge.findUnique({
     where: { publicToken: input.token },
+  })
+
+  logGuideOtp('verify_challenge_lookup', {
+    token: input.token,
+    normalizedPhone,
+    challengeId: challenge?.id || null,
+    challengeStatus: challenge?.status || null,
+    challengeMessageStatus: challenge?.messageStatus || null,
+    challengeFailureReason: challenge?.failureReason || null,
+    challengeMessageId: challenge?.messageId || null,
+    challengeExpiresAt: challenge?.expiresAt?.toISOString?.() || null,
   })
 
   if (!challenge || challenge.purpose !== GUIDE_LOGIN_PURPOSE) {
@@ -238,6 +335,14 @@ export async function verifyGuideWhatsappOtp(input: {
   const nextAttempts = challenge.attempts + 1
   if (!verifyOtpCodeHash(challenge.codeHash, input.code.trim())) {
     const reachedMaxAttempts = nextAttempts >= challenge.maxAttempts
+    logGuideOtp('verify_invalid_code', {
+      challengeId: challenge.id,
+      normalizedPhone,
+      nextAttempts,
+      maxAttempts: challenge.maxAttempts,
+      reachedMaxAttempts,
+    })
+
     await db.whatsAppOtpChallenge.update({
       where: { id: challenge.id },
       data: {
@@ -257,6 +362,15 @@ export async function verifyGuideWhatsappOtp(input: {
 
   let user = await findExistingGuideUser(normalizedPhone)
   const isNew = !user
+
+  logGuideOtp('verify_existing_user_lookup', {
+    challengeId: challenge.id,
+    normalizedPhone,
+    foundUserId: user?.id || null,
+    foundUserRole: user?.role || null,
+    foundUserEmail: user?.email || null,
+    isNew,
+  })
 
   if (user && user.role !== 'GUIDE') {
     throw createError({
@@ -344,6 +458,14 @@ export async function verifyGuideWhatsappOtp(input: {
     },
   })
 
+  logGuideOtp('verify_success', {
+    challengeId: challenge.id,
+    normalizedPhone,
+    userId: user.id,
+    requiresOnboarding: isNew,
+    consumedAt: now.toISOString(),
+  })
+
   return { ok: true as const, requiresOnboarding: isNew, user }
 }
 
@@ -353,6 +475,11 @@ export async function consumeGuideWhatsappWebhookPayload(payload: any) {
     .flatMap((entry: any) => entry?.changes || [])
     .flatMap((change: any) => change?.value?.statuses || [])
 
+  logGuideOtp('webhook_status_batch_received', {
+    statusesCount: statuses.length,
+    payloadObject: payload?.object || null,
+  })
+
   for (const status of statuses) {
     const messageId = typeof status?.id === 'string' ? status.id : null
     if (!messageId) continue
@@ -361,7 +488,14 @@ export async function consumeGuideWhatsappWebhookPayload(payload: any) {
       where: { messageId },
       select: { id: true, status: true },
     })
-    if (!challenge) continue
+    if (!challenge) {
+      logGuideOtp('webhook_status_unmatched', {
+        messageId,
+        status: status?.status || null,
+        raw: serializeForLog(status),
+      })
+      continue
+    }
 
     const messageStatus = typeof status?.status === 'string' ? status.status : null
     const failureReason = messageStatus === 'failed'
@@ -384,6 +518,16 @@ export async function consumeGuideWhatsappWebhookPayload(payload: any) {
     await db.whatsAppOtpChallenge.update({
       where: { id: challenge.id },
       data,
+    })
+
+    logGuideOtp('webhook_status_applied', {
+      challengeId: challenge.id,
+      messageId,
+      previousChallengeStatus: challenge.status,
+      messageStatus,
+      failureReason,
+      raw: serializeForLog(status),
+      nextChallengeStatus: data.status || challenge.status,
     })
   }
 }
