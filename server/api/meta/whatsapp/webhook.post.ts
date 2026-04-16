@@ -11,6 +11,7 @@ export default defineEventHandler(async (event) => {
   console.info('[meta-whatsapp-webhook] payload_received', {
     contentLength: rawBody.length,
   })
+  console.info('[meta-whatsapp-webhook] raw_payload', rawBody)
 
   const signature = getHeader(event, 'x-hub-signature-256')
   if (!verifyMetaWebhookSignature(rawBody, signature)) {
