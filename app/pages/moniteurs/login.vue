@@ -203,6 +203,20 @@ const logout = async () => {
               <p class="text-xs text-brand-200/70">
                 Un code de connexion sera envoyé sur WhatsApp.
               </p>
+              <details class="text-xs text-brand-200/70">
+                <summary class="cursor-pointer select-none text-brand-200/80 underline underline-offset-2 hover:text-white">
+                  Le code n’arrive pas ?
+                </summary>
+                <div class="mt-2 space-y-1.5 rounded-xl border border-white/10 bg-white/5 p-3 text-brand-100/80">
+                  <p>Mets à jour l’application WhatsApp, puis réessaie.</p>
+                  <p>
+                    Si le code n’arrive toujours pas, écris-nous à
+                    <a href="mailto:yo@brigadedukiff.com" class="font-semibold text-secondaryBrand-200 underline underline-offset-2 hover:text-white">
+                      yo@brigadedukiff.com
+                    </a>.
+                  </p>
+                </div>
+              </details>
             </div>
 
             <div v-if="codeSent" class="space-y-2">
