@@ -8,10 +8,17 @@ export default defineEventHandler(async (event) => {
   const query = getQuery(event);
   const mode = typeof query.mode === "string" ? query.mode : null;
   const limit = parsePositiveInt(query.limit, 3);
+  const today = startOfToday();
+  const upcomingSessionWhere = buildUpcomingSessionWhere(today);
 
   if (mode === "home") {
     const aventures = await db.aventure.findMany({
-      where: { estPublie: true },
+      where: {
+        estPublie: true,
+        sessions: {
+          some: upcomingSessionWhere,
+        },
+      },
       select: {
         id: true,
         slug: true,
@@ -35,22 +42,31 @@ export default defineEventHandler(async (event) => {
           },
         },
         sessions: {
+          where: upcomingSessionWhere,
           select: {
             dateDebut: true,
             dateFin: true,
           },
+          orderBy: {
+            dateDebut: "asc",
+          },
         },
       },
-      orderBy: { createdAt: "desc" },
+      orderBy: {
+        createdAt: "desc",
+      },
     });
 
-    return {
-      aventures: selectHomepageAventures(aventures, limit),
-    };
+    return { aventures: selectHomepageAventures(aventures, limit) };
   }
 
   const aventures = await db.aventure.findMany({
-    where: { estPublie: true },
+    where: {
+      estPublie: true,
+      sessions: {
+        some: upcomingSessionWhere,
+      },
+    },
     include: {
       guide: {
         select: {
@@ -61,7 +77,12 @@ export default defineEventHandler(async (event) => {
           },
         },
       },
-      sessions: true,
+      sessions: {
+        where: upcomingSessionWhere,
+        orderBy: {
+          dateDebut: "asc",
+        },
+      },
     },
     orderBy: { createdAt: "desc" },
   });
@@ -96,16 +117,24 @@ const parsePositiveInt = (value: unknown, fallback: number) => {
   return Math.max(1, Math.min(parsed, 12));
 };
 
-const selectHomepageAventures = (aventures: any[], limit: number) => {
+const startOfToday = () => {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  const todayMs = today.getTime();
+  return today;
+};
 
+const buildUpcomingSessionWhere = (today: Date) => ({
+  OR: [
+    { dateFin: { gte: today } },
+    { dateDebut: { gte: today } },
+  ],
+});
+
+const selectHomepageAventures = (aventures: any[], limit: number) => {
   const list = aventures
     .map((a) => {
       const nextSession = findNextSession(a.sessions);
       const nextSessionDate = nextSession?.dateDebut ? new Date(nextSession.dateDebut).getTime() : null;
-      const hasSessions = Array.isArray(a.sessions) && a.sessions.length > 0;
 
       return {
         ...sanitizePublicImageFieldSet(a.coverImageUrl, a.coverImageVariants, "cover", true),
@@ -123,16 +152,11 @@ const selectHomepageAventures = (aventures: any[], limit: number) => {
         jours: a.jours,
         prixParPersonne: a.prixParPersonne,
         guideName: [a.guide?.firstName, a.guide?.lastName].filter(Boolean).join(" ") || null,
-        hasSessions,
         nextSession,
         nextSessionDate,
       };
     })
-    .filter((stage) => {
-      if (stage.nextSessionDate) return stage.nextSessionDate >= todayMs;
-      if (stage.hasSessions) return false;
-      return true;
-    })
+    .filter((stage) => stage.nextSessionDate)
     .sort((a, b) => {
       if (a.nextSessionDate && b.nextSessionDate) return a.nextSessionDate - b.nextSessionDate;
       if (a.nextSessionDate && !b.nextSessionDate) return -1;

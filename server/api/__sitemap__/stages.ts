@@ -2,10 +2,20 @@ import { prisma } from '../../utils/prisma'
 
 export default defineSitemapEventHandler(async () => {
   const db = await prisma()
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
 
   const stages = await db.aventure.findMany({
     where: {
       estPublie: true,
+      sessions: {
+        some: {
+          OR: [
+            { dateFin: { gte: today } },
+            { dateDebut: { gte: today } },
+          ],
+        },
+      },
     },
     select: {
       slug: true,

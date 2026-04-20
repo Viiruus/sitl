@@ -109,8 +109,7 @@ const filteredAventures = computed(() => {
       if (aventure.nextDate) {
         return aventure.nextDate >= today.getTime()
       }
-      if (aventure.hasSessions) return false
-      return true
+      return false
     })
 
   if (selectedDiscipline.value) {
