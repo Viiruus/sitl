@@ -6,6 +6,7 @@ import {
   sendGuideNewSubscriptionViaWhatsapp,
 } from '../utils/whatsapp-booking-subscription'
 import { normalizePhoneNumber } from '../utils/whatsapp-otp'
+import { resolvePublicSiteUrl } from '~~/shared/utils/site-url'
 
 export default defineEventHandler(async (event) => {
   const db = await prisma()
@@ -155,7 +156,7 @@ export default defineEventHandler(async (event) => {
   const stageLocalization = dbSession.aventure.lieuLabel || 'Lieu à confirmer'
   const stageDate = formatBookingStageDate(dbSession.dateDebut, dbSession.dateFin)
   const stageUrl = (() => {
-    const baseUrl = runtimeConfig.public.publicUrl || 'https://brigadedukiff.com'
+    const baseUrl = resolvePublicSiteUrl(runtimeConfig.public.publicUrl)
     try {
       return new URL(`/stages-escalade/${dbSession.aventure.slug}`, baseUrl).toString()
     } catch {

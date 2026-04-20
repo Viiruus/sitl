@@ -159,9 +159,6 @@
                     <p v-if="guideBaseLocation" class="text-xs text-brand-200">
                       Basé·e à {{ guideBaseLocation }}
                     </p>
-                    <p v-if="languesList.length" class="text-[11px] text-brand-300">
-                      Langues : {{ languesList.join(', ') }}
-                    </p>
                   </div>
                 </div>
                 <p
@@ -1180,6 +1177,7 @@ import {
   buildDefaultGuideStageTerms,
   replaceGuideStageTermsVariables,
 } from '~~/shared/constants/guide-stage-terms'
+import { resolvePublicSiteUrl } from '~~/shared/utils/site-url'
 import '@vuepic/vue-datepicker/dist/main.css'
 const route = useRoute()
 const slug = route.params.slug as string
@@ -1204,8 +1202,7 @@ const filteredOtherStages = computed(() => {
   return list
     .filter((a: any) => {
       if (a.nextDate) return a.nextDate >= todayMs
-      if (a.hasSessions) return false
-      return true
+      return false
     })
     .sort((a: any, b: any) => {
       if (a.nextDate && b.nextDate) return a.nextDate - b.nextDate
@@ -1275,9 +1272,6 @@ const equipementRequisList = computed(() =>
 )
 const equipementFourniList = computed(() =>
   toStringArray(stage.value?.equipementFourni ?? []),
-)
-const languesList = computed(() =>
-  toStringArray(stage.value?.langues ?? []),
 )
 
 const ageRange = computed(() => {
@@ -2064,12 +2058,27 @@ const seoDescription = computed(() => {
   return truncateSeo(source)
 })
 const seoImage = computed(() => normalizeImagePath(stage.value?.coverImageUrl) || undefined)
-const siteBaseUrl = computed(() => runtimeConfig.public.publicUrl || 'https://brigadedukiff.com')
-const stageCanonicalUrl = computed(() => {
+const siteBaseUrl = computed(() => resolvePublicSiteUrl(runtimeConfig.public.publicUrl))
+const homeUrl = computed(() => {
   try {
-    return new URL(`/stages-escalade/${slug}`, siteBaseUrl.value).toString()
+    return new URL('/', siteBaseUrl.value).toString()
   } catch {
-    return `/stages-escalade/${slug}`
+    return '/'
+  }
+})
+const stagesIndexUrl = computed(() => {
+  try {
+    return new URL('/stages-escalade', siteBaseUrl.value).toString()
+  } catch {
+    return '/stages-escalade'
+  }
+})
+const stageCanonicalUrl = computed(() => {
+  const canonicalSlug = stage.value?.slug || slug
+  try {
+    return new URL(`/stages-escalade/${canonicalSlug}`, siteBaseUrl.value).toString()
+  } catch {
+    return `/stages-escalade/${canonicalSlug}`
   }
 })
 const seoImageAbsolute = computed(() => {
@@ -2160,17 +2169,61 @@ const eventStructuredData = computed(() => {
   }
 })
 
+const breadcrumbStructuredData = computed(() => {
+  if (!stage.value) return null
+
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      {
+        '@type': 'ListItem',
+        position: 1,
+        name: 'Accueil',
+        item: homeUrl.value,
+      },
+      {
+        '@type': 'ListItem',
+        position: 2,
+        name: 'Stages d’escalade',
+        item: stagesIndexUrl.value,
+      },
+      {
+        '@type': 'ListItem',
+        position: 3,
+        name: stage.value.titre,
+        item: stageCanonicalUrl.value,
+      },
+    ],
+  }
+})
+
 useHead(() => ({
   titleTemplate: '%s | Brigade du kiff — Stages d’escalade',
-  script: eventStructuredData.value
+  link: stage.value
     ? [
         {
-          key: 'stage-event-jsonld',
-          type: 'application/ld+json',
-          innerHTML: JSON.stringify(eventStructuredData.value),
+          rel: 'canonical',
+          href: stageCanonicalUrl.value,
         },
       ]
     : [],
+  script: [
+    eventStructuredData.value
+      ? {
+          key: 'stage-event-jsonld',
+          type: 'application/ld+json',
+          innerHTML: JSON.stringify(eventStructuredData.value),
+        }
+      : null,
+    breadcrumbStructuredData.value
+      ? {
+          key: 'stage-breadcrumb-jsonld',
+          type: 'application/ld+json',
+          innerHTML: JSON.stringify(breadcrumbStructuredData.value),
+        }
+      : null,
+  ].filter(Boolean),
 }))
 
 useSeoMeta({

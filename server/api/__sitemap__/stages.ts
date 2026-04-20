@@ -31,5 +31,7 @@ export default defineSitemapEventHandler(async () => {
     .map((stage) => ({
       loc: `/stages-escalade/${stage.slug}`,
       lastmod: stage.updatedAt.toISOString(),
+      changefreq: 'weekly',
+      priority: 0.8,
     }))
 })

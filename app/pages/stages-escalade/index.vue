@@ -1,7 +1,26 @@
 <script setup lang="ts">
 import { buildStoredSrcset, resolveStoredImageSrc } from '~/composables/useStoredImageVariants'
+import { resolvePublicSiteUrl } from '~~/shared/utils/site-url'
 const route = useRoute()
+const runtimeConfig = useRuntimeConfig()
 const { data, pending, error } = await useFetch('/api/aventures')
+
+const canonicalUrl = computed(() => {
+  try {
+    return new URL('/stages-escalade', resolvePublicSiteUrl(runtimeConfig.public.publicUrl)).toString()
+  } catch {
+    return '/stages-escalade'
+  }
+})
+
+useHead(() => ({
+  link: [
+    {
+      rel: 'canonical',
+      href: canonicalUrl.value,
+    },
+  ],
+}))
 
 useSeoMeta({
   title: 'Tous les stages d’escalade | Aventures outdoor',

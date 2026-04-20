@@ -327,6 +327,25 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { buildStoredSrcset, resolveStoredImageSrc } from '~/composables/useStoredImageVariants'
+import { resolvePublicSiteUrl } from '~~/shared/utils/site-url'
+
+const runtimeConfig = useRuntimeConfig()
+const canonicalUrl = computed(() => {
+  try {
+    return new URL('/', resolvePublicSiteUrl(runtimeConfig.public.publicUrl)).toString()
+  } catch {
+    return '/'
+  }
+})
+
+useHead(() => ({
+  link: [
+    {
+      rel: 'canonical',
+      href: canonicalUrl.value,
+    },
+  ],
+}))
 
 useSeoMeta({
   title: 'Aventures d’escalade encadrées | Falaise, grande voie, bloc, terrain d\'aventure, via ferrata',

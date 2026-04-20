@@ -105,10 +105,26 @@
 
 <script setup lang="ts">
 import { buildStoredSrcset, resolveStoredImageSrc } from '~/composables/useStoredImageVariants'
+import { resolvePublicSiteUrl } from '~~/shared/utils/site-url'
 
-useHead({
-  titleTemplate: '%s',
+const runtimeConfig = useRuntimeConfig()
+const canonicalUrl = computed(() => {
+  try {
+    return new URL('/la-brigade', resolvePublicSiteUrl(runtimeConfig.public.publicUrl)).toString()
+  } catch {
+    return '/la-brigade'
+  }
 })
+
+useHead(() => ({
+  titleTemplate: '%s',
+  link: [
+    {
+      rel: 'canonical',
+      href: canonicalUrl.value,
+    },
+  ],
+}))
 
 useSeoMeta({
   title: 'Brigade du kiff | Collectif de moniteurs diplômés',

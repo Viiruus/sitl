@@ -136,6 +136,7 @@
                   loading="lazy"
                 />
                 <div class="mt-4 flex flex-wrap items-center justify-center gap-2">
+                  <!--
                   <NuxtLink
                     v-if="moniteurWebsiteUrl"
                     :to="moniteurWebsiteUrl"
@@ -149,6 +150,7 @@
                       <path stroke-linecap="round" stroke-linejoin="round" d="M21 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h6" />
                     </svg>
                   </NuxtLink>
+                  -->
                   <NuxtLink
                     v-if="moniteurInstagramUrl"
                     :to="moniteurInstagramUrl"
@@ -385,9 +387,11 @@
 <script setup lang="ts">
 import { HomeIcon, TruckIcon } from '@heroicons/vue/24/solid'
 import { buildStoredSrcset, resolveStoredImageSrc } from '~/composables/useStoredImageVariants'
+import { resolvePublicSiteUrl } from '~~/shared/utils/site-url'
 
 const route = useRoute()
 const router = useRouter()
+const runtimeConfig = useRuntimeConfig()
 const slug = computed(() => route.params.slug as string)
 const { loggedIn, user, fetch: fetchUserSession } = useUserSession()
 const { openModal } = useAuthModal()
@@ -422,8 +426,7 @@ const filteredAventures = computed(() => {
   return list
     .filter((a: any) => {
       if (a.nextDate) return a.nextDate >= today.getTime()
-      if (a.hasSessions) return false
-      return true
+      return false
     })
     .sort((a: any, b: any) => {
       if (a.nextDate && b.nextDate) return a.nextDate - b.nextDate
@@ -507,8 +510,23 @@ const heroBackground = computed(
 const heroBackgroundSrcset = computed(() => buildStoredSrcset(moniteur.value?.heroImageVariants))
 const locationLabel = computed(() => moniteur.value?.baseLocation || moniteur.value?.department || 'France')
 const moniteurContactFirstName = computed(() => moniteur.value?.firstName?.trim() || 'ce moniteur')
+const siteBaseUrl = computed(() => resolvePublicSiteUrl(runtimeConfig.public.publicUrl))
+const homeUrl = computed(() => {
+  try {
+    return new URL('/', siteBaseUrl.value).toString()
+  } catch {
+    return '/'
+  }
+})
+const laBrigadeUrl = computed(() => {
+  try {
+    return new URL('/la-brigade', siteBaseUrl.value).toString()
+  } catch {
+    return '/la-brigade'
+  }
+})
 const canonicalGuideUrl = computed(() =>
-  moniteur.value?.slug ? `https://brigadedukiff.com/moniteurs/${moniteur.value.slug}` : null,
+  moniteur.value?.slug ? new URL(`/moniteurs/${moniteur.value.slug}`, siteBaseUrl.value).toString() : null,
 )
 const contactModalOpen = ref(false)
 const contactMessage = ref('')
@@ -524,6 +542,66 @@ const aventureCoverSrcset = (aventure: any) => {
   return buildStoredSrcset(aventure?.coverImageVariants)
 }
 
+const moniteurPortraitAbsolute = computed(() => {
+  const image = moniteurPortrait.value
+  if (!image) return null
+  if (/^https?:\/\//i.test(image)) return image
+  try {
+    return new URL(image, siteBaseUrl.value).toString()
+  } catch {
+    return image
+  }
+})
+
+const breadcrumbStructuredData = computed(() => {
+  if (!moniteur.value || !canonicalGuideUrl.value) return null
+
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      {
+        '@type': 'ListItem',
+        position: 1,
+        name: 'Accueil',
+        item: homeUrl.value,
+      },
+      {
+        '@type': 'ListItem',
+        position: 2,
+        name: 'La Brigade',
+        item: laBrigadeUrl.value,
+      },
+      {
+        '@type': 'ListItem',
+        position: 3,
+        name: moniteurName.value || moniteur.value.fullName || 'Moniteur',
+        item: canonicalGuideUrl.value,
+      },
+    ],
+  }
+})
+
+const profilePageStructuredData = computed(() => {
+  if (!moniteur.value || !canonicalGuideUrl.value) return null
+
+  const sameAs = [moniteurInstagramUrl.value, moniteurWebsiteUrl.value].filter(Boolean)
+
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'ProfilePage',
+    mainEntity: {
+      '@id': `${canonicalGuideUrl.value}#person`,
+      '@type': 'Person',
+      name: moniteurName.value || moniteur.value.fullName || 'Moniteur',
+      identifier: moniteur.value.id != null ? String(moniteur.value.id) : undefined,
+      description: moniteur.value.bio || undefined,
+      image: moniteurPortraitAbsolute.value || undefined,
+      sameAs: sameAs.length ? sameAs : undefined,
+    },
+  }
+})
+
 useHead(() => ({
   titleTemplate: '%s',
   link: canonicalGuideUrl.value
@@ -534,6 +612,32 @@ useHead(() => ({
         },
       ]
     : [],
+  script: breadcrumbStructuredData.value
+    ? [
+        {
+          key: 'guide-breadcrumb-jsonld',
+          type: 'application/ld+json',
+          innerHTML: JSON.stringify(breadcrumbStructuredData.value),
+        },
+        ...(profilePageStructuredData.value
+          ? [
+              {
+                key: 'guide-profilepage-jsonld',
+                type: 'application/ld+json',
+                innerHTML: JSON.stringify(profilePageStructuredData.value),
+              },
+            ]
+          : []),
+      ]
+    : profilePageStructuredData.value
+      ? [
+          {
+            key: 'guide-profilepage-jsonld',
+            type: 'application/ld+json',
+            innerHTML: JSON.stringify(profilePageStructuredData.value),
+          },
+        ]
+      : [],
 }))
 
 const seoTitle = computed(() => {

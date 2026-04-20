@@ -11,9 +11,13 @@ export default defineSitemapEventHandler(async () => {
       id: true,
       firstName: true,
       lastName: true,
+      department: true,
       updatedAt: true,
       guideProfile: {
         select: {
+          profileImageUrl: true,
+          bio: true,
+          baseLocation: true,
           updatedAt: true,
         },
       },
@@ -37,6 +41,8 @@ export default defineSitemapEventHandler(async () => {
       return {
         loc: `/moniteurs/${slug}`,
         lastmod: lastmodDate.toISOString(),
+        changefreq: 'weekly',
+        priority: 0.7,
       }
     })
 })
