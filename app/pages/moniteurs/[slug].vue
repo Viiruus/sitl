@@ -43,7 +43,7 @@
                   </h1>
                   <button
                     type="button"
-                    class="group mt-4 inline-flex items-center gap-x-2.5 rounded-md border border-white/10 bg-brand-950/55 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm ring-1 ring-inset ring-white/5 backdrop-blur transition hover:border-white/20 hover:bg-brand-900/70 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondaryBrand-300 lg:hidden"
+                    class="group mt-4 inline-flex items-start gap-x-2.5 rounded-md border border-white/10 bg-brand-950/55 px-3.5 py-2.5 text-left text-sm font-semibold text-white shadow-sm ring-1 ring-inset ring-white/5 backdrop-blur transition hover:border-white/20 hover:bg-brand-900/70 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondaryBrand-300 lg:hidden"
                     @click="handleGuideContactClick"
                   >
                     <span class="inline-flex h-8 w-8 items-center justify-center rounded-sm bg-[#25D366] text-brand-950 shadow-sm shadow-[#25D366]/20">
@@ -53,7 +53,7 @@
                         />
                       </svg>
                     </span>
-                    <span>Contacter {{ moniteurContactFirstName }} pour un projet sur mesure</span>
+                    <span class="text-left leading-tight">Contacter {{ moniteurContactFirstName }} pour un projet sur mesure</span>
                   </button>
                 </div>
                 <div class="mt-6 max-w-xl text-sm/7 text-gray-300 sm:text-base/8">
@@ -400,6 +400,13 @@ const { data, pending, error } = await useAsyncData(
   },
 )
 
+if (data.value?.moniteur?.slug && slug.value.toLowerCase() !== data.value.moniteur.slug.toLowerCase()) {
+  await navigateTo(`/moniteurs/${data.value.moniteur.slug}`, {
+    redirectCode: 301,
+    replace: true,
+  })
+}
+
 const moniteur = computed(() => data.value?.moniteur ?? null)
 const aventures = computed(() =>
   (data.value?.aventures ?? []).filter((aventure: any) => aventure?.estPublie === true),
@@ -500,6 +507,9 @@ const heroBackground = computed(
 const heroBackgroundSrcset = computed(() => buildStoredSrcset(moniteur.value?.heroImageVariants))
 const locationLabel = computed(() => moniteur.value?.baseLocation || moniteur.value?.department || 'France')
 const moniteurContactFirstName = computed(() => moniteur.value?.firstName?.trim() || 'ce moniteur')
+const canonicalGuideUrl = computed(() =>
+  moniteur.value?.slug ? `https://brigadedukiff.com/moniteurs/${moniteur.value.slug}` : null,
+)
 const contactModalOpen = ref(false)
 const contactMessage = ref('')
 const contactSending = ref(false)
@@ -514,9 +524,17 @@ const aventureCoverSrcset = (aventure: any) => {
   return buildStoredSrcset(aventure?.coverImageVariants)
 }
 
-useHead({
+useHead(() => ({
   titleTemplate: '%s',
-})
+  link: canonicalGuideUrl.value
+    ? [
+        {
+          rel: 'canonical',
+          href: canonicalGuideUrl.value,
+        },
+      ]
+    : [],
+}))
 
 const seoTitle = computed(() => {
   const fullName = moniteurName.value
