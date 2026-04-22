@@ -9,7 +9,17 @@ export default defineEventHandler(async () => {
     where: {
       role: "GUIDE",
     },
-    include: { guideProfile: true },
+    include: {
+      guideProfile: true,
+      aventures: {
+        where: {
+          estPublie: true,
+        },
+        select: {
+          discipline: true,
+        },
+      },
+    },
     orderBy: [
       { firstName: "asc" },
       { lastName: "asc" },
@@ -40,6 +50,14 @@ export default defineEventHandler(async () => {
           fullName: `${firstName} ${lastName}`,
           bio,
           baseLocation,
+          department: guide.department || null,
+          disciplines: Array.from(
+            new Set(
+              (guide.aventures ?? [])
+                .map((aventure) => aventure.discipline)
+                .filter((value): value is string => typeof value === 'string' && value.length > 0),
+            ),
+          ),
         }
       })
       .filter(Boolean),

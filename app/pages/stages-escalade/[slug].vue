@@ -52,13 +52,17 @@
             <!-- Titre + tags -->
             <div class="space-y-6">
               <div class="flex items-center gap-3 text-xs">
-                <span class="inline-flex items-center justify-center rounded-full bg-secondaryBrand-400/80 p-2 shadow-lg shadow-secondaryBrand-900/30">
+                <component
+                  :is="stageDisciplineHubPath ? 'NuxtLink' : 'span'"
+                  :to="stageDisciplineHubPath || undefined"
+                  class="inline-flex items-center justify-center rounded-full bg-secondaryBrand-400/80 p-2 shadow-lg shadow-secondaryBrand-900/30"
+                >
                   <img
                     :src="iconPathForDiscipline(stage.discipline)"
                     :alt="formatDisciplineLabel(stage.discipline)"
                     class="h-8 w-8 object-contain"
                   />
-                </span>
+                </component>
                 <span
                   class="inline-flex min-w-0 items-center gap-1.5 rounded-full bg-brand-900/70 px-3 py-1 text-[11px] font-medium text-brand-100"
                 >
@@ -1177,6 +1181,7 @@ import {
   buildDefaultGuideStageTerms,
   replaceGuideStageTermsVariables,
 } from '~~/shared/constants/guide-stage-terms'
+import { disciplineHubPath } from '~~/shared/utils/seo-hubs'
 import { resolvePublicSiteUrl } from '~~/shared/utils/site-url'
 import '@vuepic/vue-datepicker/dist/main.css'
 const route = useRoute()
@@ -1498,6 +1503,7 @@ const guideSlug = computed(() => guide.value?.slug || null)
 const guideProfileLink = computed(() =>
   guideSlug.value ? `/moniteurs/${guideSlug.value}` : null,
 )
+const stageDisciplineHubPath = computed(() => disciplineHubPath(stage.value?.discipline))
 
 const guideImage = computed(
   () => resolveStoredImageSrc(guide.value?.profile?.profileImageUrl, guide.value?.profile?.profileImageVariants) || null,

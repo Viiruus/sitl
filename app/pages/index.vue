@@ -439,7 +439,7 @@ onBeforeUnmount(() => {
       description:
         'Enchaîne plusieurs longueurs (jusqu’à plusieurs centaines de mètres) encordé·e à 2 ou 3 personnes avec matériel et techniques spécifiques : relais, rappels, assurage…',
       cta: 'Les stages grande voie',
-      href: '/stages-escalade?discipline=GRANDE_VOIE',
+      href: '/disciplines/grande-voie',
       picto: '/images/grande-voie.png',
     },
     {

@@ -1,6 +1,7 @@
 // server/api/aventures.get.ts
 import { prisma } from "../utils/prisma";
 import { sanitizePublicImageUrl, sanitizePublicImageVariants } from "../utils/public-image";
+import { buildGuideSlug } from "~~/shared/utils/guide-slug";
 
 export default defineEventHandler(async (event) => {
   setHeader(event, "cache-control", "no-store");
@@ -34,10 +35,12 @@ export default defineEventHandler(async (event) => {
         coverImageVariants: true,
         guide: {
           select: {
+            id: true,
             firstName: true,
             lastName: true,
+            department: true,
             guideProfile: {
-              select: { profileImageUrl: true, profileImageVariants: true },
+              select: { profileImageUrl: true, profileImageVariants: true, baseLocation: true },
             },
           },
         },
@@ -70,10 +73,12 @@ export default defineEventHandler(async (event) => {
     include: {
       guide: {
         select: {
+          id: true,
           firstName: true,
           lastName: true,
+          department: true,
           guideProfile: {
-            select: { profileImageUrl: true, profileImageVariants: true },
+            select: { profileImageUrl: true, profileImageVariants: true, baseLocation: true },
           },
         },
       },
@@ -104,6 +109,12 @@ export default defineEventHandler(async (event) => {
       jours: a.jours,
       prixParPersonne: a.prixParPersonne,
       guideName: [a.guide?.firstName, a.guide?.lastName].filter(Boolean).join(" ") || null,
+      guideSlug:
+        a.guide?.id != null
+          ? buildGuideSlug(a.guide?.firstName, a.guide?.lastName, a.guide.id)
+          : null,
+      guideDepartment: a.guide?.department || null,
+      guideBaseLocation: a.guide?.guideProfile?.baseLocation || null,
       hasSessions: a.sessions.length > 0,
       nextSession: findNextSession(a.sessions),
     })),
@@ -152,6 +163,12 @@ const selectHomepageAventures = (aventures: any[], limit: number) => {
         jours: a.jours,
         prixParPersonne: a.prixParPersonne,
         guideName: [a.guide?.firstName, a.guide?.lastName].filter(Boolean).join(" ") || null,
+        guideSlug:
+          a.guide?.id != null
+            ? buildGuideSlug(a.guide?.firstName, a.guide?.lastName, a.guide.id)
+            : null,
+        guideDepartment: a.guide?.department || null,
+        guideBaseLocation: a.guide?.guideProfile?.baseLocation || null,
         nextSession,
         nextSessionDate,
       };

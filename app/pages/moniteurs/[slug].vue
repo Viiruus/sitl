@@ -80,9 +80,11 @@
                   </button>
                 </div>
                 <div class="mt-8 flex flex-wrap gap-3">
-                  <span
+                  <component
+                    :is="discipline.href ? 'NuxtLink' : 'span'"
                     v-for="discipline in disciplineChips"
                     :key="discipline.value"
+                    :to="discipline.href || undefined"
                     class="inline-flex items-center gap-2 rounded-full bg-secondaryBrand-500/80 px-4 py-1.5 text-xs font-semibold uppercase tracking-wide text-secondaryBrand-100 ring-1 ring-secondaryBrand-300/40"
                   >
                     <img
@@ -91,7 +93,7 @@
                       class="h-12 w-12 object-contain"
                     />
                     {{ discipline.label }}
-                  </span>
+                  </component>
                 </div>
                 <div class="mt-10 max-w-xl text-base/7 text-gray-300 lg:max-w-lg">
                   <ul role="list" class="space-y-8 text-gray-300">
@@ -387,6 +389,7 @@
 <script setup lang="ts">
 import { HomeIcon, TruckIcon } from '@heroicons/vue/24/solid'
 import { buildStoredSrcset, resolveStoredImageSrc } from '~/composables/useStoredImageVariants'
+import { disciplineHubPath } from '~~/shared/utils/seo-hubs'
 import { resolvePublicSiteUrl } from '~~/shared/utils/site-url'
 
 const route = useRoute()
@@ -475,12 +478,29 @@ const formatDisciplineLabel = (value?: string | null) => {
   return disciplineLabels[value] ?? value.replace(/_/g, ' ')
 }
 
+const disciplineChips = computed(() => {
+  const disciplines = moniteur.value?.disciplines ?? []
+  if (!disciplines.length && aventures.value.length) {
+    return Array.from(new Set(aventures.value.map((a: any) => a.discipline).filter(Boolean))).map((value: string) => ({
+      value,
+      label: formatDisciplineLabel(value),
+      href: disciplineHubPath(value),
+    }))
+  }
+  return disciplines.map((value: string) => ({
+    value,
+    label: formatDisciplineLabel(value),
+    href: disciplineHubPath(value),
+  }))
+})
+
 const moniteurName = computed(() => {
   const fullName = moniteur.value?.fullName?.trim()
   if (fullName) return fullName
   const composed = [moniteur.value?.firstName, moniteur.value?.lastName].filter(Boolean).join(' ').trim()
   return composed || null
 })
+const locationLabel = computed(() => moniteur.value?.baseLocation || moniteur.value?.department || 'France')
 const showFullBio = ref(false)
 const moniteurBioValue = computed(() => moniteur.value?.bio?.trim() || '')
 const moniteurBioFallback = computed(() => {
@@ -508,8 +528,24 @@ const heroBackground = computed(
   () => resolveStoredImageSrc(moniteur.value?.heroImageUrl, moniteur.value?.heroImageVariants) || fallbackImageForDiscipline(),
 )
 const heroBackgroundSrcset = computed(() => buildStoredSrcset(moniteur.value?.heroImageVariants))
-const locationLabel = computed(() => moniteur.value?.baseLocation || moniteur.value?.department || 'France')
 const moniteurContactFirstName = computed(() => moniteur.value?.firstName?.trim() || 'ce moniteur')
+const moniteurWebsiteUrl = computed(() => {
+  const card = moniteur.value?.professionalCardNumber || moniteur.value?.guideProfile?.professionalCardNumber
+  if (card) {
+    return `https://recherche-educateur.sports.gouv.fr/CartePro/${card}`
+  }
+
+  return null
+})
+
+const moniteurInstagramUrl = computed(() => {
+  return (
+    moniteur.value?.guideProfile?.instagramUrl ||
+    moniteur.value?.profile?.instagramUrl ||
+    null
+  )
+})
+
 const siteBaseUrl = computed(() => resolvePublicSiteUrl(runtimeConfig.public.publicUrl))
 const homeUrl = computed(() => {
   try {
@@ -659,37 +695,6 @@ useSeoMeta({
   ogDescription: seoDescription,
   ogImage: moniteurPortrait,
   robots: 'index, follow, max-image-preview:large',
-})
-
-const moniteurWebsiteUrl = computed(() => {
-  const card = moniteur.value?.professionalCardNumber || moniteur.value?.guideProfile?.professionalCardNumber
-  if (card) {
-    return `https://recherche-educateur.sports.gouv.fr/CartePro/${card}`
-  }
-  
-  return null
-})
-
-const moniteurInstagramUrl = computed(() => {
-  return (
-    moniteur.value?.guideProfile?.instagramUrl ||
-    moniteur.value?.profile?.instagramUrl ||
-    null
-  )
-})
-
-const disciplineChips = computed(() => {
-  const disciplines = moniteur.value?.disciplines ?? []
-  if (!disciplines.length && aventures.value.length) {
-    return Array.from(new Set(aventures.value.map((a: any) => a.discipline).filter(Boolean))).map((value: string) => ({
-      value,
-      label: formatDisciplineLabel(value),
-    }))
-  }
-  return disciplines.map((value: string) => ({
-    value,
-    label: formatDisciplineLabel(value),
-  }))
 })
 
 
