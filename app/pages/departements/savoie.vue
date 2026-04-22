@@ -117,7 +117,7 @@
             </div>
             <div v-else class="grid gap-6 sm:grid-cols-2 xl:grid-cols-4">
               <NuxtLink
-                v-for="moniteur in savoieMoniteurs"
+                v-for="moniteur in randomizedSavoieMoniteurs"
                 :key="moniteur.id"
                 :to="`/moniteurs/${moniteur.slug}`"
                 class="group flex h-full flex-col gap-5 rounded-3xl border border-white/10 bg-white/5 p-5 ring-1 ring-white/10 transition hover:-translate-y-1 hover:border-white/20"
@@ -247,10 +247,47 @@ const canonicalUrl = `${siteBaseUrl}/departements/savoie`
 
 const { data: stagesData, pending: pendingStages } = await useFetch('/api/aventures')
 const { data: guidesData, pending: pendingGuides } = await useFetch('/api/moniteurs')
+const randomWeights = useState<Record<number, number>>('departement-savoie-moniteurs-order', () => ({}))
+
+const toUpcomingTimestamp = (stage: any) => {
+  const raw = stage?.nextSession?.dateDebut
+  if (!raw) return Number.POSITIVE_INFINITY
+  const ts = new Date(raw).getTime()
+  return Number.isNaN(ts) ? Number.POSITIVE_INFINITY : ts
+}
 
 const savoieMoniteurs = computed(() =>
   (guidesData.value?.moniteurs ?? []).filter((moniteur: any) => isSavoieDepartment(moniteur?.department)),
 )
+
+watch(
+  () => savoieMoniteurs.value,
+  (list) => {
+    if (!list.length) {
+      randomWeights.value = {}
+      return
+    }
+    list.forEach((moniteur: any) => {
+      const key = moniteur?.id
+      if (key == null) return
+      if (randomWeights.value[key] === undefined) {
+        randomWeights.value[key] = Math.random()
+      }
+    })
+  },
+  { immediate: true, deep: true },
+)
+
+const randomizedSavoieMoniteurs = computed(() => {
+  const weights = randomWeights.value
+  return savoieMoniteurs.value
+    .slice()
+    .sort((a: any, b: any) => {
+      const wA = weights[a?.id] ?? 0
+      const wB = weights[b?.id] ?? 0
+      return wA - wB
+    })
+})
 
 const savoieStageGuideSlugs = computed(() =>
   new Set(
@@ -263,6 +300,8 @@ const savoieStageGuideSlugs = computed(() =>
 const savoieStages = computed(() =>
   (stagesData.value?.aventures ?? []).filter((stage: any) => {
     return isSavoieDepartment(stage?.guideDepartment) || savoieStageGuideSlugs.value.has(stage?.guideSlug)
+  }).slice().sort((a: any, b: any) => {
+    return toUpcomingTimestamp(a) - toUpcomingTimestamp(b)
   }),
 )
 
