@@ -532,7 +532,9 @@
                         Conditions générales de vente
                       </h3>
                       <p class="mt-2 text-sm text-brand-100/80">
-                        Ces CGV s’appliquent au stage tel qu’il est présenté sur cette fiche. Les variables entre crochets correspondent aux informations que le moniteur n’a pas encore précisées.
+                        Ces CGV s’appliquent au stage tel qu’il est présenté sur cette fiche. Les variables entre crochets
+                        correspondent aux informations du stage automatiquement injectées. Les variables entre accolades
+                        correspondent aux informations globales du moniteur et restent visibles si elles n’ont pas encore été complétées.
                       </p>
                     </div>
                   </div>
@@ -1573,6 +1575,7 @@ const resolvedGuideStageTerms = computed(() =>
     MONITEUR_NOM: guideFullName.value,
     'MONITEUR_NOM or ENTITE_CONCERNEE': guideFullName.value,
     CARTE_PRO_EDUCATEUR: guide.value?.professionalCardNumber || null,
+    MONITEUR_TELEPHONE: guide.value?.phoneNumber || null,
     NOM_DU_STAGE: stage.value?.titre,
     DESCRIPTION_STAGE:
       stage.value?.descriptionCourte ||

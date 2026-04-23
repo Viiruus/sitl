@@ -24,6 +24,7 @@ export default defineEventHandler(async (event) => {
           id: true,
           firstName: true,
           lastName: true,
+          phoneNumber: true,
           guideProfile: {
             select: {
               bio: true,
@@ -127,6 +128,7 @@ const mapGuide = (a: any) => {
   return {
     slug: buildGuideSlug(a.guide.firstName, a.guide.lastName, a.guide.id),
     fullName: [a.guide.firstName, a.guide.lastName].filter(Boolean).join(' ') || null,
+    phoneNumber: a.guide.phoneNumber || null,
     professionalCardNumber: gp?.professionalCardNumber || null,
     profile: gp
       ? {

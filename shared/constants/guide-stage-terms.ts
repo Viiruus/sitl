@@ -1,4 +1,53 @@
-const GENERIC_GUIDE_NAME = 'Le moniteur'
+export const GUIDE_STAGE_TERMS_GLOBAL_VARIABLES = [
+  'MONITEUR_NOM',
+  'MONITEUR_STATUT',
+  'MONITEUR_SIREN',
+  'MONITEUR_NUM_TVA',
+  'TVA_NON_APPLICABLE',
+  'DIPLOME_OU_QUALIFICATION',
+  'ASSURANCE_RC_PRO',
+  'CARTE_PRO_EDUCATEUR',
+  'ACOMPTE_OU_ARRHES_POURCENTAGE',
+  'SOLDE_ECHEANCE',
+  'MODES_DE_PAIEMENT',
+  'REGLE_REFUS_PARTICIPATION_ET_REMBOURSEMENT',
+  'DELAI_ANNULATION_CLIENT_1',
+  'REMBOURSEMENT_CLIENT_1',
+  'DELAI_ANNULATION_CLIENT_2',
+  'REMBOURSEMENT_CLIENT_2',
+  'REGLE_NO_SHOW',
+  'REMBOURSEMENT_OU_REPORT_MONITEUR',
+  'REGLE_INTERRUPTION',
+  'MONITEUR_TELEPHONE',
+  'DELAI_RETARD_MAX',
+  'REGLE_RETARD',
+  'MEDIATEUR_NOM',
+  'MEDIATEUR_ADRESSE',
+  'MEDIATEUR_SITE',
+] as const
+
+export const GUIDE_STAGE_TERMS_STAGE_VARIABLES = [
+  'NOM_DU_STAGE',
+  'DESCRIPTION_STAGE',
+  'DISCIPLINE',
+  'PUBLIC_CONCERNE',
+  'NIVEAU_REQUIS',
+  'AGE_MINIMUM',
+  'PRE_REQUIS',
+  'LIEU',
+  'DATES',
+  'HORAIRES',
+  'DUREE',
+  'EFFECTIF_MIN',
+  'EFFECTIF_MAX',
+  'PRIX_TTC',
+  'CE_QUI_EST_INCLUS',
+  'CE_QUI_N_EST_PAS_INCLUS',
+  'MATERIEL_FOURNI',
+  'MATERIEL_A_PREVOIR_PAR_CLIENT',
+] as const
+
+const GUIDE_STAGE_TERMS_GLOBAL_VARIABLE_SET = new Set<string>(GUIDE_STAGE_TERMS_GLOBAL_VARIABLES)
 
 export const GUIDE_STAGE_TERMS_TEMPLATE = `1. Objet
 
@@ -168,6 +217,7 @@ En cas de litige, les parties rechercheront d’abord une solution amiable. À d
 Le client reconnaît avoir pris connaissance des présentes CGV avant toute réservation et les avoir acceptées sans réserve.`
 
 const GUIDE_STAGE_TERMS_VARIABLE_REGEX = /\[([^\]]+)\]/g
+const GUIDE_STAGE_TERMS_GLOBAL_VARIABLE_REGEX = /\{([^}]+)\}/g
 
 type GuideStageTermsValue = string | number | null | undefined
 
@@ -179,25 +229,32 @@ const normalizeGuideStageTermsValue = (value: GuideStageTermsValue) => {
   return stringValue ? stringValue : null
 }
 
+export const formatGuideStageTermsGlobalVariableMarkers = (template: string) =>
+  template.replace(GUIDE_STAGE_TERMS_VARIABLE_REGEX, (match, rawKey) => {
+    const key = String(rawKey).trim()
+    return GUIDE_STAGE_TERMS_GLOBAL_VARIABLE_SET.has(key) ? `{${key}}` : match
+  })
+
 export const replaceGuideStageTermsVariables = (
   template: string,
   variables: GuideStageTermsVariables,
 ) =>
-  template.replace(GUIDE_STAGE_TERMS_VARIABLE_REGEX, (match, rawKey) => {
-    const key = String(rawKey).trim()
-    const value = normalizeGuideStageTermsValue(variables[key])
-    return value ?? match
-  })
+  template
+    .replace(GUIDE_STAGE_TERMS_GLOBAL_VARIABLE_REGEX, (match, rawKey) => {
+      const key = String(rawKey).trim()
+      const value = normalizeGuideStageTermsValue(variables[key])
+      return value ?? match
+    })
+    .replace(GUIDE_STAGE_TERMS_VARIABLE_REGEX, (match, rawKey) => {
+      const key = String(rawKey).trim()
+      const value = normalizeGuideStageTermsValue(variables[key])
+      return value ?? match
+    })
 
 export const buildDefaultGuideStageTerms = (input?: {
   guideName?: string | null
   professionalCardNumber?: string | null
 }) => {
-  const safeGuideName = input?.guideName?.trim() || GENERIC_GUIDE_NAME
-
-  return replaceGuideStageTermsVariables(GUIDE_STAGE_TERMS_TEMPLATE, {
-    MONITEUR_NOM: safeGuideName,
-    'MONITEUR_NOM or ENTITE_CONCERNEE': safeGuideName,
-    CARTE_PRO_EDUCATEUR: input?.professionalCardNumber || null,
-  })
+  void input
+  return formatGuideStageTermsGlobalVariableMarkers(GUIDE_STAGE_TERMS_TEMPLATE)
 }

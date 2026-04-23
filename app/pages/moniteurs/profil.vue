@@ -4,7 +4,12 @@ import {
   GUIDE_UPLOAD_PRESETS,
   isManagedGuideImageUrl,
 } from '~~/shared/constants/guide-image-upload'
-import { buildDefaultGuideStageTerms } from '~~/shared/constants/guide-stage-terms'
+import {
+  GUIDE_STAGE_TERMS_GLOBAL_VARIABLES,
+  GUIDE_STAGE_TERMS_STAGE_VARIABLES,
+  buildDefaultGuideStageTerms,
+  formatGuideStageTermsGlobalVariableMarkers,
+} from '~~/shared/constants/guide-stage-terms'
 
 definePageMeta({
   middleware: 'guide-auth',
@@ -49,10 +54,12 @@ watch(
     form.whatsappOptIn = Boolean(value.whatsappOptIn)
     form.baseLocation = value.baseLocation || ''
     form.bio = value.bio || ''
-    form.stageTermsAndConditions = value.stageTermsAndConditions || buildDefaultGuideStageTerms({
-      guideName: currentGuideName,
-      professionalCardNumber: value.professionalCardNumber || null,
-    })
+    form.stageTermsAndConditions = value.stageTermsAndConditions
+      ? formatGuideStageTermsGlobalVariableMarkers(value.stageTermsAndConditions)
+      : buildDefaultGuideStageTerms({
+          guideName: currentGuideName,
+          professionalCardNumber: value.professionalCardNumber || null,
+        })
     form.instagramUrl = value.instagramUrl || ''
     form.websiteUrl = value.websiteUrl || ''
     form.professionalCardNumber = value.professionalCardNumber || ''
@@ -69,6 +76,9 @@ const uploadError = ref<string | null>(null)
 const uploadingPhoto = ref(false)
 const isClient = ref(false)
 const { uploadGuideImage } = useGuideImageUpload()
+const stageTermsGlobalVariableExamples = GUIDE_STAGE_TERMS_GLOBAL_VARIABLES.slice(0, 8)
+const stageTermsPolicyVariableExamples = GUIDE_STAGE_TERMS_GLOBAL_VARIABLES.slice(8)
+const stageTermsStageVariableExamples = GUIDE_STAGE_TERMS_STAGE_VARIABLES
 
 onMounted(() => {
   isClient.value = true
@@ -293,7 +303,7 @@ const logout = async () => {
                 <div>
                   <label class="text-sm font-medium text-brand-100/80">Conditions générales de vente (CGV)</label>
                   <p class="mt-1 text-xs text-brand-200/70">
-                    Modèle à adapter à ton activité. Les variables de stage restent dynamiques sur la fiche publique et les champs non renseignés restent affichés entre crochets.
+                    Modèle transverse à tous tes stages. Les variables globales se règlent ici, les variables de stage sont injectées automatiquement depuis les informations du stage que tu crées.
                   </p>
                 </div>
                 <button
@@ -304,10 +314,77 @@ const logout = async () => {
                   Réinitialiser le modèle
                 </button>
               </div>
+
+              <div class="grid gap-4 lg:grid-cols-2">
+                <div class="rounded-2xl border border-secondaryBrand-300/20 bg-secondaryBrand-400/10 p-4">
+                  <div class="flex items-start gap-3">
+                    <span class="mt-0.5 rounded-lg bg-secondaryBrand-300 px-2 py-1 font-mono text-xs font-semibold text-brand-950">
+                      {...}
+                    </span>
+                    <div class="space-y-2">
+                      <h3 class="text-sm font-semibold text-secondaryBrand-100">
+                        Variables globales moniteur
+                      </h3>
+                      <p class="text-xs leading-5 text-brand-100/75">
+                        Elles décrivent ton activité, tes règles commerciales ou tes infos légales. Complète-les une fois
+                        dans ce modèle : elles seront utilisées de la même façon sur toutes tes fiches stage.
+                      </p>
+                    </div>
+                  </div>
+                  <div class="mt-4 flex flex-wrap gap-2">
+                    <code
+                      v-for="variable in stageTermsGlobalVariableExamples"
+                      :key="variable"
+                      class="rounded-full border border-secondaryBrand-300/25 bg-brand-950/50 px-2.5 py-1 text-[11px] text-secondaryBrand-100"
+                    >{{ '{' + variable + '}' }}</code>
+                  </div>
+                  <details class="mt-3 text-xs text-brand-100/70">
+                    <summary class="cursor-pointer select-none font-semibold text-secondaryBrand-200">
+                      Voir les variables de règles commerciales
+                    </summary>
+                    <div class="mt-3 flex flex-wrap gap-2">
+                      <code
+                        v-for="variable in stageTermsPolicyVariableExamples"
+                        :key="variable"
+                        class="rounded-full border border-white/10 bg-brand-950/50 px-2.5 py-1 text-[11px] text-brand-100/80"
+                      >{{ '{' + variable + '}' }}</code>
+                    </div>
+                  </details>
+                </div>
+
+                <div class="rounded-2xl border border-white/10 bg-brand-950/50 p-4">
+                  <div class="flex items-start gap-3">
+                    <span class="mt-0.5 rounded-lg bg-white/10 px-2 py-1 font-mono text-xs font-semibold text-white">
+                      [...]
+                    </span>
+                    <div class="space-y-2">
+                      <h3 class="text-sm font-semibold text-white">
+                        Variables automatiques de stage
+                      </h3>
+                      <p class="text-xs leading-5 text-brand-100/75">
+                        Ne les remplace pas ici si tu veux garder le modèle dynamique. Sur la fiche publique, elles sont
+                        remplacées par le titre, le lieu, les dates, le prix, le niveau ou les infos matériel du stage.
+                      </p>
+                    </div>
+                  </div>
+                  <div class="mt-4 flex flex-wrap gap-2">
+                    <code
+                      v-for="variable in stageTermsStageVariableExamples"
+                      :key="variable"
+                      class="rounded-full border border-white/10 bg-brand-900/80 px-2.5 py-1 text-[11px] text-brand-100/80"
+                    >{{ '[' + variable + ']' }}</code>
+                  </div>
+                  <p class="mt-3 text-xs leading-5 text-brand-200/70">
+                    Si une information manque dans la fiche stage, la variable reste visible telle quelle pour signaler
+                    qu’elle doit être complétée.
+                  </p>
+                </div>
+              </div>
+
               <textarea
                 v-model="form.stageTermsAndConditions"
                 rows="18"
-                class="w-full rounded-xl border border-brand-800 bg-brand-900/80 px-3 py-3 text-sm text-white focus:border-secondaryBrand-400 focus:outline-none"
+                class="w-full rounded-xl border border-brand-800 bg-brand-900/80 px-3 py-3 font-mono text-sm leading-6 text-white focus:border-secondaryBrand-400 focus:outline-none"
               ></textarea>
             </div>
 
