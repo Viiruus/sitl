@@ -19,7 +19,7 @@ export default defineEventHandler(async (event) => {
 
   const aventure = await db.aventure.findFirst({
     where: { slug, guideId },
-    select: { id: true, titre: true, slug: true },
+    select: { id: true, titre: true, slug: true, jours: true },
   })
 
   if (!aventure) {
