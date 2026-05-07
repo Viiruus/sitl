@@ -25,7 +25,7 @@ const mapGuide = (user: any) => ({
   stageTermsAndConditions: user.guideProfile?.stageTermsAndConditions || null,
   instagramUrl: user.guideProfile?.instagramUrl || null,
   websiteUrl: user.guideProfile?.websiteUrl || null,
-  aventuresPubliees: user._count?.aventures ?? 0,
+  aventuresPubliees: user.aventures?.filter((aventure: any) => aventure?.estPublie).length ?? 0,
   prochainesSessions: user.aventures?.reduce((total: number, a: any) => total + (a.sessions?.length ?? 0), 0) ?? 0,
 })
 
@@ -50,11 +50,6 @@ export default defineEventHandler(async (event) => {
       aventures: {
         include: {
           sessions: true,
-        },
-      },
-      _count: {
-        select: {
-          aventures: true,
         },
       },
     },

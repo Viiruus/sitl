@@ -12,6 +12,7 @@ const navLinks = [
   { label: 'Tableau de bord', to: '/moniteurs' },
   { label: 'Profil moniteur', to: '/moniteurs/profil' },
   { label: 'Mes aventures', to: '/moniteurs/aventures' },
+  { label: 'Grimpeurs inscrits', to: '/moniteurs/grimpeurs' },
 ]
 
 const isActive = (link: string) => {
