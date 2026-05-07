@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import { prisma } from '../../utils/prisma'
+import { isHalfDayStep } from '~~/shared/utils/aventure-schedule'
 
 const createSchema = z.object({
   titre: z.string().trim().min(3).max(120),
@@ -12,7 +13,7 @@ const createSchema = z.object({
   discipline: z.enum(['FALAISE', 'GRANDE_VOIE', 'BLOC', 'TRAD', 'VIA_FERRATA']),
   lieuLabel: z.string().trim().min(3),
   prixParPersonne: z.number().int().min(0),
-  jours: z.number().int().min(1).max(30),
+  jours: z.number().min(0.5).max(30).refine(isHalfDayStep, 'La durée doit être définie par pas de 0,5 jour.'),
   placesMin: z.number().int().min(0).max(20),
   placesMax: z.number().int().min(1).max(20),
 })

@@ -239,7 +239,7 @@
                   <span
                     class="inline-flex items-center rounded-full border border-brand-200/40 bg-brand-950/60 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-white"
                   >
-                    {{ stage.jours }} {{ stage.jours > 1 ? 'jours' : 'jour' }}
+                    {{ formatDurationDays(stage.jours) }}
                   </span>
                 </div>
                 <div class="ml-auto">
@@ -327,6 +327,7 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { buildStoredSrcset, resolveStoredImageSrc } from '~/composables/useStoredImageVariants'
+import { formatDurationDays, formatSessionRangeLabel } from '~~/shared/utils/aventure-schedule'
 import { resolvePublicSiteUrl } from '~~/shared/utils/site-url'
 
 const runtimeConfig = useRuntimeConfig()
@@ -494,13 +495,8 @@ onBeforeUnmount(() => {
     return disciplineImages[value] || '/images/escalade-grande-voie-calanques.jpg'
   }
 
-  const formatSessionRange = (session: any) => {
-    if (!session?.dateDebut || !session?.dateFin) return ''
-    const formatter = new Intl.DateTimeFormat('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })
-    const start = formatter.format(new Date(session.dateDebut))
-    const end = formatter.format(new Date(session.dateFin))
-    return start === end ? start : `${start} → ${end}`
-  }
+  const formatSessionRange = (session: any) =>
+    formatSessionRangeLabel(session?.dateDebut, session?.dateFin)
 
   const disciplineIconMap: Record<string, string> = {
     GRANDE_VOIE: '/images/grande-voie-white.png',

@@ -1,51 +1,17 @@
 import { z } from 'zod'
 import { prisma } from '../../../../../utils/prisma'
-
-const dateSchema = z.preprocess(
-  (value) => {
-    if (value instanceof Date) return value
-    if (typeof value === 'string' && value) return new Date(value)
-    return value
-  },
-  z.date({ required_error: 'Date requise' }),
-)
+import {
+  computeSessionEndFromDuration,
+  formatDurationDays,
+  formatSessionRangeLabel,
+  type SessionHalfDay,
+} from '~~/shared/utils/aventure-schedule'
 
 const bodySchema = z
   .object({
-    dateDebut: dateSchema,
-    dateFin: dateSchema.optional().nullable(),
+    dateDebut: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+    demiJourneeDebut: z.enum(['AM', 'PM']).default('AM'),
   })
-  .refine((data) => {
-    if (!data.dateFin) return true
-    return data.dateFin >= data.dateDebut
-  }, { message: 'La date de fin doit être après la date de début', path: ['dateFin'] })
-
-const MS_PER_DAY = 24 * 60 * 60 * 1000
-
-const toUtcDayTimestamp = (value: Date) => Date.UTC(
-  value.getUTCFullYear(),
-  value.getUTCMonth(),
-  value.getUTCDate(),
-)
-
-const getInclusiveDaySpan = (start: Date, end: Date) => {
-  return Math.floor((toUtcDayTimestamp(end) - toUtcDayTimestamp(start)) / MS_PER_DAY) + 1
-}
-
-const formatSessionDate = (value: Date) => {
-  return new Intl.DateTimeFormat('fr-FR', {
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-    timeZone: 'UTC',
-  }).format(value)
-}
-
-const formatSessionPeriod = (start: Date, end: Date) => {
-  const startLabel = formatSessionDate(start)
-  const endLabel = formatSessionDate(end)
-  return startLabel === endLabel ? startLabel : `${startLabel} → ${endLabel}`
-}
 
 export default defineEventHandler(async (event) => {
   const session = await getUserSession(event)
@@ -97,12 +63,11 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 404, statusMessage: 'Session introuvable' })
   }
 
-  const sessionEndDate = body.dateFin ?? body.dateDebut
-  const inclusiveDaySpan = getInclusiveDaySpan(body.dateDebut, sessionEndDate)
-  if (inclusiveDaySpan !== aventure.jours) {
+  const computedSession = computeSessionEndFromDuration(body.dateDebut, body.demiJourneeDebut as SessionHalfDay, aventure.jours)
+  if (!computedSession?.dateDebut || !computedSession?.dateFin) {
     throw createError({
       statusCode: 422,
-      statusMessage: `Cette session doit couvrir exactement ${aventure.jours} jour${aventure.jours > 1 ? 's' : ''}.`,
+      statusMessage: `Cette session doit couvrir exactement ${formatDurationDays(aventure.jours)}.`,
     })
   }
 
@@ -116,10 +81,10 @@ export default defineEventHandler(async (event) => {
         guideId,
       },
       dateDebut: {
-        lte: sessionEndDate,
+        lte: computedSession.dateFin,
       },
       dateFin: {
-        gte: body.dateDebut,
+        gte: computedSession.dateDebut,
       },
     },
     select: {
@@ -137,15 +102,15 @@ export default defineEventHandler(async (event) => {
   if (conflictingSession) {
     throw createError({
       statusCode: 409,
-      statusMessage: `Une session est déjà planifiée sur cette période pour "${conflictingSession.aventure.titre}" (${formatSessionPeriod(conflictingSession.dateDebut, conflictingSession.dateFin)}).`,
+      statusMessage: `Une session est déjà planifiée sur cette période pour "${conflictingSession.aventure.titre}" (${formatSessionRangeLabel(conflictingSession.dateDebut, conflictingSession.dateFin)}).`,
     })
   }
 
   const updated = await db.aventureSession.update({
     where: { id: targetSession.id },
     data: {
-      dateDebut: body.dateDebut,
-      dateFin: sessionEndDate,
+      dateDebut: computedSession.dateDebut,
+      dateFin: computedSession.dateFin,
     },
     select: {
       id: true,

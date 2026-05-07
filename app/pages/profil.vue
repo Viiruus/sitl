@@ -1,4 +1,5 @@
 <script setup lang="ts">
+  import { formatSessionRangeLabel } from '~~/shared/utils/aventure-schedule'
   import { buildGuideSlug } from '~~/shared/utils/guide-slug'
 
   definePageMeta({
@@ -148,16 +149,8 @@
       form.typesOfClimbing.includes('trad'),
   )
 
-  const formatSessionRange = (session: any) => {
-    if (!session) return ''
-    const formatter = new Intl.DateTimeFormat('fr-FR', {
-      day: 'numeric',
-      month: 'long',
-    })
-    const start = formatter.format(new Date(session.dateDebut))
-    const end = formatter.format(new Date(session.dateFin))
-    return start === end ? start : `${start} → ${end}`
-  }
+  const formatSessionRange = (session: any) =>
+    formatSessionRangeLabel(session?.dateDebut, session?.dateFin)
 
   const bookingStatusLabel = (booking: any) => {
     if (booking?.statut === 'ANNULEE') return 'Annulée'

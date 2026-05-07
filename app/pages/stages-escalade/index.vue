@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { buildStoredSrcset, resolveStoredImageSrc } from '~/composables/useStoredImageVariants'
+import { formatDurationDays, formatSessionRangeLabel } from '~~/shared/utils/aventure-schedule'
 import { resolvePublicSiteUrl } from '~~/shared/utils/site-url'
 const route = useRoute()
 const runtimeConfig = useRuntimeConfig()
@@ -106,13 +107,8 @@ const imageForDiscipline = (value?: string | null) => {
   return disciplineImageMap[value] ?? '/images/escalade-grande-voie-calanques.jpg'
 }
 
-const formatSessionRange = (session: any) => {
-  if (!session?.dateDebut || !session?.dateFin) return ''
-  const formatter = new Intl.DateTimeFormat('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })
-  const start = formatter.format(new Date(session.dateDebut))
-  const end = formatter.format(new Date(session.dateFin))
-  return start === end ? start : `${start} → ${end}`
-}
+const formatSessionRange = (session: any) =>
+  formatSessionRangeLabel(session?.dateDebut, session?.dateFin)
 
 const filteredAventures = computed(() => {
   const today = new Date()
@@ -140,8 +136,8 @@ const filteredAventures = computed(() => {
   if (durationFilter.value !== 'all') {
     adventures = adventures.filter((aventure: any) => {
       const days = Number(aventure?.jours || 0)
-      if (!Number.isFinite(days) || days < 1) return false
-      if (durationFilter.value === 'single') return days === 1
+      if (!Number.isFinite(days) || days < 0.5) return false
+      if (durationFilter.value === 'single') return days <= 1
       return days > 1
     })
   }
@@ -447,7 +443,7 @@ const mapLegend = [
                       {{ formatDisciplineLabel(a.discipline) }}
                     </span>
                     <span class="inline-flex items-center rounded-full border border-brand-200/40 bg-brand-950/60 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-white">
-                      {{ a.jours }} {{ a.jours > 1 ? 'jours' : 'jour' }}
+                      {{ formatDurationDays(a.jours) }}
                     </span>
                   </div>
                   <div class="ml-auto">

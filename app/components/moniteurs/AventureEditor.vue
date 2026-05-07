@@ -4,6 +4,7 @@ import {
   GUIDE_UPLOAD_PRESETS,
   isManagedGuideImageUrl,
 } from '~~/shared/constants/guide-image-upload'
+import { formatDurationDays, isHalfDayStep } from '~~/shared/utils/aventure-schedule'
 
 type StoredImageVariant = {
   url: string
@@ -312,7 +313,7 @@ const toListPayload = (list: string[]) => list.map((item) => item.trim()).filter
 const parseNumberField = (value: string | number) => {
   if (typeof value === 'number') return value
   if (!value) return null
-  const parsed = Number(value)
+  const parsed = Number(String(value).replace(',', '.'))
   return Number.isFinite(parsed) ? parsed : null
 }
 
@@ -339,8 +340,11 @@ const validateBaseFields = () => {
     throw new Error('Indique un prix par personne.')
   }
   const daysValue = parseNumberField(form.jours)
-  if (daysValue == null || daysValue < 1) {
+  if (daysValue == null || daysValue < 0.5) {
     throw new Error('Indique le nombre de jours.')
+  }
+  if (!isHalfDayStep(daysValue)) {
+    throw new Error('La durée doit être définie par pas de 0,5 jour.')
   }
   const placesValue = parseNumberField(form.placesMax)
   if (placesValue == null || placesValue < 1) {
@@ -680,12 +684,17 @@ const uploadGalleryImage = async (event: Event, index: number) => {
             <label class="text-xs uppercase tracking-[0.3em] text-brand-200/70">Durée (jours)</label>
             <input
               v-model="form.jours"
-              min="1"
+              min="0.5"
               max="30"
               type="number"
-              placeholder="Ex: 2"
+              step="0.5"
+              inputmode="decimal"
+              placeholder="Ex: 2.5"
               class="w-full rounded-xl border border-white/10 bg-brand-900/80 px-3 py-2 text-white focus:border-secondaryBrand-400 focus:outline-none"
             />
+            <p class="text-xs text-brand-200/60">
+              Tu peux saisir des demi-journées, par exemple {{ formatDurationDays(2.5) }}.
+            </p>
           </div>
           <div class="space-y-2">
             <label class="text-xs uppercase tracking-[0.3em] text-brand-200/70">Participants minimum</label>

@@ -104,7 +104,7 @@
                 <div class="pt-4 flex flex-wrap gap-3">
                   <div class="inline-flex items-center gap-2 rounded-full bg-brand-900/70 px-3 py-2 text-sm text-white ring-1 ring-white/10">
                     <span class="text-[10px] uppercase tracking-[0.25em] text-secondaryBrand-200/90">Durée</span>
-                    <span class="font-semibold">{{ stage.jours }} {{ stage.jours > 1 ? 'jours' : 'jour' }}</span>
+                    <span class="font-semibold">{{ formatDurationDays(stage.jours) }}</span>
                   </div>
                   <div class="inline-flex items-center gap-2 rounded-full bg-brand-900/70 px-3 py-2 text-sm text-white ring-1 ring-white/10">
                     <span class="text-[10px] uppercase tracking-[0.25em] text-secondaryBrand-200/90">Niveau</span>
@@ -906,7 +906,7 @@
                       <span
                         class="inline-flex items-center rounded-full border border-brand-200/40 bg-brand-950/60 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-white"
                       >
-                        {{ s.jours }} {{ s.jours > 1 ? 'jours' : 'jour' }}
+                        {{ formatDurationDays(s.jours) }}
                       </span>
                     </div>
                     <div class="ml-auto">
@@ -1183,6 +1183,7 @@ import {
   buildDefaultGuideStageTerms,
   replaceGuideStageTermsVariables,
 } from '~~/shared/constants/guide-stage-terms'
+import { formatDurationDays, formatSessionRangeLabel } from '~~/shared/utils/aventure-schedule'
 import { disciplineHubPath } from '~~/shared/utils/seo-hubs'
 import { resolvePublicSiteUrl } from '~~/shared/utils/site-url'
 import '@vuepic/vue-datepicker/dist/main.css'
@@ -1590,7 +1591,7 @@ const resolvedGuideStageTerms = computed(() =>
     DATES: joinTextValues(sessionDateLabels.value || [], ' ; '),
     DUREE:
       typeof stage.value?.jours === 'number'
-        ? `${stage.value.jours} jour${stage.value.jours > 1 ? 's' : ''}`
+        ? formatDurationDays(stage.value.jours)
         : null,
     EFFECTIF_MIN:
       typeof stage.value?.placesMin === 'number'
@@ -1635,16 +1636,8 @@ const formatDisciplineLabel = (value?: string | null) => {
   return disciplineLabels[value] ?? value
 }
 
-const formatSessionDate = (session: any) => {
-  const formatter = new Intl.DateTimeFormat('fr-FR', {
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-  })
-  const start = formatter.format(new Date(session.dateDebut))
-  const end = formatter.format(new Date(session.dateFin))
-  return start === end ? start : `${start} → ${end}`
-}
+const formatSessionDate = (session: any) =>
+  formatSessionRangeLabel(session?.dateDebut, session?.dateFin)
 
 const sessionParticipantsCount = (session?: {
   participantsCount?: number | null
@@ -1661,18 +1654,8 @@ const sessionParticipantsCount = (session?: {
   return 0
 }
 
-const formatSessionRange = (session?: { dateDebut?: string | Date; dateFin?: string | Date } | null) => {
-  if (!session?.dateDebut) return ''
-  const formatter = new Intl.DateTimeFormat('fr-FR', {
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-  })
-  const start = formatter.format(new Date(session.dateDebut))
-  if (!session.dateFin) return start
-  const end = formatter.format(new Date(session.dateFin))
-  return start === end ? start : `${start} → ${end}`
-}
+const formatSessionRange = (session?: { dateDebut?: string | Date; dateFin?: string | Date } | null) =>
+  formatSessionRangeLabel(session?.dateDebut, session?.dateFin)
 
 const otherStageCoverImage = (entry: any) =>
   resolveStoredImageSrc(entry?.coverImageUrl, entry?.coverImageVariants) || imageForDiscipline(entry?.discipline)
@@ -1790,7 +1773,7 @@ const overviewHighlights = computed(() => {
   if (data.jours) {
     highlights.push({
       label: 'Durée',
-      value: `${data.jours} jour${data.jours > 1 ? 's' : ''}`,
+      value: formatDurationDays(data.jours),
     })
   }
   if (data.niveauMinimum) {

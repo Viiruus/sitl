@@ -222,7 +222,7 @@
                         {{ formatDisciplineLabel(aventure.discipline) }}
                       </span>
                       <span class="inline-flex items-center rounded-full border border-brand-200/40 bg-brand-950/60 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-white">
-                        {{ aventure.jours }} {{ aventure.jours > 1 ? 'jours' : 'jour' }}
+                        {{ formatDurationDays(aventure.jours) }}
                       </span>
                     </div>
                     <div class="ml-auto">
@@ -389,6 +389,7 @@
 <script setup lang="ts">
 import { HomeIcon, TruckIcon } from '@heroicons/vue/24/solid'
 import { buildStoredSrcset, resolveStoredImageSrc } from '~/composables/useStoredImageVariants'
+import { formatDurationDays, formatSessionRangeLabel } from '~~/shared/utils/aventure-schedule'
 import { disciplineHubPath } from '~~/shared/utils/seo-hubs'
 import { resolvePublicSiteUrl } from '~~/shared/utils/site-url'
 
@@ -838,13 +839,8 @@ const formatFullDate = (dateInput: string | number | Date) => {
   return formatter.format(new Date(dateInput))
 }
 
-const formatSessionRange = (session?: { dateDebut?: string | Date; dateFin?: string | Date } | null) => {
-  if (!session?.dateDebut) return 'Dates à confirmer'
-  const start = formatFullDate(session.dateDebut)
-  if (!session.dateFin) return start
-  const end = formatFullDate(session.dateFin)
-  return start === end ? start : `${start} → ${end}`
-}
+const formatSessionRange = (session?: { dateDebut?: string | Date; dateFin?: string | Date } | null) =>
+  formatSessionRangeLabel(session?.dateDebut, session?.dateFin) || 'Dates à confirmer'
 
 const formatPrice = (value?: number | null) => {
   if (!value) return 'Tarif sur demande'

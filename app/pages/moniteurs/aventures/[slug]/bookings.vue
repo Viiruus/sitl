@@ -1,4 +1,14 @@
 <script setup lang="ts">
+import {
+  computeSessionEndFromDuration,
+  formatDurationDays,
+  formatSessionRangeLabel,
+  getSessionHalfDayBounds,
+  SESSION_HALF_DAY_LABELS,
+  toDateInputValue,
+  type SessionHalfDay,
+} from '~~/shared/utils/aventure-schedule'
+
 definePageMeta({
   middleware: 'guide-auth',
 })
@@ -21,7 +31,12 @@ const bookings = computed(() => data.value?.bookings || [])
 const deletingSessionIds = reactive<Record<number, boolean>>({})
 const savingSessionIds = reactive<Record<number, boolean>>({})
 const editingSessionIds = reactive<Record<number, boolean>>({})
-const editingSessionForm = reactive<Record<number, { dateDebut: string; dateFin: string }>>({})
+const editingSessionForm = reactive<Record<number, {
+  dateDebut: string
+  demiJourneeDebut: SessionHalfDay
+  dateFin: string
+  demiJourneeFin: SessionHalfDay
+}>>({})
 const sessionActionError = ref<string | null>(null)
 const sessionActionSuccess = ref<string | null>(null)
 useSeoMeta(() => ({
@@ -63,11 +78,7 @@ const formatDate = (value?: string | Date | null) => {
 }
 
 const formatPeriod = (start?: string | Date | null, end?: string | Date | null) => {
-  if (!start) return 'Date à définir'
-  const startStr = formatDate(start)
-  if (!end) return startStr
-  const endStr = formatDate(end)
-  return startStr === endStr ? startStr : `${startStr} → ${endStr}`
+  return formatSessionRangeLabel(start, end) || 'Date à définir'
 }
 
 const formatStatut = (value?: string | null) => {
@@ -84,39 +95,18 @@ const formatPhone = (user: any) => {
   return user?.whatsappOptIn ? `${phone} (WhatsApp)` : phone
 }
 
-const MS_PER_DAY = 24 * 60 * 60 * 1000
-
-const addDaysToDateInput = (dateInput: string, daysToAdd: number) => {
-  if (!dateInput) return ''
-  const [year, month, day] = dateInput.split('-').map(Number)
-  if (!year || !month || !day) return ''
-  const utcDate = new Date(Date.UTC(year, month - 1, day))
-  utcDate.setUTCDate(utcDate.getUTCDate() + daysToAdd)
-  const nextYear = utcDate.getUTCFullYear()
-  const nextMonth = String(utcDate.getUTCMonth() + 1).padStart(2, '0')
-  const nextDay = String(utcDate.getUTCDate()).padStart(2, '0')
-  return `${nextYear}-${nextMonth}-${nextDay}`
-}
-
-const toDateInputValue = (value?: string | Date | null) => {
-  if (!value) return ''
-  const date = new Date(value)
-  if (Number.isNaN(+date)) return ''
-  const year = date.getUTCFullYear()
-  const month = String(date.getUTCMonth() + 1).padStart(2, '0')
-  const day = String(date.getUTCDate()).padStart(2, '0')
-  return `${year}-${month}-${day}`
-}
-
 const ensureEditingSessionForm = (group: { session: any }) => {
   const sessionId = Number(group.session.id)
   if (!editingSessionForm[sessionId]) {
     const startDate = toDateInputValue(group.session?.dateDebut)
+    const bounds = getSessionHalfDayBounds(group.session?.dateDebut, group.session?.dateFin)
+    const startHalfDay = bounds?.startHalfDay || 'AM'
+    const computedRange = computeSessionEndFromDuration(startDate, startHalfDay, Number(aventure.value?.jours || 0))
     editingSessionForm[sessionId] = {
       dateDebut: startDate,
-      dateFin: startDate
-        ? addDaysToDateInput(startDate, Math.max(0, Number(aventure.value?.jours || 1) - 1))
-        : toDateInputValue(group.session?.dateFin),
+      demiJourneeDebut: startHalfDay,
+      dateFin: computedRange?.dateFinInput || toDateInputValue(group.session?.dateFin),
+      demiJourneeFin: computedRange?.endHalfDay || bounds?.endHalfDay || 'PM',
     }
   }
   return editingSessionForm[sessionId]
@@ -138,9 +128,17 @@ const closeEditSession = (sessionId: number) => {
 const updateEditingSessionDateRange = (group: { session: any }, startDateInput: string) => {
   const form = ensureEditingSessionForm(group)
   form.dateDebut = startDateInput
-  form.dateFin = startDateInput
-    ? addDaysToDateInput(startDateInput, Math.max(0, Number(aventure.value?.jours || 1) - 1))
-    : ''
+  const computedRange = computeSessionEndFromDuration(startDateInput, form.demiJourneeDebut, Number(aventure.value?.jours || 0))
+  form.dateFin = computedRange?.dateFinInput || ''
+  form.demiJourneeFin = computedRange?.endHalfDay || 'PM'
+}
+
+const updateEditingSessionHalfDayRange = (group: { session: any }, startHalfDay: SessionHalfDay) => {
+  const form = ensureEditingSessionForm(group)
+  form.demiJourneeDebut = startHalfDay
+  const computedRange = computeSessionEndFromDuration(form.dateDebut, startHalfDay, Number(aventure.value?.jours || 0))
+  form.dateFin = computedRange?.dateFinInput || ''
+  form.demiJourneeFin = computedRange?.endHalfDay || 'PM'
 }
 
 const saveSession = async (group: { session: any; bookings: any[] }) => {
@@ -152,15 +150,13 @@ const saveSession = async (group: { session: any; bookings: any[] }) => {
   sessionActionSuccess.value = null
 
   const form = ensureEditingSessionForm(group)
-  const startDate = form.dateDebut ? new Date(form.dateDebut) : null
-  const endDate = form.dateFin ? new Date(form.dateFin) : null
-
-  if (!startDate || Number.isNaN(+startDate)) {
+  if (!form.dateDebut) {
     sessionActionError.value = 'Choisis une date de début.'
     return
   }
-  if (endDate && endDate < startDate) {
-    sessionActionError.value = 'La date de fin doit être après la date de début.'
+  const computedRange = computeSessionEndFromDuration(form.dateDebut, form.demiJourneeDebut, Number(aventure.value?.jours || 0))
+  if (!computedRange?.dateDebut || !computedRange?.dateFin) {
+    sessionActionError.value = `La session doit couvrir exactement ${formatDurationDays(aventure.value?.jours)}.`
     return
   }
 
@@ -169,8 +165,8 @@ const saveSession = async (group: { session: any; bookings: any[] }) => {
     await $fetch(`/api/guides/aventures/${slug.value}/sessions/${sessionId}`, {
       method: 'PUT',
       body: {
-        dateDebut: startDate.toISOString(),
-        dateFin: endDate ? endDate.toISOString() : null,
+        dateDebut: form.dateDebut,
+        demiJourneeDebut: form.demiJourneeDebut,
       },
     })
     sessionActionSuccess.value = group.bookings.length > 0
@@ -308,7 +304,7 @@ const deleteSession = async (group: { session: any; bookings: any[] }) => {
                   <div>
                     <p class="text-sm font-semibold text-secondaryBrand-100">Modifier les dates</p>
                     <p class="text-xs text-brand-200/70">
-                      Cette aventure dure {{ aventure?.jours || 1 }} jour{{ Number(aventure?.jours || 1) > 1 ? 's' : '' }}. Les inscrits restent rattachés à cette session.
+                      Cette aventure dure {{ formatDurationDays(aventure?.jours || 1) }}. Les inscrits restent rattachés à cette session.
                     </p>
                   </div>
                   <button
@@ -319,7 +315,7 @@ const deleteSession = async (group: { session: any; bookings: any[] }) => {
                     Fermer
                   </button>
                 </div>
-                <div class="mt-4 grid gap-3 sm:grid-cols-2">
+                <div class="mt-4 grid gap-3 sm:grid-cols-4">
                   <div class="space-y-1">
                     <label class="text-[11px] uppercase tracking-[0.3em] text-brand-200/70">Date début</label>
                     <input
@@ -330,10 +326,31 @@ const deleteSession = async (group: { session: any; bookings: any[] }) => {
                     />
                   </div>
                   <div class="space-y-1">
+                    <label class="text-[11px] uppercase tracking-[0.3em] text-brand-200/70">Début</label>
+                    <select
+                      :value="ensureEditingSessionForm(group).demiJourneeDebut"
+                      class="w-full rounded-xl border border-white/10 bg-brand-950/70 px-3 py-2 text-white focus:border-secondaryBrand-400 focus:outline-none"
+                      @change="updateEditingSessionHalfDayRange(group, ($event.target as HTMLSelectElement).value as SessionHalfDay)"
+                    >
+                      <option value="AM">{{ SESSION_HALF_DAY_LABELS.AM }}</option>
+                      <option value="PM">{{ SESSION_HALF_DAY_LABELS.PM }}</option>
+                    </select>
+                  </div>
+                  <div class="space-y-1">
                     <label class="text-[11px] uppercase tracking-[0.3em] text-brand-200/70">Date fin</label>
                     <input
                       :value="ensureEditingSessionForm(group).dateFin"
                       type="date"
+                      readonly
+                      disabled
+                      class="w-full cursor-not-allowed rounded-xl border border-white/10 bg-brand-900/40 px-3 py-2 text-white/70"
+                    />
+                  </div>
+                  <div class="space-y-1">
+                    <label class="text-[11px] uppercase tracking-[0.3em] text-brand-200/70">Fin</label>
+                    <input
+                      :value="SESSION_HALF_DAY_LABELS[ensureEditingSessionForm(group).demiJourneeFin]"
+                      type="text"
                       readonly
                       disabled
                       class="w-full cursor-not-allowed rounded-xl border border-white/10 bg-brand-900/40 px-3 py-2 text-white/70"

@@ -280,7 +280,7 @@ model Aventure {
   pays      String? @default("France")
   region    String?
 
-  jours         Int
+  jours         Float
   placesMax     Int
   placesMin     Int @default(0)
   niveauMinimum String? // "5b", "6a", etc.

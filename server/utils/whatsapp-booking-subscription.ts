@@ -1,4 +1,5 @@
 import { normalizePhoneNumber, sendTemplateViaWhatsapp } from './whatsapp-otp'
+import { formatSessionRangeLabel } from '~~/shared/utils/aventure-schedule'
 
 const GUIDE_NEW_SUBSCRIPTION_TEMPLATE_NAME =
   process.env.WHATSAPP_GUIDE_NEW_SUBSCRIPTION_TEMPLATE_NAME || 'new_subscription'
@@ -10,21 +11,8 @@ const CLIMBER_SUBSCRIPTION_OK_TEMPLATE_NAME =
   process.env.WHATSAPP_CLIMBER_SUBSCRIPTION_OK_TEMPLATE_NAME || 'subscription_ok'
 const BOOKING_TEMPLATE_LANGUAGE = process.env.WHATSAPP_OTP_TEMPLATE_LANGUAGE || 'fr'
 
-export const formatBookingStageDate = (start?: string | Date | null, end?: string | Date | null) => {
-  if (!start) return ''
-
-  const formatter = new Intl.DateTimeFormat('fr-FR', {
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-  })
-
-  const startLabel = formatter.format(new Date(start))
-  if (!end) return startLabel
-
-  const endLabel = formatter.format(new Date(end))
-  return startLabel === endLabel ? startLabel : `${startLabel} → ${endLabel}`
-}
+export const formatBookingStageDate = (start?: string | Date | null, end?: string | Date | null) =>
+  formatSessionRangeLabel(start, end)
 
 export async function sendGuideNewSubscriptionViaWhatsapp(input: {
   phoneNumber: string

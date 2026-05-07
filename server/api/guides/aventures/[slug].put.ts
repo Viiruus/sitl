@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import { prisma } from '../../../utils/prisma'
+import { isHalfDayStep } from '~~/shared/utils/aventure-schedule'
 
 const stringListSchema = z.array(z.string().trim().min(1)).optional()
 const imageUrlSchema = z
@@ -49,7 +50,7 @@ const bodySchema = z
     latitude: coordinateSchema,
     longitude: coordinateSchema,
     prixParPersonne: z.number().int().min(0),
-    jours: z.number().int().min(1).max(30),
+    jours: z.number().min(0.5).max(30).refine(isHalfDayStep, 'La durée doit être définie par pas de 0,5 jour.'),
     placesMin: z.number().int().min(0).max(20),
     placesMax: z.number().int().min(1).max(20),
     sousTitre: z.string().trim().optional(),

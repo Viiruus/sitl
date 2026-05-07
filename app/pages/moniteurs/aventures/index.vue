@@ -1,4 +1,11 @@
 <script setup lang="ts">
+import {
+  computeSessionEndFromDuration,
+  formatDurationDays,
+  SESSION_HALF_DAY_LABELS,
+  type SessionHalfDay,
+} from '~~/shared/utils/aventure-schedule'
+
 definePageMeta({
   middleware: 'guide-auth',
 })
@@ -72,30 +79,6 @@ const formatPeriod = (start?: string | Date | null, end?: string | Date | null) 
   return startStr === endStr ? startStr : `${startStr} → ${endStr}`
 }
 
-const MS_PER_DAY = 24 * 60 * 60 * 1000
-
-const toUtcDayTimestamp = (value: Date) => Date.UTC(
-  value.getUTCFullYear(),
-  value.getUTCMonth(),
-  value.getUTCDate(),
-)
-
-const getInclusiveDaySpan = (start: Date, end: Date) => {
-  return Math.floor((toUtcDayTimestamp(end) - toUtcDayTimestamp(start)) / MS_PER_DAY) + 1
-}
-
-const addDaysToDateInput = (dateInput: string, daysToAdd: number) => {
-  if (!dateInput) return ''
-  const [year, month, day] = dateInput.split('-').map(Number)
-  if (!year || !month || !day) return ''
-  const utcDate = new Date(Date.UTC(year, month - 1, day))
-  utcDate.setUTCDate(utcDate.getUTCDate() + daysToAdd)
-  const nextYear = utcDate.getUTCFullYear()
-  const nextMonth = String(utcDate.getUTCMonth() + 1).padStart(2, '0')
-  const nextDay = String(utcDate.getUTCDate()).padStart(2, '0')
-  return `${nextYear}-${nextMonth}-${nextDay}`
-}
-
 const logout = async () => {
   await clear()
   await fetch()
@@ -105,7 +88,9 @@ const logout = async () => {
 type SessionFormState = {
   open: boolean
   dateDebut: string
+  demiJourneeDebut: SessionHalfDay
   dateFin: string
+  demiJourneeFin: SessionHalfDay
   placesTotales: number
   loading: boolean
   error: string | null
@@ -128,7 +113,9 @@ const ensureSessionForm = (slug: string) => {
     sessionForms[slug] = {
       open: false,
       dateDebut: '',
+      demiJourneeDebut: 'AM',
       dateFin: '',
+      demiJourneeFin: 'PM',
       placesTotales: 6,
       loading: false,
       error: null,
@@ -160,9 +147,17 @@ const toggleSessionForm = (slug: string) => {
 const updateSessionDateRange = (aventure: any, startDateInput: string) => {
   const form = ensureSessionForm(aventure.slug)
   form.dateDebut = startDateInput
-  form.dateFin = startDateInput
-    ? addDaysToDateInput(startDateInput, Math.max(0, Number(aventure.jours || 1) - 1))
-    : ''
+  const computedRange = computeSessionEndFromDuration(startDateInput, form.demiJourneeDebut, Number(aventure.jours || 0))
+  form.dateFin = computedRange?.dateFinInput || ''
+  form.demiJourneeFin = computedRange?.endHalfDay || 'PM'
+}
+
+const updateSessionHalfDayRange = (aventure: any, startHalfDay: SessionHalfDay) => {
+  const form = ensureSessionForm(aventure.slug)
+  form.demiJourneeDebut = startHalfDay
+  const computedRange = computeSessionEndFromDuration(form.dateDebut, startHalfDay, Number(aventure.jours || 0))
+  form.dateFin = computedRange?.dateFinInput || ''
+  form.demiJourneeFin = computedRange?.endHalfDay || 'PM'
 }
 
 const handleCreateSession = async (aventure: any) => {
@@ -170,20 +165,13 @@ const handleCreateSession = async (aventure: any) => {
   form.error = null
   form.success = null
 
-  const startDate = form.dateDebut ? new Date(form.dateDebut) : null
-  const endDate = form.dateFin ? new Date(form.dateFin) : null
-
-  if (!startDate || Number.isNaN(+startDate)) {
+  if (!form.dateDebut) {
     form.error = 'Choisis une date de début.'
     return
   }
-  if (endDate && endDate < startDate) {
-    form.error = 'La date de fin doit être après la date de début.'
-    return
-  }
-  const inclusiveDaySpan = getInclusiveDaySpan(startDate, endDate || startDate)
-  if (inclusiveDaySpan !== aventure.jours) {
-    form.error = `La session doit couvrir exactement ${aventure.jours} jour${aventure.jours > 1 ? 's' : ''}.`
+  const computedRange = computeSessionEndFromDuration(form.dateDebut, form.demiJourneeDebut, Number(aventure.jours || 0))
+  if (!computedRange?.dateDebut || !computedRange?.dateFin) {
+    form.error = `La session doit couvrir exactement ${formatDurationDays(aventure.jours)}.`
     return
   }
   const places = Number(form.placesTotales)
@@ -197,14 +185,16 @@ const handleCreateSession = async (aventure: any) => {
     await $fetch(`/api/guides/aventures/${aventure.slug}/sessions`, {
       method: 'POST',
       body: {
-        dateDebut: startDate.toISOString(),
-        dateFin: endDate ? endDate.toISOString() : null,
+        dateDebut: form.dateDebut,
+        demiJourneeDebut: form.demiJourneeDebut,
         placesTotales: places,
       },
     })
     form.success = 'Session ajoutée.'
     form.dateDebut = ''
+    form.demiJourneeDebut = 'AM'
     form.dateFin = ''
+    form.demiJourneeFin = 'PM'
     form.placesTotales = places
     await refreshAventures?.()
   } catch (error: any) {
@@ -454,9 +444,9 @@ const contactRequestStatusLabel = (value?: string | null) => {
               >
                 <p class="text-sm font-semibold text-secondaryBrand-100">Ajouter une session</p>
                 <p class="text-xs text-brand-200/70">
-                  Cette aventure dure {{ aventure.jours }} jour{{ aventure.jours > 1 ? 's' : '' }}. La session doit couvrir exactement cette durée.
+                  Cette aventure dure {{ formatDurationDays(aventure.jours) }}. La session doit couvrir exactement cette durée.
                 </p>
-                <div class="grid gap-3 sm:grid-cols-3">
+                <div class="grid gap-3 sm:grid-cols-4">
                   <div class="space-y-1">
                     <label class="text-[11px] uppercase tracking-[0.3em] text-brand-200/70">Date début</label>
                     <input
@@ -467,10 +457,31 @@ const contactRequestStatusLabel = (value?: string | null) => {
                     />
                   </div>
                   <div class="space-y-1">
+                    <label class="text-[11px] uppercase tracking-[0.3em] text-brand-200/70">Début</label>
+                    <select
+                      :value="sessionForms[aventure.slug].demiJourneeDebut"
+                      class="w-full rounded-xl border border-white/10 bg-brand-950/70 px-3 py-2 text-white focus:border-secondaryBrand-400 focus:outline-none"
+                      @change="updateSessionHalfDayRange(aventure, ($event.target as HTMLSelectElement).value as SessionHalfDay)"
+                    >
+                      <option value="AM">{{ SESSION_HALF_DAY_LABELS.AM }}</option>
+                      <option value="PM">{{ SESSION_HALF_DAY_LABELS.PM }}</option>
+                    </select>
+                  </div>
+                  <div class="space-y-1">
                     <label class="text-[11px] uppercase tracking-[0.3em] text-brand-200/70">Date fin</label>
                     <input
                       :value="sessionForms[aventure.slug].dateFin"
                       type="date"
+                      readonly
+                      disabled
+                      class="w-full cursor-not-allowed rounded-xl border border-white/10 bg-brand-900/40 px-3 py-2 text-white/70"
+                    />
+                  </div>
+                  <div class="space-y-1">
+                    <label class="text-[11px] uppercase tracking-[0.3em] text-brand-200/70">Fin</label>
+                    <input
+                      :value="SESSION_HALF_DAY_LABELS[sessionForms[aventure.slug].demiJourneeFin]"
+                      type="text"
                       readonly
                       disabled
                       class="w-full cursor-not-allowed rounded-xl border border-white/10 bg-brand-900/40 px-3 py-2 text-white/70"

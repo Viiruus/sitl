@@ -189,7 +189,7 @@
                       {{ formatDisciplineLabel(stage.discipline) }}
                     </span>
                     <span class="inline-flex items-center rounded-full border border-white/20 bg-brand-950/60 px-3 py-1 font-semibold">
-                      {{ stage.jours }} {{ stage.jours > 1 ? 'jours' : 'jour' }}
+                      {{ formatDurationDays(stage.jours) }}
                     </span>
                   </div>
                 </div>
@@ -238,6 +238,7 @@
 
 <script setup lang="ts">
 import { buildStoredSrcset, resolveStoredImageSrc } from '~/composables/useStoredImageVariants'
+import { formatDurationDays, formatSessionRangeLabel } from '~~/shared/utils/aventure-schedule'
 import { isSavoieDepartment } from '~~/shared/utils/seo-hubs'
 import { resolvePublicSiteUrl } from '~~/shared/utils/site-url'
 
@@ -393,12 +394,6 @@ const bioSnippet = (bio?: string | null) => {
   return bio.length > 180 ? `${bio.slice(0, 180).trimEnd()}…` : bio
 }
 
-const formatSessionRange = (session: any) => {
-  if (!session?.dateDebut) return 'Date à confirmer'
-  const formatter = new Intl.DateTimeFormat('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })
-  const start = formatter.format(new Date(session.dateDebut))
-  if (!session?.dateFin) return start
-  const end = formatter.format(new Date(session.dateFin))
-  return start === end ? start : `${start} → ${end}`
-}
+const formatSessionRange = (session: any) =>
+  formatSessionRangeLabel(session?.dateDebut, session?.dateFin) || 'Date à confirmer'
 </script>
