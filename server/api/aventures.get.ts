@@ -40,7 +40,7 @@ export default defineEventHandler(async (event) => {
             lastName: true,
             department: true,
             guideProfile: {
-              select: { profileImageUrl: true, profileImageVariants: true, baseLocation: true },
+              select: { profileImageUrl: true, profileImageVariants: true, baseLocation: true, gender: true },
             },
           },
         },
@@ -78,7 +78,7 @@ export default defineEventHandler(async (event) => {
           lastName: true,
           department: true,
           guideProfile: {
-            select: { profileImageUrl: true, profileImageVariants: true, baseLocation: true },
+            select: { profileImageUrl: true, profileImageVariants: true, baseLocation: true, gender: true },
           },
         },
       },
@@ -115,6 +115,7 @@ export default defineEventHandler(async (event) => {
           : null,
       guideDepartment: a.guide?.department || null,
       guideBaseLocation: a.guide?.guideProfile?.baseLocation || null,
+      guideGender: a.guide?.guideProfile?.gender || null,
       hasSessions: a.sessions.length > 0,
       nextSession: findNextSession(a.sessions),
     })),
@@ -169,6 +170,7 @@ const selectHomepageAventures = (aventures: any[], limit: number) => {
             : null,
         guideDepartment: a.guide?.department || null,
         guideBaseLocation: a.guide?.guideProfile?.baseLocation || null,
+        guideGender: a.guide?.guideProfile?.gender || null,
         nextSession,
         nextSessionDate,
       };

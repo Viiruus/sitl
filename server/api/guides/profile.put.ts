@@ -18,6 +18,7 @@ const bodySchema = z.object({
   lastName: z.string().trim().max(100).optional(),
   phoneNumber: z.string().trim().min(6, 'Ajoute un numéro de téléphone').max(30),
   whatsappOptIn: z.boolean().optional(),
+  gender: z.enum(['male', 'female']).optional().nullable().or(z.literal('')),
   baseLocation: z.string().trim().max(160).optional().or(z.literal('')),
   bio: z.string().trim().max(2000).optional().or(z.literal('')),
   stageTermsAndConditions: z.string().trim().max(20000).optional().or(z.literal('')),
@@ -77,6 +78,7 @@ export default defineEventHandler(async (event) => {
       guideProfile: {
         upsert: {
           update: {
+            gender: body.gender === '' ? null : (body.gender ?? undefined),
             bio: clean(body.bio),
             stageTermsAndConditions: clean(body.stageTermsAndConditions),
             baseLocation: clean(body.baseLocation),
@@ -87,6 +89,7 @@ export default defineEventHandler(async (event) => {
             profileImageVariants: cleanVariants(body.profileImageVariants),
           },
           create: {
+            gender: body.gender === '' ? null : (body.gender ?? null),
             bio: clean(body.bio) ?? '',
             stageTermsAndConditions: clean(body.stageTermsAndConditions) ?? null,
             baseLocation: clean(body.baseLocation) ?? null,
@@ -124,6 +127,7 @@ export default defineEventHandler(async (event) => {
       lastName: user.lastName,
       phoneNumber: user.phoneNumber,
       whatsappOptIn: user.whatsappOptIn,
+      gender: user.guideProfile?.gender || null,
       baseLocation: user.guideProfile?.baseLocation || null,
       bio: user.guideProfile?.bio || null,
       stageTermsAndConditions: user.guideProfile?.stageTermsAndConditions || null,

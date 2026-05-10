@@ -27,6 +27,7 @@ export default defineEventHandler(async (event) => {
           phoneNumber: true,
           guideProfile: {
             select: {
+              gender: true,
               bio: true,
               baseLocation: true,
               instagramUrl: true,
@@ -104,6 +105,7 @@ export default defineEventHandler(async (event) => {
           lastName: true,
           guideProfile: {
             select: {
+              gender: true,
               profileImageUrl: true,
               profileImageVariants: true,
             },
@@ -129,9 +131,11 @@ const mapGuide = (a: any) => {
     slug: buildGuideSlug(a.guide.firstName, a.guide.lastName, a.guide.id),
     fullName: [a.guide.firstName, a.guide.lastName].filter(Boolean).join(' ') || null,
     phoneNumber: a.guide.phoneNumber || null,
+    gender: gp?.gender || null,
     professionalCardNumber: gp?.professionalCardNumber || null,
     profile: gp
       ? {
+          gender: gp.gender || null,
           bio: gp.bio,
           baseLocation: gp.baseLocation,
           instagramUrl: gp.instagramUrl,
@@ -172,6 +176,7 @@ const mapListAventure = (a: any) => ({
   prixParPersonne: a.prixParPersonne,
   guideName:
     [a.guide?.firstName, a.guide?.lastName].filter(Boolean).join(' ') || null,
+  guideGender: a.guide?.guideProfile?.gender || null,
   guide: mapGuide(a),
   sessions: mapSessions(a.sessions ?? []),
   nextSession: mapNextSession(a.sessions ?? []),

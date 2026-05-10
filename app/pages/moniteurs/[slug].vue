@@ -39,7 +39,7 @@
               <div class="lg:max-w-lg">
                 <div>
                   <h1 class="text-4xl font-semibold tracking-tight text-pretty text-white sm:text-5xl">
-                    {{ moniteurName || 'Moniteur local' }}
+                    {{ moniteurName || moniteurLocalLabel }}
                   </h1>
                   <button
                     type="button"
@@ -179,7 +179,7 @@
           <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <p class="text-sm font-semibold uppercase tracking-[0.3em] text-secondaryBrand-300">Stages & aventures</p>
-              <h2 class="mt-2 text-3xl font-semibold text-pretty text-white">Les propositions de {{ moniteurName || 'notre moniteur' }}</h2>
+              <h2 class="mt-2 text-3xl font-semibold text-pretty text-white">Les propositions de {{ moniteurName || moniteurRoleReference }}</h2>
               <p class="mt-3 text-base text-gray-300">Découvre les prochains séjours imaginés par {{ moniteurName || 'ce guide' }}.</p>
             </div>
             <NuxtLink
@@ -267,7 +267,7 @@
                     <img
                       :src="moniteurPortrait || fallbackImageForDiscipline(aventure.discipline)"
                       :srcset="moniteurPortraitSrcset"
-                      :alt="moniteurName || 'Moniteur'"
+                      :alt="moniteurName || moniteurRoleLabelCapitalized"
                       class="h-10 w-10 rounded-full border border-white/20 bg-brand-900 object-cover"
                       decoding="async"
                       sizes="40px"
@@ -275,10 +275,10 @@
                     />
                     <div>
                       <p class="text-xs uppercase tracking-[0.3em] text-brand-200/70">
-                        Moniteur
+                        {{ moniteurRoleLabelCapitalized }}
                       </p>
                       <p class="font-semibold text-white">
-                        {{ moniteurName || 'Moniteur local' }}
+                        {{ moniteurName || moniteurLocalLabel }}
                       </p>
                     </div>
                   </div>
@@ -328,13 +328,13 @@
 
             <div class="space-y-3">
               <p class="text-[11px] uppercase tracking-[0.3em] text-secondaryBrand-300">
-                Contact moniteur
+                Contact {{ moniteurRoleLabel }}
               </p>
               <h2 class="text-2xl font-semibold text-white">
                 Envoyer un message WhatsApp à {{ moniteurContactFirstName }}
               </h2>
               <p class="max-w-xl text-sm text-brand-100/75">
-                Ton message sera transmis au moniteur via le WhatsApp de Brigade du kiff, avec ton prénom, ton nom et ton numéro.
+                Ton message sera transmis {{ moniteurRoleDative }} via le WhatsApp de Brigade du kiff, avec ton prénom, ton nom et ton numéro.
               </p>
             </div>
 
@@ -390,6 +390,7 @@
 import { HomeIcon, TruckIcon } from '@heroicons/vue/24/solid'
 import { buildStoredSrcset, resolveStoredImageSrc } from '~/composables/useStoredImageVariants'
 import { formatDurationDays, formatSessionRangeLabel } from '~~/shared/utils/aventure-schedule'
+import { getGuideRoleDativeLabel, getGuideRoleLabel, getGuideRoleLabelWithArticle, getGuideRoleReferenceLabel } from '~~/shared/utils/guide-gender'
 import { disciplineHubPath } from '~~/shared/utils/seo-hubs'
 import { resolvePublicSiteUrl } from '~~/shared/utils/site-url'
 
@@ -501,6 +502,13 @@ const moniteurName = computed(() => {
   const composed = [moniteur.value?.firstName, moniteur.value?.lastName].filter(Boolean).join(' ').trim()
   return composed || null
 })
+const moniteurGender = computed(() => moniteur.value?.gender || null)
+const moniteurRoleLabel = computed(() => getGuideRoleLabel(moniteurGender.value))
+const moniteurRoleLabelCapitalized = computed(() => getGuideRoleLabel(moniteurGender.value, { capitalized: true }))
+const moniteurRoleWithArticle = computed(() => getGuideRoleLabelWithArticle(moniteurGender.value))
+const moniteurRoleReference = computed(() => getGuideRoleReferenceLabel(moniteurGender.value))
+const moniteurRoleDative = computed(() => getGuideRoleDativeLabel(moniteurGender.value))
+const moniteurLocalLabel = computed(() => `${moniteurRoleLabelCapitalized.value} local${moniteurGender.value === 'female' ? 'e' : ''}`)
 const locationLabel = computed(() => moniteur.value?.baseLocation || moniteur.value?.department || 'France')
 const showFullBio = ref(false)
 const moniteurBioValue = computed(() => moniteur.value?.bio?.trim() || '')
@@ -529,7 +537,7 @@ const heroBackground = computed(
   () => resolveStoredImageSrc(moniteur.value?.heroImageUrl, moniteur.value?.heroImageVariants) || fallbackImageForDiscipline(),
 )
 const heroBackgroundSrcset = computed(() => buildStoredSrcset(moniteur.value?.heroImageVariants))
-const moniteurContactFirstName = computed(() => moniteur.value?.firstName?.trim() || 'ce moniteur')
+const moniteurContactFirstName = computed(() => moniteur.value?.firstName?.trim() || moniteurRoleWithArticle.value)
 const moniteurWebsiteUrl = computed(() => {
   const card = moniteur.value?.professionalCardNumber || moniteur.value?.guideProfile?.professionalCardNumber
   if (card) {
@@ -680,8 +688,8 @@ useHead(() => ({
 const seoTitle = computed(() => {
   const fullName = moniteurName.value
   return fullName
-    ? `${fullName}, moniteur d'escalade de la Brigade du kiff`
-    : "Moniteur d'escalade de la Brigade du kiff"
+    ? `${fullName}, ${moniteurRoleLabel.value} d'escalade de la Brigade du kiff`
+    : `${moniteurRoleLabelCapitalized.value} d'escalade de la Brigade du kiff`
 })
 const seoDescription = computed(
   () =>

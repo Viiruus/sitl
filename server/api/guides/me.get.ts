@@ -20,6 +20,7 @@ const mapGuide = (user: any) => ({
   lastName: user.lastName,
   fullName: [user.firstName, user.lastName].filter(Boolean).join(' ') || 'Moniteur',
   slug: buildGuideSlug(user.firstName, user.lastName, user.id),
+  gender: user.guideProfile?.gender || null,
   baseLocation: user.guideProfile?.baseLocation || null,
   bio: user.guideProfile?.bio || null,
   stageTermsAndConditions: user.guideProfile?.stageTermsAndConditions || null,

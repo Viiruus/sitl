@@ -139,7 +139,7 @@
                 class="block space-y-3 rounded-3xl bg-brand-950/85 p-5 ring-1 ring-secondaryBrand-400/40 shadow-xl shadow-black/40 transition hover:ring-secondaryBrand-300/70 focus:outline-none focus-visible:ring-2 focus-visible:ring-secondaryBrand-300"
               >
                 <p class="text-[11px] font-semibold uppercase tracking-[0.3em] text-secondaryBrand-200">
-                  Moniteur de l’aventure
+                  {{ guideRoleLabelCapitalized }} de l’aventure
                 </p>
                 <div class="flex items-center gap-4">
                   <div
@@ -161,7 +161,7 @@
                       {{ guideFullName }}
                     </p>
                     <p v-if="guideBaseLocation" class="text-xs text-brand-200">
-                      Basé·e à {{ guideBaseLocation }}
+                      {{ guideBasedLabel }} {{ guideBaseLocation }}
                     </p>
                   </div>
                 </div>
@@ -175,7 +175,7 @@
                   v-else
                   class="text-xs text-brand-100/80"
                 >
-                  Moniteur·rice d’escalade passionné·e de belles lignes, de grande voie
+                  {{ guideRoleLabelCapitalized }} d’escalade passionné·e de belles lignes, de grande voie
                   et d’ambiances conviviales, aux manettes de ta prochaine aventure.
                 </p>
 
@@ -846,10 +846,10 @@
                     </button>
                   </div>
                   <p class="mt-6 text-[11px] leading-relaxed text-gray-500">
-                    Ce stage est proposé, organisé et encadré par {{ guideFullName || 'le moniteur' }} (DE Escalade), professionnel indépendant.
+                    Ce stage est proposé, organisé et encadré par {{ guideFullName || guideRoleWithArticle }} (DE Escalade), titulaire du diplôme d'État.
                     <br/>
                     Brigade du kiff agit uniquement comme plateforme de mise en relation et n’est pas partie au contrat d’encadrement. Conditions, annulation,
-                    responsabilité et facturation relèvent de l’organisateur : le moniteur.
+                    responsabilité et facturation relèvent de l’organisateur ou de l’organisatrice du stage.
                   </p>
                 </div>
               </aside>
@@ -951,7 +951,7 @@
                     <img
                       :src="otherStageGuideImage(s)"
                       :srcset="otherStageGuideSrcset(s)"
-                      :alt="s.guideName || 'Moniteur'"
+                      :alt="s.guideName || getGuideRoleLabel(s.guideGender, { capitalized: true })"
                       class="h-10 w-10 rounded-full border border-white/20 bg-brand-900 object-cover"
                       sizes="40px"
                       loading="lazy"
@@ -959,10 +959,10 @@
                     />
                     <div>
                       <p class="text-xs uppercase tracking-[0.3em] text-brand-200/70">
-                        Moniteur
+                        {{ getGuideRoleLabel(s.guideGender, { capitalized: true }) }}
                       </p>
                       <p class="font-semibold text-white">
-                        {{ s.guideName || 'Moniteur local' }}
+                        {{ s.guideName || `${getGuideRoleLabel(s.guideGender, { capitalized: true })} local${s.guideGender === 'female' ? 'e' : ''}` }}
                       </p>
                     </div>
                   </div>
@@ -1016,7 +1016,7 @@
                   v-if="guideImage"
                   :src="guideImage"
                   :srcset="guideImageSrcset"
-                  :alt="guideFullName || 'Moniteur'"
+                  :alt="guideFullName || guideRoleLabelCapitalized"
                   class="size-full object-cover"
                   sizes="56px"
                   loading="lazy"
@@ -1031,10 +1031,10 @@
               </div>
               <div>
                 <p class="text-[11px] font-semibold uppercase tracking-[0.3em] text-brand-200/70">
-                  Moniteur
+                  {{ guideRoleLabelCapitalized }}
                 </p>
                 <p class="text-sm font-semibold text-white">
-                  {{ guideFullName || 'Moniteur local' }}
+                  {{ guideFullName || guideLocalLabel }}
                 </p>
               </div>
             </div>
@@ -1184,6 +1184,7 @@ import {
   replaceGuideStageTermsVariables,
 } from '~~/shared/constants/guide-stage-terms'
 import { formatDurationDays, formatSessionRangeLabel } from '~~/shared/utils/aventure-schedule'
+import { getGuideRoleLabel, getGuideRoleLabelWithArticle } from '~~/shared/utils/guide-gender'
 import { disciplineHubPath } from '~~/shared/utils/seo-hubs'
 import { resolvePublicSiteUrl } from '~~/shared/utils/site-url'
 import '@vuepic/vue-datepicker/dist/main.css'
@@ -1500,6 +1501,12 @@ const stageGoogleMapsUrl = computed(() => {
 const guide = computed(() => stage.value?.guide || null)
 
 const guideFullName = computed(() => guide.value?.fullName || null)
+const guideGender = computed(() => guide.value?.gender || guide.value?.profile?.gender || null)
+const guideRoleLabel = computed(() => getGuideRoleLabel(guideGender.value))
+const guideRoleLabelCapitalized = computed(() => getGuideRoleLabel(guideGender.value, { capitalized: true }))
+const guideRoleWithArticle = computed(() => getGuideRoleLabelWithArticle(guideGender.value))
+const guideLocalLabel = computed(() => `${guideRoleLabelCapitalized.value} local${guideGender.value === 'female' ? 'e' : ''}`)
+const guideBasedLabel = computed(() => (guideGender.value === 'female' ? 'Basée à' : 'Basé à'))
 
 const guideSlug = computed(() => guide.value?.slug || null)
 
@@ -1967,7 +1974,7 @@ const handleInterestClick = async () => {
     }
 
     bookingSuccess.value =
-      "Le moniteur va te contacter directement via WhatsApp pour finaliser l’organisation du stage. \nEn attendant, on s’entraine et on se repose !"
+      `${guideRoleWithArticle.value.charAt(0).toUpperCase()}${guideRoleWithArticle.value.slice(1)} va te contacter directement via WhatsApp pour finaliser l’organisation du stage. \nEn attendant, on s’entraine et on se repose !`
     showBookingModal.value = true
   } catch (err: any) {
     const message =

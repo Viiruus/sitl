@@ -116,6 +116,7 @@ export default defineEventHandler(async (event) => {
     firstName: guide.firstName,
     lastName: guide.lastName,
     fullName: [guide.firstName, guide.lastName].filter(Boolean).join(" ") || null,
+    gender: guide.guideProfile?.gender || null,
     department: guide.department,
     bio: guide.guideProfile?.bio || null,
     baseLocation: guide.guideProfile?.baseLocation || null,

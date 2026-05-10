@@ -33,6 +33,7 @@ const form = reactive({
   lastName: '',
   phoneNumber: '',
   whatsappOptIn: true,
+  gender: '',
   baseLocation: '',
   bio: '',
   stageTermsAndConditions: '',
@@ -52,6 +53,7 @@ watch(
     form.lastName = value.lastName || ''
     form.phoneNumber = value.phoneNumber || ''
     form.whatsappOptIn = Boolean(value.whatsappOptIn)
+    form.gender = value.gender || ''
     form.baseLocation = value.baseLocation || ''
     form.bio = value.bio || ''
     form.stageTermsAndConditions = value.stageTermsAndConditions
@@ -197,6 +199,21 @@ const logout = async () => {
                 <label class="text-sm text-brand-100/80">Nom</label>
                 <input v-model="form.lastName" type="text" class="w-full rounded-xl border border-brand-800 bg-brand-900/80 px-3 py-2 text-white focus:border-secondaryBrand-400 focus:outline-none" />
               </div>
+            </div>
+
+            <div class="space-y-2">
+              <label class="text-sm text-brand-100/80">Genre</label>
+              <select
+                v-model="form.gender"
+                class="w-full rounded-xl border border-brand-800 bg-brand-900/80 px-3 py-2 text-white focus:border-secondaryBrand-400 focus:outline-none"
+              >
+                <option value="">Non renseigné</option>
+                <option value="male">Homme</option>
+                <option value="female">Femme</option>
+              </select>
+              <p class="text-xs text-brand-200/70">
+                Utilisé pour afficher automatiquement `moniteur` ou `monitrice` sur le site.
+              </p>
             </div>
 
             <div class="space-y-2">

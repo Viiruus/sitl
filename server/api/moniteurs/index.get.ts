@@ -48,6 +48,7 @@ export default defineEventHandler(async () => {
           firstName,
           lastName,
           fullName: `${firstName} ${lastName}`,
+          gender: guide.guideProfile?.gender || null,
           bio,
           baseLocation,
           department: guide.department || null,

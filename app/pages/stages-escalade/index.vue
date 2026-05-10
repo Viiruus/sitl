@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { buildStoredSrcset, resolveStoredImageSrc } from '~/composables/useStoredImageVariants'
 import { formatDurationDays, formatSessionRangeLabel } from '~~/shared/utils/aventure-schedule'
+import { getGuideRoleLabel } from '~~/shared/utils/guide-gender'
 import { resolvePublicSiteUrl } from '~~/shared/utils/site-url'
 const route = useRoute()
 const runtimeConfig = useRuntimeConfig()
@@ -487,7 +488,7 @@ const mapLegend = [
                   <img
                     :src="guideAvatarSrc(a)"
                     :srcset="guideAvatarSrcset(a)"
-                    :alt="a.guideName || 'Moniteur'"
+                    :alt="a.guideName || getGuideRoleLabel(a.guideGender, { capitalized: true })"
                     class="h-10 w-10 rounded-full border border-white/20 bg-brand-900 object-cover"
                     decoding="async"
                     sizes="40px"
@@ -495,10 +496,10 @@ const mapLegend = [
                   />
                   <div>
                     <p class="text-xs uppercase tracking-[0.3em] text-brand-200/70">
-                      Moniteur
+                      {{ getGuideRoleLabel(a.guideGender, { capitalized: true }) }}
                     </p>
                     <p class="font-semibold text-white">
-                      {{ a.guideName || 'Moniteur local' }}
+                      {{ a.guideName || `${getGuideRoleLabel(a.guideGender, { capitalized: true })} local${a.guideGender === 'female' ? 'e' : ''}` }}
                     </p>
                   </div>
                 </div>
