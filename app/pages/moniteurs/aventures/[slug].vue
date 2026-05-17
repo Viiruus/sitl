@@ -4,8 +4,8 @@ definePageMeta({
 })
 
 useSeoMeta({
-  title: 'Aventure moniteur',
-  description: 'Gestion d’une aventure moniteur.',
+  title: 'Aventure moniteur·ice',
+  description: 'Gestion d’une aventure moniteur·ice.',
   robots: 'noindex, nofollow',
 })
 </script>

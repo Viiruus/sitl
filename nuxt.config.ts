@@ -27,6 +27,7 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
   pages: true,
   runtimeConfig: {
+    googlePlacesApiKey: process.env.GOOGLE_PLACES_API_KEY || '',
     public: {
       blobUploadsEnabled: Boolean(process.env.BLOB_READ_WRITE_TOKEN),
       publicUrl: process.env.PUBLIC_URL || 'http://localhost:3000',

@@ -4,8 +4,8 @@ definePageMeta({
 })
 
 useSeoMeta({
-  title: 'Grimpeurs inscrits',
-  description: 'Liste des grimpeurs inscrits sur la plateforme.',
+  title: 'Grimpeur·euse·s inscrit·e·s',
+  description: 'Liste des grimpeur·euse·s inscrit·e·s sur la plateforme.',
   robots: 'noindex, nofollow',
 })
 
@@ -39,10 +39,10 @@ const logout = async () => {
           <div class="mt-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <h1 class="text-3xl font-semibold">
-                Grimpeurs inscrits
+                Grimpeur·euse·s inscrit·e·s
               </h1>
               <p class="mt-2 text-brand-100/80">
-                Vue simple de la base grimpeurs de la plateforme, avec prénom et nom uniquement.
+                Vue simple de la base des grimpeur·euse·s de la plateforme, avec prénom et nom uniquement.
               </p>
             </div>
             <div class="rounded-2xl bg-brand-900/60 px-5 py-4 text-right ring-1 ring-white/10">
@@ -58,11 +58,11 @@ const logout = async () => {
 
         <section class="rounded-3xl bg-white/5 p-8 ring-1 ring-white/10">
           <div v-if="pending" class="text-brand-100/70">
-            Chargement des grimpeurs…
+            Chargement des grimpeur·euse·s…
           </div>
 
           <div v-else-if="!climbers.length" class="text-brand-100/70">
-            Aucun grimpeur inscrit pour le moment.
+            Aucun·e grimpeur·euse inscrit·e pour le moment.
           </div>
 
           <ul v-else class="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">

@@ -282,7 +282,7 @@ const handleDeleteAdventure = async (aventure: any) => {
 const contactRequestName = (request: any) => {
   const fallback = request?.climberNameSnapshot?.trim()
   const fullName = [request?.climber?.firstName, request?.climber?.lastName].filter(Boolean).join(' ').trim()
-  return fallback || fullName || 'Grimpeur'
+  return fallback || fullName || 'Grimpeur·euse'
 }
 
 const contactRequestPhone = (request: any) => request?.climberPhoneSnapshot || null
@@ -514,13 +514,13 @@ const contactRequestStatusLabel = (value?: string | null) => {
           <p class="text-sm uppercase tracking-[0.3em] text-secondaryBrand-300">
             Suggestions de dates
           </p>
-          <h2 class="mt-2 text-2xl font-semibold">Les grimpeurs motivés</h2>
+          <h2 class="mt-2 text-2xl font-semibold">Les grimpeur·euse·s motivé·e·s</h2>
 
           <div v-if="suggestionsPending" class="mt-6 space-y-3">
             <div v-for="n in 3" :key="n" class="h-20 animate-pulse rounded-2xl bg-white/5" />
           </div>
           <div v-else-if="!suggestions.length" class="mt-6 rounded-2xl border border-dashed border-white/20 p-6 text-sm text-brand-100/70">
-            Aucun message pour le moment. Encourage tes grimpeurs à te proposer des dates depuis les fiches aventures.
+            Aucun message pour le moment. Encourage tes grimpeur·euse·s à te proposer des dates depuis les fiches aventures.
           </div>
           <div v-else class="mt-6 space-y-4">
             <article

@@ -944,7 +944,7 @@ const uploadGalleryImage = async (event: Event, index: number) => {
           <div>
             <h2 class="text-xl font-semibold">Programme jour par jour</h2>
             <p class="text-sm text-brand-100/70">
-              Optionnel. Décris le déroulé pour aider les grimpeurs à se projeter.
+              Optionnel. Décris le déroulé pour aider les grimpeur·euse·s à se projeter.
             </p>
           </div>
           <button

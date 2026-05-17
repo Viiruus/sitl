@@ -5,8 +5,8 @@ const router = useRouter()
 const { loggedIn, user, fetch, clear } = useUserSession()
 
 useSeoMeta({
-  title: 'Espace moniteur | Inscription WhatsApp',
-  description: 'Créer son compte moniteur et se connecter via WhatsApp.',
+  title: 'Espace moniteur·ice | Inscription WhatsApp',
+  description: 'Créer son compte moniteur·ice et se connecter via WhatsApp.',
   robots: 'noindex, nofollow',
 })
 
@@ -144,14 +144,14 @@ const logout = async () => {
         <div class="space-y-6">
           <div class="inline-flex items-center gap-2 rounded-full bg-brand-800/80 px-3 py-1 text-[11px] font-medium">
             <span class="h-2 w-2 rounded-full bg-secondaryBrand-400" />
-            <span class="text-brand-100/80">Espace moniteur</span>
+            <span class="text-brand-100/80">Espace moniteur·ice</span>
           </div>
           <div class="space-y-2">
             <h1 class="text-2xl font-semibold text-secondaryBrand-300">
               Diffuse tes prestations escalade grâce à la Brigade du kiff
             </h1>
             <p class="text-sm text-brand-100/80">
-              Crée ton compte moniteur, publie tes aventures et suis tes inscriptions depuis une interface dédiée.
+              Crée ton compte moniteur·ice, publie tes aventures et suis tes inscriptions depuis une interface dédiée.
             </p>
           </div>
           <div class="space-y-3 text-sm text-brand-100/80">
@@ -237,7 +237,7 @@ const logout = async () => {
                 Dernière étape
               </p>
               <h2 class="text-lg font-semibold text-secondaryBrand-200">
-                Finalise ton compte moniteur
+                Finalise ton compte moniteur·ice
               </h2>
             </div>
             <div class="grid gap-4 md:grid-cols-2">
@@ -262,7 +262,7 @@ const logout = async () => {
             </div>
             <p class="text-xs text-brand-100/70">
               Je reconnais être seul organisateur et seul responsable des stages que je publie (sécurité, conformité, assurance, paiement, annulation, facturation).
-              Brigade du kiff est une plateforme de mise en relation et n’est pas partie au contrat avec les grimpeurs.
+              Brigade du kiff est une plateforme de mise en relation et n’est pas partie au contrat avec les grimpeur·euse·s.
             </p>
             <label class="flex items-start gap-3 text-xs text-brand-100/80">
               <input
@@ -279,7 +279,7 @@ const logout = async () => {
                   rel="noopener"
                   class="text-secondaryBrand-200 underline hover:text-secondaryBrand-100"
                 >
-                  CGU moniteurs
+                  CGU moniteur·ice·s
                 </NuxtLink>.
               </span>
             </label>

@@ -1537,10 +1537,6 @@ const guideInstagramUrl = computed(
   () => guide.value?.profile?.instagramUrl || null,
 )
 
-const guideWebsiteUrl = computed(
-  () => guide.value?.profile?.websiteUrl || null,
-)
-
 const joinTextValues = (values: Array<string | null | undefined>, separator = ', ') => {
   const filtered = values
     .map((value) => (typeof value === 'string' ? value.trim() : value))

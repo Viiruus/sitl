@@ -10,9 +10,9 @@ const emit = defineEmits<{
 
 const navLinks = [
   { label: 'Tableau de bord', to: '/moniteurs' },
-  { label: 'Profil moniteur', to: '/moniteurs/profil' },
+  { label: 'Profil moniteur·ice', to: '/moniteurs/profil' },
   { label: 'Mes aventures', to: '/moniteurs/aventures' },
-  { label: 'Grimpeurs inscrits', to: '/moniteurs/grimpeurs' },
+  { label: 'Grimpeur·euse·s inscrit·e·s', to: '/moniteurs/grimpeurs' },
 ]
 
 const isActive = (link: string) => {
@@ -29,7 +29,7 @@ const isActive = (link: string) => {
           Identité
         </p>
         <p class="mt-2 text-lg font-semibold text-white">
-          {{ guide?.fullName || 'Moniteur' }}
+          {{ guide?.fullName || 'Moniteur·ice' }}
         </p>
         <p class="text-brand-100/70">
           {{ guide?.baseLocation || 'Camp de base à définir' }}

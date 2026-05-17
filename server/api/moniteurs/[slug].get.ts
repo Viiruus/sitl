@@ -1,6 +1,12 @@
 import { prisma } from "../../utils/prisma"
 import { sanitizePublicImageUrl, sanitizePublicImageVariants } from "../../utils/public-image"
+import { extractGooglePlaceId, fetchGooglePlaceSummary } from "../../utils/google-place-details"
 import { buildGuideSlug } from "~~/shared/utils/guide-slug"
+
+const normalizeStringList = (value: unknown) =>
+  Array.isArray(value)
+    ? value.filter((entry): entry is string => typeof entry === 'string' && entry.trim().length > 0)
+    : []
 
 const findNextSession = (sessions: any[]) => {
   const today = new Date()
@@ -45,6 +51,7 @@ const mapAventureForGuide = (a: any) => {
 }
 
 export default defineEventHandler(async (event) => {
+  const runtimeConfig = useRuntimeConfig(event)
   const slug = event.context.params?.slug
   const normalizedSlug = typeof slug === "string" ? slug.toLowerCase() : null
 
@@ -109,6 +116,13 @@ export default defineEventHandler(async (event) => {
         .filter((value): value is string => typeof value === "string" && value.length > 0),
     ),
   )
+  const googleBusinessUrl = guide.guideProfile?.googleBusinessUrl || null
+  const googlePlaceId = guide.guideProfile?.googlePlaceId || extractGooglePlaceId(googleBusinessUrl)
+  const googleBusiness = await fetchGooglePlaceSummary({
+    apiKey: runtimeConfig.googlePlacesApiKey,
+    placeId: googlePlaceId,
+    fallbackUrl: googleBusinessUrl,
+  })
 
   const moniteur = {
     id: guide.id,
@@ -120,8 +134,10 @@ export default defineEventHandler(async (event) => {
     department: guide.department,
     bio: guide.guideProfile?.bio || null,
     baseLocation: guide.guideProfile?.baseLocation || null,
+    serviceAreas: normalizeStringList(guide.guideProfile?.serviceAreas),
     instagramUrl: guide.guideProfile?.instagramUrl || null,
-    websiteUrl: guide.guideProfile?.websiteUrl || null,
+    googleBusinessUrl,
+    googleBusiness,
     professionalCardNumber: guide.guideProfile?.professionalCardNumber || null,
     profileImageUrl,
     profileImageVariants,

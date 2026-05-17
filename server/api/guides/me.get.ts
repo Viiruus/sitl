@@ -22,10 +22,14 @@ const mapGuide = (user: any) => ({
   slug: buildGuideSlug(user.firstName, user.lastName, user.id),
   gender: user.guideProfile?.gender || null,
   baseLocation: user.guideProfile?.baseLocation || null,
+  serviceAreas: Array.isArray(user.guideProfile?.serviceAreas)
+    ? user.guideProfile.serviceAreas.filter((value: unknown) => typeof value === 'string' && value.trim().length > 0)
+    : [],
   bio: user.guideProfile?.bio || null,
   stageTermsAndConditions: user.guideProfile?.stageTermsAndConditions || null,
   instagramUrl: user.guideProfile?.instagramUrl || null,
-  websiteUrl: user.guideProfile?.websiteUrl || null,
+  googleBusinessUrl: user.guideProfile?.googleBusinessUrl || null,
+  googlePlaceId: user.guideProfile?.googlePlaceId || null,
   aventuresPubliees: user.aventures?.filter((aventure: any) => aventure?.estPublie).length ?? 0,
   prochainesSessions: user.aventures?.reduce((total: number, a: any) => total + (a.sessions?.length ?? 0), 0) ?? 0,
 })

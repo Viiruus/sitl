@@ -4,7 +4,7 @@ definePageMeta({
 })
 
 useSeoMeta({
-  title: 'Tableau de bord moniteur',
+  title: 'Tableau de bord moniteur·ice',
   description: 'Gère tes aventures, sessions et inscriptions.',
   robots: 'noindex, nofollow',
 })
@@ -100,13 +100,13 @@ const logout = async () => {
           <div class="flex flex-wrap items-start justify-between gap-4">
             <div>
               <p class="text-xs uppercase tracking-[0.3em] text-amber-200/80">
-                Accès grimpeur
+                Accès grimpeur·euse
               </p>
               <p class="mt-2 text-lg font-semibold">
-                Connecté en tant que moniteur
+                Connecté·e en tant que moniteur·ice
               </p>
               <p class="mt-1 text-sm text-amber-100/80">
-                L’espace grimpeur est réservé aux grimpeurs. Tu peux gérer ton compte depuis ce back‑office moniteurs.
+                L’espace grimpeur·euse est réservé aux grimpeur·euse·s. Tu peux gérer ton compte depuis ce back-office moniteur·ice·s.
               </p>
             </div>
             <button
@@ -121,10 +121,10 @@ const logout = async () => {
 
         <div class="rounded-3xl bg-white/5 p-8 ring-1 ring-white/10">
           <p class="text-sm uppercase tracking-[0.4em] text-secondaryBrand-300">
-            Tableau de bord moniteur
+            Tableau de bord moniteur·ice
           </p>
           <h1 class="mt-4 text-3xl font-semibold">
-            Salut {{ guide?.firstName || 'moniteur' }} 👋
+            Salut {{ guide?.firstName || 'moniteur·ice' }} 👋
           </h1>
           <p class="mt-2 text-brand-100/80">
             Prépare tes prochains stages, suis tes aventures et gère les inscriptions.

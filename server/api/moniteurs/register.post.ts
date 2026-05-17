@@ -47,7 +47,6 @@ export default defineEventHandler(async (event) => {
           bio: '',
           baseLocation: baseLocation || null,
           instagramUrl: null,
-          websiteUrl: null,
           profileImageUrl: null,
           isPublic: true,
         },

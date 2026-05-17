@@ -100,7 +100,6 @@ async function seedGuides() {
                 'mixer progression, moments de vie et bons plans terroir sans perdre le plaisir de grimper.',
               baseLocation: 'Massif des Bauges & Vercors',
               instagramUrl: 'https://www.instagram.com/brigadedukif',
-              websiteUrl: 'https://brigadedukif.fr',
               // mets ici une vraie image de toi si tu veux
               profileImageUrl:
                 '/images/falaise-Bauges-Chatelard-Garins.jpg',
@@ -111,7 +110,6 @@ async function seedGuides() {
                 'mixer progression, moments de vie et bons plans terroir sans perdre le plaisir de grimper.',
               baseLocation: 'Massif des Bauges & Vercors',
               instagramUrl: 'https://www.instagram.com/brigadedukif',
-              websiteUrl: 'https://brigadedukif.fr',
               profileImageUrl:
                 '/images/falaise-Bauges-Chatelard-Garins.jpg',
             },
@@ -132,7 +130,6 @@ async function seedGuides() {
               'mixer progression, moments de vie et bons plans terroir sans perdre le plaisir de grimper.',
             baseLocation: 'Massif des Bauges & Vercors',
             instagramUrl: 'https://www.instagram.com/brigadedukif',
-            websiteUrl: 'https://brigadedukif.fr',
             profileImageUrl:
               '/images/falaise-Bauges-Chatelard-Garins.jpg',
           },
@@ -160,7 +157,6 @@ async function seedGuides() {
                 'avec un gros focus sur la gestuelle et la sécurité.',
               baseLocation: 'Fontainebleau',
               instagramUrl: 'https://www.instagram.com/bleau_avec_emma',
-              websiteUrl: null,
               profileImageUrl:
                 '/images/bloc-Pays-Basque-Mondarrain.jpg',
             },
@@ -170,7 +166,6 @@ async function seedGuides() {
                 'avec un gros focus sur la gestuelle et la sécurité.',
               baseLocation: 'Fontainebleau',
               instagramUrl: 'https://www.instagram.com/bleau_avec_emma',
-              websiteUrl: null,
               profileImageUrl:
                 '/images/bloc-Pays-Basque-Mondarrain.jpg',
             },
@@ -191,7 +186,6 @@ async function seedGuides() {
               'avec un gros focus sur la gestuelle et la sécurité.',
             baseLocation: 'Fontainebleau',
             instagramUrl: 'https://www.instagram.com/bleau_avec_emma',
-            websiteUrl: null,
             profileImageUrl:
               '/images/bloc-Pays-Basque-Mondarrain.jpg',
           },
@@ -219,7 +213,6 @@ async function seedGuides() {
                 'avec beaucoup de pédagogie et une vraie place pour le groupe.',
               baseLocation: 'Pays basque',
               instagramUrl: 'https://www.instagram.com/trad_pays_basque',
-              websiteUrl: null,
               profileImageUrl:
                 '/images/falaise-Calanques.jpg',
             },
@@ -229,7 +222,6 @@ async function seedGuides() {
                 'avec beaucoup de pédagogie et une vraie place pour le groupe.',
               baseLocation: 'Pays basque',
               instagramUrl: 'https://www.instagram.com/trad_pays_basque',
-              websiteUrl: null,
               profileImageUrl:
                 '/images/falaise-Calanques.jpg',
             },
@@ -250,7 +242,6 @@ async function seedGuides() {
               'avec beaucoup de pédagogie et une vraie place pour le groupe.',
             baseLocation: 'Pays basque',
             instagramUrl: 'https://www.instagram.com/trad_pays_basque',
-            websiteUrl: null,
             profileImageUrl:
               '/images/falaise-Calanques.jpg',
           },

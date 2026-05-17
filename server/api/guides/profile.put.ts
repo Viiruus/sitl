@@ -20,10 +20,12 @@ const bodySchema = z.object({
   whatsappOptIn: z.boolean().optional(),
   gender: z.enum(['male', 'female']).optional().nullable().or(z.literal('')),
   baseLocation: z.string().trim().max(160).optional().or(z.literal('')),
+  serviceAreas: z.array(z.string().trim().max(120)).max(30).optional(),
   bio: z.string().trim().max(2000).optional().or(z.literal('')),
   stageTermsAndConditions: z.string().trim().max(20000).optional().or(z.literal('')),
   instagramUrl: z.string().url().optional().or(z.literal('')),
-  websiteUrl: z.string().url().optional().or(z.literal('')),
+  googleBusinessUrl: z.string().url().optional().or(z.literal('')),
+  googlePlaceId: z.string().trim().max(255).optional().or(z.literal('')),
   professionalCardNumber: z.string().trim().max(100).optional().or(z.literal('')),
   profileImageUrl: z.union([
     imageUrlSchema,
@@ -61,6 +63,13 @@ export default defineEventHandler(async (event) => {
       .filter((variant) => variant.url && variant.width > 0)
     return normalized.length ? normalized : null
   }
+  const cleanStringList = (values?: string[] | null) => {
+    if (values === undefined) return undefined
+    const normalized = (values || [])
+      .map((value) => value.trim())
+      .filter((value, index, arr) => value.length > 0 && arr.indexOf(value) === index)
+    return normalized.length ? normalized : null
+  }
 
   const user = await db.user.update({
     where: { id: Number(session.user.id) },
@@ -82,8 +91,10 @@ export default defineEventHandler(async (event) => {
             bio: clean(body.bio),
             stageTermsAndConditions: clean(body.stageTermsAndConditions),
             baseLocation: clean(body.baseLocation),
+            serviceAreas: cleanStringList(body.serviceAreas),
             instagramUrl: clean(body.instagramUrl),
-            websiteUrl: clean(body.websiteUrl),
+            googleBusinessUrl: clean(body.googleBusinessUrl),
+            googlePlaceId: clean(body.googlePlaceId),
             professionalCardNumber: clean(body.professionalCardNumber),
             profileImageUrl: clean(body.profileImageUrl),
             profileImageVariants: cleanVariants(body.profileImageVariants),
@@ -93,8 +104,10 @@ export default defineEventHandler(async (event) => {
             bio: clean(body.bio) ?? '',
             stageTermsAndConditions: clean(body.stageTermsAndConditions) ?? null,
             baseLocation: clean(body.baseLocation) ?? null,
+            serviceAreas: cleanStringList(body.serviceAreas) ?? null,
             instagramUrl: clean(body.instagramUrl) ?? null,
-            websiteUrl: clean(body.websiteUrl) ?? null,
+            googleBusinessUrl: clean(body.googleBusinessUrl) ?? null,
+            googlePlaceId: clean(body.googlePlaceId) ?? null,
             professionalCardNumber: clean(body.professionalCardNumber) ?? null,
             profileImageUrl: clean(body.profileImageUrl) ?? null,
             profileImageVariants: cleanVariants(body.profileImageVariants) ?? null,
@@ -129,10 +142,14 @@ export default defineEventHandler(async (event) => {
       whatsappOptIn: user.whatsappOptIn,
       gender: user.guideProfile?.gender || null,
       baseLocation: user.guideProfile?.baseLocation || null,
+      serviceAreas: Array.isArray(user.guideProfile?.serviceAreas)
+        ? user.guideProfile.serviceAreas.filter((value: unknown) => typeof value === 'string' && value.trim().length > 0)
+        : [],
       bio: user.guideProfile?.bio || null,
       stageTermsAndConditions: user.guideProfile?.stageTermsAndConditions || null,
       instagramUrl: user.guideProfile?.instagramUrl || null,
-      websiteUrl: user.guideProfile?.websiteUrl || null,
+      googleBusinessUrl: user.guideProfile?.googleBusinessUrl || null,
+      googlePlaceId: user.guideProfile?.googlePlaceId || null,
       professionalCardNumber: user.guideProfile?.professionalCardNumber || null,
       profileImageUrl: user.guideProfile?.profileImageUrl || null,
       profileImageVariants: user.guideProfile?.profileImageVariants || null,

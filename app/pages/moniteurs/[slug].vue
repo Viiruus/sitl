@@ -41,20 +41,19 @@
                   <h1 class="text-4xl font-semibold tracking-tight text-pretty text-white sm:text-5xl">
                     {{ moniteurName || moniteurLocalLabel }}
                   </h1>
-                  <button
-                    type="button"
-                    class="group mt-4 inline-flex items-start gap-x-2.5 rounded-md border border-white/10 bg-brand-950/55 px-3.5 py-2.5 text-left text-sm font-semibold text-white shadow-sm ring-1 ring-inset ring-white/5 backdrop-blur transition hover:border-white/20 hover:bg-brand-900/70 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondaryBrand-300 lg:hidden"
-                    @click="handleGuideContactClick"
-                  >
-                    <span class="inline-flex h-8 w-8 items-center justify-center rounded-sm bg-[#25D366] text-brand-950 shadow-sm shadow-[#25D366]/20">
-                      <svg class="h-4 w-4" viewBox="0 0 32 32" fill="currentColor" aria-hidden="true">
-                        <path
-                          d="M16 3C9.4 3 4 8.2 4 14.7c0 2.4.7 4.6 2 6.5L4 29l8-1.8c1.3.4 2.7.6 4 .6 6.6 0 12-5.2 12-11.7C28 8.2 22.6 3 16 3Zm0 2c5.5 0 10 4.3 10 9.7S21.5 24.4 16 24.4c-1.3 0-2.5-.2-3.7-.7l-.8-.3-.8.2-3.9.9 1.1-3.3.2-.7-.5-.6c-1.1-1.6-1.6-3.4-1.6-5.3C6 9.3 10.5 5 16 5Zm5.2 10.9c-.3-.1-1.8-.9-2-1-.3-.1-.5-.1-.7.1-.2.3-.8 1-.9 1.1-.2.2-.3.2-.6.1-.3-.1-1.2-.4-2.2-1.4-.8-.8-1.4-1.7-1.6-2-.2-.3 0-.4.1-.6.1-.2.3-.3.4-.5.1-.1.2-.3.3-.5.1-.2 0-.4 0-.5 0-.1-.7-1.7-1-2.3-.3-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.3-.3.3-1 1-1 2.4s1.1 2.8 1.2 3c.1.2 2.1 3.3 5 4.5.7.3 1.2.5 1.6.6.7.2 1.4.2 1.9.1.6-.1 1.8-.7 2-1.3.2-.6.2-1.2.2-1.3 0-.1-.2-.1-.5-.2Z"
-                        />
+                  <div class="mt-5 border-l border-white/12 pl-4">
+                    <p class="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.28em] text-secondaryBrand-300">
+                      <svg class="h-3.5 w-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 10.5 12 3l9 7.5" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M5.25 9.75V20a1 1 0 0 0 1 1h11.5a1 1 0 0 0 1-1V9.75" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M10 21v-5.5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1V21" />
                       </svg>
-                    </span>
-                    <span class="text-left leading-tight">Contacter {{ moniteurContactFirstName }} pour un projet sur mesure</span>
-                  </button>
+                      Camp de base
+                    </p>
+                    <p class="mt-1 text-base font-medium text-white/92">
+                      {{ locationLabel }}
+                    </p>
+                  </div>
                 </div>
                 <div class="mt-6 max-w-xl text-sm/7 text-gray-300 sm:text-base/8">
                   <p class="whitespace-pre-line">
@@ -79,7 +78,27 @@
                     </svg>
                   </button>
                 </div>
-                <div class="mt-8 flex flex-wrap gap-3">
+                <div v-if="serviceAreas.length" class="mt-10 lg:max-w-2xl">
+                  <div class="rounded-2xl border border-white/10 bg-white/5 p-5">
+                    <p class="text-xs font-semibold uppercase tracking-[0.3em] text-secondaryBrand-300">
+                      Zones desservies
+                    </p>
+                    <div class="mt-3 flex flex-wrap gap-2">
+                      <span
+                        v-for="area in serviceAreas"
+                        :key="area"
+                        class="inline-flex items-center rounded-full border border-white/10 bg-brand-900/80 px-3 py-1 text-sm text-brand-100/85"
+                      >
+                        {{ area }}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                <div v-if="showStageDisciplines" class="mt-8">
+                  <p class="text-xs font-semibold uppercase tracking-[0.3em] text-secondaryBrand-300">
+                    Types de stage proposés
+                  </p>
+                  <div class="mt-3 flex flex-wrap gap-3">
                   <component
                     :is="discipline.href ? 'NuxtLink' : 'span'"
                     v-for="discipline in disciplineChips"
@@ -95,38 +114,10 @@
                     {{ discipline.label }}
                   </component>
                 </div>
-                <div class="mt-10 max-w-xl text-base/7 text-gray-300 lg:max-w-lg">
-                  <ul role="list" class="space-y-8 text-gray-300">
-                    <li
-                      v-for="feature in featureList"
-                      :key="feature.title"
-                      class="flex gap-x-3"
-                    >
-                      <component :is="feature.icon" class="mt-1 size-5 flex-none text-secondaryBrand-300" aria-hidden="true" />
-                      <span>
-                        <strong class="font-semibold text-white">{{ feature.title }}.</strong>
-                        {{ feature.description }}
-                      </span>
-                    </li>
-                  </ul>
                 </div>
               </div>
             </div>
             <div class="order-1 lg:order-2 -mt-16 lg:mt-0 lg:sticky lg:top-4 lg:justify-self-end">
-              <button
-                type="button"
-                class="group mb-4 hidden items-center gap-x-2.5 rounded-md border border-white/10 bg-brand-950/55 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm ring-1 ring-inset ring-white/5 backdrop-blur transition hover:border-white/20 hover:bg-brand-900/70 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondaryBrand-300 lg:inline-flex"
-                @click="handleGuideContactClick"
-              >
-                <span class="inline-flex h-8 w-8 items-center justify-center rounded-sm bg-[#25D366] text-brand-950 shadow-sm shadow-[#25D366]/20">
-                  <svg class="h-4 w-4" viewBox="0 0 32 32" fill="currentColor" aria-hidden="true">
-                    <path
-                      d="M16 3C9.4 3 4 8.2 4 14.7c0 2.4.7 4.6 2 6.5L4 29l8-1.8c1.3.4 2.7.6 4 .6 6.6 0 12-5.2 12-11.7C28 8.2 22.6 3 16 3Zm0 2c5.5 0 10 4.3 10 9.7S21.5 24.4 16 24.4c-1.3 0-2.5-.2-3.7-.7l-.8-.3-.8.2-3.9.9 1.1-3.3.2-.7-.5-.6c-1.1-1.6-1.6-3.4-1.6-5.3C6 9.3 10.5 5 16 5Zm5.2 10.9c-.3-.1-1.8-.9-2-1-.3-.1-.5-.1-.7.1-.2.3-.8 1-.9 1.1-.2.2-.3.2-.6.1-.3-.1-1.2-.4-2.2-1.4-.8-.8-1.4-1.7-1.6-2-.2-.3 0-.4.1-.6.1-.2.3-.3.4-.5.1-.1.2-.3.3-.5.1-.2 0-.4 0-.5 0-.1-.7-1.7-1-2.3-.3-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.3-.3.3-1 1-1 2.4s1.1 2.8 1.2 3c.1.2 2.1 3.3 5 4.5.7.3 1.2.5 1.6.6.7.2 1.4.2 1.9.1.6-.1 1.8-.7 2-1.3.2-.6.2-1.2.2-1.3 0-.1-.2-.1-.5-.2Z"
-                    />
-                  </svg>
-                </span>
-                <span>Contacter {{ moniteurContactFirstName }} pour un projet sur mesure</span>
-              </button>
               <div class="rounded-3xl bg-white/5 p-6 shadow-2xl shadow-black/40 ring-1 ring-white/10 lg:max-w-[34rem] xl:max-w-[36rem]">
                 <img
                   class="w-full max-h-[44rem] rounded-2xl bg-gray-800 object-cover"
@@ -137,34 +128,86 @@
                   sizes="(min-width: 1024px) 40vw, 100vw"
                   loading="lazy"
                 />
-                <div class="mt-4 flex flex-wrap items-center justify-center gap-2">
-                  <!--
+                <div v-if="moniteurExternalLinks.length" class="mt-4 flex flex-wrap items-center justify-center gap-2">
                   <NuxtLink
-                    v-if="moniteurWebsiteUrl"
-                    :to="moniteurWebsiteUrl"
+                    v-for="link in moniteurExternalLinks"
+                    :key="link.label"
+                    :to="link.href"
                     target="_blank"
                     rel="noopener"
                     class="inline-flex items-center gap-2 rounded-full border border-white/20 px-4 py-2 text-sm font-semibold text-white transition hover:border-secondaryBrand-300 hover:text-secondaryBrand-200"
                   >
-                    Carte professionnelle
+                    {{ link.label }}
                     <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
                       <path stroke-linecap="round" stroke-linejoin="round" d="M13 11l8-8M16 3h5v5" />
                       <path stroke-linecap="round" stroke-linejoin="round" d="M21 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h6" />
                     </svg>
                   </NuxtLink>
-                  -->
+                </div>
+                <div class="mt-5 rounded-2xl border border-[#25D366]/25 bg-[#25D366]/10 p-5">
+                  <p class="text-xs font-semibold uppercase tracking-[0.3em] text-[#8cf1b4]">
+                    Coaching & sur-mesure
+                  </p>
+                  <p class="mt-3 text-sm leading-6 text-brand-100/80">
+                    Échange avec {{ moniteurContactFirstName }} pour préparer une planification d'entrainement, une sortie privée ou un projet sur mesure.
+                  </p>
+                  <button
+                    type="button"
+                    class="mt-4 inline-flex items-center justify-center gap-3 self-start rounded-full border border-[#25D366] bg-[#25D366] px-4 py-2.5 text-sm font-semibold text-white shadow-md shadow-[#25D366]/20 transition hover:bg-[#1ebe5d] focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-brand-950"
+                    @click="handleGuideContactClick"
+                  >
+                    <span class="inline-flex h-7 w-7 items-center justify-center rounded-full bg-white text-[#25D366]">
+                      <svg class="h-4 w-4" viewBox="0 0 32 32" fill="currentColor" aria-hidden="true">
+                        <path
+                          d="M16 3C9.4 3 4 8.2 4 14.7c0 2.4.7 4.6 2 6.5L4 29l8-1.8c1.3.4 2.7.6 4 .6 6.6 0 12-5.2 12-11.7C28 8.2 22.6 3 16 3Zm0 2c5.5 0 10 4.3 10 9.7S21.5 24.4 16 24.4c-1.3 0-2.5-.2-3.7-.7l-.8-.3-.8.2-3.9.9 1.1-3.3.2-.7-.5-.6c-1.1-1.6-1.6-3.4-1.6-5.3C6 9.3 10.5 5 16 5Zm5.2 10.9c-.3-.1-1.8-.9-2-1-.3-.1-.5-.1-.7.1-.2.3-.8 1-.9 1.1-.2.2-.3.2-.6.1-.3-.1-1.2-.4-2.2-1.4-.8-.8-1.4-1.7-1.6-2-.2-.3 0-.4.1-.6.1-.2.3-.3.4-.5.1-.1.2-.3.3-.5.1-.2 0-.4 0-.5 0-.1-.7-1.7-1-2.3-.3-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.3-.3.3-1 1-1 2.4s1.1 2.8 1.2 3c.1.2 2.1 3.3 5 4.5.7.3 1.2.5 1.6.6.7.2 1.4.2 1.9.1.6-.1 1.8-.7 2-1.3.2-.6.2-1.2.2-1.3 0-.1-.2-.1-.5-.2Z"
+                        />
+                      </svg>
+                    </span>
+                    <span>Parler de ton projet sur WhatsApp</span>
+                  </button>
+                </div>
+                <div
+                  v-if="hasGoogleReviewCard"
+                  class="mt-4 rounded-2xl border border-white/10 bg-brand-900/60 p-5"
+                >
+                  <p class="text-xs font-semibold uppercase tracking-[0.3em] text-secondaryBrand-300">
+                    Avis Google
+                  </p>
+                  <div v-if="hasGoogleReviewSummary" class="mt-3 flex flex-wrap items-center gap-3">
+                    <div v-if="googleRatingLabel" class="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-sm font-semibold text-white">
+                      <span class="text-amber-300">★</span>
+                      <span>{{ googleRatingLabel }}/5</span>
+                    </div>
+                    <div v-if="googleReviewCountLabel" class="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-brand-100/80">
+                      {{ googleReviewCountLabel }}
+                    </div>
+                  </div>
+                  <div v-if="moniteurGoogleReviews.length" class="mt-4 space-y-3">
+                    <blockquote
+                      v-for="review in moniteurGoogleReviews"
+                      :key="`${review.authorName || 'review'}-${review.text}`"
+                      class="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm leading-6 text-brand-100/80"
+                    >
+                      <p>“{{ review.text }}”</p>
+                      <footer v-if="review.authorName || review.relativeTime" class="mt-2 text-xs text-brand-200/60">
+                        {{ [review.authorName, review.relativeTime].filter(Boolean).join(' · ') }}
+                      </footer>
+                    </blockquote>
+                  </div>
+                  <p v-else class="mt-3 text-sm leading-6 text-brand-100/80">
+                    Retours de grimpeur·euse·s disponibles sur la fiche Google de {{ moniteurName || moniteurLocalLabel }}.
+                  </p>
                   <NuxtLink
-                    v-if="moniteurInstagramUrl"
-                    :to="moniteurInstagramUrl"
+                    v-if="moniteurGoogleBusinessUrl"
+                    :to="moniteurGoogleBusinessUrl"
                     target="_blank"
                     rel="noopener"
-                    class="inline-flex items-center gap-2 rounded-full border border-white/20 px-4 py-2 text-sm font-semibold text-white transition hover:border-secondaryBrand-300 hover:text-secondaryBrand-200"
+                    class="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-secondaryBrand-200 transition hover:text-secondaryBrand-100"
                   >
-                    Instagram
+                    Ouvrir la fiche Google
                     <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                      <rect x="4" y="4" width="16" height="16" rx="4" />
-                      <circle cx="12" cy="12" r="3" />
-                      <circle cx="16.5" cy="7.5" r="1" />
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M13 11l8-8M16 3h5v5" />
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M21 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h6" />
                     </svg>
                   </NuxtLink>
                 </div>
@@ -174,19 +217,19 @@
         </div>
       </section>
 
-      <section id="aventures" class="relative isolate pb-20">
+      <section id="stages" class="relative isolate pb-20">
         <div class="mx-auto max-w-7xl px-6">
           <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <p class="text-sm font-semibold uppercase tracking-[0.3em] text-secondaryBrand-300">Stages & aventures</p>
-              <h2 class="mt-2 text-3xl font-semibold text-pretty text-white">Les propositions de {{ moniteurName || moniteurRoleReference }}</h2>
-              <p class="mt-3 text-base text-gray-300">Découvre les prochains séjours imaginés par {{ moniteurName || 'ce guide' }}.</p>
+              <p class="text-sm font-semibold uppercase tracking-[0.3em] text-secondaryBrand-300">Stages</p>
+              <h2 class="mt-2 text-3xl font-semibold text-pretty text-white">Les prochains stages de {{ moniteurName || moniteurRoleReference }}</h2>
+              <p class="mt-3 text-base text-gray-300">Découvre les prochains stages proposés par {{ moniteurName || moniteurRoleReference }}.</p>
             </div>
             <NuxtLink
               to="/stages-escalade"
               class="inline-flex items-center gap-2 rounded-full border border-white/20 px-4 py-2 text-sm font-semibold text-white/70 transition hover:border-white hover:text-white"
             >
-              Voir toutes les aventures
+              Voir tous les stages
               <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M8 5l8 7-8 7" />
               </svg>
@@ -292,7 +335,7 @@
 
           <div v-else-if="!pending" class="mt-12 rounded-3xl border border-dashed border-white/20 p-12 text-center text-gray-300">
             <p>
-              Ce moniteur n’a pas encore publié d’aventures. Reviens bientôt ou contacte-nous pour imaginer un séjour sur-mesure.
+              Ce moniteur n’a pas encore publié de stage. Reviens bientôt ou contacte-nous pour imaginer un projet sur mesure.
             </p>
           </div>
 
@@ -387,7 +430,6 @@
 </template>
 
 <script setup lang="ts">
-import { HomeIcon, TruckIcon } from '@heroicons/vue/24/solid'
 import { buildStoredSrcset, resolveStoredImageSrc } from '~/composables/useStoredImageVariants'
 import { formatDurationDays, formatSessionRangeLabel } from '~~/shared/utils/aventure-schedule'
 import { getGuideRoleDativeLabel, getGuideRoleLabel, getGuideRoleLabelWithArticle, getGuideRoleReferenceLabel } from '~~/shared/utils/guide-gender'
@@ -420,6 +462,7 @@ const moniteur = computed(() => data.value?.moniteur ?? null)
 const aventures = computed(() =>
   (data.value?.aventures ?? []).filter((aventure: any) => aventure?.estPublie === true),
 )
+const hasPublishedStages = computed(() => aventures.value.length > 0)
 const filteredAventures = computed(() => {
   const today = new Date()
   today.setHours(0, 0, 0, 0)
@@ -495,6 +538,7 @@ const disciplineChips = computed(() => {
     href: disciplineHubPath(value),
   }))
 })
+const showStageDisciplines = computed(() => hasPublishedStages.value && disciplineChips.value.length > 0)
 
 const moniteurName = computed(() => {
   const fullName = moniteur.value?.fullName?.trim()
@@ -510,6 +554,19 @@ const moniteurRoleReference = computed(() => getGuideRoleReferenceLabel(moniteur
 const moniteurRoleDative = computed(() => getGuideRoleDativeLabel(moniteurGender.value))
 const moniteurLocalLabel = computed(() => `${moniteurRoleLabelCapitalized.value} local${moniteurGender.value === 'female' ? 'e' : ''}`)
 const locationLabel = computed(() => moniteur.value?.baseLocation || moniteur.value?.department || 'France')
+const serviceAreas = computed(() =>
+  Array.isArray(moniteur.value?.serviceAreas)
+    ? moniteur.value.serviceAreas.filter((value: unknown): value is string => typeof value === 'string' && value.trim().length > 0)
+    : [],
+)
+const serviceAreasForSeo = computed(() => {
+  const values = [...serviceAreas.value]
+  const fallback = moniteur.value?.baseLocation || moniteur.value?.department
+  if (typeof fallback === 'string' && fallback.trim().length > 0 && !values.includes(fallback.trim())) {
+    values.unshift(fallback.trim())
+  }
+  return values
+})
 const showFullBio = ref(false)
 const moniteurBioValue = computed(() => moniteur.value?.bio?.trim() || '')
 const moniteurBioFallback = computed(() => {
@@ -538,7 +595,7 @@ const heroBackground = computed(
 )
 const heroBackgroundSrcset = computed(() => buildStoredSrcset(moniteur.value?.heroImageVariants))
 const moniteurContactFirstName = computed(() => moniteur.value?.firstName?.trim() || moniteurRoleWithArticle.value)
-const moniteurWebsiteUrl = computed(() => {
+const moniteurProfessionalCardUrl = computed(() => {
   const card = moniteur.value?.professionalCardNumber || moniteur.value?.guideProfile?.professionalCardNumber
   if (card) {
     return `https://recherche-educateur.sports.gouv.fr/CartePro/${card}`
@@ -546,6 +603,30 @@ const moniteurWebsiteUrl = computed(() => {
 
   return null
 })
+const moniteurGoogleBusinessUrl = computed(() => {
+  return (
+    moniteur.value?.googleBusinessUrl ||
+    moniteur.value?.guideProfile?.googleBusinessUrl ||
+    moniteur.value?.profile?.googleBusinessUrl ||
+    null
+  )
+})
+const moniteurGoogleBusiness = computed(() => moniteur.value?.googleBusiness || null)
+const moniteurGoogleRating = computed(() =>
+  typeof moniteurGoogleBusiness.value?.rating === 'number' ? moniteurGoogleBusiness.value.rating : null,
+)
+const moniteurGoogleReviewCount = computed(() =>
+  typeof moniteurGoogleBusiness.value?.reviewCount === 'number' ? moniteurGoogleBusiness.value.reviewCount : null,
+)
+const moniteurGoogleReviews = computed(() =>
+  Array.isArray(moniteurGoogleBusiness.value?.reviews) ? moniteurGoogleBusiness.value.reviews : [],
+)
+const hasGoogleReviewSummary = computed(() =>
+  moniteurGoogleRating.value != null || moniteurGoogleReviewCount.value != null,
+)
+const hasGoogleReviewCard = computed(() =>
+  Boolean(moniteurGoogleBusinessUrl.value || hasGoogleReviewSummary.value || moniteurGoogleReviews.value.length),
+)
 
 const moniteurInstagramUrl = computed(() => {
   return (
@@ -553,6 +634,22 @@ const moniteurInstagramUrl = computed(() => {
     moniteur.value?.profile?.instagramUrl ||
     null
   )
+})
+const moniteurExternalLinks = computed(() => [
+  moniteurInstagramUrl.value
+    ? { label: 'Instagram', href: moniteurInstagramUrl.value }
+    : null,
+  moniteurProfessionalCardUrl.value
+    ? { label: 'Carte pro', href: moniteurProfessionalCardUrl.value }
+    : null,
+].filter(Boolean) as { label: string; href: string }[])
+const googleRatingLabel = computed(() => {
+  if (moniteurGoogleRating.value == null) return null
+  return moniteurGoogleRating.value.toFixed(1).replace('.', ',')
+})
+const googleReviewCountLabel = computed(() => {
+  if (moniteurGoogleReviewCount.value == null) return null
+  return `${moniteurGoogleReviewCount.value} avis`
 })
 
 const siteBaseUrl = computed(() => resolvePublicSiteUrl(runtimeConfig.public.publicUrl))
@@ -630,7 +727,7 @@ const breadcrumbStructuredData = computed(() => {
 const profilePageStructuredData = computed(() => {
   if (!moniteur.value || !canonicalGuideUrl.value) return null
 
-  const sameAs = [moniteurInstagramUrl.value, moniteurWebsiteUrl.value].filter(Boolean)
+  const sameAs = [moniteurInstagramUrl.value, moniteurGoogleBusinessUrl.value].filter(Boolean)
 
   return {
     '@context': 'https://schema.org',
@@ -647,6 +744,76 @@ const profilePageStructuredData = computed(() => {
   }
 })
 
+const localBusinessStructuredData = computed(() => {
+  if (!moniteur.value || !canonicalGuideUrl.value) return null
+
+  const sameAs = [moniteurInstagramUrl.value, moniteurGoogleBusinessUrl.value].filter(Boolean)
+  const serviceTypes = disciplineChips.value.map((discipline) => discipline.label)
+  const areaServed = serviceAreasForSeo.value.map((area) => ({
+    '@type': 'AdministrativeArea',
+    name: area,
+  }))
+  const review = moniteurGoogleReviews.value.slice(0, 3).map((item) => ({
+    '@type': 'Review',
+    reviewBody: item.text,
+    author: {
+      '@type': 'Person',
+      name: item.authorName || 'Grimpeur',
+    },
+  }))
+
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'LocalBusiness',
+    '@id': `${canonicalGuideUrl.value}#localbusiness`,
+    name: moniteurName.value || moniteur.value.fullName || moniteurLocalLabel.value,
+    image: moniteurPortraitAbsolute.value || undefined,
+    description: moniteurBioFull.value || undefined,
+    url: canonicalGuideUrl.value,
+    telephone: moniteur.value?.phoneNumber || undefined,
+    areaServed: areaServed.length ? areaServed : undefined,
+    serviceType: serviceTypes.length ? serviceTypes : undefined,
+    knowsAbout: serviceTypes.length ? serviceTypes : undefined,
+    aggregateRating: moniteurGoogleRating.value != null
+      ? {
+          '@type': 'AggregateRating',
+          ratingValue: moniteurGoogleRating.value,
+          reviewCount: moniteurGoogleReviewCount.value ?? undefined,
+          bestRating: 5,
+          worstRating: 1,
+        }
+      : undefined,
+    review: review.length ? review : undefined,
+    sameAs: sameAs.length ? sameAs : undefined,
+  }
+})
+
+const structuredDataScripts = computed(() =>
+  [
+    breadcrumbStructuredData.value
+      ? {
+          key: 'guide-breadcrumb-jsonld',
+          type: 'application/ld+json',
+          innerHTML: JSON.stringify(breadcrumbStructuredData.value),
+        }
+      : null,
+    profilePageStructuredData.value
+      ? {
+          key: 'guide-profilepage-jsonld',
+          type: 'application/ld+json',
+          innerHTML: JSON.stringify(profilePageStructuredData.value),
+        }
+      : null,
+    localBusinessStructuredData.value
+      ? {
+          key: 'guide-localbusiness-jsonld',
+          type: 'application/ld+json',
+          innerHTML: JSON.stringify(localBusinessStructuredData.value),
+        }
+      : null,
+  ].filter(Boolean),
+)
+
 useHead(() => ({
   titleTemplate: '%s',
   link: canonicalGuideUrl.value
@@ -657,32 +824,7 @@ useHead(() => ({
         },
       ]
     : [],
-  script: breadcrumbStructuredData.value
-    ? [
-        {
-          key: 'guide-breadcrumb-jsonld',
-          type: 'application/ld+json',
-          innerHTML: JSON.stringify(breadcrumbStructuredData.value),
-        },
-        ...(profilePageStructuredData.value
-          ? [
-              {
-                key: 'guide-profilepage-jsonld',
-                type: 'application/ld+json',
-                innerHTML: JSON.stringify(profilePageStructuredData.value),
-              },
-            ]
-          : []),
-      ]
-    : profilePageStructuredData.value
-      ? [
-          {
-            key: 'guide-profilepage-jsonld',
-            type: 'application/ld+json',
-            innerHTML: JSON.stringify(profilePageStructuredData.value),
-          },
-        ]
-      : [],
+  script: structuredDataScripts.value,
 }))
 
 const seoTitle = computed(() => {
@@ -706,60 +848,6 @@ useSeoMeta({
   robots: 'index, follow, max-image-preview:large',
 })
 
-
-const nextSessionLabel = computed(() => {
-  const today = new Date()
-  today.setHours(0, 0, 0, 0)
-  const todayMs = today.getTime()
-
-  const candidates: number[] = []
-  for (const a of aventures.value || []) {
-    if (a?.nextSession?.dateDebut) {
-      const ts = new Date(a.nextSession.dateDebut).getTime()
-      if (!Number.isNaN(ts) && ts >= todayMs) candidates.push(ts)
-    }
-    if (Array.isArray(a?.sessions)) {
-      for (const s of a.sessions) {
-        if (!s?.dateDebut) continue
-        const ts = new Date(s.dateDebut).getTime()
-        if (!Number.isNaN(ts) && ts >= todayMs) candidates.push(ts)
-      }
-    }
-  }
-  if (candidates.length) {
-    const nextTs = Math.min(...candidates)
-    return formatFullDate(nextTs)
-  }
-
-  const stats = moniteur.value?.stats
-  if (stats?.prochaineDate) {
-    const ts = new Date(stats.prochaineDate).getTime()
-    if (!Number.isNaN(ts) && ts >= todayMs) {
-      return formatFullDate(ts)
-    }
-  }
-  return 'Sur demande'
-})
-
-const aventuresCountLabel = computed(() => {
-  const stats = moniteur.value?.stats
-  const count = stats?.aventuresPubliees ?? aventures.value.length
-  if (!count) return 'Bientôt disponible'
-  return `${count} aventure${count > 1 ? 's' : ''}`
-})
-
-const featureList = computed(() => [
-  {
-    icon: HomeIcon,
-    title: 'Camp de base',
-    description: locationLabel.value,
-  },
-  {
-    icon: TruckIcon,
-    title: 'Prochain départ',
-    description: nextSessionLabel.value,
-  },
-])
 
 const clearGuideContactQuery = async () => {
   if (route.query.contact !== '1') return
@@ -836,16 +924,6 @@ watch(
 onMounted(() => {
   fetchUserSession()
 })
-
-
-const formatFullDate = (dateInput: string | number | Date) => {
-  const formatter = new Intl.DateTimeFormat('fr-FR', {
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-  })
-  return formatter.format(new Date(dateInput))
-}
 
 const formatSessionRange = (session?: { dateDebut?: string | Date; dateFin?: string | Date } | null) =>
   formatSessionRangeLabel(session?.dateDebut, session?.dateFin) || 'Dates à confirmer'

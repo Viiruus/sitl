@@ -6,7 +6,7 @@ const props = withDefaults(defineProps<{
   guideName?: string | null
   fileName?: string | null
 }>(), {
-  guideName: 'Moniteur',
+  guideName: 'Moniteur·ice',
   fileName: 'qr-code-profil-moniteur',
 })
 
@@ -110,7 +110,7 @@ const downloadQrCode = async () => {
           QR code du profil
         </h2>
         <p class="mt-3 text-sm text-brand-100/80">
-          Affiche ce QR code pour envoyer directement vers la page publique de {{ guideName || 'ce moniteur' }}.
+          Affiche ce QR code pour envoyer directement vers la page publique de {{ guideName || 'ce profil' }}.
         </p>
         <div class="mt-6 flex flex-wrap gap-3">
           <NuxtLink
@@ -139,7 +139,7 @@ const downloadQrCode = async () => {
         <img
           v-if="qrSvgDataUrl"
           :src="qrSvgDataUrl"
-          alt="QR code du profil moniteur"
+          alt="QR code du profil moniteur·ice"
           class="block h-[280px] w-[280px] max-w-full rounded-2xl"
         />
       </div>

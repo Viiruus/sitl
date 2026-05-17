@@ -16,8 +16,8 @@ definePageMeta({
 })
 
 useSeoMeta({
-  title: 'Profil moniteur',
-  description: 'Gère ton profil public de moniteur.',
+  title: 'Profil moniteur·ice',
+  description: 'Gère ton profil public de moniteur·ice.',
   robots: 'noindex, nofollow',
 })
 
@@ -35,10 +35,12 @@ const form = reactive({
   whatsappOptIn: true,
   gender: '',
   baseLocation: '',
+  serviceAreasText: '',
   bio: '',
   stageTermsAndConditions: '',
   instagramUrl: '',
-  websiteUrl: '',
+  googleBusinessUrl: '',
+  googlePlaceId: '',
   professionalCardNumber: '',
   profileImageUrl: '',
   profileImageVariants: [] as { url: string; width: number; size?: number }[],
@@ -55,6 +57,7 @@ watch(
     form.whatsappOptIn = Boolean(value.whatsappOptIn)
     form.gender = value.gender || ''
     form.baseLocation = value.baseLocation || ''
+    form.serviceAreasText = Array.isArray(value.serviceAreas) ? value.serviceAreas.join('\n') : ''
     form.bio = value.bio || ''
     form.stageTermsAndConditions = value.stageTermsAndConditions
       ? formatGuideStageTermsGlobalVariableMarkers(value.stageTermsAndConditions)
@@ -63,7 +66,8 @@ watch(
           professionalCardNumber: value.professionalCardNumber || null,
         })
     form.instagramUrl = value.instagramUrl || ''
-    form.websiteUrl = value.websiteUrl || ''
+    form.googleBusinessUrl = value.googleBusinessUrl || ''
+    form.googlePlaceId = value.googlePlaceId || ''
     form.professionalCardNumber = value.professionalCardNumber || ''
     form.profileImageUrl = value.profileImageUrl || ''
     form.profileImageVariants = normalizeVariants(value.profileImageVariants || [])
@@ -121,10 +125,15 @@ const saveProfile = async () => {
   success.value = null
   error.value = null
   try {
+    const serviceAreas = form.serviceAreasText
+      .split(/\r?\n|,/)
+      .map((value) => value.trim())
+      .filter((value, index, arr) => value.length > 0 && arr.indexOf(value) === index)
     await $fetch('/api/guides/profile', {
       method: 'PUT',
       body: {
         ...form,
+        serviceAreas,
         profileImageVariants: isManagedGuideImageUrl(form.profileImageUrl) ? form.profileImageVariants : [],
       },
     })
@@ -184,7 +193,7 @@ const logout = async () => {
             Profil public
           </p>
           <h1 class="mt-2 text-3xl font-semibold">
-            Mets à jour ce que les grimpeurs voient
+            Mets à jour ce que les grimpeur·euse·s voient
           </h1>
           <p class="mt-3 max-w-3xl text-sm text-brand-100/75">
             Pour que ton profil soit visible sur le site, renseigne au minimum ton prénom, ton nom, ta photo de profil, ton camp de base et ta bio.
@@ -226,13 +235,26 @@ const logout = async () => {
                 placeholder="+33 6 12 34 56 78"
               />
               <p class="text-xs text-brand-200/70">
-                Obligatoire pour échanger rapidement avec les grimpeurs.
+                Obligatoire pour échanger rapidement avec les grimpeur·euse·s.
               </p>
             </div>
 
             <div class="space-y-2">
               <label class="text-sm text-brand-100/80">Camp de base</label>
               <input v-model="form.baseLocation" type="text" class="w-full rounded-xl border border-brand-800 bg-brand-900/80 px-3 py-2 text-white focus:border-secondaryBrand-400 focus:outline-none" />
+            </div>
+
+            <div class="space-y-2">
+              <label class="text-sm text-brand-100/80">Zones desservies</label>
+              <textarea
+                v-model="form.serviceAreasText"
+                rows="4"
+                class="w-full rounded-xl border border-brand-800 bg-brand-900/80 px-3 py-2 text-white focus:border-secondaryBrand-400 focus:outline-none"
+                placeholder="Une zone par ligne ou séparée par des virgules&#10;Ex: Bauges&#10;Annecy&#10;Chambéry"
+              ></textarea>
+              <p class="text-xs text-brand-200/70">
+                Ces zones seront affichées sur ta page publique et utilisées dans le balisage SEO local.
+              </p>
             </div>
 
             <div class="grid gap-4 md:grid-cols-2">
@@ -245,6 +267,45 @@ const logout = async () => {
                   class="w-full rounded-xl border border-brand-800 bg-brand-900/80 px-3 py-2 text-white focus:border-secondaryBrand-400 focus:outline-none"
                 />
               </div>
+              <div class="space-y-2">
+                <label class="text-sm text-brand-100/80">Fiche Google (URL)</label>
+                <input
+                  v-model="form.googleBusinessUrl"
+                  type="url"
+                  placeholder="https://g.page/..."
+                  class="w-full rounded-xl border border-brand-800 bg-brand-900/80 px-3 py-2 text-white focus:border-secondaryBrand-400 focus:outline-none"
+                />
+                <p class="text-xs text-brand-200/70">
+                  Lien public vers ta fiche Google.
+                </p>
+              </div>
+            </div>
+
+            <div class="space-y-2">
+              <label class="text-sm text-brand-100/80">Google Place ID</label>
+              <input
+                v-model="form.googlePlaceId"
+                type="text"
+                placeholder="ChIJN1t_tDeuEmsRUsoyG83frY4"
+                class="w-full rounded-xl border border-brand-800 bg-brand-900/80 px-3 py-2 text-white focus:border-secondaryBrand-400 focus:outline-none"
+              />
+              <p class="text-xs text-brand-200/70">
+                Utilisé côté serveur pour récupérer automatiquement la note et les avis Google. Sans cet identifiant, l’encart `Avis Google` ne pourra pas être enrichi.
+              </p>
+              <p class="text-xs text-brand-200/70">
+                Tu peux le trouver avec le
+                <a
+                  href="https://developers.google.com/maps/documentation/places/web-service/place-id"
+                  target="_blank"
+                  rel="noopener"
+                  class="font-semibold text-secondaryBrand-200 hover:text-secondaryBrand-100"
+                >
+                  Place ID Finder de Google
+                </a>.
+              </p>
+            </div>
+
+            <div class="grid gap-4 md:grid-cols-2">
               <div class="space-y-2">
                 <label class="text-sm text-brand-100/80">Numéro de carte professionnelle</label>
                 <input
@@ -296,7 +357,7 @@ const logout = async () => {
                   <img
                     v-if="form.profileImageUrl"
                     :src="form.profileImageUrl"
-                    alt="Photo du moniteur"
+                    alt="Photo du profil"
                     class="absolute inset-0 h-full w-full object-cover"
                   />
                   <div v-else class="absolute inset-0 flex items-center justify-center text-sm text-brand-300/70">
@@ -340,7 +401,7 @@ const logout = async () => {
                     </span>
                     <div class="space-y-2">
                       <h3 class="text-sm font-semibold text-secondaryBrand-100">
-                        Variables globales moniteur
+                        Variables globales moniteur·ice
                       </h3>
                       <p class="text-xs leading-5 text-brand-100/75">
                         Elles décrivent ton activité, tes règles commerciales ou tes infos légales. Complète-les une fois
