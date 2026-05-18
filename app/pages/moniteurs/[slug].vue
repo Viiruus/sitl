@@ -149,7 +149,7 @@
                     Coaching & sur-mesure
                   </p>
                   <p class="mt-3 text-sm leading-6 text-brand-100/80">
-                    Échange avec {{ moniteurContactFirstName }} pour préparer une planification d'entrainement, une sortie privée ou un projet sur mesure.
+                    Échange avec {{ moniteurContactFirstName }} pour préparer une planification d'entrainements, une sortie privée ou un projet sur mesure.
                   </p>
                   <button
                     type="button"

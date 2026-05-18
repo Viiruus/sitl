@@ -12,14 +12,8 @@ const onboardingSchema = z.object({
   birthDate: z.string().optional().or(z.literal('')), // string simple
   department: z.string().optional().or(z.literal('')),
   phoneNumber: z.string().trim().max(30).optional().or(z.literal('')),
-  cguAccepted: z
-    .literal(true, {
-      errorMap: () => ({ message: 'Merci de valider les CGU.' }),
-    })
-    .optional(),
-  associationMembershipAccepted: z.literal(true, {
-    errorMap: () => ({ message: "Merci de valider l'adhésion à l'association." }),
-  }),
+  cguAccepted: z.boolean().optional(),
+  associationMembershipAccepted: z.boolean().optional(),
   whatsappOptIn: z.boolean().optional(),
 
   // Pratique
@@ -64,6 +58,13 @@ const onboardingSchema = z.object({
   tripStyles: z.array(z.string()).optional().default([]),
 })
 
+const createValidationError = (message: string) =>
+  createError({
+    statusCode: 400,
+    statusMessage: message,
+    data: { message },
+  })
+
 export default defineEventHandler(async (event) => {
   const db = await prisma()
   // 1) Vérifier qu'on a bien un utilisateur connecté
@@ -94,7 +95,19 @@ export default defineEventHandler(async (event) => {
 
   // 2) Lire et valider le body
   const rawBody = await readBody(event)
-  const body = onboardingSchema.parse(rawBody)
+  const parsedBody = onboardingSchema.safeParse(rawBody)
+  if (!parsedBody.success) {
+    throw createValidationError(parsedBody.error.issues[0]?.message || 'Données invalides.')
+  }
+  const body = parsedBody.data
+
+  const needsRequiredConsents = !currentUser.onboarded
+  if (needsRequiredConsents && body.cguAccepted !== true) {
+    throw createValidationError('Merci de valider les CGU.')
+  }
+  if (needsRequiredConsents && body.associationMembershipAccepted !== true) {
+    throw createValidationError("Merci de valider l'adhésion à l'association.")
+  }
 
   // 4) Mettre à jour l'utilisateur en BDD
   const user = await db.user.update({
@@ -136,24 +149,10 @@ export default defineEventHandler(async (event) => {
   })
 
   if (user.phoneNumber && user.whatsappOptIn) {
-    const climberFirstName = user.firstName || body.firstName?.trim?.() || 'grimpeur'
-
     const result = await sendTemplateViaWhatsapp({
       phone: user.phoneNumber,
       templateName: process.env.WHATSAPP_CLIMBER_WELCOME_TEMPLATE_NAME || 'welcome_climber',
       language: process.env.WHATSAPP_OTP_TEMPLATE_LANGUAGE || 'fr',
-      components: [
-        {
-          type: 'header',
-          parameters: [
-            {
-              type: 'text',
-              parameter_name: 'firstname',
-              text: climberFirstName,
-            },
-          ],
-        },
-      ],
       logLabel: 'whatsapp-climber-welcome',
     })
 

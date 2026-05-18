@@ -14,6 +14,13 @@ const bodySchema = z.object({
   }),
 })
 
+const createValidationError = (message: string) =>
+  createError({
+    statusCode: 400,
+    statusMessage: message,
+    data: { message },
+  })
+
 export default defineEventHandler(async (event) => {
   const session = await getUserSession(event)
   if (!session?.user?.id) {
@@ -23,7 +30,11 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 403, statusMessage: 'Accès réservé aux moniteurs' })
   }
 
-  const body = bodySchema.parse(await readBody(event))
+  const parsedBody = bodySchema.safeParse(await readBody(event))
+  if (!parsedBody.success) {
+    throw createValidationError(parsedBody.error.issues[0]?.message || 'Données invalides.')
+  }
+  const body = parsedBody.data
   const db = await prisma()
 
   const user = await db.user.update({
