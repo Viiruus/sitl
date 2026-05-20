@@ -30,6 +30,7 @@ export default defineEventHandler(async (event) => {
         formule: true,
         lieuLabel: true,
         jours: true,
+        placesMax: true,
         prixParPersonne: true,
         coverImageUrl: true,
         coverImageVariants: true,
@@ -49,6 +50,7 @@ export default defineEventHandler(async (event) => {
           select: {
             dateDebut: true,
             dateFin: true,
+            placesReservees: true,
           },
           orderBy: {
             dateDebut: "asc",
@@ -118,6 +120,7 @@ export default defineEventHandler(async (event) => {
       guideGender: a.guide?.guideProfile?.gender || null,
       hasSessions: a.sessions.length > 0,
       nextSession: findNextSession(a.sessions),
+      estComplet: isStageSoldOut(a.sessions, a.placesMax),
     })),
   };
 });
@@ -141,6 +144,12 @@ const buildUpcomingSessionWhere = (today: Date) => ({
     { dateDebut: { gte: today } },
   ],
 });
+
+const isStageSoldOut = (sessions: any[], placesMax?: number | null) => {
+  const capacity = Number(placesMax ?? 0)
+  if (!capacity || !Array.isArray(sessions) || sessions.length === 0) return false
+  return sessions.every((session: any) => Number(session?.placesReservees ?? 0) >= capacity)
+}
 
 const selectHomepageAventures = (aventures: any[], limit: number) => {
   const list = aventures
@@ -173,6 +182,7 @@ const selectHomepageAventures = (aventures: any[], limit: number) => {
         guideGender: a.guide?.guideProfile?.gender || null,
         nextSession,
         nextSessionDate,
+        estComplet: isStageSoldOut(a.sessions, a.placesMax),
       };
     })
     .filter((stage) => stage.nextSessionDate)

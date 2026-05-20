@@ -25,6 +25,20 @@ const findNextSession = (sessions: any[]) => {
   return best
 }
 
+const isStageSoldOut = (sessions: any[], placesMax?: number | null) => {
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  const todayMs = today.getTime()
+  const futureSessions = (sessions ?? []).filter((session: any) => {
+    if (!session?.dateDebut) return false
+    const ts = new Date(session.dateDebut).getTime()
+    return !Number.isNaN(ts) && ts >= todayMs
+  })
+  const capacity = Number(placesMax ?? 0)
+  if (!capacity || !futureSessions.length) return false
+  return futureSessions.every((session: any) => Number(session?.placesReservees ?? 0) >= capacity)
+}
+
 const mapAventureForGuide = (a: any) => {
   const coverImageUrl = sanitizePublicImageUrl(a.coverImageUrl, { allowInline: true })
   const coverImageVariants = sanitizePublicImageVariants(a.coverImageVariants, { allowInline: true })
@@ -41,6 +55,7 @@ const mapAventureForGuide = (a: any) => {
     prixParPersonne: a.prixParPersonne,
     coverImageUrl,
     coverImageVariants,
+    estComplet: isStageSoldOut(a.sessions ?? [], a.placesMax),
     nextSession: nextSession
       ? {
           dateDebut: nextSession.dateDebut,

@@ -894,6 +894,7 @@
             >
               <div>{{ s.value?.sessions }}</div>
               <div class="relative h-52">
+                <StageSoldOutRibbon v-if="s.estComplet" />
                 <img
                   :src="otherStageCoverImage(s)"
                   :srcset="otherStageCoverSrcset(s)"

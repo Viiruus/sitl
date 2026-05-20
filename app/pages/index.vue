@@ -227,6 +227,7 @@
               sizes="(min-width: 1024px) 33vw, 100vw"
               loading="lazy"
             />
+            <StageSoldOutRibbon v-if="stage.estComplet" />
             <div class="absolute inset-0 bg-gradient-to-t from-brand-950 via-brand-950/40 to-transparent"></div>
             <div class="absolute inset-4 flex flex-col justify-between">
               <div class="flex flex-wrap items-center gap-3 text-xs text-white sm:flex-row sm:justify-between">

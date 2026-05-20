@@ -178,6 +178,7 @@ const mapListAventure = (a: any) => ({
   guide: mapGuide(a),
   sessions: mapSessions(a.sessions ?? []),
   nextSession: mapNextSession(a.sessions ?? []),
+  estComplet: isStageSoldOut(a.sessions ?? [], a.placesMax),
 })
 
 const mapDetailAventure = (a: any, bookedSessionIds: Set<number>) => ({
@@ -273,4 +274,30 @@ const mapNextSession = (sessions: any[]) => {
     statut: best.statut,
     placesTotales: best.placesTotales,
   }
+}
+
+const isStageSoldOut = (sessions: any[], placesMax?: number | null) => {
+  if (!Array.isArray(sessions) || !sessions.length || !placesMax || placesMax <= 0) return false
+
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  const todayMs = today.getTime()
+
+  const upcoming = sessions.filter((session: any) => {
+    const timestamp = session?.dateDebut ? new Date(session.dateDebut).getTime() : Number.NaN
+    return !Number.isNaN(timestamp) && timestamp >= todayMs
+  })
+
+  if (!upcoming.length) return false
+
+  return upcoming.every((session: any) => {
+    const participantsCount = Array.isArray(session?.reservations)
+      ? session.reservations.reduce(
+          (total: number, booking: any) => total + (booking?.participants ?? 1),
+          0,
+        )
+      : session?.placesReservees ?? 0
+
+    return participantsCount >= placesMax
+  })
 }

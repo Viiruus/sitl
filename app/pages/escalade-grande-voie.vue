@@ -150,6 +150,7 @@
               class="group flex flex-col overflow-hidden rounded-3xl bg-white/5 p-6 ring-1 ring-white/10 transition hover:bg-white/10"
             >
               <div class="relative mb-6 h-48 overflow-hidden rounded-2xl">
+                <StageSoldOutRibbon v-if="stage.estComplet" />
                 <img :src="stage.imageUrl" :alt="stage.title" class="size-full object-cover transition duration-300 group-hover:scale-105" />
                 <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
                 <div class="absolute top-3 left-3 flex flex-wrap gap-2">

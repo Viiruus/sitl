@@ -133,6 +133,7 @@
                     sizes="(min-width: 1024px) 33vw, 100vw"
                     loading="lazy"
                   />
+                  <StageSoldOutRibbon v-if="stage.estComplet" />
                   <div class="absolute inset-0 bg-gradient-to-t from-brand-950 via-brand-950/30 to-transparent" />
                   <div class="absolute inset-x-4 bottom-4 flex items-center justify-between gap-3 text-xs text-white">
                     <span class="inline-flex items-center rounded-full bg-secondaryBrand-400/80 px-3 py-1 font-semibold uppercase tracking-[0.3em] text-secondaryBrand-100">
