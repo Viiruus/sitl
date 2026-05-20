@@ -628,26 +628,35 @@
                         <label
                             v-for="session in availableSessions"
                             :key="session.id"
-                            class="flex items-start gap-3 rounded-2xl border border-gray-200 px-4 py-3 text-sm shadow-sm"
+                            :class="[
+                              'flex items-start gap-3 rounded-2xl border px-4 py-3 text-sm shadow-sm transition',
+                              isSessionFull(session)
+                                ? 'cursor-not-allowed border-gray-200 bg-gray-50/80 opacity-75'
+                                : 'border-gray-200',
+                            ]"
                           >
                             <input
                               type="checkbox"
                               class="mt-1 h-4 w-4 rounded border-gray-300 text-brand-600 focus:ring-brand-500"
                               :value="String(session.id)"
                               v-model="selectedSessionIds"
-                              :disabled="bookingLoading"
+                              :disabled="bookingLoading || isSessionFull(session)"
                             />
                             <div class="space-y-1">
                               <p class="font-semibold text-gray-900">
                                 {{ formatSessionDate(session) }}
                               </p>
-                              <p class="text-xs text-brand-600">
+                              <p
+                                :class="[
+                                  'text-xs',
+                                  isSessionFull(session) ? 'font-semibold text-gray-500' : 'text-brand-600',
+                                ]"
+                              >
                                 {{
-                                  Math.max(
-                                    0,
-                                    (stage?.placesMax || 0) - sessionParticipantsCount(session)
-                                  )
-                                }} places restantes
+                                  isSessionFull(session)
+                                    ? 'Session complète'
+                                    : `${sessionRemainingPlaces(session)} places restantes`
+                                }}
                               </p>
                               <p
                                 v-if="session.userIsBooked && session.statut !== 'ANNULE'"
@@ -1657,6 +1666,22 @@ const sessionParticipantsCount = (session?: {
   return 0
 }
 
+const sessionCapacity = (session?: { placesTotales?: number | null } | null) =>
+  Math.max(0, Number(session?.placesTotales ?? stage.value?.placesMax ?? 0))
+
+const sessionRemainingPlaces = (session?: {
+  placesTotales?: number | null
+  participantsCount?: number | null
+  reservations?: { participants?: number | null }[]
+} | null) =>
+  Math.max(0, sessionCapacity(session) - sessionParticipantsCount(session))
+
+const isSessionFull = (session?: {
+  placesTotales?: number | null
+  participantsCount?: number | null
+  reservations?: { participants?: number | null }[]
+} | null) => sessionRemainingPlaces(session) <= 0
+
 const formatSessionRange = (session?: { dateDebut?: string | Date; dateFin?: string | Date } | null) =>
   formatSessionRangeLabel(session?.dateDebut, session?.dateFin)
 
@@ -1824,7 +1849,12 @@ const formatInputDate = (value: Date) => {
 watch(
   () => stage.value?.sessions,
   (sessions) => {
-    selectedSessionIds.value = []
+    const availableSelectableIds = new Set(
+      availableSessions.value
+        .filter((session: any) => !isSessionFull(session))
+        .map((session: any) => String(session.id)),
+    )
+    selectedSessionIds.value = selectedSessionIds.value.filter((id) => availableSelectableIds.has(String(id)))
   },
   { immediate: true },
 )
@@ -1872,7 +1902,11 @@ const tryResumePendingBooking = async () => {
   }
 
   const availableIds = new Set(availableSessions.value.map((s: any) => String(s.id)))
-  const nextIds = payload.sessionIds.filter((id) => availableIds.has(String(id)))
+  const nextIds = payload.sessionIds.filter((id) => {
+    if (!availableIds.has(String(id))) return false
+    const session = availableSessions.value.find((entry: any) => String(entry.id) === String(id))
+    return session ? !isSessionFull(session) : false
+  })
 
   window.localStorage.removeItem(pendingBookingKey)
   pendingBookingHandled.value = true
@@ -1946,7 +1980,7 @@ const handleInterestClick = async () => {
     const sessions = stage.value?.sessions || []
     const targets = selectedSessionIds.value
       .map((id) => sessions.find((s: any) => String(s.id) === id))
-      .filter((s: any) => s && !s.userIsBooked)
+      .filter((s: any) => s && !s.userIsBooked && !isSessionFull(s))
 
     if (!targets.length) {
       return
