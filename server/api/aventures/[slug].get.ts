@@ -229,10 +229,10 @@ const mapDetailAventure = (a: any, bookedSessionIds: Set<number>) => ({
 
   guide: mapGuide(a),
 
-  sessions: mapSessions(a.sessions ?? [], bookedSessionIds),
+    sessions: mapSessions(a.sessions ?? [], a.placesMax, bookedSessionIds),
 })
 
-const mapSessions = (sessions: any[], bookedSessionIds?: Set<number>) =>
+const mapSessions = (sessions: any[], placesMax?: number | null, bookedSessionIds?: Set<number>) =>
   (sessions ?? [])
     .sort((s1: any, s2: any) => +s1.dateDebut - +s2.dateDebut)
     .map((session: any) => {
@@ -248,7 +248,7 @@ const mapSessions = (sessions: any[], bookedSessionIds?: Set<number>) =>
         dateDebut: session.dateDebut,
         dateFin: session.dateFin,
         statut: session.statut,
-        placesTotales: session.placesTotales,
+        placesTotales: placesMax ?? session.placesTotales,
         participantsCount,
         userIsBooked: bookedSessionIds?.has(session.id) ?? false,
       }

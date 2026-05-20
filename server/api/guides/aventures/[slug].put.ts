@@ -213,6 +213,7 @@ export default defineEventHandler(async (event) => {
       sessions: {
         select: {
           id: true,
+          placesReservees: true,
         },
       },
     },
@@ -238,6 +239,13 @@ export default defineEventHandler(async (event) => {
     throw createError({
       statusCode: 422,
       statusMessage: 'Ajoute au moins une session avant de publier ce stage.',
+    })
+  }
+  const overloadedSession = existing.sessions.find((session) => (session.placesReservees ?? 0) > body.placesMax)
+  if (overloadedSession) {
+    throw createError({
+      statusCode: 422,
+      statusMessage: 'Impossible de définir un nombre de places max inférieur au nombre de grimpeur·euse·s déjà inscrit·e·s sur une session.',
     })
   }
 
@@ -282,6 +290,13 @@ export default defineEventHandler(async (event) => {
         id: true,
         slug: true,
         estPublie: true,
+      },
+    })
+
+    await tx.aventureSession.updateMany({
+      where: { aventureId: existing.id },
+      data: {
+        placesTotales: body.placesMax,
       },
     })
 

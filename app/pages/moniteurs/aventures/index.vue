@@ -91,7 +91,6 @@ type SessionFormState = {
   demiJourneeDebut: SessionHalfDay
   dateFin: string
   demiJourneeFin: SessionHalfDay
-  placesTotales: number
   loading: boolean
   error: string | null
   success: string | null
@@ -116,7 +115,6 @@ const ensureSessionForm = (slug: string) => {
       demiJourneeDebut: 'AM',
       dateFin: '',
       demiJourneeFin: 'PM',
-      placesTotales: 6,
       loading: false,
       error: null,
       success: null,
@@ -174,12 +172,6 @@ const handleCreateSession = async (aventure: any) => {
     form.error = `La session doit couvrir exactement ${formatDurationDays(aventure.jours)}.`
     return
   }
-  const places = Number(form.placesTotales)
-  if (!Number.isFinite(places) || places < 1) {
-    form.error = 'Indique un nombre de places.'
-    return
-  }
-
   form.loading = true
   try {
     await $fetch(`/api/guides/aventures/${aventure.slug}/sessions`, {
@@ -187,7 +179,6 @@ const handleCreateSession = async (aventure: any) => {
       body: {
         dateDebut: form.dateDebut,
         demiJourneeDebut: form.demiJourneeDebut,
-        placesTotales: places,
       },
     })
     form.success = 'Session ajoutée.'
@@ -195,7 +186,6 @@ const handleCreateSession = async (aventure: any) => {
     form.demiJourneeDebut = 'AM'
     form.dateFin = ''
     form.demiJourneeFin = 'PM'
-    form.placesTotales = places
     await refreshAventures?.()
   } catch (error: any) {
     form.error = error?.data?.message || 'Impossible de créer la session.'

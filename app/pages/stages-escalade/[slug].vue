@@ -1667,7 +1667,7 @@ const sessionParticipantsCount = (session?: {
 }
 
 const sessionCapacity = (session?: { placesTotales?: number | null } | null) =>
-  Math.max(0, Number(session?.placesTotales ?? stage.value?.placesMax ?? 0))
+  Math.max(0, Number(stage.value?.placesMax ?? session?.placesTotales ?? 0))
 
 const sessionRemainingPlaces = (session?: {
   placesTotales?: number | null

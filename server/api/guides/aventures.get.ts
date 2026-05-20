@@ -1,11 +1,11 @@
 import { prisma } from '../../utils/prisma'
 
-const mapSession = (session: any) => ({
+const mapSession = (session: any, placesMax?: number | null) => ({
   id: session.id,
   dateDebut: session.dateDebut,
   dateFin: session.dateFin,
   statut: session.statut,
-  placesTotales: session.placesTotales,
+  placesTotales: placesMax ?? session.placesTotales,
   placesReservees: session.placesReservees,
   bookings: session.reservations?.length || 0,
 })
@@ -50,12 +50,12 @@ export default defineEventHandler(async (event) => {
         estPublie: a.estPublie,
         prixParPersonne: a.prixParPersonne,
         jours: a.jours,
-        sessions: (a.sessions ?? []).map(mapSession),
+        sessions: (a.sessions ?? []).map((session) => mapSession(session, a.placesMax)),
         bookingsCount: (a.sessions ?? []).reduce(
           (total, session) => total + (session.reservations?.length || 0),
           0,
         ),
-        prochainSession: upcoming ? mapSession(upcoming) : null,
+        prochainSession: upcoming ? mapSession(upcoming, a.placesMax) : null,
       }
     }),
   }

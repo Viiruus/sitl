@@ -118,7 +118,7 @@ export default defineEventHandler(async (event) => {
 
   // Vérifier les places restantes
   const placesRestantes =
-    dbSession.placesTotales - dbSession.placesReservees
+    dbSession.aventure.placesMax - dbSession.placesReservees
 
   if (placesRestantes <= 0) {
     throw createError({

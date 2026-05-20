@@ -11,7 +11,6 @@ const bodySchema = z
   .object({
     dateDebut: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
     demiJourneeDebut: z.enum(['AM', 'PM']).default('AM'),
-    placesTotales: z.number().int().min(1).max(30),
   })
 
 export default defineEventHandler(async (event) => {
@@ -33,7 +32,7 @@ export default defineEventHandler(async (event) => {
 
   const aventure = await db.aventure.findFirst({
     where: { slug, guideId: Number(session.user.id) },
-    select: { id: true, jours: true },
+    select: { id: true, jours: true, placesMax: true },
   })
 
   if (!aventure) {
@@ -89,7 +88,7 @@ export default defineEventHandler(async (event) => {
       dateDebut: computedSession.dateDebut,
       dateFin: computedSession.dateFin,
       statut: 'OUVERT',
-      placesTotales: body.placesTotales,
+      placesTotales: aventure.placesMax,
     },
     select: {
       id: true,
