@@ -96,7 +96,7 @@
                 </div>
                 <div v-if="showStageDisciplines" class="mt-8">
                   <p class="text-xs font-semibold uppercase tracking-[0.3em] text-secondaryBrand-300">
-                    Types de stage proposés
+                    Activités proposées
                   </p>
                   <div class="mt-3 flex flex-wrap gap-3">
                   <component

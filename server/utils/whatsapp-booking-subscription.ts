@@ -11,6 +11,12 @@ const CLIMBER_SUBSCRIPTION_OK_TEMPLATE_NAME =
   process.env.WHATSAPP_CLIMBER_SUBSCRIPTION_OK_TEMPLATE_NAME || 'subscription_ok'
 const BOOKING_TEMPLATE_LANGUAGE = process.env.WHATSAPP_OTP_TEMPLATE_LANGUAGE || 'fr'
 
+const buildNamedTextParameter = (parameterName: string, text: string) => ({
+  type: 'text',
+  parameter_name: parameterName,
+  text,
+})
+
 export const formatBookingStageDate = (start?: string | Date | null, end?: string | Date | null) =>
   formatSessionRangeLabel(start, end)
 
@@ -31,30 +37,12 @@ export async function sendGuideNewSubscriptionViaWhatsapp(input: {
       {
         type: 'body',
         parameters: [
-          {
-            type: 'text',
-            text: input.stageTitle,
-          },
-          {
-            type: 'text',
-            text: input.stageLocalization,
-          },
-          {
-            type: 'text',
-            text: input.stageDate,
-          },
-          {
-            type: 'text',
-            text: input.climberFirstName || 'Grimpeur',
-          },
-          {
-            type: 'text',
-            text: input.climberLastName || '-',
-          },
-          {
-            type: 'text',
-            text: normalizePhoneNumber(input.climberPhoneNumber),
-          },
+          buildNamedTextParameter('stage_title', input.stageTitle),
+          buildNamedTextParameter('stage_localization', input.stageLocalization),
+          buildNamedTextParameter('stage_date', input.stageDate),
+          buildNamedTextParameter('firstname', input.climberFirstName || 'Grimpeur'),
+          buildNamedTextParameter('lastname', input.climberLastName || '-'),
+          buildNamedTextParameter('whatsapp_number', normalizePhoneNumber(input.climberPhoneNumber)),
         ],
       },
     ],
@@ -117,30 +105,12 @@ export async function sendGuideClimberStageCancelationViaWhatsapp(input: {
       {
         type: 'body',
         parameters: [
-          {
-            type: 'text',
-            text: input.stageTitle,
-          },
-          {
-            type: 'text',
-            text: input.stageLocalization,
-          },
-          {
-            type: 'text',
-            text: input.stageDate,
-          },
-          {
-            type: 'text',
-            text: input.climberFirstName || 'Grimpeur',
-          },
-          {
-            type: 'text',
-            text: input.climberLastName || '-',
-          },
-          {
-            type: 'text',
-            text: normalizePhoneNumber(input.climberPhoneNumber),
-          },
+          buildNamedTextParameter('stage_title', input.stageTitle),
+          buildNamedTextParameter('stage_localization', input.stageLocalization),
+          buildNamedTextParameter('stage_date', input.stageDate),
+          buildNamedTextParameter('firstname', input.climberFirstName || 'Grimpeur'),
+          buildNamedTextParameter('lastname', input.climberLastName || '-'),
+          buildNamedTextParameter('phone_number', normalizePhoneNumber(input.climberPhoneNumber)),
         ],
       },
     ],
