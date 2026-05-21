@@ -1894,6 +1894,7 @@ const tryResumePendingBooking = async () => {
     payload = JSON.parse(raw)
   } catch (error) {
     window.localStorage.removeItem(pendingBookingKey)
+    window.localStorage.removeItem(pendingBookingIntentKey)
     pendingBookingHandled.value = true
     return
   }
@@ -1910,6 +1911,7 @@ const tryResumePendingBooking = async () => {
   })
 
   window.localStorage.removeItem(pendingBookingKey)
+  window.localStorage.removeItem(pendingBookingIntentKey)
   pendingBookingHandled.value = true
 
   if (!nextIds.length) return

@@ -1,6 +1,7 @@
 // server/api/login.post.ts
 import { z } from 'zod'
 import { prisma } from '../utils/prisma'
+import { isClimberOnboardingComplete } from '../utils/climber-onboarding'
 
 const bodySchema = z.object({
   email: z.string().email(),
@@ -33,13 +34,17 @@ export default defineEventHandler(async (event) => {
     })
   }
 
+  const onboarded = user.role === 'CLIMBER'
+    ? await isClimberOnboardingComplete(db, user)
+    : user.onboarded
+
   await setUserSession(event, {
     user: {
       id: user.id,
       email: user.email,
       firstName: user.firstName,
       lastName: user.lastName,
-      onboarded: user.onboarded,
+      onboarded,
       role: user.role,
       phoneNumber: user.phoneNumber,
       whatsappOptIn: user.whatsappOptIn,

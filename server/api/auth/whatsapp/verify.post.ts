@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import { prisma } from '../../../utils/prisma'
+import { isClimberOnboardingComplete } from '../../../utils/climber-onboarding'
 import { verifyClimberWhatsappOtp } from '../../../utils/whatsapp-climber-otp'
 import {
   buildPhoneLookupVariants,
@@ -36,6 +37,7 @@ export default defineEventHandler(async (event) => {
       code,
       source: source || null,
     })
+    const onboarded = await isClimberOnboardingComplete(await prisma(), result.user)
 
     await setUserSession(event, {
       user: {
@@ -43,7 +45,7 @@ export default defineEventHandler(async (event) => {
         email: result.user.email,
         firstName: result.user.firstName,
         lastName: result.user.lastName,
-        onboarded: result.user.onboarded,
+        onboarded,
         role: result.user.role,
         phoneNumber: result.user.phoneNumber,
         whatsappOptIn: result.user.whatsappOptIn,
@@ -114,13 +116,15 @@ export default defineEventHandler(async (event) => {
     })
   }
 
+  const onboarded = await isClimberOnboardingComplete(db, user)
+
   await setUserSession(event, {
     user: {
       id: user.id,
       email: user.email,
       firstName: user.firstName,
       lastName: user.lastName,
-      onboarded: user.onboarded,
+      onboarded,
       role: user.role,
       phoneNumber: user.phoneNumber,
       whatsappOptIn: user.whatsappOptIn,

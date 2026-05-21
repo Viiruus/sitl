@@ -1,4 +1,5 @@
 import { assertOAuthState, exchangeCodeForTokens, getGoogleUser } from '../../../utils/google-oauth'
+import { isClimberOnboardingComplete } from '../../../utils/climber-onboarding'
 import { prisma } from '../../../utils/prisma'
 
 export default defineEventHandler(async (event) => {
@@ -65,6 +66,7 @@ export default defineEventHandler(async (event) => {
       whatsappOptIn: false,
     },
   })
+  const onboarded = await isClimberOnboardingComplete(db, user)
 
   // Clear any existing session then set the new one
   await setUserSession(event, null as any)
@@ -74,12 +76,12 @@ export default defineEventHandler(async (event) => {
       email: user.email,
       firstName: user.firstName,
       lastName: user.lastName,
-      onboarded: user.onboarded,
+      onboarded,
       role: user.role,
       phoneNumber: user.phoneNumber,
       whatsappOptIn: user.whatsappOptIn,
     },
   })
 
-  return sendRedirect(event, user.onboarded ? '/profil' : '/onboarding')
+  return sendRedirect(event, onboarded ? '/profil' : '/onboarding')
 })

@@ -1,4 +1,6 @@
 // server/routes/auth/facebook.get.ts
+import { isClimberOnboardingComplete } from '../../utils/climber-onboarding'
+
 export default defineOAuthFacebookEventHandler({
   async onSuccess(event, { user, tokens }) {
     // Si tu veux t'assurer qu'on a un email, tu peux vérifier ici
@@ -22,6 +24,7 @@ export default defineOAuthFacebookEventHandler({
         onboarded: false,
       },
     })
+    const onboarded = await isClimberOnboardingComplete(prisma, dbUser)
 
     await setUserSession(event, {
       user: {
@@ -29,7 +32,7 @@ export default defineOAuthFacebookEventHandler({
         email: dbUser.email,
         firstName: dbUser.firstName,
         lastName: dbUser.lastName,
-        onboarded: dbUser.onboarded,
+        onboarded,
         role: dbUser.role,
       },
     })

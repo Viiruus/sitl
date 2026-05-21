@@ -7,6 +7,7 @@ import {
 } from '../utils/whatsapp-booking-subscription'
 import { normalizePhoneNumber } from '../utils/whatsapp-otp'
 import { resolvePublicSiteUrl } from '~~/shared/utils/site-url'
+import { assertClimberOnboardingComplete } from '../utils/climber-onboarding'
 
 export default defineEventHandler(async (event) => {
   const db = await prisma()
@@ -53,6 +54,7 @@ export default defineEventHandler(async (event) => {
       lastName: true,
       phoneNumber: true,
       whatsappOptIn: true,
+      onboarded: true,
     },
   })
 
@@ -62,6 +64,8 @@ export default defineEventHandler(async (event) => {
       statusMessage: "Seuls les grimpeurs peuvent s'inscrire à une date.",
     })
   }
+
+  await assertClimberOnboardingComplete(db, climber)
 
   // Vérifier que la session existe
   const dbSession = await db.aventureSession.findUnique({

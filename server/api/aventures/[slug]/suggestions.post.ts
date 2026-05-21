@@ -4,6 +4,7 @@ import {
   sendGuideStageDatePropositionViaWhatsapp,
 } from '../../../utils/whatsapp-booking-subscription'
 import { normalizePhoneNumber } from '../../../utils/whatsapp-otp'
+import { assertClimberOnboardingComplete } from '../../../utils/climber-onboarding'
 
 export default defineEventHandler(async (event) => {
   const db = await prisma()
@@ -92,6 +93,8 @@ export default defineEventHandler(async (event) => {
       firstName: true,
       lastName: true,
       phoneNumber: true,
+      role: true,
+      onboarded: true,
     },
   })
 
@@ -101,6 +104,8 @@ export default defineEventHandler(async (event) => {
       statusMessage: 'Utilisateur introuvable.',
     })
   }
+
+  await assertClimberOnboardingComplete(db, userExists)
 
   const suggestion = await db.aventureDateSuggestion.create({
     data: {

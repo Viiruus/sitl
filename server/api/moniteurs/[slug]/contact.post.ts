@@ -5,6 +5,7 @@ import {
   sendGuideContactRequestViaWhatsapp,
 } from '../../../utils/whatsapp-guide-contact'
 import { normalizePhoneNumber } from '../../../utils/whatsapp-otp'
+import { assertClimberOnboardingComplete } from '../../../utils/climber-onboarding'
 
 const bodySchema = z.object({
   message: z.string().trim().min(10, 'Décris un peu plus ta demande.').max(2000),
@@ -61,6 +62,8 @@ export default defineEventHandler(async (event) => {
   if (!climber || climber.role === 'GUIDE') {
     throw createError({ statusCode: 403, statusMessage: 'Cette action est réservée aux grimpeurs.' })
   }
+
+  await assertClimberOnboardingComplete(db, climber)
 
   const normalizedClimberPhone = normalizePhoneNumber(climber.phoneNumber || session.user.phoneNumber || '')
   if (!normalizedClimberPhone) {

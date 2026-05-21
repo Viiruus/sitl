@@ -19,6 +19,9 @@ const skipPendingClear = ref(false)
 
 const source = computed(() => (route.query.source as string) || 'direct')
 
+const getFetchErrorMessage = (e: any, fallback: string) =>
+  e?.data?.message || e?.data?.statusMessage || e?.statusMessage || e?.message || fallback
+
 const resetState = () => {
   error.value = null
   success.value = null
@@ -44,6 +47,11 @@ const redirectAfterAuth = async () => {
   await fetch()
   skipPendingClear.value = true
   closeModal()
+
+  if (!user.value?.onboarded) {
+    await router.push('/onboarding')
+    return
+  }
 
   if (typeof window !== 'undefined') {
     const raw = window.localStorage.getItem(pendingBookingKey)
@@ -113,7 +121,7 @@ const requestCode = async () => {
       ? `Code de test : ${res.devCode}`
       : 'Code envoyé sur WhatsApp.'
   } catch (e: any) {
-    error.value = e?.data?.message || 'Une erreur est survenue.'
+    error.value = getFetchErrorMessage(e, 'Une erreur est survenue.')
   }
   sending.value = false
 }
@@ -139,7 +147,7 @@ const verifyCode = async () => {
     })
     await redirectAfterAuth()
   } catch (e: any) {
-    error.value = e?.data?.message || 'Code invalide ou expiré.'
+    error.value = getFetchErrorMessage(e, 'Code invalide ou expiré.')
   }
   loading.value = false
 }

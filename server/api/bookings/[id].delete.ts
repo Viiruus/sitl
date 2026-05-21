@@ -4,6 +4,7 @@ import {
   sendGuideClimberStageCancelationViaWhatsapp,
 } from '../../utils/whatsapp-booking-subscription'
 import { normalizePhoneNumber } from '../../utils/whatsapp-otp'
+import { isClimberOnboardingComplete } from '../../utils/climber-onboarding'
 
 export default defineEventHandler(async (event) => {
   const db = await prisma()
@@ -38,9 +39,10 @@ export default defineEventHandler(async (event) => {
             include: {
               guide: {
                 select: {
-                  id: true,
-                  firstName: true,
-                  lastName: true,
+      id: true,
+      role: true,
+      firstName: true,
+      lastName: true,
                   phoneNumber: true,
                   whatsappOptIn: true,
                 },
@@ -72,6 +74,7 @@ export default defineEventHandler(async (event) => {
       firstName: true,
       lastName: true,
       phoneNumber: true,
+      onboarded: true,
     },
   })
 
@@ -98,8 +101,9 @@ export default defineEventHandler(async (event) => {
   const guide = booking.session?.aventure?.guide
   const normalizedGuidePhone = normalizePhoneNumber(guide?.phoneNumber || '')
   const normalizedClimberPhone = normalizePhoneNumber(climber?.phoneNumber || sessionAuth.user.phoneNumber || '')
+  const canNotifyGuide = await isClimberOnboardingComplete(db, climber)
 
-  if (guide?.whatsappOptIn && normalizedGuidePhone && normalizedClimberPhone) {
+  if (canNotifyGuide && guide?.whatsappOptIn && normalizedGuidePhone && normalizedClimberPhone) {
     const stageTitle = booking.session.aventure.titre
     const stageLocalization = booking.session.aventure.lieuLabel || 'Lieu à confirmer'
     const stageDate = formatBookingStageDate(booking.session.dateDebut, booking.session.dateFin)

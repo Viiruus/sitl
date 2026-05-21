@@ -14,6 +14,8 @@ useSeoMeta({
 const { loggedIn, fetch, user } = useUserSession()
 const router = useRouter()
 const pendingGuideContactPathKey = 'bdk_pending_guide_contact_path'
+const pendingBookingKey = 'bdk_pending_booking'
+const pendingBookingIntentKey = 'bdk_pending_booking_intent'
 
 // Étapes
 const step = ref(1)
@@ -61,6 +63,7 @@ const membershipOffer = getAssociationMembershipOffer()
 const loading = ref(false)
 const error = ref<string | null>(null)
 const success = ref<string | null>(null)
+const showStepOneErrors = ref(false)
 
 // Champs conditionnels : si corde (sport ou grande voie) cochés
 const needsRopeFields = computed(() =>
@@ -87,10 +90,6 @@ const toggleInArray = (arr: string[], value: string) => {
   else arr.splice(idx, 1)
 }
 
-const nextStep = () => {
-  if (step.value < maxStep) step.value++
-}
-
 const prevStep = () => {
   if (step.value > 1) step.value--
 }
@@ -101,6 +100,14 @@ const canGoNext = computed(() => {
   }
   return true
 })
+
+const stepOneErrorMessage = computed(() => {
+  if (canGoNext.value) return null
+  return 'Renseigne ton prénom, ton nom, accepte les CGU et valide l’adhésion à l’association pour continuer.'
+})
+
+const getFetchErrorMessage = (e: any, fallback: string) =>
+  e?.data?.message || e?.data?.statusMessage || e?.statusMessage || e?.message || fallback
 
 const submit = async () => {
   error.value = null
@@ -121,13 +128,43 @@ const submit = async () => {
         await router.push(contactPath.includes('?') ? `${contactPath}&contact=1` : `${contactPath}?contact=1`)
         return
       }
+
+      const bookingRaw = window.localStorage.getItem(pendingBookingKey)
+      const bookingIntentSlug = window.localStorage.getItem(pendingBookingIntentKey)
+      let bookingSlug = bookingIntentSlug
+
+      if (bookingRaw) {
+        try {
+          const payload = JSON.parse(bookingRaw)
+          if (typeof payload?.slug === 'string' && payload.slug) {
+            bookingSlug = payload.slug
+          }
+        } catch {
+          window.localStorage.removeItem(pendingBookingKey)
+        }
+      }
+
+      if (bookingSlug) {
+        await router.push(`/stages-escalade/${bookingSlug}`)
+        return
+      }
     }
     router.push('/profil')
   } catch (e: any) {
-    error.value = e?.data?.message || 'Une erreur est survenue.'
+    error.value = getFetchErrorMessage(e, 'Une erreur est survenue.')
   } finally {
     loading.value = false
   }
+}
+
+const nextStep = () => {
+  if (step.value === 1 && !canGoNext.value) {
+    showStepOneErrors.value = true
+    error.value = stepOneErrorMessage.value
+    return
+  }
+  error.value = null
+  if (step.value < maxStep) step.value++
 }
 </script>
 
@@ -226,6 +263,7 @@ const submit = async () => {
               <input
                 v-model="form.firstName"
                 type="text"
+                required
                 class="w-full border border-brand-700 rounded-lg px-3 py-2 text-sm bg-brand-950/50 text-white placeholder:text-brand-200/50 focus:outline-none focus:ring-2 focus:ring-secondaryBrand-500 focus:border-secondaryBrand-500"
               />
             </div>
@@ -234,6 +272,7 @@ const submit = async () => {
               <input
                 v-model="form.lastName"
                 type="text"
+                required
                 class="w-full border border-brand-700 rounded-lg px-3 py-2 text-sm bg-brand-950/50 text-white placeholder:text-brand-200/50 focus:outline-none focus:ring-2 focus:ring-secondaryBrand-500 focus:border-secondaryBrand-500"
               />
             </div>
@@ -259,6 +298,7 @@ const submit = async () => {
                 id="cgu"
                 v-model="form.cguAccepted"
                 type="checkbox"
+                required
                 class="mt-1 h-4 w-4 rounded border-brand-700 text-secondaryBrand-500 focus:ring-secondaryBrand-500"
               />
               <label for="cgu" class="text-sm text-brand-100/85">
@@ -270,6 +310,7 @@ const submit = async () => {
                 id="association-membership"
                 v-model="form.associationMembershipAccepted"
                 type="checkbox"
+                required
                 class="mt-1 h-4 w-4 rounded border-brand-700 text-secondaryBrand-500 focus:ring-secondaryBrand-500"
               />
               <label for="association-membership" class="text-sm text-brand-100/85">
@@ -692,7 +733,6 @@ const submit = async () => {
               v-if="step < maxStep"
               type="button"
               class="px-4 py-2 rounded-lg bg-secondaryBrand-500 text-brand-950 text-xs font-medium transition disabled:cursor-not-allowed disabled:opacity-50 hover:bg-secondaryBrand-400 disabled:hover:bg-secondaryBrand-500"
-              :disabled="step === 1 && !canGoNext"
               @click="nextStep"
             >
               Étape suivante

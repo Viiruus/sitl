@@ -98,7 +98,7 @@
                   <p class="text-xs font-semibold uppercase tracking-[0.3em] text-secondaryBrand-300">
                     Activités proposées
                   </p>
-                  <div class="mt-3 flex flex-wrap gap-3">
+                  <div class="mt-5 flex flex-wrap gap-3">
                   <component
                     :is="discipline.href ? 'NuxtLink' : 'span'"
                     v-for="discipline in disciplineChips"
@@ -118,7 +118,7 @@
               </div>
             </div>
             <div class="order-1 lg:order-2 -mt-16 lg:mt-0 lg:sticky lg:top-4 lg:justify-self-end">
-              <div class="rounded-3xl bg-white/5 p-6 shadow-2xl shadow-black/40 ring-1 ring-white/10 lg:max-w-[34rem] xl:max-w-[36rem]">
+              <div class="rounded-3xl lg:max-w-[34rem] xl:max-w-[36rem]">
                 <img
                   class="w-full max-h-[44rem] rounded-2xl bg-gray-800 object-cover"
                   :src="moniteurPortrait"
@@ -144,7 +144,7 @@
                     </svg>
                   </NuxtLink>
                 </div>
-                <div class="mt-5 rounded-2xl border border-[#25D366]/25 bg-[#25D366]/10 p-5">
+                <div class="mt-5 rounded-2xl bg-[#25D366]/10 p-5">
                   <p class="text-xs font-semibold uppercase tracking-[0.3em] text-[#8cf1b4]">
                     Coaching & sur-mesure
                   </p>
@@ -153,22 +153,23 @@
                   </p>
                   <button
                     type="button"
-                    class="mt-4 inline-flex items-center justify-center gap-3 self-start rounded-full border border-[#25D366] bg-[#25D366] px-4 py-2.5 text-sm font-semibold text-white shadow-md shadow-[#25D366]/20 transition hover:bg-[#1ebe5d] focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-brand-950"
+                    class="mt-4 inline-flex items-center justify-center gap-3 self-start rounded-[1.35rem] bg-[#25D366] px-5 py-3 text-white transition hover:bg-[#22c95e] focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-brand-950"
                     @click="handleGuideContactClick"
                   >
-                    <span class="inline-flex h-7 w-7 items-center justify-center rounded-full bg-white text-[#25D366]">
-                      <svg class="h-4 w-4" viewBox="0 0 32 32" fill="currentColor" aria-hidden="true">
-                        <path
-                          d="M16 3C9.4 3 4 8.2 4 14.7c0 2.4.7 4.6 2 6.5L4 29l8-1.8c1.3.4 2.7.6 4 .6 6.6 0 12-5.2 12-11.7C28 8.2 22.6 3 16 3Zm0 2c5.5 0 10 4.3 10 9.7S21.5 24.4 16 24.4c-1.3 0-2.5-.2-3.7-.7l-.8-.3-.8.2-3.9.9 1.1-3.3.2-.7-.5-.6c-1.1-1.6-1.6-3.4-1.6-5.3C6 9.3 10.5 5 16 5Zm5.2 10.9c-.3-.1-1.8-.9-2-1-.3-.1-.5-.1-.7.1-.2.3-.8 1-.9 1.1-.2.2-.3.2-.6.1-.3-.1-1.2-.4-2.2-1.4-.8-.8-1.4-1.7-1.6-2-.2-.3 0-.4.1-.6.1-.2.3-.3.4-.5.1-.1.2-.3.3-.5.1-.2 0-.4 0-.5 0-.1-.7-1.7-1-2.3-.3-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.3-.3.3-1 1-1 2.4s1.1 2.8 1.2 3c.1.2 2.1 3.3 5 4.5.7.3 1.2.5 1.6.6.7.2 1.4.2 1.9.1.6-.1 1.8-.7 2-1.3.2-.6.2-1.2.2-1.3 0-.1-.2-.1-.5-.2Z"
-                        />
-                      </svg>
+                    <img
+                      src="~/assets/images/logo-whatsapp.png"
+                      alt=""
+                      class="h-8 w-8 shrink-0 object-contain"
+                      aria-hidden="true"
+                    />
+                    <span class="text-base font-semibold leading-none tracking-[-0.01em]">
+                      Contacter {{ moniteurContactFirstName }}
                     </span>
-                    <span>Parler de ton projet sur WhatsApp</span>
                   </button>
                 </div>
                 <div
                   v-if="hasGoogleReviewCard"
-                  class="mt-4 rounded-2xl border border-white/10 bg-brand-900/60 p-5"
+                  class="mt-4 rounded-2xl bg-brand-900/60 p-5"
                 >
                   <p class="text-xs font-semibold uppercase tracking-[0.3em] text-secondaryBrand-300">
                     Avis Google

@@ -2,13 +2,14 @@
 import { z } from 'zod'
 import { prisma } from '../utils/prisma'
 import { recordAssociationMembership } from '../utils/association-membership'
+import { hasCurrentAssociationMembership } from '../utils/climber-onboarding'
 import { sendTemplateViaWhatsapp } from '../utils/whatsapp-otp'
 
 // Schéma de validation/typage des données reçues du front
 const onboardingSchema = z.object({
   // Infos perso
-  firstName: z.string().trim().min(1).optional().or(z.literal('')),
-  lastName: z.string().trim().min(1).optional().or(z.literal('')),
+  firstName: z.string().trim().min(1, 'Prénom requis').max(100),
+  lastName: z.string().trim().min(1, 'Nom requis').max(100),
   birthDate: z.string().optional().or(z.literal('')), // string simple
   department: z.string().optional().or(z.literal('')),
   phoneNumber: z.string().trim().max(30).optional().or(z.literal('')),
@@ -100,12 +101,14 @@ export default defineEventHandler(async (event) => {
     throw createValidationError(parsedBody.error.issues[0]?.message || 'Données invalides.')
   }
   const body = parsedBody.data
+  const currentAssociationMembership = await hasCurrentAssociationMembership(db, currentUser.id)
+  const needsInitialOnboardingConsents = !currentUser.onboarded
+  const needsAssociationMembership = !currentAssociationMembership
 
-  const needsRequiredConsents = !currentUser.onboarded
-  if (needsRequiredConsents && body.cguAccepted !== true) {
+  if (needsInitialOnboardingConsents && body.cguAccepted !== true) {
     throw createValidationError('Merci de valider les CGU.')
   }
-  if (needsRequiredConsents && body.associationMembershipAccepted !== true) {
+  if (needsAssociationMembership && body.associationMembershipAccepted !== true) {
     throw createValidationError("Merci de valider l'adhésion à l'association.")
   }
 
@@ -113,8 +116,8 @@ export default defineEventHandler(async (event) => {
   const user = await db.user.update({
     where: { id: Number(session.user.id) }, // au cas où l'id soit sérialisé en string
     data: {
-      firstName: body.firstName || null,
-      lastName: body.lastName || null,
+      firstName: body.firstName,
+      lastName: body.lastName,
       birthDate: body.birthDate || null,
       department: body.department || null,
       phoneNumber: body.phoneNumber?.trim?.() || currentUser.phoneNumber,
@@ -148,7 +151,7 @@ export default defineEventHandler(async (event) => {
     accepted: body.associationMembershipAccepted,
   })
 
-  if (user.phoneNumber && user.whatsappOptIn) {
+  if (!currentUser.onboarded && user.phoneNumber && user.whatsappOptIn) {
     const result = await sendTemplateViaWhatsapp({
       phone: user.phoneNumber,
       templateName: process.env.WHATSAPP_CLIMBER_WELCOME_TEMPLATE_NAME || 'welcome_climber',
