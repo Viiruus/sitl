@@ -119,6 +119,7 @@ export default defineEventHandler(async (event) => {
       guideBaseLocation: a.guide?.guideProfile?.baseLocation || null,
       guideGender: a.guide?.guideProfile?.gender || null,
       hasSessions: a.sessions.length > 0,
+      sessions: serializeSessions(a.sessions),
       nextSession: findNextSession(a.sessions),
       estComplet: isStageSoldOut(a.sessions, a.placesMax),
     })),
@@ -180,6 +181,7 @@ const selectHomepageAventures = (aventures: any[], limit: number) => {
         guideDepartment: a.guide?.department || null,
         guideBaseLocation: a.guide?.guideProfile?.baseLocation || null,
         guideGender: a.guide?.guideProfile?.gender || null,
+        sessions: serializeSessions(a.sessions),
         nextSession,
         nextSessionDate,
         estComplet: isStageSoldOut(a.sessions, a.placesMax),
@@ -214,6 +216,15 @@ const findNextSession = (sessions: any[]) => {
   delete best._ts;
   return best;
 };
+
+const serializeSessions = (sessions: any[]) =>
+  (sessions ?? []).map((session: any) => ({
+    id: session.id,
+    dateDebut: session.dateDebut,
+    dateFin: session.dateFin,
+    statut: session.statut,
+    placesReservees: session.placesReservees,
+  }));
 
 const sanitizePublicImageFieldSet = (
   url: unknown,

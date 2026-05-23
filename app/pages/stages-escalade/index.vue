@@ -32,7 +32,9 @@ useSeoMeta({
 })
 
 const selectedDiscipline = ref<string | null>(null)
-const durationFilter = ref<'all' | 'single' | 'multi'>('all')
+const selectedRegion = ref<string | null>(null)
+const dateRangeStart = ref('')
+const dateRangeEnd = ref('')
 const activeView = ref<'list' | 'map'>('list')
 const disciplineQueryAliases: Record<string, string> = {
   TERRAIN_AVENTURE: 'TRAD',
@@ -56,6 +58,50 @@ const formatDisciplineLabel = (value: string) => {
   return disciplineLabels[value] ?? value?.replace(/_/g, ' ') ?? 'Autre'
 }
 
+type RegionBounds = {
+  value: string
+  label: string
+  minLat: number
+  maxLat: number
+  minLng: number
+  maxLng: number
+}
+
+const regionBounds: RegionBounds[] = [
+  { value: 'corse', label: 'Corse', minLat: 41.3, maxLat: 43.1, minLng: 8.4, maxLng: 9.7 },
+  { value: 'bretagne', label: 'Bretagne', minLat: 47.2, maxLat: 49.2, minLng: -5.3, maxLng: -1.0 },
+  { value: 'normandie', label: 'Normandie', minLat: 48.1, maxLat: 50.2, minLng: -1.9, maxLng: 1.9 },
+  { value: 'hauts-de-france', label: 'Hauts-de-France', minLat: 49.5, maxLat: 51.2, minLng: 1.2, maxLng: 4.4 },
+  { value: 'ile-de-france', label: 'Île-de-France', minLat: 48.0, maxLat: 49.3, minLng: 1.4, maxLng: 3.7 },
+  { value: 'grand-est', label: 'Grand Est', minLat: 47.4, maxLat: 50.3, minLng: 3.4, maxLng: 8.4 },
+  { value: 'pays-de-la-loire', label: 'Pays de la Loire', minLat: 46.2, maxLat: 48.8, minLng: -2.8, maxLng: 0.9 },
+  { value: 'centre-val-de-loire', label: 'Centre-Val de Loire', minLat: 46.3, maxLat: 48.9, minLng: 0.0, maxLng: 3.2 },
+  { value: 'bourgogne-franche-comte', label: 'Bourgogne-Franche-Comté', minLat: 46.1, maxLat: 48.7, minLng: 2.8, maxLng: 7.2 },
+  { value: 'nouvelle-aquitaine', label: 'Nouvelle-Aquitaine', minLat: 42.7, maxLat: 47.3, minLng: -1.8, maxLng: 2.6 },
+  { value: 'occitanie', label: 'Occitanie', minLat: 42.3, maxLat: 45.1, minLng: -0.4, maxLng: 4.9 },
+  { value: 'provence-alpes-cote-d-azur', label: 'Provence-Alpes-Côte d’Azur', minLat: 43.0, maxLat: 45.2, minLng: 4.2, maxLng: 7.8 },
+  { value: 'auvergne-rhone-alpes', label: 'Auvergne-Rhône-Alpes', minLat: 44.0, maxLat: 46.9, minLng: 3.6, maxLng: 7.3 },
+]
+
+const getRegionForCoordinates = (latitude?: number | null, longitude?: number | null) => {
+  if (
+    typeof latitude !== 'number' ||
+    typeof longitude !== 'number' ||
+    !Number.isFinite(latitude) ||
+    !Number.isFinite(longitude)
+  ) {
+    return null
+  }
+
+  return regionBounds.find(
+    (region) =>
+      latitude >= region.minLat &&
+      latitude <= region.maxLat &&
+      longitude >= region.minLng &&
+      longitude <= region.maxLng,
+  ) ?? null
+}
+
 const publishedAventures = computed(() =>
   (data.value?.aventures ?? []).filter((aventure: any) => aventure?.estPublie === true),
 )
@@ -74,6 +120,25 @@ const disciplineOptions = computed(() => {
     return acc
   }, [])
   return options
+})
+
+const regionOptions = computed(() => {
+  const seen = new Set<string>()
+
+  return publishedAventures.value.reduce<{ value: string; label: string }[]>((acc, aventure: any) => {
+    const region = getRegionForCoordinates(aventure.latitude, aventure.longitude)
+    if (region && !seen.has(region.value)) {
+      seen.add(region.value)
+      acc.push({ value: region.value, label: region.label })
+    }
+    return acc
+  }, []).sort((a, b) => a.label.localeCompare(b.label, 'fr'))
+})
+
+watch(regionOptions, (options) => {
+  if (selectedRegion.value && !options.some((option) => option.value === selectedRegion.value)) {
+    selectedRegion.value = null
+  }
 })
 
 const disciplineIconMap: Record<string, string> = {
@@ -111,6 +176,47 @@ const imageForDiscipline = (value?: string | null) => {
 const formatSessionRange = (session: any) =>
   formatSessionRangeLabel(session?.dateDebut, session?.dateFin)
 
+const parseDateInput = (value: string, endOfDay = false) => {
+  if (!value) return null
+  const date = new Date(`${value}T${endOfDay ? '23:59:59.999' : '00:00:00.000'}`)
+  return Number.isNaN(date.getTime()) ? null : date
+}
+
+const selectedDateStart = computed(() => parseDateInput(dateRangeStart.value))
+const selectedDateEnd = computed(() => parseDateInput(dateRangeEnd.value, true))
+
+const hasDateRangeFilter = computed(() => Boolean(selectedDateStart.value || selectedDateEnd.value))
+
+const resetDateRange = () => {
+  dateRangeStart.value = ''
+  dateRangeEnd.value = ''
+}
+
+const getUpcomingSessions = (aventure: any) => {
+  if (Array.isArray(aventure?.sessions) && aventure.sessions.length) return aventure.sessions
+  return aventure?.nextSession ? [aventure.nextSession] : []
+}
+
+const sessionOverlapsSelectedDateRange = (session: any) => {
+  if (!hasDateRangeFilter.value) return true
+  if (!session?.dateDebut) return false
+
+  const sessionStart = new Date(session.dateDebut)
+  const sessionEnd = session?.dateFin ? new Date(session.dateFin) : sessionStart
+  if (Number.isNaN(sessionStart.getTime()) || Number.isNaN(sessionEnd.getTime())) return false
+
+  const rangeStart = selectedDateStart.value
+  const rangeEnd = selectedDateEnd.value
+  if (rangeStart && sessionEnd < rangeStart) return false
+  if (rangeEnd && sessionStart > rangeEnd) return false
+  return true
+}
+
+const getDisplaySession = (aventure: any) => {
+  if (!hasDateRangeFilter.value) return aventure?.nextSession ?? null
+  return getUpcomingSessions(aventure).find(sessionOverlapsSelectedDateRange) ?? aventure?.nextSession ?? null
+}
+
 const filteredAventures = computed(() => {
   const today = new Date()
   today.setHours(0, 0, 0, 0)
@@ -134,12 +240,16 @@ const filteredAventures = computed(() => {
     )
   }
 
-  if (durationFilter.value !== 'all') {
+  if (hasDateRangeFilter.value) {
+    adventures = adventures.filter((aventure: any) =>
+      getUpcomingSessions(aventure).some(sessionOverlapsSelectedDateRange),
+    )
+  }
+
+  if (selectedRegion.value) {
     adventures = adventures.filter((aventure: any) => {
-      const days = Number(aventure?.jours || 0)
-      if (!Number.isFinite(days) || days < 0.5) return false
-      if (durationFilter.value === 'single') return days <= 1
-      return days > 1
+      const region = getRegionForCoordinates(aventure.latitude, aventure.longitude)
+      return region?.value === selectedRegion.value
     })
   }
 
@@ -201,7 +311,7 @@ const mapStages = computed(() =>
       latitude: stage.latitude,
       longitude: stage.longitude,
       locationLabel: stage.lieuLabel,
-      sessionLabel: stage.nextSession ? formatSessionRange(stage.nextSession) : 'Date à confirmer',
+      sessionLabel: getDisplaySession(stage) ? formatSessionRange(getDisplaySession(stage)) : 'Date à confirmer',
       priceLabel: formatMapPrice(stage.prixParPersonne),
       url: `/stages-escalade/${stage.slug}`,
     })),
@@ -271,12 +381,38 @@ const mapLegend = [
       </div>
 
       <div v-else class="space-y-6">
+        <div class="flex flex-wrap items-center justify-between gap-4 border-b border-white/10 pb-5">
+          <p class="text-xs uppercase tracking-[0.3em] text-brand-200/70">Mode d’affichage</p>
+          <div class="inline-flex rounded-2xl border border-white/15 bg-white/5 p-1">
+            <button
+              type="button"
+              class="rounded-xl px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.2em] transition"
+              :class="activeView === 'list'
+                ? 'bg-secondaryBrand-500 text-brand-950'
+                : 'text-brand-100/75 hover:text-white'"
+              @click="activeView = 'list'"
+            >
+              Liste
+            </button>
+            <button
+              type="button"
+              class="rounded-xl px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.2em] transition"
+              :class="activeView === 'map'
+                ? 'bg-secondaryBrand-500 text-brand-950'
+                : 'text-brand-100/75 hover:text-white'"
+              @click="activeView = 'map'"
+            >
+              Carte
+            </button>
+          </div>
+        </div>
+
         <section class="mb-6 border-b border-white/10 pb-6">
           <div class="rounded-2xl border border-white/15 bg-brand-900/50 p-3 shadow-lg shadow-black/30 backdrop-blur">
-            <div class="grid gap-3 xl:grid-cols-6 xl:items-start">
-              <div class="space-y-2 xl:col-span-3">
+            <div class="grid gap-4 lg:grid-cols-3 lg:items-stretch">
+              <div class="flex h-full flex-col gap-3 rounded-xl border border-white/10 bg-brand-950/35 p-4">
                 <div class="flex flex-wrap items-center justify-between gap-2">
-                  <p class="text-xs uppercase tracking-[0.3em] text-brand-200/70">Discipline</p>
+                  <p class="text-xs uppercase tracking-[0.3em] text-brand-200/70">Activité</p>
                   <button
                     v-if="selectedDiscipline"
                     type="button"
@@ -310,70 +446,71 @@ const mapLegend = [
                 </div>
               </div>
 
-              <div class="space-y-2 xl:col-span-2">
-                <p class="text-xs uppercase tracking-[0.3em] text-brand-200/70">Durée</p>
-                <div class="inline-flex rounded-2xl border border-white/15 bg-white/5 p-1">
+              <div class="flex h-full flex-col gap-3 rounded-xl border border-white/10 bg-brand-950/35 p-4">
+                <div class="flex flex-wrap items-center justify-between gap-2">
+                  <p class="text-xs uppercase tracking-[0.3em] text-brand-200/70">Dates</p>
                   <button
+                    v-if="hasDateRangeFilter"
                     type="button"
-                    class="rounded-xl px-2.5 py-1.5 text-[11px] font-semibold uppercase tracking-[0.2em] transition"
-                    :class="durationFilter === 'all'
-                      ? 'bg-secondaryBrand-500 text-brand-950'
-                      : 'text-brand-100/75 hover:text-white'"
-                    @click="durationFilter = 'all'"
+                    class="rounded-full border border-secondaryBrand-300 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.3em] text-secondaryBrand-100 transition hover:bg-secondaryBrand-500/20"
+                    @click="resetDateRange"
                   >
-                    Tous
+                    Réinitialiser
                   </button>
-                  <button
-                    type="button"
-                    class="rounded-xl px-2.5 py-1.5 text-[11px] font-semibold uppercase tracking-[0.2em] transition"
-                    :class="durationFilter === 'single'
-                      ? 'bg-secondaryBrand-500 text-brand-950'
-                      : 'text-brand-100/75 hover:text-white'"
-                    @click="durationFilter = 'single'"
-                  >
-                    1 jour
-                  </button>
-                  <button
-                    type="button"
-                    class="rounded-xl px-2.5 py-1.5 text-[11px] font-semibold uppercase tracking-[0.2em] transition"
-                    :class="durationFilter === 'multi'
-                      ? 'bg-secondaryBrand-500 text-brand-950'
-                      : 'text-brand-100/75 hover:text-white'"
-                    @click="durationFilter = 'multi'"
-                  >
-                    Plusieurs jours
-                  </button>
+                </div>
+                <div class="grid gap-2 sm:grid-cols-2 lg:grid-cols-1 2xl:grid-cols-2">
+                  <label class="space-y-1">
+                    <span class="block text-[11px] font-semibold uppercase tracking-[0.2em] text-brand-100/70">Début</span>
+                    <input
+                      v-model="dateRangeStart"
+                      type="date"
+                      class="date-filter-input w-full rounded-xl border border-white/15 bg-brand-950/70 px-3 py-2 text-sm text-white outline-none transition focus:border-secondaryBrand-300"
+                    />
+                  </label>
+                  <label class="space-y-1">
+                    <span class="block text-[11px] font-semibold uppercase tracking-[0.2em] text-brand-100/70">Fin</span>
+                    <input
+                      v-model="dateRangeEnd"
+                      type="date"
+                      :min="dateRangeStart || undefined"
+                      class="date-filter-input w-full rounded-xl border border-white/15 bg-brand-950/70 px-3 py-2 text-sm text-white outline-none transition focus:border-secondaryBrand-300"
+                    />
+                  </label>
                 </div>
               </div>
 
-              <div class="space-y-2 xl:col-span-1">
-                <p class="text-xs uppercase tracking-[0.3em] text-brand-200/70">Affichage</p>
-                <div class="inline-flex rounded-2xl border border-white/15 bg-white/5 p-1">
+              <div class="flex h-full flex-col gap-3 rounded-xl border border-white/10 bg-brand-950/35 p-4">
+                <div class="flex flex-wrap items-center justify-between gap-2">
+                  <p class="text-xs uppercase tracking-[0.3em] text-brand-200/70">Région</p>
                   <button
+                    v-if="selectedRegion"
                     type="button"
-                    class="rounded-xl px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.2em] transition"
-                    :class="activeView === 'list'
-                      ? 'bg-secondaryBrand-500 text-brand-950'
-                      : 'text-brand-100/75 hover:text-white'"
-                    @click="activeView = 'list'"
+                    class="rounded-full border border-secondaryBrand-300 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.3em] text-secondaryBrand-100 transition hover:bg-secondaryBrand-500/20"
+                    @click="selectedRegion = null"
                   >
-                    Liste
-                  </button>
-                  <button
-                    type="button"
-                    class="rounded-xl px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.2em] transition"
-                    :class="activeView === 'map'
-                      ? 'bg-secondaryBrand-500 text-brand-950'
-                      : 'text-brand-100/75 hover:text-white'"
-                    @click="activeView = 'map'"
-                  >
-                    Carte
+                    Réinitialiser
                   </button>
                 </div>
+                <select
+                  v-model="selectedRegion"
+                  class="w-full rounded-xl border border-white/15 bg-brand-950/70 px-3 py-2 text-sm text-white outline-none transition focus:border-secondaryBrand-300"
+                >
+                  <option :value="null">Toutes les régions</option>
+                  <option
+                    v-for="option in regionOptions"
+                    :key="option.value"
+                    :value="option.value"
+                  >
+                    {{ option.label }}
+                  </option>
+                </select>
+                <p v-if="!regionOptions.length" class="text-xs text-brand-200/70">
+                  Les régions apparaîtront dès que les stages auront des coordonnées GPS.
+                </p>
               </div>
             </div>
             <p v-if="!disciplineOptions.length" class="mt-3 text-xs text-brand-200/70">
-              Les disciplines apparaîtront dès que des aventures seront publiées.
+              Les activités apparaîtront dès que des aventures seront publiées.
             </p>
           </div>
         </section>
@@ -471,7 +608,7 @@ const mapLegend = [
                       <rect x="3" y="4" width="18" height="16" rx="2" />
                       <path d="M16 2v4M8 2v4M3 10h18" />
                     </svg>
-                    {{ a.nextSession ? formatSessionRange(a.nextSession) : 'Date à confirmer' }}
+                    {{ getDisplaySession(a) ? formatSessionRange(getDisplaySession(a)) : 'Date à confirmer' }}
                   </span>
                   <span class="inline-flex items-center gap-2 font-semibold text-xs text-white">
                     <svg class="h-4 w-4 text-secondaryBrand-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
@@ -533,6 +670,11 @@ const mapLegend = [
 :deep(.dp-no-time-toggle .dp--tp-wrap .dp__button) {
   display: none !important;
 }
+:deep(.date-filter-input::-webkit-calendar-picker-indicator) {
+  cursor: pointer;
+  filter: invert(1);
+  opacity: 0.9;
+}
 </style>
 
 <style>
@@ -540,5 +682,10 @@ const mapLegend = [
 :global([data-test-id="open-time-picker-btn"]),
 :global(.dp--tp-wrap .dp__button) {
   display: none !important;
+}
+:global(.date-filter-input::-webkit-calendar-picker-indicator) {
+  cursor: pointer;
+  filter: invert(1);
+  opacity: 0.9;
 }
 </style>
