@@ -154,12 +154,14 @@
 
   const bookingStatusLabel = (booking: any) => {
     if (booking?.statut === 'ANNULEE') return 'Annulée'
+    if (booking?.statut === 'EN_ATTENTE') return 'Validée'
     if (booking?.statut === 'CONFIRMEE') return 'Confirmée'
     return 'En attente'
   }
 
   const bookingStatusToneClass = (booking: any) => {
     if (booking?.statut === 'ANNULEE') return 'bg-red-500/20 text-red-200'
+    if (booking?.statut === 'EN_ATTENTE') return 'bg-emerald-500/20 text-emerald-200'
     if (booking?.statut === 'CONFIRMEE') return 'bg-emerald-500/20 text-emerald-200'
     return 'bg-amber-500/20 text-amber-200'
   }
@@ -488,7 +490,7 @@
                   </div>
 
                     <div class="text-sm text-brand-100/85 space-y-1">
-                      <p>Demandé le <span class="font-semibold text-white">{{ new Date(booking.createdAt).toLocaleDateString('fr-FR') }}</span></p>
+                      <p>Inscrit le <span class="font-semibold text-white">{{ new Date(booking.createdAt).toLocaleDateString('fr-FR') }}</span></p>
                     </div>
 
                   <div class="mt-auto flex items-center gap-2">
