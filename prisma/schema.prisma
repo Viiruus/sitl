@@ -67,6 +67,17 @@ enum GuideGender {
   female
 }
 
+enum StageNotificationSubscriptionKind {
+  STAGE_LISTING
+  GUIDE_STAGE
+}
+
+enum StageNotificationDeliveryStatus {
+  SENT
+  FAILED
+  SKIPPED
+}
+
 model User {
   id Int @id @default(autoincrement())
 
@@ -153,6 +164,8 @@ model User {
   whatsappOtpChallenges WhatsAppOtpChallenge[]
   guideContactRequestsSent GuideContactRequest[] @relation("GuideContactRequestsSent")
   guideContactRequestsReceived GuideContactRequest[] @relation("GuideContactRequestsReceived")
+  stageNotificationSubscriptions StageNotificationSubscription[] @relation("StageNotificationSubscriptions")
+  guideStageNotificationSubscriptions StageNotificationSubscription[] @relation("GuideStageNotificationSubscriptions")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -327,6 +340,7 @@ model Aventure {
   coverImageVariants Json?
   images             AventureImage[]
   dateSuggestions    AventureDateSuggestion[]
+  stageNotificationDeliveries StageNotificationDelivery[]
 
   // ✅ Programme structuré
   programmeJours AventureJour[]
@@ -339,6 +353,63 @@ model Aventure {
   estPublie Boolean  @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model StageNotificationSubscription {
+  id Int @id @default(autoincrement())
+
+  userId Int
+  user   User @relation("StageNotificationSubscriptions", fields: [userId], references: [id], onDelete: Cascade)
+
+  kind StageNotificationSubscriptionKind @default(STAGE_LISTING)
+
+  discipline AventureDiscipline?
+  region     String?
+  dateStart  DateTime?
+  dateEnd    DateTime?
+
+  guideId Int?
+  guide   User? @relation("GuideStageNotificationSubscriptions", fields: [guideId], references: [id], onDelete: Cascade)
+
+  active Boolean @default(true)
+  lastNotifiedAt DateTime?
+
+  deliveries StageNotificationDelivery[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([kind, active])
+  @@index([userId, active])
+  @@index([guideId, active])
+}
+
+model StageNotificationDelivery {
+  id Int @id @default(autoincrement())
+
+  subscriptionId Int
+  subscription   StageNotificationSubscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+
+  aventureId Int
+  aventure   Aventure @relation(fields: [aventureId], references: [id], onDelete: Cascade)
+
+  sessionId Int?
+  session   AventureSession? @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  deliveryKey String @unique
+
+  status StageNotificationDeliveryStatus
+  templateName String
+  messageId String? @unique
+  failureReason String?
+  sentAt DateTime?
+  lastPayload Json?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([aventureId])
+  @@index([sessionId])
 }
 
 model AventureImage {
@@ -372,6 +443,7 @@ model AventureSession {
   prixSpecifique Int?
 
   reservations Booking[]
+  stageNotificationDeliveries StageNotificationDelivery[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

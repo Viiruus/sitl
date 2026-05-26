@@ -850,6 +850,9 @@ const uploadGalleryImage = async (event: Event, index: number) => {
             <p class="text-xs text-brand-200/70">
               Colle l’URL d’une photo ou téléverse une image JPG/PNG/WebP (max 4,5 Mo). Les variantes optimisées sont générées automatiquement.
             </p>
+            <p class="rounded-xl border border-amber-300/20 bg-amber-500/10 px-3 py-2 text-xs text-amber-100">
+              Assure-toi d’utiliser une photo dont tu détiens les droits, ou une photo libre de droits autorisée pour un usage commercial.
+            </p>
             <div v-if="isClient" class="space-y-2">
               <label class="inline-flex cursor-pointer items-center gap-3 rounded-full border border-white/20 px-4 py-2 text-sm font-semibold text-white/80 transition hover:bg-white/5">
                 <span v-if="!uploadingCover">Téléverser une image</span>
@@ -1149,6 +1152,9 @@ const uploadGalleryImage = async (event: Event, index: number) => {
             + Ajouter une photo
           </button>
         </div>
+        <p class="rounded-xl border border-amber-300/20 bg-amber-500/10 px-3 py-2 text-xs text-amber-100">
+          Ajoute uniquement des photos dont tu détiens les droits, ou des photos libres de droits autorisées pour un usage commercial.
+        </p>
 
         <div class="space-y-4">
           <div

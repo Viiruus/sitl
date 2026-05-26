@@ -327,6 +327,9 @@ const logout = async () => {
                 <p class="text-xs text-brand-200/70">
                   Tu peux coller l’URL d’une photo ou téléverser ton portrait (JPG/PNG/WebP, max 4 Mo).
                 </p>
+                <p class="rounded-xl border border-amber-300/20 bg-amber-500/10 px-3 py-2 text-xs text-amber-100">
+                  Assure-toi d’utiliser une photo dont tu détiens les droits, ou une photo libre de droits autorisée pour un usage commercial.
+                </p>
                 <div v-if="isClient" class="space-y-2">
                   <label class="inline-flex items-center gap-3 rounded-full border border-white/20 px-4 py-2 text-sm font-semibold text-white/80 transition hover:bg-white/5 cursor-pointer">
                     <span v-if="!uploadingPhoto">Téléverser une photo</span>

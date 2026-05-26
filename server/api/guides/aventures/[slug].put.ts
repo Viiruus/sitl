@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import { prisma } from '../../../utils/prisma'
+import { notifyStageNotificationSubscribers } from '../../../utils/stage-notifications'
 import { isHalfDayStep } from '~~/shared/utils/aventure-schedule'
 
 const stringListSchema = z.array(z.string().trim().min(1)).optional()
@@ -348,6 +349,20 @@ export default defineEventHandler(async (event) => {
 
     return updatedAventure
   })
+
+  if (updated.estPublie && !existing.estPublie) {
+    const runtimeConfig = useRuntimeConfig(event)
+    await notifyStageNotificationSubscribers({
+      db,
+      aventureId: existing.id,
+      publicUrl: runtimeConfig.public.publicUrl,
+    }).catch((error) => {
+      console.error('[stage-notifications] Publish notification failure', {
+        aventureId: existing.id,
+        error,
+      })
+    })
+  }
 
   return { slug: updated.slug, estPublie: updated.estPublie }
 })

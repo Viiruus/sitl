@@ -3,9 +3,13 @@ import { buildStoredSrcset, resolveStoredImageSrc } from '~/composables/useStore
 import { formatDurationDays, formatSessionRangeLabel } from '~~/shared/utils/aventure-schedule'
 import { getGuideRoleLabel } from '~~/shared/utils/guide-gender'
 import { resolvePublicSiteUrl } from '~~/shared/utils/site-url'
+import { getStageRegionForCoordinates } from '~~/shared/utils/stage-region'
 const route = useRoute()
+const router = useRouter()
 const runtimeConfig = useRuntimeConfig()
 const { data, pending, error } = await useFetch('/api/aventures')
+const { loggedIn, user, fetch: fetchUserSession } = useUserSession()
+const { openModal } = useAuthModal()
 
 const canonicalUrl = computed(() => {
   try {
@@ -36,6 +40,10 @@ const selectedRegion = ref<string | null>(null)
 const dateRangeStart = ref('')
 const dateRangeEnd = ref('')
 const activeView = ref<'list' | 'map'>('list')
+const notificationLoading = ref(false)
+const notificationError = ref<string | null>(null)
+const notificationSuccess = ref<string | null>(null)
+const pendingStageNotificationKey = 'bdk_pending_stage_notification'
 const disciplineQueryAliases: Record<string, string> = {
   TERRAIN_AVENTURE: 'TRAD',
 }
@@ -56,50 +64,6 @@ const disciplineLabels: Record<string, string> = {
 
 const formatDisciplineLabel = (value: string) => {
   return disciplineLabels[value] ?? value?.replace(/_/g, ' ') ?? 'Autre'
-}
-
-type RegionBounds = {
-  value: string
-  label: string
-  minLat: number
-  maxLat: number
-  minLng: number
-  maxLng: number
-}
-
-const regionBounds: RegionBounds[] = [
-  { value: 'corse', label: 'Corse', minLat: 41.3, maxLat: 43.1, minLng: 8.4, maxLng: 9.7 },
-  { value: 'bretagne', label: 'Bretagne', minLat: 47.2, maxLat: 49.2, minLng: -5.3, maxLng: -1.0 },
-  { value: 'normandie', label: 'Normandie', minLat: 48.1, maxLat: 50.2, minLng: -1.9, maxLng: 1.9 },
-  { value: 'hauts-de-france', label: 'Hauts-de-France', minLat: 49.5, maxLat: 51.2, minLng: 1.2, maxLng: 4.4 },
-  { value: 'ile-de-france', label: 'Île-de-France', minLat: 48.0, maxLat: 49.3, minLng: 1.4, maxLng: 3.7 },
-  { value: 'grand-est', label: 'Grand Est', minLat: 47.4, maxLat: 50.3, minLng: 3.4, maxLng: 8.4 },
-  { value: 'pays-de-la-loire', label: 'Pays de la Loire', minLat: 46.2, maxLat: 48.8, minLng: -2.8, maxLng: 0.9 },
-  { value: 'centre-val-de-loire', label: 'Centre-Val de Loire', minLat: 46.3, maxLat: 48.9, minLng: 0.0, maxLng: 3.2 },
-  { value: 'bourgogne-franche-comte', label: 'Bourgogne-Franche-Comté', minLat: 46.1, maxLat: 48.7, minLng: 2.8, maxLng: 7.2 },
-  { value: 'nouvelle-aquitaine', label: 'Nouvelle-Aquitaine', minLat: 42.7, maxLat: 47.3, minLng: -1.8, maxLng: 2.6 },
-  { value: 'occitanie', label: 'Occitanie', minLat: 42.3, maxLat: 45.1, minLng: -0.4, maxLng: 4.9 },
-  { value: 'provence-alpes-cote-d-azur', label: 'Provence-Alpes-Côte d’Azur', minLat: 43.0, maxLat: 45.2, minLng: 4.2, maxLng: 7.8 },
-  { value: 'auvergne-rhone-alpes', label: 'Auvergne-Rhône-Alpes', minLat: 44.0, maxLat: 46.9, minLng: 3.6, maxLng: 7.3 },
-]
-
-const getRegionForCoordinates = (latitude?: number | null, longitude?: number | null) => {
-  if (
-    typeof latitude !== 'number' ||
-    typeof longitude !== 'number' ||
-    !Number.isFinite(latitude) ||
-    !Number.isFinite(longitude)
-  ) {
-    return null
-  }
-
-  return regionBounds.find(
-    (region) =>
-      latitude >= region.minLat &&
-      latitude <= region.maxLat &&
-      longitude >= region.minLng &&
-      longitude <= region.maxLng,
-  ) ?? null
 }
 
 const publishedAventures = computed(() =>
@@ -126,7 +90,7 @@ const regionOptions = computed(() => {
   const seen = new Set<string>()
 
   return publishedAventures.value.reduce<{ value: string; label: string }[]>((acc, aventure: any) => {
-    const region = getRegionForCoordinates(aventure.latitude, aventure.longitude)
+    const region = getStageRegionForCoordinates(aventure.latitude, aventure.longitude)
     if (region && !seen.has(region.value)) {
       seen.add(region.value)
       acc.push({ value: region.value, label: region.label })
@@ -248,7 +212,7 @@ const filteredAventures = computed(() => {
 
   if (selectedRegion.value) {
     adventures = adventures.filter((aventure: any) => {
-      const region = getRegionForCoordinates(aventure.latitude, aventure.longitude)
+      const region = getStageRegionForCoordinates(aventure.latitude, aventure.longitude)
       return region?.value === selectedRegion.value
     })
   }
@@ -329,6 +293,117 @@ const mapLegend = [
   { value: 'VIA_FERRATA', label: 'Via ferrata', letter: 'V', color: 'bg-[#6b8e23]' },
 ]
 
+const currentNotificationCriteria = computed(() => ({
+  discipline: selectedDiscipline.value,
+  region: selectedRegion.value,
+  dateStart: dateRangeStart.value || null,
+  dateEnd: dateRangeEnd.value || null,
+}))
+
+const getFetchErrorMessage = (e: any, fallback: string) =>
+  e?.data?.message || e?.data?.statusMessage || e?.statusMessage || e?.message || fallback
+
+const storePendingStageNotification = () => {
+  if (typeof window === 'undefined') return
+  window.localStorage.setItem(
+    pendingStageNotificationKey,
+    JSON.stringify({
+      path: route.fullPath,
+      criteria: currentNotificationCriteria.value,
+      createdAt: Date.now(),
+    }),
+  )
+}
+
+const applyNotificationCriteria = (criteria: any) => {
+  if (!criteria || typeof criteria !== 'object') return
+  selectedDiscipline.value = typeof criteria.discipline === 'string' ? criteria.discipline : null
+  selectedRegion.value = typeof criteria.region === 'string' ? criteria.region : null
+  dateRangeStart.value = typeof criteria.dateStart === 'string' ? criteria.dateStart : ''
+  dateRangeEnd.value = typeof criteria.dateEnd === 'string' ? criteria.dateEnd : ''
+}
+
+const clearNotifyStagesQuery = async () => {
+  if (!route.query.notifyStages) return
+  const nextQuery = { ...route.query }
+  delete nextQuery.notifyStages
+  await router.replace({ path: route.path, query: nextQuery })
+}
+
+const subscribeToStageNotifications = async (options: { fromPending?: boolean } = {}) => {
+  notificationError.value = null
+  notificationSuccess.value = null
+  notificationLoading.value = true
+
+  try {
+    const res: any = await $fetch('/api/stage-notification-subscriptions', {
+      method: 'POST',
+      body: currentNotificationCriteria.value,
+    })
+
+    if (typeof window !== 'undefined') {
+      window.localStorage.removeItem(pendingStageNotificationKey)
+    }
+
+    notificationSuccess.value = res?.already
+      ? 'Tu es déjà inscrit·e à ces notifications.'
+      : 'C’est noté, tu seras prévenu·e sur WhatsApp.'
+    if (options.fromPending) {
+      await clearNotifyStagesQuery()
+    }
+  } catch (e: any) {
+    notificationError.value = getFetchErrorMessage(e, 'Impossible d’enregistrer cette alerte.')
+  } finally {
+    notificationLoading.value = false
+  }
+}
+
+const handleStageNotificationClick = async () => {
+  await fetchUserSession()
+
+  if (!loggedIn.value) {
+    storePendingStageNotification()
+    openModal()
+    return
+  }
+
+  if (user.value?.role === 'GUIDE') {
+    notificationError.value = 'Connecte-toi avec un compte grimpeur pour recevoir ces notifications.'
+    notificationSuccess.value = null
+    return
+  }
+
+  if (!user.value?.onboarded) {
+    storePendingStageNotification()
+    await router.push('/onboarding')
+    return
+  }
+
+  await subscribeToStageNotifications()
+}
+
+onMounted(async () => {
+  if (route.query.notifyStages !== '1' || typeof window === 'undefined') return
+
+  const raw = window.localStorage.getItem(pendingStageNotificationKey)
+  if (!raw) {
+    await clearNotifyStagesQuery()
+    return
+  }
+
+  try {
+    const payload = JSON.parse(raw)
+    applyNotificationCriteria(payload?.criteria)
+    await fetchUserSession()
+    if (loggedIn.value && user.value?.role !== 'GUIDE' && user.value?.onboarded) {
+      await subscribeToStageNotifications({ fromPending: true })
+    }
+  } catch {
+    window.localStorage.removeItem(pendingStageNotificationKey)
+    await clearNotifyStagesQuery()
+  }
+})
+
 
 </script>
 
@@ -370,7 +445,7 @@ const mapLegend = [
         </section>
       </div>
     </div>
-    <div class="mx-auto max-w-7xl px-6 py-14 lg:px-8 space-y-10 pb-16">
+    <div class="mx-auto max-w-7xl px-6 py-10 lg:px-8 space-y-6 pb-14">
 
       <div v-if="pending" class="text-sm text-brand-100/70">
         Chargement des aventures...
@@ -380,13 +455,13 @@ const mapLegend = [
         Impossible de charger les aventures.
       </div>
 
-      <div v-else class="space-y-6">
-        <div class="flex flex-wrap items-center justify-between gap-4 border-b border-white/10 pb-5">
-          <p class="text-xs uppercase tracking-[0.3em] text-brand-200/70">Mode d’affichage</p>
-          <div class="inline-flex rounded-2xl border border-white/15 bg-white/5 p-1">
+      <div v-else class="space-y-4">
+        <div class="flex flex-wrap items-center justify-between gap-2 border-b border-white/10 pb-2">
+          <p class="text-[11px] font-semibold uppercase tracking-[0.25em] text-brand-200/70">Mode d’affichage</p>
+          <div class="inline-flex rounded-xl border border-white/15 bg-white/5 p-0.5">
             <button
               type="button"
-              class="rounded-xl px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.2em] transition"
+              class="rounded-lg px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] transition"
               :class="activeView === 'list'
                 ? 'bg-secondaryBrand-500 text-brand-950'
                 : 'text-brand-100/75 hover:text-white'"
@@ -396,7 +471,7 @@ const mapLegend = [
             </button>
             <button
               type="button"
-              class="rounded-xl px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.2em] transition"
+              class="rounded-lg px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] transition"
               :class="activeView === 'map'
                 ? 'bg-secondaryBrand-500 text-brand-950'
                 : 'text-brand-100/75 hover:text-white'"
@@ -407,37 +482,37 @@ const mapLegend = [
           </div>
         </div>
 
-        <section class="mb-6 border-b border-white/10 pb-6">
-          <div class="rounded-2xl border border-white/15 bg-brand-900/50 p-3 shadow-lg shadow-black/30 backdrop-blur">
-            <div class="grid gap-4 lg:grid-cols-3 lg:items-stretch">
-              <div class="flex h-full flex-col gap-3 rounded-xl border border-white/10 bg-brand-950/35 p-4">
+        <section class="mb-3 border-b border-white/10 pb-3">
+          <div class="rounded-2xl border border-white/15 bg-brand-900/50 p-2.5 shadow-lg shadow-black/30 backdrop-blur">
+            <div class="grid gap-2 lg:grid-cols-3 lg:items-stretch">
+              <div class="flex h-full flex-col gap-2 rounded-xl border border-white/10 bg-brand-950/35 p-2.5">
                 <div class="flex flex-wrap items-center justify-between gap-2">
-                  <p class="text-xs uppercase tracking-[0.3em] text-brand-200/70">Activité</p>
+                  <p class="text-[11px] uppercase tracking-[0.25em] text-brand-200/70">Activité</p>
                   <button
                     v-if="selectedDiscipline"
                     type="button"
-                    class="rounded-full border border-secondaryBrand-300 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.3em] text-secondaryBrand-100 transition hover:bg-secondaryBrand-500/20"
+                    class="rounded-full border border-secondaryBrand-300 px-2 py-0.5 text-[9px] font-semibold uppercase tracking-[0.2em] text-secondaryBrand-100 transition hover:bg-secondaryBrand-500/20"
                     @click="selectedDiscipline = null"
                   >
                     Réinitialiser
                   </button>
                 </div>
-                <div class="flex flex-wrap gap-2">
+                <div class="flex flex-wrap gap-1.5">
                   <button
                     v-for="option in disciplineOptions"
                     :key="option.value"
                     type="button"
-                    class="group flex items-center gap-2 rounded-xl border px-2.5 py-1.5 text-xs transition"
+                    class="group flex items-center gap-1.5 rounded-lg border px-2 py-1 text-[11px] transition"
                     :class="selectedDiscipline === option.value
                       ? 'border-secondaryBrand-400 bg-secondaryBrand-500/20 text-white'
                       : 'border-brand-800 bg-brand-900/80 text-brand-100'"
                     @click="selectedDiscipline = option.value"
                   >
-                    <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-secondaryBrand-400/80 transition duration-300 ease-out group-hover:scale-105 group-hover:shadow-lg group-hover:shadow-secondaryBrand-500/40">
+                    <span class="flex h-6 w-6 items-center justify-center rounded-md bg-secondaryBrand-400/80 transition duration-300 ease-out group-hover:scale-105 group-hover:shadow-lg group-hover:shadow-secondaryBrand-500/40">
                       <img
                         :src="iconPathForDiscipline(option.value)"
                         :alt="option.label"
-                        class="h-6 w-6 object-contain"
+                        class="h-4 w-4 object-contain"
                         loading="lazy"
                       />
                     </span>
@@ -446,46 +521,46 @@ const mapLegend = [
                 </div>
               </div>
 
-              <div class="flex h-full flex-col gap-3 rounded-xl border border-white/10 bg-brand-950/35 p-4">
+              <div class="flex h-full flex-col gap-2 rounded-xl border border-white/10 bg-brand-950/35 p-2.5">
                 <div class="flex flex-wrap items-center justify-between gap-2">
-                  <p class="text-xs uppercase tracking-[0.3em] text-brand-200/70">Dates</p>
+                  <p class="text-[11px] uppercase tracking-[0.25em] text-brand-200/70">Dates</p>
                   <button
                     v-if="hasDateRangeFilter"
                     type="button"
-                    class="rounded-full border border-secondaryBrand-300 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.3em] text-secondaryBrand-100 transition hover:bg-secondaryBrand-500/20"
+                    class="rounded-full border border-secondaryBrand-300 px-2 py-0.5 text-[9px] font-semibold uppercase tracking-[0.2em] text-secondaryBrand-100 transition hover:bg-secondaryBrand-500/20"
                     @click="resetDateRange"
                   >
                     Réinitialiser
                   </button>
                 </div>
-                <div class="grid gap-2 sm:grid-cols-2 lg:grid-cols-1 2xl:grid-cols-2">
-                  <label class="space-y-1">
-                    <span class="block text-[11px] font-semibold uppercase tracking-[0.2em] text-brand-100/70">Début</span>
+                <div class="grid gap-1.5 sm:grid-cols-2">
+                  <label>
+                    <span class="sr-only">Début</span>
                     <input
                       v-model="dateRangeStart"
                       type="date"
-                      class="date-filter-input w-full rounded-xl border border-white/15 bg-brand-950/70 px-3 py-2 text-sm text-white outline-none transition focus:border-secondaryBrand-300"
+                      class="date-filter-input w-full rounded-lg border border-white/15 bg-brand-950/70 px-2.5 py-1.5 text-xs text-white outline-none transition focus:border-secondaryBrand-300"
                     />
                   </label>
-                  <label class="space-y-1">
-                    <span class="block text-[11px] font-semibold uppercase tracking-[0.2em] text-brand-100/70">Fin</span>
+                  <label>
+                    <span class="sr-only">Fin</span>
                     <input
                       v-model="dateRangeEnd"
                       type="date"
                       :min="dateRangeStart || undefined"
-                      class="date-filter-input w-full rounded-xl border border-white/15 bg-brand-950/70 px-3 py-2 text-sm text-white outline-none transition focus:border-secondaryBrand-300"
+                      class="date-filter-input w-full rounded-lg border border-white/15 bg-brand-950/70 px-2.5 py-1.5 text-xs text-white outline-none transition focus:border-secondaryBrand-300"
                     />
                   </label>
                 </div>
               </div>
 
-              <div class="flex h-full flex-col gap-3 rounded-xl border border-white/10 bg-brand-950/35 p-4">
+              <div class="flex h-full flex-col gap-2 rounded-xl border border-white/10 bg-brand-950/35 p-2.5">
                 <div class="flex flex-wrap items-center justify-between gap-2">
-                  <p class="text-xs uppercase tracking-[0.3em] text-brand-200/70">Région</p>
+                  <p class="text-[11px] uppercase tracking-[0.25em] text-brand-200/70">Région</p>
                   <button
                     v-if="selectedRegion"
                     type="button"
-                    class="rounded-full border border-secondaryBrand-300 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.3em] text-secondaryBrand-100 transition hover:bg-secondaryBrand-500/20"
+                    class="rounded-full border border-secondaryBrand-300 px-2 py-0.5 text-[9px] font-semibold uppercase tracking-[0.2em] text-secondaryBrand-100 transition hover:bg-secondaryBrand-500/20"
                     @click="selectedRegion = null"
                   >
                     Réinitialiser
@@ -493,7 +568,7 @@ const mapLegend = [
                 </div>
                 <select
                   v-model="selectedRegion"
-                  class="w-full rounded-xl border border-white/15 bg-brand-950/70 px-3 py-2 text-sm text-white outline-none transition focus:border-secondaryBrand-300"
+                  class="w-full rounded-lg border border-white/15 bg-brand-950/70 px-2.5 py-1.5 text-xs text-white outline-none transition focus:border-secondaryBrand-300"
                 >
                   <option :value="null">Toutes les régions</option>
                   <option
@@ -508,6 +583,27 @@ const mapLegend = [
                   Les régions apparaîtront dès que les stages auront des coordonnées GPS.
                 </p>
               </div>
+            </div>
+            <div class="mt-2 flex flex-col gap-2 border-t border-white/10 pt-2 sm:flex-row sm:items-center sm:justify-between">
+              <button
+                type="button"
+                class="inline-flex items-center justify-center gap-2 rounded-lg border border-secondaryBrand-300 bg-secondaryBrand-500/15 px-3 py-2 text-xs font-semibold text-secondaryBrand-100 transition hover:bg-secondaryBrand-500/25 disabled:cursor-not-allowed disabled:opacity-60"
+                :disabled="notificationLoading"
+                @click="handleStageNotificationClick"
+              >
+                <svg class="h-3.5 w-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15 17H9m10-2.5c-1.3-1.1-2-2.5-2-4.2V8a5 5 0 0 0-10 0v2.3c0 1.7-.7 3.1-2 4.2l-.5.4A1 1 0 0 0 5.1 17h13.8a1 1 0 0 0 .6-2.1l-.5-.4Z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M10 20a2 2 0 0 0 4 0" />
+                </svg>
+                <span v-if="notificationLoading">Inscription en cours…</span>
+                <span v-else>Je souhaite être notifié des prochains stages répondant à ces critères</span>
+              </button>
+              <p v-if="notificationSuccess" class="text-xs font-medium text-secondaryBrand-200">
+                {{ notificationSuccess }}
+              </p>
+              <p v-else-if="notificationError" class="text-xs font-medium text-red-300">
+                {{ notificationError }}
+              </p>
             </div>
             <p v-if="!disciplineOptions.length" class="mt-3 text-xs text-brand-200/70">
               Les activités apparaîtront dès que des aventures seront publiées.

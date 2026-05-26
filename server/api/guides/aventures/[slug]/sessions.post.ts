@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import { prisma } from '../../../../utils/prisma'
+import { notifyStageNotificationSubscribers } from '../../../../utils/stage-notifications'
 import {
   computeSessionEndFromDuration,
   formatDurationDays,
@@ -32,7 +33,7 @@ export default defineEventHandler(async (event) => {
 
   const aventure = await db.aventure.findFirst({
     where: { slug, guideId: Number(session.user.id) },
-    select: { id: true, jours: true, placesMax: true },
+    select: { id: true, jours: true, placesMax: true, estPublie: true },
   })
 
   if (!aventure) {
@@ -99,6 +100,22 @@ export default defineEventHandler(async (event) => {
       placesReservees: true,
     },
   })
+
+  if (aventure.estPublie) {
+    const runtimeConfig = useRuntimeConfig(event)
+    await notifyStageNotificationSubscribers({
+      db,
+      aventureId: aventure.id,
+      sessionId: created.id,
+      publicUrl: runtimeConfig.public.publicUrl,
+    }).catch((error) => {
+      console.error('[stage-notifications] Session notification failure', {
+        aventureId: aventure.id,
+        sessionId: created.id,
+        error,
+      })
+    })
+  }
 
   return { session: created }
 })

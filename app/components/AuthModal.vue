@@ -15,12 +15,19 @@ const otpToken = ref<string | null>(null)
 const pendingBookingKey = 'bdk_pending_booking'
 const pendingBookingIntentKey = 'bdk_pending_booking_intent'
 const pendingGuideContactPathKey = 'bdk_pending_guide_contact_path'
+const pendingStageNotificationKey = 'bdk_pending_stage_notification'
+const pendingGuideStageNotificationKey = 'bdk_pending_guide_stage_notification'
 const skipPendingClear = ref(false)
 
 const source = computed(() => (route.query.source as string) || 'direct')
 
 const getFetchErrorMessage = (e: any, fallback: string) =>
   e?.data?.message || e?.data?.statusMessage || e?.statusMessage || e?.message || fallback
+
+const withGuideStageNotificationQuery = (path: string) => {
+  if (path.includes('notifyGuideStages=1')) return path
+  return path.includes('?') ? `${path}&notifyGuideStages=1` : `${path}?notifyGuideStages=1`
+}
 
 const resetState = () => {
   error.value = null
@@ -38,6 +45,8 @@ watch(open, (val) => {
       window.localStorage.removeItem(pendingBookingKey)
       window.localStorage.removeItem(pendingBookingIntentKey)
       window.localStorage.removeItem(pendingGuideContactPathKey)
+      window.localStorage.removeItem(pendingStageNotificationKey)
+      window.localStorage.removeItem(pendingGuideStageNotificationKey)
     }
     skipPendingClear.value = false
   }
@@ -90,6 +99,38 @@ const redirectAfterAuth = async () => {
         await router.push(target)
       }
       window.localStorage.removeItem(pendingGuideContactPathKey)
+      return
+    }
+
+    const stageNotificationRaw = window.localStorage.getItem(pendingStageNotificationKey)
+    if (stageNotificationRaw) {
+      let target = '/stages-escalade?notifyStages=1'
+      try {
+        const payload = JSON.parse(stageNotificationRaw)
+        const path = typeof payload?.path === 'string' && payload.path ? payload.path : '/stages-escalade'
+        target = path.includes('?') ? `${path}&notifyStages=1` : `${path}?notifyStages=1`
+      } catch {
+        target = '/stages-escalade?notifyStages=1'
+      }
+      if (route.fullPath !== target) {
+        await router.push(target)
+      }
+      return
+    }
+
+    const guideStageNotificationRaw = window.localStorage.getItem(pendingGuideStageNotificationKey)
+    if (guideStageNotificationRaw) {
+      let target = withGuideStageNotificationQuery(route.path.includes('/moniteurs/') ? route.path : '/moniteurs')
+      try {
+        const payload = JSON.parse(guideStageNotificationRaw)
+        const path = typeof payload?.path === 'string' && payload.path ? payload.path : '/moniteurs'
+        target = withGuideStageNotificationQuery(path)
+      } catch {
+        target = withGuideStageNotificationQuery('/moniteurs')
+      }
+      if (route.fullPath !== target) {
+        await router.push(target)
+      }
       return
     }
   }

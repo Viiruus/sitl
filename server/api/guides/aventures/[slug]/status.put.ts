@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import { prisma } from '../../../../utils/prisma'
+import { notifyStageNotificationSubscribers } from '../../../../utils/stage-notifications'
 
 const bodySchema = z.object({
   estPublie: z.boolean(),
@@ -79,6 +80,7 @@ export default defineEventHandler(async (event) => {
     },
     select: {
       id: true,
+      estPublie: true,
       sousTitre: true,
       niveauMinimum: true,
       descriptionCourte: true,
@@ -124,6 +126,20 @@ export default defineEventHandler(async (event) => {
       estPublie: body.estPublie,
     },
   })
+
+  if (body.estPublie && !existing.estPublie) {
+    const runtimeConfig = useRuntimeConfig(event)
+    await notifyStageNotificationSubscribers({
+      db,
+      aventureId: existing.id,
+      publicUrl: runtimeConfig.public.publicUrl,
+    }).catch((error) => {
+      console.error('[stage-notifications] Publish notification failure', {
+        aventureId: existing.id,
+        error,
+      })
+    })
+  }
 
   return { slug, estPublie: body.estPublie }
 })

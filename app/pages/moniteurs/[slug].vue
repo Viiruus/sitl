@@ -226,16 +226,27 @@
               <h2 class="mt-2 text-3xl font-semibold text-pretty text-white">Les prochains stages de {{ moniteurName || moniteurRoleReference }}</h2>
               <p class="mt-3 text-base text-gray-300">Découvre les prochains stages proposés par {{ moniteurName || moniteurRoleReference }}.</p>
             </div>
-            <NuxtLink
-              to="/stages-escalade"
-              class="inline-flex items-center gap-2 rounded-full border border-white/20 px-4 py-2 text-sm font-semibold text-white/70 transition hover:border-white hover:text-white"
-            >
-              Voir tous les stages
-              <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M8 5l8 7-8 7" />
-              </svg>
-            </NuxtLink>
+            <div class="flex flex-wrap gap-2">
+              <button
+                type="button"
+                class="inline-flex items-center gap-2 rounded-full border border-secondaryBrand-300 bg-secondaryBrand-500/15 px-4 py-2 text-sm font-semibold text-secondaryBrand-100 transition hover:bg-secondaryBrand-500/25 disabled:cursor-not-allowed disabled:opacity-60"
+                :disabled="guideNotificationLoading"
+                @click="handleGuideStageNotificationClick"
+              >
+                <svg class="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15 17H9m10-2.5c-1.3-1.1-2-2.5-2-4.2V8a5 5 0 0 0-10 0v2.3c0 1.7-.7 3.1-2 4.2l-.5.4A1 1 0 0 0 5.1 17h13.8a1 1 0 0 0 .6-2.1l-.5-.4Z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M10 20a2 2 0 0 0 4 0" />
+                </svg>
+                <span>{{ guideNotificationLoading ? 'Inscription…' : 'Être notifié des prochains stages de ' + moniteurContactFirstName }}</span>
+              </button>
+            </div>
           </div>
+          <p v-if="guideNotificationSuccess" class="mt-4 text-sm font-medium text-secondaryBrand-200">
+            {{ guideNotificationSuccess }}
+          </p>
+          <p v-else-if="guideNotificationError" class="mt-4 text-sm font-medium text-red-300">
+            {{ guideNotificationError }}
+          </p>
 
           <div v-if="pending" class="mt-12 grid gap-8 lg:grid-cols-2">
             <div v-for="n in 2" :key="n" class="h-64 animate-pulse rounded-3xl bg-white/5" />
@@ -445,6 +456,7 @@ const slug = computed(() => route.params.slug as string)
 const { loggedIn, user, fetch: fetchUserSession } = useUserSession()
 const { openModal } = useAuthModal()
 const pendingGuideContactPathKey = 'bdk_pending_guide_contact_path'
+const pendingGuideStageNotificationKey = 'bdk_pending_guide_stage_notification'
 
 const { data, pending, error } = await useAsyncData(
   () => $fetch(`/api/moniteurs/${slug.value}`),
@@ -677,6 +689,9 @@ const contactMessage = ref('')
 const contactSending = ref(false)
 const contactError = ref<string | null>(null)
 const contactSuccess = ref<string | null>(null)
+const guideNotificationLoading = ref(false)
+const guideNotificationError = ref<string | null>(null)
+const guideNotificationSuccess = ref<string | null>(null)
 
 const aventureCoverSrc = (aventure: any) => {
   return resolveStoredImageSrc(aventure?.coverImageUrl, aventure?.coverImageVariants) || fallbackImageForDiscipline(aventure?.discipline)
@@ -863,6 +878,91 @@ const storePendingGuideContact = () => {
   window.localStorage.setItem(pendingGuideContactPathKey, route.path)
 }
 
+const storePendingGuideStageNotification = () => {
+  if (typeof window === 'undefined') return
+  const query = { ...route.query }
+  delete query.notifyGuideStages
+  const targetPath = router.resolve({ path: route.path, query }).fullPath
+  window.localStorage.setItem(
+    pendingGuideStageNotificationKey,
+    JSON.stringify({
+      path: targetPath,
+      guideId: moniteur.value?.id ?? null,
+      createdAt: Date.now(),
+    }),
+  )
+}
+
+const clearNotifyGuideStagesQuery = async () => {
+  if (route.query.notifyGuideStages !== '1') return
+  const query = { ...route.query }
+  delete query.notifyGuideStages
+  await router.replace({ query })
+}
+
+const getGuideNotificationErrorMessage = (e: any, fallback: string) =>
+  e?.data?.message || e?.data?.statusMessage || e?.statusMessage || e?.message || fallback
+
+const subscribeToGuideStageNotifications = async (options: { fromPending?: boolean } = {}) => {
+  guideNotificationError.value = null
+  guideNotificationSuccess.value = null
+  guideNotificationLoading.value = true
+
+  try {
+    const guideId = Number(moniteur.value?.id)
+    if (!guideId || Number.isNaN(guideId)) {
+      throw new Error('Moniteur introuvable.')
+    }
+
+    const response: any = await $fetch('/api/stage-notification-subscriptions', {
+      method: 'POST',
+      body: {
+        kind: 'GUIDE_STAGE',
+        guideId,
+      },
+    })
+
+    if (typeof window !== 'undefined') {
+      window.localStorage.removeItem(pendingGuideStageNotificationKey)
+    }
+    guideNotificationSuccess.value = response?.already
+      ? `Tu es déjà inscrit·e aux notifications de ${moniteurContactFirstName.value}.`
+      : `C’est noté, tu seras prévenu·e des prochains stages de ${moniteurContactFirstName.value}.`
+
+    if (options.fromPending) {
+      await clearNotifyGuideStagesQuery()
+    }
+  } catch (e: any) {
+    guideNotificationError.value = getGuideNotificationErrorMessage(e, 'Impossible d’enregistrer cette alerte.')
+  } finally {
+    guideNotificationLoading.value = false
+  }
+}
+
+const handleGuideStageNotificationClick = async () => {
+  await fetchUserSession()
+
+  if (!loggedIn.value) {
+    storePendingGuideStageNotification()
+    openModal()
+    return
+  }
+
+  if (user.value?.role === 'GUIDE') {
+    guideNotificationSuccess.value = null
+    guideNotificationError.value = 'Connecte-toi avec un compte grimpeur pour recevoir ces notifications.'
+    return
+  }
+
+  if (!user.value?.onboarded) {
+    storePendingGuideStageNotification()
+    await router.push('/onboarding')
+    return
+  }
+
+  await subscribeToGuideStageNotifications()
+}
+
 const closeGuideContactModal = () => {
   contactModalOpen.value = false
   contactError.value = null
@@ -919,6 +1019,35 @@ watch(
     contactSuccess.value = null
     contactModalOpen.value = true
     await clearGuideContactQuery()
+  },
+  { immediate: true },
+)
+
+watch(
+  [() => route.query.notifyGuideStages, loggedIn, () => user.value?.role, () => user.value?.onboarded, () => moniteur.value?.id],
+  async ([notifyGuideStages, isLoggedIn, role, onboarded, guideId]) => {
+    if (notifyGuideStages !== '1' || !guideId) return
+
+    if (!isLoggedIn) {
+      storePendingGuideStageNotification()
+      openModal()
+      return
+    }
+
+    if (role === 'GUIDE') {
+      guideNotificationSuccess.value = null
+      guideNotificationError.value = 'Connecte-toi avec un compte grimpeur pour recevoir ces notifications.'
+      await clearNotifyGuideStagesQuery()
+      return
+    }
+
+    if (!onboarded) {
+      storePendingGuideStageNotification()
+      await router.push('/onboarding')
+      return
+    }
+
+    await subscribeToGuideStageNotifications({ fromPending: true })
   },
   { immediate: true },
 )

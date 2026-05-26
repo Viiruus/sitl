@@ -16,6 +16,13 @@ const router = useRouter()
 const pendingGuideContactPathKey = 'bdk_pending_guide_contact_path'
 const pendingBookingKey = 'bdk_pending_booking'
 const pendingBookingIntentKey = 'bdk_pending_booking_intent'
+const pendingStageNotificationKey = 'bdk_pending_stage_notification'
+const pendingGuideStageNotificationKey = 'bdk_pending_guide_stage_notification'
+
+const withGuideStageNotificationQuery = (path: string) => {
+  if (path.includes('notifyGuideStages=1')) return path
+  return path.includes('?') ? `${path}&notifyGuideStages=1` : `${path}?notifyGuideStages=1`
+}
 
 // Étapes
 const step = ref(1)
@@ -146,6 +153,34 @@ const submit = async () => {
 
       if (bookingSlug) {
         await router.push(`/stages-escalade/${bookingSlug}`)
+        return
+      }
+
+      const stageNotificationRaw = window.localStorage.getItem(pendingStageNotificationKey)
+      if (stageNotificationRaw) {
+        let target = '/stages-escalade?notifyStages=1'
+        try {
+          const payload = JSON.parse(stageNotificationRaw)
+          const path = typeof payload?.path === 'string' && payload.path ? payload.path : '/stages-escalade'
+          target = path.includes('?') ? `${path}&notifyStages=1` : `${path}?notifyStages=1`
+        } catch {
+          target = '/stages-escalade?notifyStages=1'
+        }
+        await router.push(target)
+        return
+      }
+
+      const guideStageNotificationRaw = window.localStorage.getItem(pendingGuideStageNotificationKey)
+      if (guideStageNotificationRaw) {
+        let target = withGuideStageNotificationQuery('/moniteurs')
+        try {
+          const payload = JSON.parse(guideStageNotificationRaw)
+          const path = typeof payload?.path === 'string' && payload.path ? payload.path : target
+          target = withGuideStageNotificationQuery(path)
+        } catch {
+          target = withGuideStageNotificationQuery('/moniteurs')
+        }
+        await router.push(target)
         return
       }
     }
