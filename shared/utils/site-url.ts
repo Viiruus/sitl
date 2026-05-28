@@ -1,4 +1,4 @@
-const DEFAULT_SITE_URL = 'https://brigadedukiff.com'
+const DEFAULT_SITE_URL = 'https://www.brigadedukiff.com'
 
 export const resolvePublicSiteUrl = (value?: string | null) => {
   const raw = typeof value === 'string' ? value.trim() : ''
@@ -24,4 +24,3 @@ export const resolvePublicSiteUrl = (value?: string | null) => {
     return DEFAULT_SITE_URL
   }
 }
-

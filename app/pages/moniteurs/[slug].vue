@@ -465,6 +465,13 @@ const { data, pending, error } = await useAsyncData(
   },
 )
 
+if (error.value) {
+  throw createError({
+    statusCode: error.value.statusCode || 500,
+    statusMessage: error.value.statusMessage || 'Impossible de charger le moniteur',
+  })
+}
+
 if (data.value?.moniteur?.slug && slug.value.toLowerCase() !== data.value.moniteur.slug.toLowerCase()) {
   await navigateTo(`/moniteurs/${data.value.moniteur.slug}`, {
     redirectCode: 301,
