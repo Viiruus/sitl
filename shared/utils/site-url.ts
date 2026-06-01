@@ -1,4 +1,5 @@
 const DEFAULT_SITE_URL = 'https://www.brigadedukiff.com'
+const PRODUCTION_HOSTS = new Set(['brigadedukiff.com', 'www.brigadedukiff.com'])
 
 export const resolvePublicSiteUrl = (value?: string | null) => {
   const raw = typeof value === 'string' ? value.trim() : ''
@@ -16,6 +17,10 @@ export const resolvePublicSiteUrl = (value?: string | null) => {
       hostname === '0.0.0.0'
 
     if (process.env.NODE_ENV === 'production' && isLocalHost) {
+      return DEFAULT_SITE_URL
+    }
+
+    if (PRODUCTION_HOSTS.has(hostname)) {
       return DEFAULT_SITE_URL
     }
 
