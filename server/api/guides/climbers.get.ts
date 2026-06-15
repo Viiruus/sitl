@@ -28,12 +28,33 @@ export default defineEventHandler(async (event) => {
       id: true,
       firstName: true,
       lastName: true,
+      createdAt: true,
     },
     orderBy: [
-      { firstName: 'asc' },
-      { lastName: 'asc' },
+      { createdAt: 'desc' },
+      { id: 'desc' },
     ],
   })
+  const climberIds = climbers.map((climber) => climber.id)
+  const bookingCounts = climberIds.length
+    ? await db.booking.groupBy({
+        by: ['userId'],
+        where: {
+          userId: {
+            in: climberIds,
+          },
+          statut: {
+            not: 'ANNULEE',
+          },
+        },
+        _count: {
+          _all: true,
+        },
+      })
+    : []
+  const bookingCountByUserId = new Map(
+    bookingCounts.map((entry) => [entry.userId, entry._count._all]),
+  )
 
   return {
     climbers: climbers
@@ -45,6 +66,8 @@ export default defineEventHandler(async (event) => {
           firstName,
           lastName,
           fullName: [firstName, lastName].filter(Boolean).join(' ').trim(),
+          registeredAt: climber.createdAt,
+          stageBookingsCount: bookingCountByUserId.get(climber.id) ?? 0,
         }
       })
       .filter((climber) => climber.fullName.length > 0),

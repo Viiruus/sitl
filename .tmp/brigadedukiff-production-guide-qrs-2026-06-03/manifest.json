@@ -1,0 +1,197 @@
+{
+  "generatedAt": "2026-06-03T19:07:14.491Z",
+  "baseUrl": "https://www.brigadedukiff.com",
+  "count": 19,
+  "guides": [
+    {
+      "id": 19,
+      "firstName": "Anaïs",
+      "lastName": "Prenant",
+      "fullName": "Anaïs Prenant",
+      "slug": "anais-prenant",
+      "url": "https://www.brigadedukiff.com/moniteurs/anais-prenant?source=qrcode",
+      "file": "Anaïs-Prenant.png",
+      "publicComplete": true
+    },
+    {
+      "id": 23,
+      "firstName": "Camille",
+      "lastName": "Rey",
+      "fullName": "Camille Rey",
+      "slug": "camille-rey",
+      "url": "https://www.brigadedukiff.com/moniteurs/camille-rey?source=qrcode",
+      "file": "Camille-Rey.png",
+      "publicComplete": true
+    },
+    {
+      "id": 15,
+      "firstName": "Cheyenne",
+      "lastName": "Muon",
+      "fullName": "Cheyenne Muon",
+      "slug": "cheyenne-muon",
+      "url": "https://www.brigadedukiff.com/moniteurs/cheyenne-muon?source=qrcode",
+      "file": "Cheyenne-Muon.png",
+      "publicComplete": true
+    },
+    {
+      "id": 2,
+      "firstName": "Fabien",
+      "lastName": "Moyon",
+      "fullName": "Fabien Moyon",
+      "slug": "fabien-moyon",
+      "url": "https://www.brigadedukiff.com/moniteurs/fabien-moyon?source=qrcode",
+      "file": "Fabien-Moyon.png",
+      "publicComplete": true
+    },
+    {
+      "id": 3,
+      "firstName": "Jean",
+      "lastName": "De melo",
+      "fullName": "Jean De melo",
+      "slug": "jean-de-melo",
+      "url": "https://www.brigadedukiff.com/moniteurs/jean-de-melo?source=qrcode",
+      "file": "Jean-De-melo.png",
+      "publicComplete": true
+    },
+    {
+      "id": 16,
+      "firstName": "Leonie",
+      "lastName": "Marquart",
+      "fullName": "Leonie Marquart",
+      "slug": "leonie-marquart",
+      "url": "https://www.brigadedukiff.com/moniteurs/leonie-marquart?source=qrcode",
+      "file": "Leonie-Marquart.png",
+      "publicComplete": true
+    },
+    {
+      "id": 9,
+      "firstName": "Lino",
+      "lastName": "Paul",
+      "fullName": "Lino Paul",
+      "slug": "lino-paul",
+      "url": "https://www.brigadedukiff.com/moniteurs/lino-paul?source=qrcode",
+      "file": "Lino-Paul.png",
+      "publicComplete": true
+    },
+    {
+      "id": 5,
+      "firstName": "Loïc",
+      "lastName": "Palpa",
+      "fullName": "Loïc Palpa",
+      "slug": "loic-palpa",
+      "url": "https://www.brigadedukiff.com/moniteurs/loic-palpa?source=qrcode",
+      "file": "Loïc-Palpa.png",
+      "publicComplete": true
+    },
+    {
+      "id": 8,
+      "firstName": "Lucas",
+      "lastName": "Bouillon",
+      "fullName": "Lucas Bouillon",
+      "slug": "lucas-bouillon",
+      "url": "https://www.brigadedukiff.com/moniteurs/lucas-bouillon?source=qrcode",
+      "file": "Lucas-Bouillon.png",
+      "publicComplete": true
+    },
+    {
+      "id": 4,
+      "firstName": "Margot",
+      "lastName": "Huguet",
+      "fullName": "Margot Huguet",
+      "slug": "margot-huguet",
+      "url": "https://www.brigadedukiff.com/moniteurs/margot-huguet?source=qrcode",
+      "file": "Margot-Huguet.png",
+      "publicComplete": true
+    },
+    {
+      "id": 22,
+      "firstName": "Maël",
+      "lastName": "Chastin",
+      "fullName": "Maël Chastin",
+      "slug": "mael-chastin",
+      "url": "https://www.brigadedukiff.com/moniteurs/mael-chastin?source=qrcode",
+      "file": "Maël-Chastin.png",
+      "publicComplete": true
+    },
+    {
+      "id": 17,
+      "firstName": "Milo",
+      "lastName": "Maigne",
+      "fullName": "Milo Maigne",
+      "slug": "milo-maigne",
+      "url": "https://www.brigadedukiff.com/moniteurs/milo-maigne?source=qrcode",
+      "file": "Milo-Maigne.png",
+      "publicComplete": true
+    },
+    {
+      "id": 12,
+      "firstName": "Myléna",
+      "lastName": "Person",
+      "fullName": "Myléna Person",
+      "slug": "mylena-person",
+      "url": "https://www.brigadedukiff.com/moniteurs/mylena-person?source=qrcode",
+      "file": "Myléna-Person.png",
+      "publicComplete": true
+    },
+    {
+      "id": 1,
+      "firstName": "Nicolas",
+      "lastName": "Guillemain",
+      "fullName": "Nicolas Guillemain",
+      "slug": "nicolas-guillemain",
+      "url": "https://www.brigadedukiff.com/moniteurs/nicolas-guillemain?source=qrcode",
+      "file": "Nicolas-Guillemain.png",
+      "publicComplete": true
+    },
+    {
+      "id": 11,
+      "firstName": "Pierre",
+      "lastName": "Blondin",
+      "fullName": "Pierre Blondin",
+      "slug": "pierre-blondin",
+      "url": "https://www.brigadedukiff.com/moniteurs/pierre-blondin?source=qrcode",
+      "file": "Pierre-Blondin.png",
+      "publicComplete": true
+    },
+    {
+      "id": 18,
+      "firstName": "Pilou",
+      "lastName": "Bergues",
+      "fullName": "Pilou Bergues",
+      "slug": "pilou-bergues",
+      "url": "https://www.brigadedukiff.com/moniteurs/pilou-bergues?source=qrcode",
+      "file": "Pilou-Bergues.png",
+      "publicComplete": true
+    },
+    {
+      "id": 33,
+      "firstName": "Roxane",
+      "lastName": "Merle",
+      "fullName": "Roxane Merle",
+      "slug": "roxane-merle",
+      "url": "https://www.brigadedukiff.com/moniteurs/roxane-merle?source=qrcode",
+      "file": "Roxane-Merle.png",
+      "publicComplete": true
+    },
+    {
+      "id": 21,
+      "firstName": "Timothé",
+      "lastName": "Vernay",
+      "fullName": "Timothé Vernay",
+      "slug": "timothe-vernay",
+      "url": "https://www.brigadedukiff.com/moniteurs/timothe-vernay?source=qrcode",
+      "file": "Timothé-Vernay.png",
+      "publicComplete": true
+    },
+    {
+      "id": 14,
+      "firstName": "Victor",
+      "lastName": "Galdino Dos Santos",
+      "fullName": "Victor Galdino Dos Santos",
+      "slug": "victor-galdino-dos-santos",
+      "url": "https://www.brigadedukiff.com/moniteurs/victor-galdino-dos-santos?source=qrcode",
+      "file": "Victor-Galdino-Dos-Santos.png",
+      "publicComplete": true
+    }
+  ]
+}
