@@ -66,6 +66,7 @@ const RETRYABLE_NETWORK_ERROR_CODES = new Set([
 
 const proxiedClients = new WeakMap<object, any>()
 const proxiedDelegates = new WeakMap<object, any>()
+const boundClientMethods = new WeakMap<object, Map<PropertyKey, any>>()
 
 function getLocalSqliteUrl() {
   return process.env.DATABASE_URL ?? "file:./prisma/dev.db";
@@ -189,6 +190,8 @@ function proxyDelegate(delegate: object, delegateName: string) {
 function proxyPrismaClient<T extends object>(client: T): T {
   const existing = proxiedClients.get(client)
   if (existing) return existing
+  const boundMethods = new Map<PropertyKey, any>()
+  boundClientMethods.set(client, boundMethods)
 
   const proxy = new Proxy(client, {
     get(target, prop, receiver) {
@@ -201,6 +204,15 @@ function proxyPrismaClient<T extends object>(client: T): T {
         !prop.startsWith("$")
       ) {
         return proxyDelegate(value, prop)
+      }
+
+      if (typeof value === "function") {
+        const existingMethod = boundMethods.get(prop)
+        if (existingMethod) return existingMethod
+
+        const boundMethod = value.bind(target)
+        boundMethods.set(prop, boundMethod)
+        return boundMethod
       }
 
       return value
