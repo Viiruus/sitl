@@ -130,11 +130,14 @@ useSeoMeta({
   title: 'Brigade du kiff | Collectif de moniteurs diplômés',
   description:
     'Un collectif de moniteurs d’escalade passionnés qui propose des stages et aventures outdoor partout en France.',
+  ogTitle: 'Brigade du kiff | Collectif de moniteurs diplômés',
+  ogDescription:
+    'Un collectif de moniteurs d’escalade passionnés qui propose des stages et aventures outdoor partout en France.',
+  ogUrl: canonicalUrl.value,
   robots: 'index, follow, max-image-preview:large',
 })
 
 const { data, pending } = await useFetch('/api/moniteurs')
-const randomWeights = useState<Record<number, number>>('la-brigade-moniteurs-order', () => ({}))
 
 const moniteurs = computed(() => {
   const list = data.value?.moniteurs ?? []
@@ -145,34 +148,31 @@ const moniteurs = computed(() => {
   })
 })
 
-watch(
-  () => moniteurs.value,
-  (list) => {
-    if (!list.length) {
-      randomWeights.value = {}
-      return
-    }
-    list.forEach((moniteur: any) => {
-      const key = moniteur.id
-      if (key == null) return
-      if (randomWeights.value[key] === undefined) {
-        randomWeights.value[key] = Math.random()
-      }
-    })
-  },
-  { immediate: true, deep: true },
-)
+const randomizedMoniteurs = computed(() => moniteurs.value)
 
-const randomizedMoniteurs = computed(() => {
-  const weights = randomWeights.value
-  return moniteurs.value
-    .slice()
-    .sort((a: any, b: any) => {
-      const wA = weights[a?.id] ?? 0
-      const wB = weights[b?.id] ?? 0
-      return wA - wB
-    })
-})
+const moniteursItemListStructuredData = computed(() => ({
+  '@context': 'https://schema.org',
+  '@type': 'ItemList',
+  name: 'Moniteurs de la Brigade du kiff',
+  itemListElement: moniteurs.value.map((moniteur: any, index: number) => ({
+    '@type': 'ListItem',
+    position: index + 1,
+    url: new URL(`/moniteurs/${moniteur.slug}`, canonicalUrl.value).toString(),
+    name: moniteur.fullName,
+  })),
+}))
+
+useHead(() => ({
+  script: moniteurs.value.length
+    ? [
+        {
+          key: 'la-brigade-moniteurs-itemlist-jsonld',
+          type: 'application/ld+json',
+          innerHTML: JSON.stringify(moniteursItemListStructuredData.value),
+        },
+      ]
+    : [],
+}))
 
 const fallbackImage = '/images/escalade-grande-voie-calanques.jpg'
 

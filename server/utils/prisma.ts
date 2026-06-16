@@ -39,6 +39,34 @@ const prismaState: PrismaState =
     sqliteFingerprint: null,
   });
 
+const READ_METHODS_WITH_TRANSIENT_RETRY = new Set([
+  "aggregate",
+  "count",
+  "findFirst",
+  "findFirstOrThrow",
+  "findMany",
+  "findUnique",
+  "findUniqueOrThrow",
+  "groupBy",
+])
+
+const RETRYABLE_NETWORK_ERROR_CODES = new Set([
+  "ECONNRESET",
+  "ETIMEDOUT",
+  "EAI_AGAIN",
+  "ENETDOWN",
+  "ENETRESET",
+  "ENETUNREACH",
+  "EHOSTDOWN",
+  "EHOSTUNREACH",
+  "UND_ERR_CONNECT_TIMEOUT",
+  "UND_ERR_HEADERS_TIMEOUT",
+  "UND_ERR_SOCKET",
+])
+
+const proxiedClients = new WeakMap<object, any>()
+const proxiedDelegates = new WeakMap<object, any>()
+
 function getLocalSqliteUrl() {
   return process.env.DATABASE_URL ?? "file:./prisma/dev.db";
 }
@@ -83,6 +111,104 @@ async function resetPrismaClient() {
   prismaState.mode = null;
   prismaState.sqlitePath = null;
   prismaState.sqliteFingerprint = null;
+}
+
+function getErrorCode(error: unknown): string | null {
+  if (!error || typeof error !== "object") return null
+  const code = (error as { code?: unknown }).code
+  return typeof code === "string" ? code : null
+}
+
+function isRetryableNetworkError(error: unknown): boolean {
+  let current: unknown = error
+
+  while (current && typeof current === "object") {
+    const code = getErrorCode(current)
+    if (code && RETRYABLE_NETWORK_ERROR_CODES.has(code)) {
+      return true
+    }
+
+    const message = (current as { message?: unknown }).message
+    if (
+      typeof message === "string" &&
+      (message.includes("fetch failed") ||
+        message.includes("connect ETIMEDOUT") ||
+        message.includes("Connect Timeout Error"))
+    ) {
+      return true
+    }
+
+    current = (current as { cause?: unknown }).cause
+  }
+
+  return false
+}
+
+function wait(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms))
+}
+
+async function retryTransientRead<T>(operation: string, run: () => Promise<T>): Promise<T> {
+  const delays = [150, 500]
+
+  for (let attempt = 0; ; attempt += 1) {
+    try {
+      return await run()
+    } catch (error) {
+      if (attempt >= delays.length || !isRetryableNetworkError(error)) {
+        throw error
+      }
+
+      console.warn(`[prisma] transient network error during ${operation}; retry ${attempt + 1}/${delays.length}`)
+      await wait(delays[attempt])
+    }
+  }
+}
+
+function proxyDelegate(delegate: object, delegateName: string) {
+  const existing = proxiedDelegates.get(delegate)
+  if (existing) return existing
+
+  const proxy = new Proxy(delegate, {
+    get(target, prop, receiver) {
+      const value = Reflect.get(target, prop, receiver)
+
+      if (typeof prop !== "string" || typeof value !== "function" || !READ_METHODS_WITH_TRANSIENT_RETRY.has(prop)) {
+        return value
+      }
+
+      return (...args: unknown[]) =>
+        retryTransientRead(`${delegateName}.${prop}`, () => value.apply(target, args))
+    },
+  })
+
+  proxiedDelegates.set(delegate, proxy)
+  return proxy
+}
+
+function proxyPrismaClient<T extends object>(client: T): T {
+  const existing = proxiedClients.get(client)
+  if (existing) return existing
+
+  const proxy = new Proxy(client, {
+    get(target, prop, receiver) {
+      const value = Reflect.get(target, prop, receiver)
+
+      if (
+        typeof prop === "string" &&
+        value &&
+        typeof value === "object" &&
+        !prop.startsWith("$")
+      ) {
+        return proxyDelegate(value, prop)
+      }
+
+      return value
+    },
+  })
+
+  proxiedClients.set(client, proxy)
+  return proxy
 }
 
 async function createPrismaClient() {
@@ -135,10 +261,12 @@ export async function prisma() {
   }
 
   if (!prismaState.promise) {
-    prismaState.promise = createPrismaClient().catch(async (error) => {
-      await resetPrismaClient();
-      throw error;
-    });
+    prismaState.promise = createPrismaClient()
+      .then((client) => proxyPrismaClient(client))
+      .catch(async (error) => {
+        await resetPrismaClient();
+        throw error;
+      });
   }
 
   return prismaState.promise;

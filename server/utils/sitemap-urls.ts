@@ -1,11 +1,49 @@
 import { buildGuideSlug } from "~~/shared/utils/guide-slug"
+import { getPublicFutureSessionThreshold } from "~~/shared/utils/public-stage-sessions"
 import { sanitizePublicImageUrl } from "./public-image"
 
 type SitemapUrl = {
   loc: string
   lastmod: string
   changefreq: "weekly"
-  priority: 0.7 | 0.8
+  priority: 0.7 | 0.8 | 0.9
+}
+
+export function getStaticSitemapUrls(): SitemapUrl[] {
+  const lastmod = new Date().toISOString()
+
+  return [
+    {
+      loc: "/",
+      lastmod,
+      changefreq: "weekly",
+      priority: 0.9,
+    },
+    {
+      loc: "/stages-escalade",
+      lastmod,
+      changefreq: "weekly",
+      priority: 0.9,
+    },
+    {
+      loc: "/la-brigade",
+      lastmod,
+      changefreq: "weekly",
+      priority: 0.8,
+    },
+    {
+      loc: "/disciplines/grande-voie",
+      lastmod,
+      changefreq: "weekly",
+      priority: 0.8,
+    },
+    {
+      loc: "/departements/savoie",
+      lastmod,
+      changefreq: "weekly",
+      priority: 0.8,
+    },
+  ]
 }
 
 export async function getGuideSitemapUrls(db: any): Promise<SitemapUrl[]> {
@@ -52,18 +90,14 @@ export async function getGuideSitemapUrls(db: any): Promise<SitemapUrl[]> {
 }
 
 export async function getStageSitemapUrls(db: any): Promise<SitemapUrl[]> {
-  const today = new Date()
-  today.setHours(0, 0, 0, 0)
+  const publicFutureThreshold = getPublicFutureSessionThreshold()
 
   const stages = await db.aventure.findMany({
     where: {
       estPublie: true,
       sessions: {
         some: {
-          OR: [
-            { dateFin: { gte: today } },
-            { dateDebut: { gte: today } },
-          ],
+          dateDebut: { gte: publicFutureThreshold },
         },
       },
     },

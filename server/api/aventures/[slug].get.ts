@@ -2,6 +2,10 @@
 import { prisma } from '../../utils/prisma'
 import { sanitizePublicImageUrl, sanitizePublicImageVariants } from '../../utils/public-image'
 import { buildGuideSlug } from '~~/shared/utils/guide-slug'
+import {
+  getPublicFutureSessionThreshold,
+  isPublicFutureSession,
+} from '~~/shared/utils/public-stage-sessions'
 
 export default defineEventHandler(async (event) => {
   const db = await prisma()
@@ -163,6 +167,7 @@ const mapListAventure = (a: any) => ({
   id: a.id,
   slug: a.slug,
   estPublie: a.estPublie,
+  createdAt: a.createdAt,
   titre: a.titre,
   sousTitre: a.sousTitre,
   discipline: a.discipline,
@@ -235,6 +240,7 @@ const mapDetailAventure = (a: any, bookedSessionIds: Set<number>) => ({
 
 const mapSessions = (sessions: any[], placesMax?: number | null, bookedSessionIds?: Set<number>) =>
   (sessions ?? [])
+    .filter((session: any) => isPublicFutureSession(session))
     .sort((s1: any, s2: any) => +s1.dateDebut - +s2.dateDebut)
     .map((session: any) => {
       const participantsCount = Array.isArray(session.reservations)
@@ -256,12 +262,11 @@ const mapSessions = (sessions: any[], placesMax?: number | null, bookedSessionId
     })
 
 const mapNextSession = (sessions: any[]) => {
-  const today = new Date()
-  today.setHours(0, 0, 0, 0)
+  const thresholdMs = getPublicFutureSessionThreshold().getTime()
   const future = (sessions ?? [])
     .filter((s: any) => s?.dateDebut)
     .map((s: any) => ({ ...s, _ts: new Date(s.dateDebut).getTime() }))
-    .filter((s: any) => !Number.isNaN(s._ts) && s._ts >= today.getTime())
+    .filter((s: any) => !Number.isNaN(s._ts) && s._ts >= thresholdMs)
     .sort((a: any, b: any) => a._ts - b._ts)
 
   if (!future.length) return null
@@ -279,13 +284,11 @@ const mapNextSession = (sessions: any[]) => {
 const isStageSoldOut = (sessions: any[], placesMax?: number | null) => {
   if (!Array.isArray(sessions) || !sessions.length || !placesMax || placesMax <= 0) return false
 
-  const today = new Date()
-  today.setHours(0, 0, 0, 0)
-  const todayMs = today.getTime()
+  const thresholdMs = getPublicFutureSessionThreshold().getTime()
 
   const upcoming = sessions.filter((session: any) => {
     const timestamp = session?.dateDebut ? new Date(session.dateDebut).getTime() : Number.NaN
-    return !Number.isNaN(timestamp) && timestamp >= todayMs
+    return !Number.isNaN(timestamp) && timestamp >= thresholdMs
   })
 
   if (!upcoming.length) return false

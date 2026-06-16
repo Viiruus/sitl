@@ -2,6 +2,7 @@
 import { buildStoredSrcset, resolveStoredImageSrc } from '~/composables/useStoredImageVariants'
 import { formatDurationDays, formatSessionRangeLabel } from '~~/shared/utils/aventure-schedule'
 import { getGuideRoleLabel } from '~~/shared/utils/guide-gender'
+import { getPublicFutureSessionThresholdMs } from '~~/shared/utils/public-stage-sessions'
 import { resolvePublicSiteUrl } from '~~/shared/utils/site-url'
 import { getStageRegionForCoordinates } from '~~/shared/utils/stage-region'
 const route = useRoute()
@@ -182,8 +183,7 @@ const getDisplaySession = (aventure: any) => {
 }
 
 const filteredAventures = computed(() => {
-  const today = new Date()
-  today.setHours(0, 0, 0, 0)
+  const thresholdMs = getPublicFutureSessionThresholdMs()
 
   let adventures = publishedAventures.value
     .map((aventure: any) => {
@@ -193,7 +193,7 @@ const filteredAventures = computed(() => {
     })
     .filter((aventure: any) => {
       if (aventure.nextDate) {
-        return aventure.nextDate >= today.getTime()
+        return aventure.nextDate >= thresholdMs
       }
       return false
     })

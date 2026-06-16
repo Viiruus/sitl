@@ -2,6 +2,7 @@ import { prisma } from "../../utils/prisma"
 import { sanitizePublicImageUrl, sanitizePublicImageVariants } from "../../utils/public-image"
 import { extractGooglePlaceId, fetchGooglePlaceSummary } from "../../utils/google-place-details"
 import { buildGuideSlug } from "~~/shared/utils/guide-slug"
+import { getPublicFutureSessionThreshold, isPublicFutureSession } from "~~/shared/utils/public-stage-sessions"
 
 const normalizeStringList = (value: unknown) =>
   Array.isArray(value)
@@ -9,14 +10,12 @@ const normalizeStringList = (value: unknown) =>
     : []
 
 const findNextSession = (sessions: any[]) => {
-  const today = new Date()
-  today.setHours(0, 0, 0, 0)
-  const todayMs = today.getTime()
+  const thresholdMs = getPublicFutureSessionThreshold().getTime()
 
   const future = (sessions ?? [])
     .filter((s: any) => s?.dateDebut)
     .map((s: any) => ({ ...s, _ts: new Date(s.dateDebut).getTime() }))
-    .filter((s: any) => !Number.isNaN(s._ts) && s._ts >= todayMs)
+    .filter((s: any) => !Number.isNaN(s._ts) && s._ts >= thresholdMs)
     .sort((a: any, b: any) => a._ts - b._ts)
 
   if (!future.length) return null
@@ -26,14 +25,7 @@ const findNextSession = (sessions: any[]) => {
 }
 
 const isStageSoldOut = (sessions: any[], placesMax?: number | null) => {
-  const today = new Date()
-  today.setHours(0, 0, 0, 0)
-  const todayMs = today.getTime()
-  const futureSessions = (sessions ?? []).filter((session: any) => {
-    if (!session?.dateDebut) return false
-    const ts = new Date(session.dateDebut).getTime()
-    return !Number.isNaN(ts) && ts >= todayMs
-  })
+  const futureSessions = (sessions ?? []).filter((session: any) => isPublicFutureSession(session))
   const capacity = Number(placesMax ?? 0)
   if (!capacity || !futureSessions.length) return false
   return futureSessions.every((session: any) => Number(session?.placesReservees ?? 0) >= capacity)

@@ -1,6 +1,7 @@
 import { prisma } from "../utils/prisma"
-import { getGuideSitemapUrls, getStageSitemapUrls } from "../utils/sitemap-urls"
+import { getGuideSitemapUrls, getStageSitemapUrls, getStaticSitemapUrls } from "../utils/sitemap-urls"
 
+const STATIC_SOURCE_PATH = "/api/__sitemap__/static"
 const GUIDE_SOURCE_PATH = "/api/__sitemap__/moniteurs"
 const STAGE_SOURCE_PATH = "/api/__sitemap__/stages"
 
@@ -21,10 +22,11 @@ function getSourcePath(source: any): string | null {
 export default defineNitroPlugin((nitroApp) => {
   nitroApp.hooks.hook("sitemap:sources", async (ctx) => {
     const sourcePaths = ctx.sources.map(getSourcePath)
+    const needsStatic = sourcePaths.includes(STATIC_SOURCE_PATH)
     const needsGuides = sourcePaths.includes(GUIDE_SOURCE_PATH)
     const needsStages = sourcePaths.includes(STAGE_SOURCE_PATH)
 
-    if (!needsGuides && !needsStages) return
+    if (!needsStatic && !needsGuides && !needsStages) return
 
     const db = await prisma()
     const [guideUrls, stageUrls] = await Promise.all([
@@ -34,6 +36,17 @@ export default defineNitroPlugin((nitroApp) => {
 
     ctx.sources = ctx.sources.map((source, index) => {
       const sourcePath = sourcePaths[index]
+
+      if (sourcePath === STATIC_SOURCE_PATH && needsStatic) {
+        return {
+          context: {
+            name: "bdk:sitemap:static",
+            description: "Static SEO pages generated directly to avoid production self-fetch timeouts.",
+          },
+          sourceType: "user",
+          urls: getStaticSitemapUrls(),
+        }
+      }
 
       if (sourcePath === GUIDE_SOURCE_PATH && guideUrls) {
         return {

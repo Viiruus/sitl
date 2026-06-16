@@ -443,9 +443,10 @@
 </template>
 
 <script setup lang="ts">
-import { buildStoredSrcset, resolveStoredImageSrc } from '~/composables/useStoredImageVariants'
+import { buildStoredSrcset, normalizeStoredVariants, resolveStoredImageSrc } from '~/composables/useStoredImageVariants'
 import { formatDurationDays, formatSessionRangeLabel } from '~~/shared/utils/aventure-schedule'
 import { getGuideRoleDativeLabel, getGuideRoleLabel, getGuideRoleLabelWithArticle, getGuideRoleReferenceLabel } from '~~/shared/utils/guide-gender'
+import { getPublicFutureSessionThresholdMs } from '~~/shared/utils/public-stage-sessions'
 import { disciplineHubPath } from '~~/shared/utils/seo-hubs'
 import { resolvePublicSiteUrl } from '~~/shared/utils/site-url'
 
@@ -485,8 +486,7 @@ const aventures = computed(() =>
 )
 const hasPublishedStages = computed(() => aventures.value.length > 0)
 const filteredAventures = computed(() => {
-  const today = new Date()
-  today.setHours(0, 0, 0, 0)
+  const thresholdMs = getPublicFutureSessionThresholdMs()
   const list = (aventures.value || []).map((a: any) => {
     const nextDate = a.nextSession?.dateDebut ? new Date(a.nextSession.dateDebut).getTime() : null
     const hasSessions = Array.isArray(a.sessions) && a.sessions.length > 0
@@ -494,7 +494,7 @@ const filteredAventures = computed(() => {
   })
   return list
     .filter((a: any) => {
-      if (a.nextDate) return a.nextDate >= today.getTime()
+      if (a.nextDate) return a.nextDate >= thresholdMs
       return false
     })
     .sort((a: any, b: any) => {
@@ -708,15 +708,32 @@ const aventureCoverSrcset = (aventure: any) => {
   return buildStoredSrcset(aventure?.coverImageVariants)
 }
 
-const moniteurPortraitAbsolute = computed(() => {
-  const image = moniteurPortrait.value
-  if (!image) return null
-  if (/^https?:\/\//i.test(image)) return image
+const toStructuredDataImageUrl = (value?: string | null) => {
+  const image = typeof value === 'string' ? value.trim() : ''
+  const lowerImage = image.toLowerCase()
+  if (!image || lowerImage.startsWith('data:') || lowerImage.startsWith('blob:')) return null
+
   try {
-    return new URL(image, siteBaseUrl.value).toString()
+    const url = /^https?:\/\//i.test(image)
+      ? new URL(image)
+      : new URL(image, siteBaseUrl.value)
+
+    return url.protocol === 'http:' || url.protocol === 'https:' ? url.toString() : null
   } catch {
-    return image
+    return null
   }
+}
+
+const moniteurStructuredDataImage = computed(() => {
+  const variants = normalizeStoredVariants(moniteur.value?.profileImageVariants)
+    .map((variant) => toStructuredDataImageUrl(variant.url))
+    .filter((url): url is string => Boolean(url))
+
+  if (variants.length) {
+    return variants[variants.length - 1]
+  }
+
+  return toStructuredDataImageUrl(moniteur.value?.profileImageUrl)
 })
 
 const breadcrumbStructuredData = computed(() => {
@@ -762,7 +779,7 @@ const profilePageStructuredData = computed(() => {
       name: moniteurName.value || moniteur.value.fullName || 'Moniteur',
       identifier: moniteur.value.id != null ? String(moniteur.value.id) : undefined,
       description: moniteur.value.bio || undefined,
-      image: moniteurPortraitAbsolute.value || undefined,
+      image: moniteurStructuredDataImage.value || undefined,
       sameAs: sameAs.length ? sameAs : undefined,
     },
   }
@@ -791,7 +808,7 @@ const localBusinessStructuredData = computed(() => {
     '@type': 'LocalBusiness',
     '@id': `${canonicalGuideUrl.value}#localbusiness`,
     name: moniteurName.value || moniteur.value.fullName || moniteurLocalLabel.value,
-    image: moniteurPortraitAbsolute.value || undefined,
+    image: moniteurStructuredDataImage.value || undefined,
     description: moniteurBioFull.value || undefined,
     url: canonicalGuideUrl.value,
     telephone: moniteur.value?.phoneNumber || undefined,

@@ -1195,8 +1195,13 @@ import {
 } from '~~/shared/constants/guide-stage-terms'
 import { formatDurationDays, formatSessionRangeLabel } from '~~/shared/utils/aventure-schedule'
 import { getGuideRoleLabel, getGuideRoleLabelWithArticle } from '~~/shared/utils/guide-gender'
+import {
+  getPublicFutureSessionThresholdMs,
+  isPublicFutureSession,
+} from '~~/shared/utils/public-stage-sessions'
 import { disciplineHubPath } from '~~/shared/utils/seo-hubs'
 import { resolvePublicSiteUrl } from '~~/shared/utils/site-url'
+import { buildStoredSrcset, normalizeStoredVariants, resolveStoredImageSrc } from '~/composables/useStoredImageVariants'
 import '@vuepic/vue-datepicker/dist/main.css'
 const route = useRoute()
 const slug = route.params.slug as string
@@ -1210,17 +1215,15 @@ const otherStages = computed(() =>
   (data.value?.autres ?? []).filter((aventure: any) => aventure?.estPublie === true),
 )
 const filteredOtherStages = computed(() => {
-  const today = new Date()
-  today.setHours(0, 0, 0, 0)
-  const todayMs = today.getTime()
+  const thresholdMs = getPublicFutureSessionThresholdMs()
   const list = (otherStages.value || []).map((a: any) => {
-    const { next, hasAnySession } = findNextSession(a, todayMs)
+    const { next, hasAnySession } = findNextSession(a, thresholdMs)
     const nextDate = next?.dateDebut ? new Date(next.dateDebut).getTime() : null
     return { ...a, nextDate, hasSessions: hasAnySession, derivedNextSession: next }
   })
   return list
     .filter((a: any) => {
-      if (a.nextDate) return a.nextDate >= todayMs
+      if (a.nextDate) return a.nextDate >= thresholdMs
       return false
     })
     .sort((a: any, b: any) => {
@@ -1256,9 +1259,7 @@ const findNextSession = (aventure: any, todayMs: number) => {
 }
 
 const displayNextSession = (aventure: any) => {
-  const today = new Date()
-  today.setHours(0, 0, 0, 0)
-  return findNextSession(aventure, today.getTime()).next
+  return findNextSession(aventure, getPublicFutureSessionThresholdMs()).next
 }
 
 // Onglets
@@ -1740,12 +1741,9 @@ const suggestionError = ref<string | null>(null)
 const suggestionSuccess = ref<string | null>(null)
 
 const availableSessions = computed(() => {
-  const today = new Date()
-  today.setHours(0, 0, 0, 0)
+  const thresholdMs = getPublicFutureSessionThresholdMs()
   return (stage.value?.sessions || []).filter((s: any) => {
-    if (!s?.dateDebut) return false
-    const ts = new Date(s.dateDebut).getTime()
-    return !Number.isNaN(ts) && ts >= today.getTime()
+    return isPublicFutureSession(s, thresholdMs)
   })
 })
 
@@ -1755,12 +1753,9 @@ const selectedSessionIds = ref<string[]>([])
 
 const selectedSessions = computed(() => {
   const ids = selectedSessionIds.value
-  const today = new Date()
-  today.setHours(0, 0, 0, 0)
+  const thresholdMs = getPublicFutureSessionThresholdMs()
   const sessions = (stage.value?.sessions || []).filter((s: any) => {
-    if (!s?.dateDebut) return false
-    const ts = new Date(s.dateDebut).getTime()
-    return !Number.isNaN(ts) && ts >= today.getTime()
+    return isPublicFutureSession(s, thresholdMs)
   })
   return sessions.filter((s: any) => ids.includes(String(s.id)))
 })
@@ -2113,15 +2108,56 @@ const stageCanonicalUrl = computed(() => {
     return `/stages-escalade/${canonicalSlug}`
   }
 })
-const seoImageAbsolute = computed(() => {
-  const image = seoImage.value
-  if (!image) return undefined
-  if (/^https?:\/\//i.test(image)) return image
+
+const toStructuredDataUrl = (value?: string | null) => {
+  const raw = typeof value === 'string' ? value.trim() : ''
+  const lowerRaw = raw.toLowerCase()
+  if (!raw || lowerRaw.startsWith('data:') || lowerRaw.startsWith('blob:')) return undefined
+
   try {
-    return new URL(image, siteBaseUrl.value).toString()
+    const url = new URL(raw, siteBaseUrl.value)
+    return url.protocol === 'http:' || url.protocol === 'https:' ? url.toString() : undefined
   } catch {
-    return image
+    return undefined
   }
+}
+
+const toStructuredDataDateTime = (value?: string | Date | null) => {
+  if (!value) return undefined
+  const date = value instanceof Date ? value : new Date(value)
+  return Number.isNaN(date.getTime()) ? undefined : date.toISOString()
+}
+
+const seoImageAbsolute = computed(() => toStructuredDataUrl(seoImage.value))
+
+const guideProfileAbsoluteUrl = computed(() =>
+  guideProfileLink.value ? toStructuredDataUrl(guideProfileLink.value) : undefined,
+)
+
+const guideStructuredDataImage = computed(() => {
+  const variants = normalizeStoredVariants(guide.value?.profile?.profileImageVariants)
+    .map((variant) => toStructuredDataUrl(variant.url))
+    .filter((url): url is string => Boolean(url))
+
+  if (variants.length) {
+    return variants[variants.length - 1]
+  }
+
+  return toStructuredDataUrl(guide.value?.profile?.profileImageUrl)
+})
+
+const performerStructuredData = computed(() => {
+  const name = guideFullName.value || guideLocalLabel.value
+  if (!name) return undefined
+
+  return compactObject({
+    '@type': 'Person',
+    name,
+    url: guideProfileAbsoluteUrl.value,
+    image: guideStructuredDataImage.value ? [guideStructuredDataImage.value] : undefined,
+    identifier: guide.value?.professionalCardNumber || undefined,
+    sameAs: guideInstagramUrl.value ? [guideInstagramUrl.value] : undefined,
+  })
 })
 
 const compactObject = <T extends Record<string, any>>(value: T): Partial<T> =>
@@ -2132,7 +2168,10 @@ const compactObject = <T extends Record<string, any>>(value: T): Partial<T> =>
 const eventStructuredData = computed(() => {
   if (!stage.value) return null
 
-  const sessions = (stage.value.sessions || []).filter((session: any) => session?.dateDebut)
+  const thresholdMs = getPublicFutureSessionThresholdMs()
+  const sessions = (stage.value.sessions || []).filter((session: any) =>
+    isPublicFutureSession(session, thresholdMs),
+  )
   if (!sessions.length) return null
 
   const organizationId = `${siteBaseUrl.value.replace(/\/$/, '')}/#organization`
@@ -2185,13 +2224,19 @@ const eventStructuredData = computed(() => {
           organizer: {
             '@id': organizationId,
           },
+          performer: performerStructuredData.value,
           offers:
             typeof stage.value?.prixParPersonne === 'number'
               ? {
                   '@type': 'Offer',
                   price: String(stage.value.prixParPersonne),
                   priceCurrency: stage.value?.devise || 'EUR',
-                  availability: 'https://schema.org/InStock',
+                  availability: isSessionFull(session)
+                    ? 'https://schema.org/SoldOut'
+                    : 'https://schema.org/InStock',
+                  validFrom:
+                    toStructuredDataDateTime(stage.value?.createdAt) ||
+                    toStructuredDataDateTime(session.dateDebut),
                   url: stageCanonicalUrl.value,
                 }
               : undefined,

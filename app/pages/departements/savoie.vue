@@ -249,7 +249,6 @@ const canonicalUrl = `${siteBaseUrl}/departements/savoie`
 
 const { data: stagesData, pending: pendingStages } = await useFetch('/api/aventures')
 const { data: guidesData, pending: pendingGuides } = await useFetch('/api/moniteurs')
-const randomWeights = useState<Record<number, number>>('departement-savoie-moniteurs-order', () => ({}))
 
 const toUpcomingTimestamp = (stage: any) => {
   const raw = stage?.nextSession?.dateDebut
@@ -262,34 +261,7 @@ const savoieMoniteurs = computed(() =>
   (guidesData.value?.moniteurs ?? []).filter((moniteur: any) => isSavoieDepartment(moniteur?.department)),
 )
 
-watch(
-  () => savoieMoniteurs.value,
-  (list) => {
-    if (!list.length) {
-      randomWeights.value = {}
-      return
-    }
-    list.forEach((moniteur: any) => {
-      const key = moniteur?.id
-      if (key == null) return
-      if (randomWeights.value[key] === undefined) {
-        randomWeights.value[key] = Math.random()
-      }
-    })
-  },
-  { immediate: true, deep: true },
-)
-
-const randomizedSavoieMoniteurs = computed(() => {
-  const weights = randomWeights.value
-  return savoieMoniteurs.value
-    .slice()
-    .sort((a: any, b: any) => {
-      const wA = weights[a?.id] ?? 0
-      const wB = weights[b?.id] ?? 0
-      return wA - wB
-    })
-})
+const randomizedSavoieMoniteurs = computed(() => savoieMoniteurs.value)
 
 const savoieStageGuideSlugs = computed(() =>
   new Set(
@@ -336,7 +308,30 @@ const breadcrumbStructuredData = computed(() => ({
   ],
 }))
 
-useHead({
+const savoieItemListStructuredData = computed(() => {
+  const stageItems = savoieStages.value.map((stage: any) => ({
+    name: stage.titre,
+    url: `${siteBaseUrl}/stages-escalade/${stage.slug}`,
+  }))
+  const moniteurItems = savoieMoniteurs.value.map((moniteur: any) => ({
+    name: moniteur.fullName,
+    url: `${siteBaseUrl}/moniteurs/${moniteur.slug}`,
+  }))
+
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    name: 'Stages et moniteurs escalade en Savoie',
+    itemListElement: [...stageItems, ...moniteurItems].map((item, index) => ({
+      '@type': 'ListItem',
+      position: index + 1,
+      name: item.name,
+      url: item.url,
+    })),
+  }
+})
+
+useHead(() => ({
   link: [
     {
       rel: 'canonical',
@@ -349,8 +344,13 @@ useHead({
       type: 'application/ld+json',
       innerHTML: JSON.stringify(breadcrumbStructuredData.value),
     },
+    {
+      key: 'departement-savoie-itemlist-jsonld',
+      type: 'application/ld+json',
+      innerHTML: JSON.stringify(savoieItemListStructuredData.value),
+    },
   ],
-})
+}))
 
 useSeoMeta({
   title: seoTitle,

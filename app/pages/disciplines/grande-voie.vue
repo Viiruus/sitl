@@ -249,7 +249,6 @@ const canonicalUrl = `${siteBaseUrl}/disciplines/grande-voie`
 
 const { data: stagesData, pending: pendingStages } = await useFetch('/api/aventures')
 const { data: guidesData, pending: pendingGuides } = await useFetch('/api/moniteurs')
-const randomWeights = useState<Record<number, number>>('discipline-grande-voie-moniteurs-order', () => ({}))
 
 const toUpcomingTimestamp = (stage: any) => {
   const raw = stage?.nextSession?.dateDebut
@@ -280,34 +279,7 @@ const grandeVoieMoniteurs = computed(() =>
   }),
 )
 
-watch(
-  () => grandeVoieMoniteurs.value,
-  (list) => {
-    if (!list.length) {
-      randomWeights.value = {}
-      return
-    }
-    list.forEach((moniteur: any) => {
-      const key = moniteur?.id
-      if (key == null) return
-      if (randomWeights.value[key] === undefined) {
-        randomWeights.value[key] = Math.random()
-      }
-    })
-  },
-  { immediate: true, deep: true },
-)
-
-const randomizedGrandeVoieMoniteurs = computed(() => {
-  const weights = randomWeights.value
-  return grandeVoieMoniteurs.value
-    .slice()
-    .sort((a: any, b: any) => {
-      const wA = weights[a?.id] ?? 0
-      const wB = weights[b?.id] ?? 0
-      return wA - wB
-    })
-})
+const randomizedGrandeVoieMoniteurs = computed(() => grandeVoieMoniteurs.value)
 
 const seoTitle = 'Stages grande voie | Moniteurs et aventures de la Brigade du kiff'
 const seoDescription =
@@ -338,7 +310,30 @@ const breadcrumbStructuredData = computed(() => ({
   ],
 }))
 
-useHead({
+const grandeVoieItemListStructuredData = computed(() => {
+  const stageItems = grandeVoieStages.value.map((stage: any) => ({
+    name: stage.titre,
+    url: `${siteBaseUrl}/stages-escalade/${stage.slug}`,
+  }))
+  const moniteurItems = grandeVoieMoniteurs.value.map((moniteur: any) => ({
+    name: moniteur.fullName,
+    url: `${siteBaseUrl}/moniteurs/${moniteur.slug}`,
+  }))
+
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    name: 'Stages et moniteurs grande voie',
+    itemListElement: [...stageItems, ...moniteurItems].map((item, index) => ({
+      '@type': 'ListItem',
+      position: index + 1,
+      name: item.name,
+      url: item.url,
+    })),
+  }
+})
+
+useHead(() => ({
   link: [
     {
       rel: 'canonical',
@@ -351,8 +346,13 @@ useHead({
       type: 'application/ld+json',
       innerHTML: JSON.stringify(breadcrumbStructuredData.value),
     },
+    {
+      key: 'discipline-grande-voie-itemlist-jsonld',
+      type: 'application/ld+json',
+      innerHTML: JSON.stringify(grandeVoieItemListStructuredData.value),
+    },
   ],
-})
+}))
 
 useSeoMeta({
   title: seoTitle,

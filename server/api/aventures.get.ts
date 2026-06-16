@@ -2,6 +2,7 @@
 import { prisma } from "../utils/prisma";
 import { sanitizePublicImageUrl, sanitizePublicImageVariants } from "../utils/public-image";
 import { buildGuideSlug } from "~~/shared/utils/guide-slug";
+import { getPublicFutureSessionThreshold } from "~~/shared/utils/public-stage-sessions";
 
 export default defineEventHandler(async (event) => {
   setHeader(event, "cache-control", "no-store");
@@ -9,8 +10,8 @@ export default defineEventHandler(async (event) => {
   const query = getQuery(event);
   const mode = typeof query.mode === "string" ? query.mode : null;
   const limit = parsePositiveInt(query.limit, 3);
-  const today = startOfToday();
-  const upcomingSessionWhere = buildUpcomingSessionWhere(today);
+  const publicFutureThreshold = getPublicFutureSessionThreshold();
+  const upcomingSessionWhere = buildUpcomingSessionWhere(publicFutureThreshold);
 
   if (mode === "home") {
     const aventures = await db.aventure.findMany({
@@ -133,17 +134,8 @@ const parsePositiveInt = (value: unknown, fallback: number) => {
   return Math.max(1, Math.min(parsed, 12));
 };
 
-const startOfToday = () => {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  return today;
-};
-
-const buildUpcomingSessionWhere = (today: Date) => ({
-  OR: [
-    { dateFin: { gte: today } },
-    { dateDebut: { gte: today } },
-  ],
+const buildUpcomingSessionWhere = (threshold: Date) => ({
+  dateDebut: { gte: threshold },
 });
 
 const isStageSoldOut = (sessions: any[], placesMax?: number | null) => {
@@ -201,14 +193,12 @@ const selectHomepageAventures = (aventures: any[], limit: number) => {
 };
 
 const findNextSession = (sessions: any[]) => {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const todayMs = today.getTime();
+  const thresholdMs = getPublicFutureSessionThreshold().getTime();
 
   const future = (sessions ?? [])
     .filter((s: any) => s?.dateDebut)
     .map((s: any) => ({ ...s, _ts: new Date(s.dateDebut).getTime() }))
-    .filter((s: any) => !Number.isNaN(s._ts) && s._ts >= todayMs)
+    .filter((s: any) => !Number.isNaN(s._ts) && s._ts >= thresholdMs)
     .sort((a: any, b: any) => a._ts - b._ts);
 
   if (!future.length) return null;
