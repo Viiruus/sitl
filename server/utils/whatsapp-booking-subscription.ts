@@ -1,5 +1,6 @@
-import { normalizePhoneNumber, sendTemplateViaWhatsapp } from './whatsapp-otp'
 import { formatSessionRangeLabel } from '~~/shared/utils/aventure-schedule'
+import { normalizePhoneNumber } from '~~/shared/utils/phone-number'
+import { sendTemplateViaWhatsapp } from './whatsapp-otp'
 
 const GUIDE_NEW_SUBSCRIPTION_TEMPLATE_NAME =
   process.env.WHATSAPP_GUIDE_NEW_SUBSCRIPTION_TEMPLATE_NAME || 'new_subscription'
@@ -55,7 +56,7 @@ export async function sendClimberSubscriptionOkViaWhatsapp(input: {
   stageTitle: string
   stageLocalization: string
   stageDate: string
-  stageUrl: string
+  stageUrlPath: string
 }) {
   return sendTemplateViaWhatsapp({
     phone: normalizePhoneNumber(input.phoneNumber),
@@ -77,9 +78,16 @@ export async function sendClimberSubscriptionOkViaWhatsapp(input: {
             type: 'text',
             text: input.stageDate,
           },
+        ],
+      },
+      {
+        type: 'button',
+        sub_type: 'url',
+        index: 0,
+        parameters: [
           {
             type: 'text',
-            text: input.stageUrl,
+            text: input.stageUrlPath,
           },
         ],
       },

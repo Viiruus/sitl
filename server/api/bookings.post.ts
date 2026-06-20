@@ -1,12 +1,11 @@
 // server/api/bookings.post.ts
+import { normalizePhoneNumber } from '~~/shared/utils/phone-number'
 import { prisma } from '../utils/prisma'
 import {
   formatBookingStageDate,
   sendClimberSubscriptionOkViaWhatsapp,
   sendGuideNewSubscriptionViaWhatsapp,
 } from '../utils/whatsapp-booking-subscription'
-import { normalizePhoneNumber } from '../utils/whatsapp-otp'
-import { resolvePublicSiteUrl } from '~~/shared/utils/site-url'
 import { assertClimberOnboardingComplete } from '../utils/climber-onboarding'
 
 export default defineEventHandler(async (event) => {
@@ -155,18 +154,10 @@ export default defineEventHandler(async (event) => {
     },
   })
 
-  const runtimeConfig = useRuntimeConfig(event)
   const stageTitle = dbSession.aventure.titre
   const stageLocalization = dbSession.aventure.lieuLabel || 'Lieu à confirmer'
   const stageDate = formatBookingStageDate(dbSession.dateDebut, dbSession.dateFin)
-  const stageUrl = (() => {
-    const baseUrl = resolvePublicSiteUrl(runtimeConfig.public.publicUrl)
-    try {
-      return new URL(`/stages-escalade/${dbSession.aventure.slug}`, baseUrl).toString()
-    } catch {
-      return `/stages-escalade/${dbSession.aventure.slug}`
-    }
-  })()
+  const stageUrlPath = dbSession.aventure.slug
 
   const normalizedClimberPhone = normalizePhoneNumber(climber.phoneNumber || sessionAuth.user.phoneNumber || '')
   const normalizedGuidePhone = normalizePhoneNumber(dbSession.aventure.guide?.phoneNumber || '')
@@ -212,7 +203,7 @@ export default defineEventHandler(async (event) => {
         stageTitle,
         stageLocalization,
         stageDate,
-        stageUrl,
+        stageUrlPath,
       }).then((result) => {
         if (!result.ok) {
           console.error('[whatsapp-climber-subscription-ok] Non-blocking send failure', {

@@ -1,9 +1,9 @@
+import { normalizePhoneNumber } from '~~/shared/utils/phone-number'
 import { prisma } from '../../utils/prisma'
 import {
   formatBookingStageDate,
   sendGuideClimberStageCancelationViaWhatsapp,
 } from '../../utils/whatsapp-booking-subscription'
-import { normalizePhoneNumber } from '../../utils/whatsapp-otp'
 import { isClimberOnboardingComplete } from '../../utils/climber-onboarding'
 
 export default defineEventHandler(async (event) => {

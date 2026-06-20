@@ -1,10 +1,10 @@
 import { z } from 'zod'
+import { normalizePhoneNumber } from '~~/shared/utils/phone-number'
 import { prisma } from '../../../utils/prisma'
 import {
   buildGuideContactMessagePreview,
   sendGuideContactRequestViaWhatsapp,
 } from '../../../utils/whatsapp-guide-contact'
-import { normalizePhoneNumber } from '../../../utils/whatsapp-otp'
 import { assertClimberOnboardingComplete } from '../../../utils/climber-onboarding'
 
 const bodySchema = z.object({

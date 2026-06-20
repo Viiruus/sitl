@@ -1,7 +1,8 @@
 import { formatSessionRangeLabel } from '~~/shared/utils/aventure-schedule'
+import { normalizePhoneNumber } from '~~/shared/utils/phone-number'
 import { getStageRegionForCoordinates } from '~~/shared/utils/stage-region'
 import { resolvePublicSiteUrl } from '~~/shared/utils/site-url'
-import { normalizePhoneNumber, sendTemplateViaWhatsapp } from './whatsapp-otp'
+import { sendTemplateViaWhatsapp } from './whatsapp-otp'
 
 export const STAGE_LISTING_NOTIFICATION_TEMPLATE_NAME =
   process.env.WHATSAPP_STAGE_LISTING_NOTIFICATION_TEMPLATE_NAME || 'notifications_new_stage'

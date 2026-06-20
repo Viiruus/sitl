@@ -1,6 +1,6 @@
 import { z } from 'zod'
+import { normalizeWhatsAppPhoneNumber } from '~~/shared/utils/phone-number'
 import {
-  normalizePhoneNumber,
   generateOtpToken,
   isWhatsAppOtpDevFallbackEnabled,
   isWhatsAppOtpPersistentModeEnabled,
@@ -18,8 +18,8 @@ export default defineEventHandler(async (event) => {
   const body = await readBody(event)
   const { phoneNumber, source } = bodySchema.parse(body)
 
-  const normalized = normalizePhoneNumber(phoneNumber)
-  if (!normalized || normalized.length < 6) {
+  const normalized = normalizeWhatsAppPhoneNumber(phoneNumber)
+  if (!normalized) {
     throw createError({ statusCode: 400, statusMessage: 'Numéro de téléphone invalide.' })
   }
 

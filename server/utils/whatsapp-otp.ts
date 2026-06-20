@@ -1,11 +1,21 @@
 import crypto from 'node:crypto'
+import {
+  normalizePhoneNumber,
+  normalizeWhatsAppPhoneNumber,
+} from '~~/shared/utils/phone-number'
 
 const OTP_TTL_MS = 10 * 60 * 1000 // 10 minutes
 const OTP_MAX_ATTEMPTS = 5
 
 type WhatsAppOtpSendResult =
   | { ok: true; messageId: string | null; raw: any }
-  | { ok: false; reason: 'not_configured' | 'send_failed'; message: string; statusCode?: number; raw?: any }
+  | {
+      ok: false
+      reason: 'invalid_phone' | 'not_configured' | 'send_failed'
+      message: string
+      statusCode?: number
+      raw?: any
+    }
 
 type WhatsAppTemplateSendInput = {
   phone: string
@@ -23,35 +33,6 @@ function secret() {
     process.env.NITRO_SECRET ||
     'dev-whatsapp-secret'
   )
-}
-
-export function normalizePhoneNumber(raw: string): string {
-  const trimmed = raw.trim()
-  if (!trimmed) return ''
-
-  // keep a possible leading "+" and strip formatting noise everywhere else
-  let normalized = trimmed.replace(/[^\d+]/g, '')
-  if (normalized.startsWith('00')) {
-    normalized = `+${normalized.slice(2)}`
-  }
-
-  const hasPlus = normalized.startsWith('+')
-  const digits = normalized.replace(/\D/g, '')
-  if (!digits) return ''
-
-  // Canonicalise common French inputs:
-  // +336..., 336..., 06..., 6... => +336...
-  if (digits.startsWith('33') && digits.length === 11) {
-    return `+${digits}`
-  }
-  if (digits.startsWith('0') && digits.length === 10) {
-    return `+33${digits.slice(1)}`
-  }
-  if (!hasPlus && digits.length === 9) {
-    return `+33${digits}`
-  }
-
-  return hasPlus ? `+${digits}` : digits
 }
 
 export function buildPhoneLookupVariants(raw: string): string[] {
@@ -232,6 +213,23 @@ async function sendTemplateRequest(input: WhatsAppTemplateSendInput): Promise<Wh
   const tokenFingerprint = token ? `${token.slice(0, 4)}...${token.slice(-4)} (len:${token.length})` : 'missing'
   const languageCode = input.language || getWhatsAppOtpTemplateConfig().language
   const logLabel = input.logLabel || 'whatsapp-template'
+  const phone = normalizeWhatsAppPhoneNumber(input.phone)
+
+  if (!phone) {
+    console.warn(`[${logLabel}] Invalid phone number, Meta send skipped`, {
+      vercelEnv: process.env.VERCEL_ENV || 'local',
+      templateName: input.templateName,
+      templateLanguage: languageCode,
+      rawPhoneLength: input.phone?.length || 0,
+    })
+
+    return {
+      ok: false,
+      reason: 'invalid_phone' as const,
+      message: 'Numéro de téléphone invalide.',
+      statusCode: 400,
+    }
+  }
 
   if (!token || !phoneId) {
     return {
@@ -243,7 +241,7 @@ async function sendTemplateRequest(input: WhatsAppTemplateSendInput): Promise<Wh
 
   const payload = {
     messaging_product: 'whatsapp',
-    to: input.phone,
+    to: phone,
     type: 'template',
     template: {
       name: input.templateName,
@@ -301,20 +299,30 @@ export async function sendTemplateViaWhatsapp(input: WhatsAppTemplateSendInput):
 
 export async function sendOtpViaWhatsapp(phone: string, code: string): Promise<WhatsAppOtpSendResult> {
   const templateConfig = getWhatsAppOtpTemplateConfig()
+  const normalizedPhone = normalizeWhatsAppPhoneNumber(phone)
+  if (!normalizedPhone) {
+    return {
+      ok: false,
+      reason: 'invalid_phone' as const,
+      message: 'Numéro de téléphone invalide.',
+      statusCode: 400,
+    }
+  }
+
   let result = await sendTemplateRequest({
-    phone,
+    phone: normalizedPhone,
     templateName: templateConfig.name,
     language: templateConfig.language,
-    components: buildAuthenticationTemplatePayload(phone, code, templateConfig.buttonSubType || undefined).template.components,
+    components: buildAuthenticationTemplatePayload(normalizedPhone, code, templateConfig.buttonSubType || undefined).template.components,
     logLabel: 'whatsapp-otp',
   })
 
-  if (!result.ok && !templateConfig.buttonSubType) {
+  if (!result.ok && result.reason === 'send_failed' && !templateConfig.buttonSubType) {
     result = await sendTemplateRequest({
-      phone,
+      phone: normalizedPhone,
       templateName: templateConfig.name,
       language: templateConfig.language,
-      components: buildAuthenticationTemplatePayload(phone, code, 'copy_code').template.components,
+      components: buildAuthenticationTemplatePayload(normalizedPhone, code, 'copy_code').template.components,
       logLabel: 'whatsapp-otp',
     })
   }

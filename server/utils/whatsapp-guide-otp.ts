@@ -1,4 +1,5 @@
 import { prisma } from './prisma'
+import { normalizeWhatsAppPhoneNumber } from '~~/shared/utils/phone-number'
 import {
   buildPhoneLookupVariants,
   createPublicOtpToken,
@@ -8,7 +9,6 @@ import {
   getWhatsAppOtpTemplateConfig,
   hashOtpCode,
   isWhatsAppOtpDevFallbackEnabled,
-  normalizePhoneNumber,
   shouldBypassRealWhatsAppSend,
   sendOtpViaWhatsapp,
   verifyOtpCodeHash,
@@ -87,14 +87,14 @@ export async function requestGuideWhatsappOtp(input: {
   phoneNumber: string
   source?: string | null
 }) {
-  const normalizedPhone = normalizePhoneNumber(input.phoneNumber)
+  const normalizedPhone = normalizeWhatsAppPhoneNumber(input.phoneNumber)
   logGuideOtp('request_received', {
     phoneNumber: input.phoneNumber,
     normalizedPhone,
     source: input.source || 'guide',
   })
 
-  if (!normalizedPhone || normalizedPhone.length < 6) {
+  if (!normalizedPhone) {
     logGuideOtp('request_rejected_invalid_phone', {
       phoneNumber: input.phoneNumber,
       normalizedPhone,
@@ -267,7 +267,7 @@ export async function verifyGuideWhatsappOtp(input: {
   code: string
   source?: string | null
 }) {
-  const normalizedPhone = normalizePhoneNumber(input.phoneNumber)
+  const normalizedPhone = normalizeWhatsAppPhoneNumber(input.phoneNumber)
   logGuideOtp('verify_attempt_received', {
     phoneNumber: input.phoneNumber,
     normalizedPhone,
@@ -275,7 +275,7 @@ export async function verifyGuideWhatsappOtp(input: {
     source: input.source || 'guide',
   })
 
-  if (!normalizedPhone || normalizedPhone.length < 6) {
+  if (!normalizedPhone) {
     logGuideOtp('verify_rejected_invalid_phone', {
       phoneNumber: input.phoneNumber,
       normalizedPhone,

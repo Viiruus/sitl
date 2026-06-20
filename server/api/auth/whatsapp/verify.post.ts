@@ -1,11 +1,11 @@
 import { z } from 'zod'
+import { normalizeWhatsAppPhoneNumber } from '~~/shared/utils/phone-number'
 import { prisma } from '../../../utils/prisma'
 import { isClimberOnboardingComplete } from '../../../utils/climber-onboarding'
 import { verifyClimberWhatsappOtp } from '../../../utils/whatsapp-climber-otp'
 import {
   buildPhoneLookupVariants,
   isWhatsAppOtpPersistentModeEnabled,
-  normalizePhoneNumber,
   verifyOtpToken,
 } from '../../../utils/whatsapp-otp'
 
@@ -25,8 +25,8 @@ export default defineEventHandler(async (event) => {
   const body = await readBody(event)
   const { phoneNumber, code, source, token } = bodySchema.parse(body)
 
-  const normalized = normalizePhoneNumber(phoneNumber)
-  if (!normalized || normalized.length < 6) {
+  const normalized = normalizeWhatsAppPhoneNumber(phoneNumber)
+  if (!normalized) {
     throw createError({ statusCode: 400, statusMessage: 'Numéro de téléphone invalide.' })
   }
 
@@ -69,7 +69,7 @@ export default defineEventHandler(async (event) => {
   }
 
   // Le token contient le numéro officiel validé
-  const verifiedPhone = normalizePhoneNumber(verification.phone)
+  const verifiedPhone = normalizeWhatsAppPhoneNumber(verification.phone)
   if (verifiedPhone !== normalized) {
     throw createError({ statusCode: 400, statusMessage: 'Numéro différent de la demande initiale.' })
   }

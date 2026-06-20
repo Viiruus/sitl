@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { getAssociationMembershipOffer } from '~~/shared/constants/association-membership'
+import { normalizeWhatsAppPhoneNumber } from '~~/shared/utils/phone-number'
 
 const router = useRouter()
 const { loggedIn, user, fetch, clear } = useUserSession()
@@ -54,6 +55,13 @@ const redirectAfterAuth = async () => {
 const requestCode = async () => {
   error.value = null
   success.value = null
+  const normalizedPhone = normalizeWhatsAppPhoneNumber(phoneNumber.value)
+  if (!normalizedPhone) {
+    error.value = 'Numéro de téléphone invalide.'
+    return
+  }
+
+  phoneNumber.value = normalizedPhone
   sending.value = true
 
   try {
@@ -62,7 +70,7 @@ const requestCode = async () => {
     const res: any = await $fetch('/api/moniteurs/auth/whatsapp', {
       method: 'POST',
       body: {
-        phoneNumber: phoneNumber.value,
+        phoneNumber: normalizedPhone,
         source: 'guide',
       },
     })
@@ -87,11 +95,19 @@ const verifyCode = async () => {
     loading.value = false
     return
   }
+  const normalizedPhone = normalizeWhatsAppPhoneNumber(phoneNumber.value)
+  if (!normalizedPhone) {
+    error.value = 'Numéro de téléphone invalide.'
+    loading.value = false
+    return
+  }
+
+  phoneNumber.value = normalizedPhone
   try {
     const res: any = await $fetch('/api/moniteurs/auth/whatsapp/verify', {
       method: 'POST',
       body: {
-        phoneNumber: phoneNumber.value,
+        phoneNumber: normalizedPhone,
         code: code.value,
         token: otpToken.value,
         source: 'guide',

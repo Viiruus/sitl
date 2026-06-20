@@ -1,4 +1,5 @@
 import { prisma } from './prisma'
+import { normalizeWhatsAppPhoneNumber } from '~~/shared/utils/phone-number'
 import {
   buildPhoneLookupVariants,
   createPublicOtpToken,
@@ -7,7 +8,6 @@ import {
   getOtpTtlMs,
   getWhatsAppOtpTemplateConfig,
   hashOtpCode,
-  normalizePhoneNumber,
   sendOtpViaWhatsapp,
   verifyOtpCodeHash,
 } from './whatsapp-otp'
@@ -45,8 +45,8 @@ export async function requestClimberWhatsappOtp(input: {
   phoneNumber: string
   source?: string | null
 }) {
-  const normalizedPhone = normalizePhoneNumber(input.phoneNumber)
-  if (!normalizedPhone || normalizedPhone.length < 6) {
+  const normalizedPhone = normalizeWhatsAppPhoneNumber(input.phoneNumber)
+  if (!normalizedPhone) {
     throw createError({ statusCode: 400, statusMessage: 'Numéro de téléphone invalide.' })
   }
 
@@ -136,8 +136,8 @@ export async function verifyClimberWhatsappOtp(input: {
   code: string
   source?: string | null
 }) {
-  const normalizedPhone = normalizePhoneNumber(input.phoneNumber)
-  if (!normalizedPhone || normalizedPhone.length < 6) {
+  const normalizedPhone = normalizeWhatsAppPhoneNumber(input.phoneNumber)
+  if (!normalizedPhone) {
     throw createError({ statusCode: 400, statusMessage: 'Numéro de téléphone invalide.' })
   }
 

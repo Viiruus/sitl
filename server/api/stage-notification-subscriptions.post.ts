@@ -1,9 +1,9 @@
 import { z } from 'zod'
+import { normalizePhoneNumber } from '~~/shared/utils/phone-number'
+import { STAGE_REGION_BOUNDS } from '~~/shared/utils/stage-region'
 import { prisma } from '../utils/prisma'
 import { assertClimberOnboardingComplete } from '../utils/climber-onboarding'
-import { normalizePhoneNumber } from '../utils/whatsapp-otp'
 import { normalizeStageNotificationDateRange } from '../utils/stage-notifications'
-import { STAGE_REGION_BOUNDS } from '~~/shared/utils/stage-region'
 
 const bodySchema = z.object({
   kind: z.enum(['STAGE_LISTING', 'GUIDE_STAGE']).default('STAGE_LISTING'),

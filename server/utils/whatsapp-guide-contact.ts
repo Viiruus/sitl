@@ -1,5 +1,6 @@
 import { prisma } from './prisma'
-import { normalizePhoneNumber, sendTemplateViaWhatsapp } from './whatsapp-otp'
+import { normalizePhoneNumber } from '~~/shared/utils/phone-number'
+import { sendTemplateViaWhatsapp } from './whatsapp-otp'
 
 const GUIDE_CONTACT_TEMPLATE_NAME = process.env.WHATSAPP_GUIDE_CONTACT_TEMPLATE_NAME || 'guide_contact_request'
 const GUIDE_CONTACT_TEMPLATE_LANGUAGE = process.env.WHATSAPP_OTP_TEMPLATE_LANGUAGE || 'fr'

@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { normalizeWhatsAppPhoneNumber } from '~~/shared/utils/phone-number'
+
 const { open, closeModal } = useAuthModal()
 const route = useRoute()
 const router = useRouter()
@@ -145,6 +147,13 @@ const redirectAfterAuth = async () => {
 const requestCode = async () => {
   error.value = null
   success.value = null
+  const normalizedPhone = normalizeWhatsAppPhoneNumber(phoneNumber.value)
+  if (!normalizedPhone) {
+    error.value = 'Numéro de téléphone invalide.'
+    return
+  }
+
+  phoneNumber.value = normalizedPhone
   sending.value = true
   try {
     await clear()
@@ -152,7 +161,7 @@ const requestCode = async () => {
     const res: any = await $fetch('/api/auth/whatsapp', {
       method: 'POST',
       body: {
-        phoneNumber: phoneNumber.value,
+        phoneNumber: normalizedPhone,
         source: source.value,
       },
     })
@@ -176,11 +185,19 @@ const verifyCode = async () => {
     loading.value = false
     return
   }
+  const normalizedPhone = normalizeWhatsAppPhoneNumber(phoneNumber.value)
+  if (!normalizedPhone) {
+    error.value = 'Numéro de téléphone invalide.'
+    loading.value = false
+    return
+  }
+
+  phoneNumber.value = normalizedPhone
   try {
     await $fetch('/api/auth/whatsapp/verify', {
       method: 'POST',
       body: {
-        phoneNumber: phoneNumber.value,
+        phoneNumber: normalizedPhone,
         code: code.value,
         token: otpToken.value,
         source: source.value,
