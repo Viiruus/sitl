@@ -3,7 +3,7 @@ const isProduction = process.env.NODE_ENV === 'production'
 const isVercelRuntime = process.env.VERCEL === '1' || Boolean(process.env.VERCEL_ENV)
 
 export default defineNuxtConfig({
-  modules: ['@nuxtjs/tailwindcss', 'nuxt-headlessui', 'nuxt-auth-utils', '@nuxtjs/seo', '@nuxt/image'],
+  modules: ['@vercel/analytics', '@nuxtjs/tailwindcss', 'nuxt-headlessui', 'nuxt-auth-utils', '@nuxtjs/seo', '@nuxt/image'],
   authUtils: {
     // on demande au module d’activer ces providers OAuth
     providers: ['google', 'facebook'],
