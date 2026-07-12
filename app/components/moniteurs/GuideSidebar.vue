@@ -13,6 +13,7 @@ const navLinks = [
   { label: 'Profil moniteur·ice', to: '/moniteurs/profil' },
   { label: 'Mes aventures', to: '/moniteurs/aventures' },
   { label: 'Grimpeur·euse·s inscrit·e·s', to: '/moniteurs/grimpeurs' },
+  { label: 'Pages moniteurs les plus vues', to: '/moniteurs/analytics' },
 ]
 
 const isActive = (link: string) => {
