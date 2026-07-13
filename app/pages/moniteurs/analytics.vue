@@ -102,9 +102,6 @@ const logout = async () => {
                   <option :value="30">
                     30 jours
                   </option>
-                  <option :value="90">
-                    90 jours
-                  </option>
                 </select>
               </label>
 

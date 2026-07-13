@@ -22,8 +22,8 @@ const parseDays = (value: unknown) => {
   const raw = Array.isArray(value) ? value[0] : value
   const parsed = typeof raw === 'string' ? Number.parseInt(raw, 10) : Number(raw)
 
-  if (!Number.isFinite(parsed)) return 30
-  return Math.min(Math.max(parsed, 1), 90)
+  if (parsed === 7 || parsed === 30) return parsed
+  return 30
 }
 
 const normalizeProfilePath = (value: unknown) => {
@@ -65,6 +65,28 @@ const labelFromSlug = (slug: string) =>
     .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
     .join(' ')
 
+const extractVercelErrorMessage = async (response: Response) => {
+  const body = await response.text().catch(() => '')
+  if (!body) return null
+
+  try {
+    const parsed = JSON.parse(body)
+    const message =
+      parsed?.error?.message ||
+      parsed?.error?.code ||
+      parsed?.message ||
+      parsed?.code
+
+    if (typeof message === 'string' && message.trim()) {
+      return message.trim()
+    }
+  } catch {
+    // Vercel can return plain text for some API errors.
+  }
+
+  return body.slice(0, 500)
+}
+
 export default defineEventHandler(async (event) => {
   const session = await getUserSession(event)
   if (!session?.user?.id) {
@@ -103,32 +125,50 @@ export default defineEventHandler(async (event) => {
   const since = new Date(until)
   since.setUTCDate(since.getUTCDate() - (days - 1))
 
-  const params = new URLSearchParams({
-    projectId,
-    since: formatDateParam(since),
-    until: formatDateParam(until),
-    by: 'requestPath',
-    limit: '200',
-    filter: "startswith(requestPath, '/moniteurs/')",
-  })
+  const buildVercelAnalyticsParams = (includePathFilter: boolean) => {
+    const params = new URLSearchParams({
+      projectId,
+      since: formatDateParam(since),
+      until: formatDateParam(until),
+      by: 'requestPath',
+      limit: '200',
+    })
 
-  if (teamId) {
-    params.set('teamId', teamId)
-  } else if (teamSlug) {
-    params.set('teamSlug', teamSlug)
+    if (includePathFilter) {
+      params.set('filter', "startswith(requestPath, '/moniteurs/')")
+    }
+
+    if (teamId) {
+      params.set('teamId', teamId)
+    } else if (teamSlug) {
+      params.set('slug', teamSlug)
+    }
+
+    return params
   }
 
-  const response = await fetch(`https://api.vercel.com/v1/query/web-analytics/visits/aggregate?${params.toString()}`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  })
+  const fetchVercelAnalytics = (includePathFilter: boolean) =>
+    fetch(`https://api.vercel.com/v1/query/web-analytics/visits/aggregate?${buildVercelAnalyticsParams(includePathFilter).toString()}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+
+  let usedServerPathFilter = true
+  let response = await fetchVercelAnalytics(true)
+
+  if (response.status === 400) {
+    usedServerPathFilter = false
+    response = await fetchVercelAnalytics(false)
+  }
 
   if (!response.ok) {
-    const body = await response.text().catch(() => '')
+    const message = await extractVercelErrorMessage(response)
     throw createError({
       statusCode: response.status,
-      statusMessage: body || 'Impossible de récupérer les statistiques Vercel Analytics.',
+      statusMessage: message
+        ? `Vercel Analytics: ${message}`
+        : 'Impossible de récupérer les statistiques Vercel Analytics.',
     })
   }
 
@@ -200,6 +240,7 @@ export default defineEventHandler(async (event) => {
 
   return {
     configured: true,
+    usedServerPathFilter,
     range: {
       days,
       since: formatDateParam(since),
