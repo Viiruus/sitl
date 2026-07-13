@@ -131,7 +131,7 @@ export default defineEventHandler(async (event) => {
       since: formatDateParam(since),
       until: formatDateParam(until),
       by: 'requestPath',
-      limit: '200',
+      limit: '100',
     })
 
     if (includePathFilter) {
