@@ -236,7 +236,7 @@ export default defineEventHandler(async (event) => {
         knownGuide: Boolean(guide),
       }
     })
-    .sort((a, b) => b.pageviews - a.pageviews || b.visitors - a.visitors || a.fullName.localeCompare(b.fullName))
+    .sort((a, b) => b.visitors - a.visitors || b.pageviews - a.pageviews || a.fullName.localeCompare(b.fullName))
 
   return {
     configured: true,

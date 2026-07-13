@@ -123,18 +123,18 @@ const logout = async () => {
         >
           <div class="rounded-2xl bg-brand-900/60 p-5 ring-1 ring-white/10">
             <p class="text-xs uppercase tracking-[0.3em] text-brand-200/70">
-              Pages vues
-            </p>
-            <p class="mt-2 text-3xl font-semibold">
-              {{ formatNumber(totalPageviews) }}
-            </p>
-          </div>
-          <div class="rounded-2xl bg-brand-900/60 p-5 ring-1 ring-white/10">
-            <p class="text-xs uppercase tracking-[0.3em] text-brand-200/70">
               Visiteurs
             </p>
             <p class="mt-2 text-3xl font-semibold">
               {{ formatNumber(totalVisitors) }}
+            </p>
+          </div>
+          <div class="rounded-2xl bg-brand-900/60 p-5 ring-1 ring-white/10">
+            <p class="text-xs uppercase tracking-[0.3em] text-brand-200/70">
+              Pages vues
+            </p>
+            <p class="mt-2 text-3xl font-semibold">
+              {{ formatNumber(totalPageviews) }}
             </p>
           </div>
         </section>
@@ -196,10 +196,10 @@ const logout = async () => {
                       Moniteur·ice
                     </th>
                     <th scope="col" class="px-5 py-3 text-right text-xs font-semibold uppercase tracking-[0.25em] text-brand-200/80">
-                      Pages vues
+                      Visiteurs
                     </th>
                     <th scope="col" class="px-5 py-3 text-right text-xs font-semibold uppercase tracking-[0.25em] text-brand-200/80">
-                      Visiteurs
+                      Pages vues
                     </th>
                   </tr>
                 </thead>
@@ -227,10 +227,10 @@ const logout = async () => {
                       </p>
                     </td>
                     <td class="whitespace-nowrap px-5 py-4 text-right text-sm font-semibold text-secondaryBrand-200">
-                      {{ formatNumber(item.pageviews) }}
+                      {{ formatNumber(item.visitors) }}
                     </td>
                     <td class="whitespace-nowrap px-5 py-4 text-right text-sm font-semibold text-white">
-                      {{ formatNumber(item.visitors) }}
+                      {{ formatNumber(item.pageviews) }}
                     </td>
                   </tr>
                 </tbody>
