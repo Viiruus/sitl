@@ -32,6 +32,18 @@ export function getStaticSitemapUrls(): SitemapUrl[] {
       priority: 0.8,
     },
     {
+      loc: "/articles",
+      lastmod,
+      changefreq: "weekly",
+      priority: 0.8,
+    },
+    {
+      loc: "/partenaires",
+      lastmod,
+      changefreq: "weekly",
+      priority: 0.7,
+    },
+    {
       loc: "/disciplines/grande-voie",
       lastmod,
       changefreq: "weekly",

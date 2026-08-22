@@ -3,7 +3,7 @@
     <div class="mx-auto max-w-7xl px-6 py-16 sm:py-20 lg:px-8">
       <div class="flex flex-col items-center text-center space-y-6">
         <img class="h-16" src="~/assets/images/brigade-du-kiff_black-logo.png" alt="Brigade du Kiff" />
-        <p class="text-sm/6 text-balance text-gray-600">Vos aventures verticales commencent ici.</p>
+        <p class="text-sm/6 text-balance text-gray-600">Grimpez dehors !</p>
         <div class="flex justify-center gap-x-6">
           <a
             v-for="item in footerNavigation.social"

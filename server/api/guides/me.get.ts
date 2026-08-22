@@ -14,6 +14,7 @@ const mapGuide = (user: any) => ({
   id: user.id,
   email: user.email,
   role: user.role,
+  isAdmin: user.role === 'GUIDE' && user.isAdmin === true,
   phoneNumber: user.phoneNumber,
   whatsappOptIn: user.whatsappOptIn,
   firstName: user.firstName,

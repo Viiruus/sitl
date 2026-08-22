@@ -27,6 +27,7 @@ export default defineEventHandler(async (event) => {
       lastName: result.user.lastName,
       onboarded: result.user.onboarded,
       role: result.user.role,
+      isAdmin: result.user.isAdmin,
       phoneNumber: result.user.phoneNumber,
       whatsappOptIn: result.user.whatsappOptIn,
     },

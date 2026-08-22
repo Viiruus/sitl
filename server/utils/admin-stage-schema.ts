@@ -1,0 +1,62 @@
+import { z } from 'zod'
+import { isHalfDayStep } from '~~/shared/utils/aventure-schedule'
+
+const optionalText = z.string().trim().optional().nullable()
+const optionalList = z.array(z.string().trim()).max(200).optional().nullable()
+
+export const adminStageSchema = z.object({
+  guideId: z.number().int().positive(),
+  slug: z.string().trim().min(3).max(140).regex(/^[a-z0-9-]+$/),
+  titre: z.string().trim().min(3).max(120),
+  sousTitre: optionalText,
+  discipline: z.enum(['FALAISE', 'GRANDE_VOIE', 'BLOC', 'TRAD', 'VIA_FERRATA']),
+  formule: z.enum(['GRIMPE_SEULEMENT', 'IMMERSION_COMPLETE']).default('GRIMPE_SEULEMENT'),
+  disciplinesComplementaires: optionalList,
+  lieuLabel: z.string().trim().min(2),
+  pays: optionalText,
+  region: optionalText,
+  jours: z.number().min(0.5).max(30).refine(isHalfDayStep),
+  placesMax: z.number().int().min(1).max(1000),
+  placesMin: z.number().int().min(0).max(1000).default(0),
+  niveauMinimum: optionalText,
+  autonomieMini: optionalText,
+  prixParPersonne: z.number().int().min(0),
+  devise: z.string().trim().min(3).max(3).default('EUR'),
+  inclus: optionalText,
+  nonInclus: optionalText,
+  pointsLocaux: optionalText,
+  descriptionCourte: optionalText,
+  descriptionLongue: optionalText,
+  objectifs: optionalText,
+  prerequis: optionalList,
+  equipementRequis: optionalList,
+  equipementFourni: optionalList,
+  hebergementLabel: optionalText,
+  hebergementDetails: optionalText,
+  repasLabel: optionalText,
+  transportLabel: optionalText,
+  pointRdv: optionalText,
+  latitude: z.number().min(-90).max(90).optional().nullable(),
+  longitude: z.number().min(-180).max(180).optional().nullable(),
+  langues: optionalList,
+  ageMin: z.number().int().min(0).max(120).optional().nullable(),
+  ageMax: z.number().int().min(0).max(120).optional().nullable(),
+  coverImageUrl: optionalText,
+  coverImageVariants: z.unknown().optional().nullable(),
+  estPublie: z.boolean().default(false),
+  images: z.array(z.object({
+    url: z.string().trim().min(1),
+    kind: z.enum(['COVER', 'GALLERY']).default('GALLERY'),
+    alt: optionalText,
+    position: z.number().int().min(0).optional().nullable(),
+    variants: z.unknown().optional().nullable(),
+  })).max(200).default([]),
+  programmeJours: z.array(z.object({
+    ordre: z.number().int().positive(),
+    titre: z.string().trim().min(1),
+    description: optionalText,
+    lieuLabel: optionalText,
+    discipline: z.enum(['FALAISE', 'GRANDE_VOIE', 'BLOC', 'TRAD', 'VIA_FERRATA']).optional().nullable(),
+  })).max(100).default([]),
+})
+

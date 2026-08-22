@@ -3,6 +3,7 @@ import { sanitizePublicImageUrl, sanitizePublicImageVariants } from "../../utils
 import { extractGooglePlaceId, fetchGooglePlaceSummary } from "../../utils/google-place-details"
 import { buildGuideSlug } from "~~/shared/utils/guide-slug"
 import { getPublicFutureSessionThreshold, isPublicFutureSession } from "~~/shared/utils/public-stage-sessions"
+import { articleMarkdownExcerpt } from "~~/shared/utils/article-content"
 
 const normalizeStringList = (value: unknown) =>
   Array.isArray(value)
@@ -100,13 +101,28 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  const aventures = await db.aventure.findMany({
-    where: { guideId: guide.id, estPublie: true },
-    include: {
-      sessions: true,
-    },
-    orderBy: { createdAt: "desc" },
-  })
+  const [aventures, articles] = await Promise.all([
+    db.aventure.findMany({
+      where: { guideId: guide.id, estPublie: true },
+      include: {
+        sessions: true,
+      },
+      orderBy: { createdAt: "desc" },
+    }),
+    db.article.findMany({
+      where: { authorId: guide.id, isPublished: true, publishedAt: { not: null } },
+      select: {
+        id: true,
+        slug: true,
+        title: true,
+        coverImageUrl: true,
+        coverImageVariants: true,
+        content: true,
+        publishedAt: true,
+      },
+      orderBy: { publishedAt: "desc" },
+    }),
+  ])
 
   const allSessions = aventures.flatMap((a) => a.sessions || [])
   const nextSessionDate = findNextSession(allSessions)?.dateDebut ?? null
@@ -167,5 +183,19 @@ export default defineEventHandler(async (event) => {
   return {
     moniteur,
     aventures: aventures.map(mapAventureForGuide),
+    articles: articles.map(article => ({
+      id: article.id,
+      slug: article.slug,
+      title: article.title,
+      excerpt: articleMarkdownExcerpt(article.content),
+      coverImageUrl: sanitizePublicImageUrl(article.coverImageUrl, { allowInline: true }),
+      coverImageVariants: sanitizePublicImageVariants(article.coverImageVariants, { allowInline: true }),
+      publishedAt: article.publishedAt,
+      author: {
+        name: moniteur.fullName || "La Brigade du kiff",
+        profileImageUrl,
+        profileImageVariants,
+      },
+    })),
   }
 })

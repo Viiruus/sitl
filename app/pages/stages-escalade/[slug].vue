@@ -1334,14 +1334,30 @@ const normalizeImagePath = (src?: string | null) => {
   return `/images/${src.replace(/^(\.\/)+/, '')}`
 }
 
-const galerieImages = computed(() =>
-  (stage.value?.images || [])
-    .map((img: any) => ({
+const galerieImages = computed(() => {
+  const coverUrl = normalizeImagePath(stage.value?.coverImageUrl)
+  const images = [
+    ...(coverUrl
+      ? [{
+          id: 'cover',
+          url: coverUrl,
+          alt: stage.value?.titre || 'Photo principale du stage',
+          variants: stage.value?.coverImageVariants || [],
+        }]
+      : []),
+    ...(stage.value?.images || []).map((img: any) => ({
       ...img,
       url: normalizeImagePath(img.url),
-    }))
-    .filter((img: any) => Boolean(img.url)),
-)
+    })),
+  ]
+
+  const seenUrls = new Set<string>()
+  return images.filter((img: any) => {
+    if (!img.url || seenUrls.has(img.url)) return false
+    seenUrls.add(img.url)
+    return true
+  })
+})
 const galleryIndex = ref(0)
 const showLightbox = ref(false)
 watch(

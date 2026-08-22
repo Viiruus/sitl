@@ -357,6 +357,32 @@
           </div>
         </div>
         </section>
+
+        <section id="articles" class="relative isolate pb-24 sm:pb-32">
+          <div class="mx-auto max-w-7xl px-6">
+            <p class="text-sm font-semibold uppercase tracking-[0.3em] text-secondaryBrand-300">
+              Carnet vertical
+            </p>
+            <h2 class="mt-2 text-3xl font-semibold text-pretty text-white">
+              Les récits de {{ moniteurName || moniteurRoleReference }}
+            </h2>
+            <p class="mt-3 max-w-2xl text-base text-gray-300">
+              Conseils, histoires de cordées et aventures vécues sur le terrain.
+            </p>
+
+            <ul v-if="articles.length" role="list" class="mt-12 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+              <li v-for="article in articles" :key="article.id">
+                <ArticleCard
+                  :article="article"
+                  image-sizes="(min-width: 1280px) 33vw, (min-width: 768px) 50vw, 100vw"
+                />
+              </li>
+            </ul>
+            <p v-else class="mt-10 rounded-3xl border border-dashed border-white/20 p-10 text-center text-gray-300">
+              {{ moniteurName || moniteurRoleReference }} n’a pas encore publié de récit.
+            </p>
+          </div>
+        </section>
       </main>
 
       <AppFooter />
@@ -484,6 +510,7 @@ const moniteur = computed(() => data.value?.moniteur ?? null)
 const aventures = computed(() =>
   (data.value?.aventures ?? []).filter((aventure: any) => aventure?.estPublie === true),
 )
+const articles = computed<any[]>(() => data.value?.articles ?? [])
 const hasPublishedStages = computed(() => aventures.value.length > 0)
 const filteredAventures = computed(() => {
   const thresholdMs = getPublicFutureSessionThresholdMs()

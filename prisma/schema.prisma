@@ -87,17 +87,19 @@ model User {
   googleId     String? @unique
   facebookId   String? @unique
 
-  role UserRole @default(CLIMBER)
+  role    UserRole @default(CLIMBER)
+  // Permission transverse : un moniteur reste GUIDE tout en pouvant administrer la plateforme.
+  isAdmin Boolean  @default(false)
 
   acquisitionSource String? // "direct", "landing", "google", "facebook", etc.
 
   // Informations personnelles
-  firstName  String?
-  lastName   String?
-  birthDate  String?
-  department String? // ex: "38 - Isère"
-  phoneNumber String?
-  whatsappOptIn Boolean @default(false)
+  firstName       String?
+  lastName        String?
+  birthDate       String?
+  department      String? // ex: "38 - Isère"
+  phoneNumber     String?
+  whatsappOptIn   Boolean @default(false)
   profileImageUrl String?
 
   // Pratique de l’escalade
@@ -156,15 +158,16 @@ model User {
   // 👇 pour les moniteurs (facultatif)
   guideProfile GuideProfile?
   aventures    Aventure[]    @relation("GuideAventures")
+  articles     Article[]     @relation("GuideArticles")
 
   // 👇 pour les grimpeurs qui réservent
-  bookings Booking[]
-  dateSuggestions AventureDateSuggestion[]
-  associationMemberships AssociationMembership[]
-  whatsappOtpChallenges WhatsAppOtpChallenge[]
-  guideContactRequestsSent GuideContactRequest[] @relation("GuideContactRequestsSent")
-  guideContactRequestsReceived GuideContactRequest[] @relation("GuideContactRequestsReceived")
-  stageNotificationSubscriptions StageNotificationSubscription[] @relation("StageNotificationSubscriptions")
+  bookings                            Booking[]
+  dateSuggestions                     AventureDateSuggestion[]
+  associationMemberships              AssociationMembership[]
+  whatsappOtpChallenges               WhatsAppOtpChallenge[]
+  guideContactRequestsSent            GuideContactRequest[]           @relation("GuideContactRequestsSent")
+  guideContactRequestsReceived        GuideContactRequest[]           @relation("GuideContactRequestsReceived")
+  stageNotificationSubscriptions      StageNotificationSubscription[] @relation("StageNotificationSubscriptions")
   guideStageNotificationSubscriptions StageNotificationSubscription[] @relation("GuideStageNotificationSubscriptions")
 
   createdAt DateTime @default(now())
@@ -178,15 +181,15 @@ model WhatsAppOtpChallenge {
   user   User? @relation(fields: [userId], references: [id], onDelete: SetNull)
 
   purpose     WhatsAppOtpPurpose
-  status      WhatsAppOtpStatus @default(PENDING)
-  publicToken String            @unique
+  status      WhatsAppOtpStatus  @default(PENDING)
+  publicToken String             @unique
 
   phoneNumber String
   source      String?
 
   codeHash    String
-  attempts    Int @default(0)
-  maxAttempts Int @default(5)
+  attempts    Int    @default(0)
+  maxAttempts Int    @default(5)
 
   templateName  String?
   messageId     String? @unique
@@ -233,14 +236,14 @@ model GuideProfile {
   userId Int  @unique
   user   User @relation(fields: [userId], references: [id])
 
-  bio          String?
-  gender       GuideGender?
-  baseLocation String? // "Massif des Bauges"
-  serviceAreas Json?
-  instagramUrl String?
-  googleBusinessUrl String?
-  googlePlaceId String?
-  professionalCardNumber String?
+  bio                     String?
+  gender                  GuideGender?
+  baseLocation            String? // "Massif des Bauges"
+  serviceAreas            Json?
+  instagramUrl            String?
+  googleBusinessUrl       String?
+  googlePlaceId           String?
+  professionalCardNumber  String?
   stageTermsAndConditions String?
 
   // ✅ Nouveau : image principale du moniteur
@@ -253,14 +256,35 @@ model GuideProfile {
   updatedAt DateTime @updatedAt
 }
 
+model Article {
+  id   Int    @id @default(autoincrement())
+  slug String @unique
+
+  title              String
+  coverImageUrl      String
+  coverImageVariants Json?
+  content            Json
+
+  authorId Int
+  author   User @relation("GuideArticles", fields: [authorId], references: [id], onDelete: Cascade)
+
+  isPublished Boolean   @default(false)
+  publishedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([authorId, createdAt])
+  @@index([isPublished, publishedAt])
+}
+
 model GuideContactRequest {
   id Int @id @default(autoincrement())
 
   guideId Int
-  guide User @relation("GuideContactRequestsReceived", fields: [guideId], references: [id], onDelete: Cascade)
+  guide   User @relation("GuideContactRequestsReceived", fields: [guideId], references: [id], onDelete: Cascade)
 
   climberId Int
-  climber User @relation("GuideContactRequestsSent", fields: [climberId], references: [id], onDelete: Cascade)
+  climber   User @relation("GuideContactRequestsSent", fields: [climberId], references: [id], onDelete: Cascade)
 
   message        String
   messagePreview String
@@ -303,7 +327,7 @@ model Aventure {
 
   jours         Float
   placesMax     Int
-  placesMin     Int @default(0)
+  placesMin     Int     @default(0)
   niveauMinimum String? // "5b", "6a", etc.
   autonomieMini String? // "assur_tete", etc.
 
@@ -336,10 +360,10 @@ model Aventure {
   ageMax Int?
 
   // ✅ Images
-  coverImageUrl      String?
-  coverImageVariants Json?
-  images             AventureImage[]
-  dateSuggestions    AventureDateSuggestion[]
+  coverImageUrl               String?
+  coverImageVariants          Json?
+  images                      AventureImage[]
+  dateSuggestions             AventureDateSuggestion[]
   stageNotificationDeliveries StageNotificationDelivery[]
 
   // ✅ Programme structuré
@@ -371,7 +395,7 @@ model StageNotificationSubscription {
   guideId Int?
   guide   User? @relation("GuideStageNotificationSubscriptions", fields: [guideId], references: [id], onDelete: Cascade)
 
-  active Boolean @default(true)
+  active         Boolean   @default(true)
   lastNotifiedAt DateTime?
 
   deliveries StageNotificationDelivery[]
@@ -398,12 +422,12 @@ model StageNotificationDelivery {
 
   deliveryKey String @unique
 
-  status StageNotificationDeliveryStatus
-  templateName String
-  messageId String? @unique
+  status        StageNotificationDeliveryStatus
+  templateName  String
+  messageId     String?                         @unique
   failureReason String?
-  sentAt DateTime?
-  lastPayload Json?
+  sentAt        DateTime?
+  lastPayload   Json?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -442,7 +466,7 @@ model AventureSession {
 
   prixSpecifique Int?
 
-  reservations Booking[]
+  reservations                Booking[]
   stageNotificationDeliveries StageNotificationDelivery[]
 
   createdAt DateTime @default(now())

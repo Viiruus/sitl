@@ -8,17 +8,19 @@ const emit = defineEmits<{
   (e: 'logout'): void
 }>()
 
-const navLinks = [
+const navLinks = computed(() => [
   { label: 'Tableau de bord', to: '/moniteurs' },
   { label: 'Profil moniteur·ice', to: '/moniteurs/profil' },
   { label: 'Mes aventures', to: '/moniteurs/aventures' },
+  { label: 'Mes articles', to: '/moniteurs/articles' },
   { label: 'Grimpeur·euse·s inscrit·e·s', to: '/moniteurs/grimpeurs' },
   { label: 'Pages moniteurs les plus vues', to: '/moniteurs/analytics' },
-]
+  ...(props.guide?.isAdmin ? [{ label: 'Administration', to: '/admin' }] : []),
+])
 
 const isActive = (link: string) => {
   const basePath = link.split('#')[0]
-  return basePath === props.currentPath
+  return basePath === props.currentPath || (basePath !== '/moniteurs' && props.currentPath.startsWith(`${basePath}/`))
 }
 </script>
 
@@ -32,6 +34,12 @@ const isActive = (link: string) => {
         <p class="mt-2 text-lg font-semibold text-white">
           {{ guide?.fullName || 'Moniteur·ice' }}
         </p>
+        <span
+          v-if="guide?.isAdmin"
+          class="mt-2 inline-flex rounded-full bg-secondaryBrand-400/15 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-secondaryBrand-200 ring-1 ring-secondaryBrand-300/20"
+        >
+          Administrateur
+        </span>
         <p class="text-brand-100/70">
           {{ guide?.baseLocation || 'Camp de base à définir' }}
         </p>

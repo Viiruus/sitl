@@ -81,14 +81,6 @@ const formatPeriod = (start?: string | Date | null, end?: string | Date | null) 
   return formatSessionRangeLabel(start, end) || 'Date à définir'
 }
 
-const formatStatut = (value?: string | null) => {
-  if (!value) return 'en attente'
-  const lower = value.toLowerCase()
-  if (lower === 'confirmee') return 'confirmée'
-  if (lower === 'annulee') return 'annulée'
-  return lower
-}
-
 const formatPhone = (user: any) => {
   const phone = user?.phoneNumber || ''
   if (!phone) return 'Numéro non fourni'
@@ -384,22 +376,10 @@ const deleteSession = async (group: { session: any; bookings: any[] }) => {
                   :key="booking.id"
                   class="rounded-xl border border-white/10 bg-brand-900/60 p-4"
                 >
-                  <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                    <div>
-                      <p class="font-semibold">{{ booking.user.firstName }} {{ booking.user.lastName }}</p>
-                      <p class="text-xs text-brand-200/80">{{ booking.user.email }}</p>
-                      <p class="text-xs text-brand-100/80 mt-1">📞 {{ formatPhone(booking.user) }}</p>
-                    </div>
-                    <span
-                      class="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wide"
-                      :class="booking.statut === 'CONFIRMEE'
-                        ? 'bg-green-500/20 text-green-200'
-                        : booking.statut === 'ANNULEE'
-                          ? 'bg-red-500/20 text-red-200'
-                          : 'bg-yellow-500/20 text-yellow-200'"
-                    >
-                      {{ formatStatut(booking.statut) }}
-                    </span>
+                  <div>
+                    <p class="font-semibold">{{ booking.user.firstName }} {{ booking.user.lastName }}</p>
+                    <p class="text-xs text-brand-200/80">{{ booking.user.email }}</p>
+                    <p class="text-xs text-brand-100/80 mt-1">📞 {{ formatPhone(booking.user) }}</p>
                   </div>
                   <p class="text-sm text-brand-200/80">
                     Participants : {{ booking.participants }} — Montant : {{ booking.montant }} €
