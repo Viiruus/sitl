@@ -5,15 +5,24 @@ const { data, pending, error } = await useFetch('/api/moniteurs', {
 
 const moniteurs = computed<any[]>(() => data.value?.moniteurs ?? [])
 
-const randomizedMoniteurIds = useState<Array<number | string>>('home-brigade-random-moniteur-ids', () => {
-  const ids = moniteurs.value.map(moniteur => moniteur.id)
+const shuffled = <T>(values: T[]) => {
+  const result = [...values]
 
-  for (let index = ids.length - 1; index > 0; index -= 1) {
+  for (let index = result.length - 1; index > 0; index -= 1) {
     const randomIndex = Math.floor(Math.random() * (index + 1))
-    ;[ids[index], ids[randomIndex]] = [ids[randomIndex], ids[index]]
+    ;[result[index], result[randomIndex]] = [result[randomIndex], result[index]]
   }
 
-  return ids.slice(0, 4)
+  return result
+}
+
+const hasPublishedStage = (moniteur: any) => Number(moniteur?.publishedStageCount || 0) > 0
+
+const randomizedMoniteurIds = useState<Array<number | string>>('home-brigade-prioritized-moniteur-ids', () => {
+  const withStages = moniteurs.value.filter(hasPublishedStage).map(moniteur => moniteur.id)
+  const withoutStages = moniteurs.value.filter(moniteur => !hasPublishedStage(moniteur)).map(moniteur => moniteur.id)
+
+  return [...shuffled(withStages), ...shuffled(withoutStages)]
 })
 
 const featuredMoniteurs = computed(() => {
@@ -22,7 +31,10 @@ const featuredMoniteurs = computed(() => {
     .map(id => moniteursById.get(id))
     .filter(Boolean)
   const selectedIds = new Set(selected.map(moniteur => moniteur.id))
-  const replacements = moniteurs.value.filter(moniteur => !selectedIds.has(moniteur.id))
+  const replacements = [
+    ...moniteurs.value.filter(moniteur => hasPublishedStage(moniteur) && !selectedIds.has(moniteur.id)),
+    ...moniteurs.value.filter(moniteur => !hasPublishedStage(moniteur) && !selectedIds.has(moniteur.id)),
+  ]
 
   return [...selected, ...replacements].slice(0, 4)
 })

@@ -89,6 +89,7 @@ export default defineEventHandler(async () => {
           baseLocation,
           department: guide.department || null,
           disciplines: Array.from(new Set(disciplines.filter(value => value.length > 0))),
+          publishedStageCount: guide.aventures?.length ?? 0,
           nextStage,
         }
       })

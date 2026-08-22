@@ -9,6 +9,7 @@
     "preview": "nuxt preview",
     "db:backfill-association-memberships": "tsx prisma/scripts/backfill-association-memberships.ts",
     "db:sanitize-inline-images": "tsx prisma/scripts/sanitize-inline-images.ts",
+    "db:sync-preview": "tsx prisma/scripts/sync-preview-from-production.ts",
     "postinstall": "nuxt prepare && prisma generate",
     "vercel-build": "node --input-type=module -e \"import { execSync } from 'node:child_process'; console.log('VERCEL_ENV=', process.env.VERCEL_ENV); execSync('npx prisma migrate deploy', { stdio: 'inherit' }); if (process.env.VERCEL_ENV === 'preview') { console.log('Preview -> seeding'); execSync('npx prisma db seed', { stdio: 'inherit' }); } else { console.log('Not preview -> skip seed'); }\" && nuxt build"
   },
@@ -41,6 +42,7 @@
     "@nuxtjs/seo": "^5.3.0",
     "@nuxtjs/tailwindcss": "^6.14.0",
     "@types/node": "^24.10.1",
+    "dotenv": "^17.4.2",
     "nuxt-og-image": "^6.7.0",
     "prisma": "7.2.0",
     "tailwindcss": "3.4.19",
