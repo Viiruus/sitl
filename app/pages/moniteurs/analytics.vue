@@ -13,7 +13,9 @@ const route = useRoute()
 const router = useRouter()
 const { clear, fetch } = useUserSession()
 
-const selectedDays = ref(30)
+type AnalyticsRange = '7' | '30' | '365'
+
+const selectedRange = ref<AnalyticsRange>('30')
 
 const { data: guideData } = await useFetch('/api/guides/me')
 const guide = computed(() => guideData.value?.guide ?? null)
@@ -25,9 +27,9 @@ const {
   refresh,
 } = await useFetch('/api/guides/analytics/moniteurs', {
   query: {
-    days: selectedDays,
+    range: selectedRange,
   },
-  watch: [selectedDays],
+  watch: [selectedRange],
 })
 
 const rankings = computed(() => data.value?.rankings ?? [])
@@ -93,14 +95,17 @@ const logout = async () => {
               <label class="text-sm text-brand-100/80">
                 Période
                 <select
-                  v-model.number="selectedDays"
+                  v-model="selectedRange"
                   class="mt-1 block rounded-xl border border-white/10 bg-brand-900 px-4 py-2 text-sm text-white outline-none transition focus:border-secondaryBrand-300"
                 >
-                  <option :value="7">
+                  <option value="7">
                     7 jours
                   </option>
-                  <option :value="30">
+                  <option value="30">
                     30 jours
+                  </option>
+                  <option value="365">
+                    1 an
                   </option>
                 </select>
               </label>

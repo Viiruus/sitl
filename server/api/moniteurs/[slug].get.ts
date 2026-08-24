@@ -157,6 +157,8 @@ export default defineEventHandler(async (event) => {
     department: guide.department,
     bio: guide.guideProfile?.bio || null,
     baseLocation: guide.guideProfile?.baseLocation || null,
+    baseLatitude: guide.guideProfile?.baseLatitude ?? null,
+    baseLongitude: guide.guideProfile?.baseLongitude ?? null,
     serviceAreas: normalizeStringList(guide.guideProfile?.serviceAreas),
     instagramUrl: guide.guideProfile?.instagramUrl || null,
     googleBusinessUrl,

@@ -4,59 +4,30 @@ const { data, pending, error } = await useFetch('/api/moniteurs', {
 })
 
 const moniteurs = computed<any[]>(() => data.value?.moniteurs ?? [])
-
-const shuffled = <T>(values: T[]) => {
-  const result = [...values]
-
-  for (let index = result.length - 1; index > 0; index -= 1) {
-    const randomIndex = Math.floor(Math.random() * (index + 1))
-    ;[result[index], result[randomIndex]] = [result[randomIndex], result[index]]
-  }
-
-  return result
-}
-
-const hasPublishedStage = (moniteur: any) => Number(moniteur?.publishedStageCount || 0) > 0
-
-const randomizedMoniteurIds = useState<Array<number | string>>('home-brigade-prioritized-moniteur-ids', () => {
-  const withStages = moniteurs.value.filter(hasPublishedStage).map(moniteur => moniteur.id)
-  const withoutStages = moniteurs.value.filter(moniteur => !hasPublishedStage(moniteur)).map(moniteur => moniteur.id)
-
-  return [...shuffled(withStages), ...shuffled(withoutStages)]
-})
-
-const featuredMoniteurs = computed(() => {
-  const moniteursById = new Map(moniteurs.value.map(moniteur => [moniteur.id, moniteur]))
-  const selected = randomizedMoniteurIds.value
-    .map(id => moniteursById.get(id))
-    .filter(Boolean)
-  const selectedIds = new Set(selected.map(moniteur => moniteur.id))
-  const replacements = [
-    ...moniteurs.value.filter(moniteur => hasPublishedStage(moniteur) && !selectedIds.has(moniteur.id)),
-    ...moniteurs.value.filter(moniteur => !hasPublishedStage(moniteur) && !selectedIds.has(moniteur.id)),
-  ]
-
-  return [...selected, ...replacements].slice(0, 4)
-})
+const prioritizedMoniteurs = usePrioritizedRandomMoniteurs(
+  moniteurs,
+  'home-brigade-prioritized-moniteur-ids',
+)
+const featuredMoniteurs = computed(() => prioritizedMoniteurs.value.slice(0, 4))
 </script>
 
 <template>
   <section class="bg-brand-950 py-20 text-white sm:py-28">
-    <div class="w-full px-4 sm:px-6 lg:px-8">
+    <div class="mx-auto w-full max-w-[90rem] px-4 sm:px-6 lg:px-8">
       <div class="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p class="text-sm font-semibold uppercase tracking-[0.35em] text-secondaryBrand-200">
             Le collectif
           </p>
           <h2 class="mt-3 text-4xl font-semibold tracking-tight text-pretty sm:text-5xl">
-            Les moniteurs de la Brigade
+            Les moniteur·ices
           </h2>
         </div>
         <NuxtLink
           to="/la-brigade"
           class="hidden w-fit items-center justify-center gap-2 rounded-full bg-secondaryBrand-500 px-5 py-3 text-sm font-semibold text-white transition hover:bg-secondaryBrand-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondaryBrand-400 sm:inline-flex"
         >
-          Toute la Brigade
+          Toute l'équipe
           <span aria-hidden="true">→</span>
         </NuxtLink>
       </div>
@@ -92,7 +63,7 @@ const featuredMoniteurs = computed(() => {
           to="/la-brigade"
           class="inline-flex items-center justify-center gap-2 rounded-full border border-white/20 px-5 py-3 text-sm font-semibold text-white transition hover:border-white/40 hover:bg-white/5"
         >
-          Toute la Brigade
+          Toute l'équipe
           <span aria-hidden="true">→</span>
         </NuxtLink>
       </div>

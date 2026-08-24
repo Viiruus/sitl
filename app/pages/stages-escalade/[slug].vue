@@ -414,6 +414,34 @@
                     >
                       La liste précise du matériel est envoyée après inscription.
                     </p>
+
+                    <a
+                      href="https://4c-plus.com/collections/escalade"
+                      target="_blank"
+                      rel="sponsored noopener noreferrer"
+                      class="group mt-5 flex flex-col gap-3 rounded-xl bg-white p-4 text-brand-950 shadow-lg shadow-black/15 transition hover:-translate-y-0.5 hover:shadow-xl sm:flex-row sm:items-center"
+                    >
+                      <span class="flex h-16 w-full shrink-0 items-center justify-center overflow-hidden rounded-lg bg-white sm:w-24">
+                        <img
+                          src="https://cdn.shopify.com/s/files/1/0931/0650/3944/files/LOGO_con_web.jpg?v=1787406790"
+                          alt="4c+ - Matériel d’escalade et d’alpinisme"
+                          width="160"
+                          height="84"
+                          class="h-full w-full object-contain"
+                          loading="lazy"
+                          decoding="async"
+                        >
+                      </span>
+                      <span class="min-w-0">
+                        <span class="block text-sm leading-5">
+                          <strong>Besoin de matos ?</strong> Profite des prix imbattables de notre partenaire 4c+ et bénéficie d'un code de réduction en t'inscrivant au stage.
+                        </span>
+                        <span class="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-secondaryBrand-600 transition group-hover:text-secondaryBrand-500">
+                          Découvrir le matériel d’escalade
+                          <span aria-hidden="true">↗</span>
+                        </span>
+                      </span>
+                    </a>
                   </div>
 
                   <div class="space-y-2 rounded-2xl bg-brand-900/40 p-4 ring-1 ring-white/10">

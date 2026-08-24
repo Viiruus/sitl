@@ -29,8 +29,8 @@ useSeoMeta({
 <template>
   <div class="min-h-screen bg-[#f7f7f5] text-[#242424]">
     <div class="bg-brand-950 text-white">
-      <AppHeader />
-      <div class="mx-auto max-w-7xl px-6 pb-20 pt-40 lg:px-8 lg:pb-24">
+      <AppHeader compact />
+      <div class="w-full px-4 pb-20 pt-40 sm:px-6 lg:px-8 lg:pb-24">
         <p class="text-sm font-semibold uppercase tracking-[0.35em] text-secondaryBrand-200">
           Les récits de la Brigade
         </p>

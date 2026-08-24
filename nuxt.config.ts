@@ -28,6 +28,8 @@ export default defineNuxtConfig({
   pages: true,
   runtimeConfig: {
     googlePlacesApiKey: process.env.GOOGLE_PLACES_API_KEY || '',
+    geocodingBaseUrl: process.env.GEOCODING_BASE_URL || 'https://nominatim.openstreetmap.org',
+    geocodingUserAgent: process.env.GEOCODING_USER_AGENT || 'BrigadeDuKiff/1.0 (yo@brigadedukiff.com)',
     vercelAnalyticsToken: process.env.VERCEL_ANALYTICS_TOKEN || process.env.VERCEL_TOKEN || '',
     vercelAnalyticsProjectId: process.env.VERCEL_ANALYTICS_PROJECT_ID || process.env.VERCEL_PROJECT_ID || '',
     vercelAnalyticsTeamId: process.env.VERCEL_ANALYTICS_TEAM_ID || process.env.VERCEL_TEAM_ID || '',

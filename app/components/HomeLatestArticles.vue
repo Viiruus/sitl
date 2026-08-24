@@ -9,8 +9,8 @@ const articles = computed<any[]>(() => data.value?.articles ?? [])
 </script>
 
 <template>
-  <section class="bg-[#f7f7f5] py-20 text-[#242424] sm:py-28">
-    <div class="w-full px-4 sm:px-6 lg:px-8">
+  <section class="bg-white py-20 text-[#242424] sm:py-28">
+    <div class="mx-auto w-full max-w-[90rem] px-4 sm:px-6 lg:px-8">
       <div class="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p class="text-sm font-semibold uppercase tracking-[0.35em] text-secondaryBrand-600">

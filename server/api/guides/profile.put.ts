@@ -20,6 +20,8 @@ const bodySchema = z.object({
   whatsappOptIn: z.boolean().optional(),
   gender: z.enum(['male', 'female']).optional().nullable().or(z.literal('')),
   baseLocation: z.string().trim().max(160).optional().or(z.literal('')),
+  baseLatitude: z.number().min(-90).max(90).nullable().optional(),
+  baseLongitude: z.number().min(-180).max(180).nullable().optional(),
   serviceAreas: z.array(z.string().trim().max(120)).max(30).optional(),
   bio: z.string().trim().max(2000).optional().or(z.literal('')),
   stageTermsAndConditions: z.string().trim().max(20000).optional().or(z.literal('')),
@@ -33,6 +35,16 @@ const bodySchema = z.object({
     z.literal(''),
   ]).optional(),
   profileImageVariants: z.array(imageVariantSchema).max(16).optional(),
+}).superRefine((body, context) => {
+  const hasLatitude = body.baseLatitude != null
+  const hasLongitude = body.baseLongitude != null
+  if (hasLatitude !== hasLongitude) {
+    context.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ['baseLatitude'],
+      message: 'Sélectionne une localisation complète.',
+    })
+  }
 })
 
 export default defineEventHandler(async (event) => {
@@ -70,6 +82,14 @@ export default defineEventHandler(async (event) => {
       .filter((value, index, arr) => value.length > 0 && arr.indexOf(value) === index)
     return normalized.length ? normalized : null
   }
+  const cleanedBaseLocation = clean(body.baseLocation)
+  const baseCoordinates =
+    body.baseLatitude !== undefined || body.baseLongitude !== undefined
+      ? {
+          baseLatitude: cleanedBaseLocation ? (body.baseLatitude ?? null) : null,
+          baseLongitude: cleanedBaseLocation ? (body.baseLongitude ?? null) : null,
+        }
+      : {}
 
   const user = await db.user.update({
     where: { id: Number(session.user.id) },
@@ -90,7 +110,8 @@ export default defineEventHandler(async (event) => {
             gender: body.gender === '' ? null : (body.gender ?? undefined),
             bio: clean(body.bio),
             stageTermsAndConditions: clean(body.stageTermsAndConditions),
-            baseLocation: clean(body.baseLocation),
+            baseLocation: cleanedBaseLocation,
+            ...baseCoordinates,
             serviceAreas: cleanStringList(body.serviceAreas),
             instagramUrl: clean(body.instagramUrl),
             googleBusinessUrl: clean(body.googleBusinessUrl),
@@ -103,7 +124,9 @@ export default defineEventHandler(async (event) => {
             gender: body.gender === '' ? null : (body.gender ?? null),
             bio: clean(body.bio) ?? '',
             stageTermsAndConditions: clean(body.stageTermsAndConditions) ?? null,
-            baseLocation: clean(body.baseLocation) ?? null,
+            baseLocation: cleanedBaseLocation ?? null,
+            baseLatitude: cleanedBaseLocation ? (body.baseLatitude ?? null) : null,
+            baseLongitude: cleanedBaseLocation ? (body.baseLongitude ?? null) : null,
             serviceAreas: cleanStringList(body.serviceAreas) ?? null,
             instagramUrl: clean(body.instagramUrl) ?? null,
             googleBusinessUrl: clean(body.googleBusinessUrl) ?? null,
@@ -143,6 +166,8 @@ export default defineEventHandler(async (event) => {
       whatsappOptIn: user.whatsappOptIn,
       gender: user.guideProfile?.gender || null,
       baseLocation: user.guideProfile?.baseLocation || null,
+      baseLatitude: user.guideProfile?.baseLatitude ?? null,
+      baseLongitude: user.guideProfile?.baseLongitude ?? null,
       serviceAreas: Array.isArray(user.guideProfile?.serviceAreas)
         ? user.guideProfile.serviceAreas.filter((value: unknown) => typeof value === 'string' && value.trim().length > 0)
         : [],

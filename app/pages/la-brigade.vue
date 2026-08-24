@@ -28,7 +28,7 @@
         <AppHeader />
 
         <!-- Hero Section -->
-        <div class="mx-auto max-w-7xl px-6 pt-16 lg:px-8">
+        <div class="w-full px-4 pt-16 sm:px-6 lg:px-8">
           <div class="max-w-4xl py-16 sm:py-24">
             <h2 class="text-4xl font-semibold tracking-tight text-pretty text-white sm:text-5xl">Rencontre la Brigade du kiff</h2>
             <p class="mt-6 text-base text-brand-100/80">La Brigade du kiff c’est avant tout la promo du DEJEPS Escalade Milieux Naturels 2025/2026. Fort.e.s d’une année riche en partages, en émotions et en apprentissages, nous avons décidé d’unir nos forces pour te faire profiter un maximum de l’escalade en milieux naturels.<br><br>Nos moniteur.ices connaissent leurs territoires et sauront te faire découvrir les meilleurs spots à coté ou loin de chez toi. Que ce soit pour t’initier, pour progresser ou pour te perfectionner, faire appel à la Brigade du kiff, c’est rejoindre une grande famille déjà bien soudée.</p>
@@ -117,13 +117,16 @@ const moniteurs = computed(() => {
   })
 })
 
-const randomizedMoniteurs = computed(() => moniteurs.value)
+const randomizedMoniteurs = usePrioritizedRandomMoniteurs(
+  moniteurs,
+  'la-brigade-prioritized-moniteur-ids',
+)
 
 const moniteursItemListStructuredData = computed(() => ({
   '@context': 'https://schema.org',
   '@type': 'ItemList',
   name: 'Moniteurs de la Brigade du kiff',
-  itemListElement: moniteurs.value.map((moniteur: any, index: number) => ({
+  itemListElement: randomizedMoniteurs.value.map((moniteur: any, index: number) => ({
     '@type': 'ListItem',
     position: index + 1,
     url: new URL(`/moniteurs/${moniteur.slug}`, canonicalUrl.value).toString(),

@@ -7,9 +7,13 @@ const props = withDefaults(defineProps<{
   stage: any
   session?: any
   headingLevel?: 'h2' | 'h3'
+  imageSizes?: string
+  withBorder?: boolean
 }>(), {
   session: null,
   headingLevel: 'h2',
+  imageSizes: '(min-width: 1280px) 33vw, (min-width: 768px) 50vw, 100vw',
+  withBorder: true,
 })
 
 const disciplineLabels: Record<string, string> = {
@@ -72,7 +76,8 @@ const formatSessionRange = (session: any) => {
 <template>
   <NuxtLink
     :to="`/stages-escalade/${stage.slug}`"
-    class="block overflow-hidden rounded-3xl border border-brand-900 bg-brand-950 shadow-2xl shadow-black/20 transition duration-300 hover:-translate-y-1 hover:border-secondaryBrand-500/50 hover:shadow-3xl hover:shadow-black/30 focus:outline-none focus-visible:ring-2 focus-visible:ring-secondaryBrand-400"
+    class="block overflow-hidden rounded-3xl bg-brand-950 shadow-2xl shadow-black/20 transition duration-300 hover:-translate-y-1 hover:shadow-3xl hover:shadow-black/30 focus:outline-none focus-visible:ring-2 focus-visible:ring-secondaryBrand-400"
+    :class="withBorder ? 'border border-brand-900 hover:border-secondaryBrand-500/50' : 'border-0'"
   >
     <div class="relative h-72 w-full overflow-hidden">
       <img
@@ -81,7 +86,7 @@ const formatSessionRange = (session: any) => {
         :alt="stage.titre"
         class="size-full object-cover transition duration-500 hover:scale-105"
         decoding="async"
-        sizes="(min-width: 1280px) 33vw, (min-width: 768px) 50vw, 100vw"
+        :sizes="imageSizes"
         loading="lazy"
       />
       <StageSoldOutRibbon v-if="stage.estComplet" />

@@ -1,6 +1,9 @@
 <script setup lang="ts">
 const props = defineProps<{
   department?: string | null
+  latitude?: number | null
+  longitude?: number | null
+  locationLabel?: string | null
 }>()
 
 const regionMarkers = [
@@ -27,7 +30,20 @@ const departmentCode = computed(() => {
   return match?.[1] ?? null
 })
 
+const gpsMarker = computed(() => {
+  const latitude = Number(props.latitude)
+  const longitude = Number(props.longitude)
+  if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) return null
+
+  const x = projectLongitude(longitude)
+  const y = projectLatitude(latitude)
+  if (x < 4 || x > 96 || y < 4 || y > 86) return null
+
+  return { x, y }
+})
+
 const marker = computed(() => {
+  if (gpsMarker.value) return gpsMarker.value
   const region = regionMarkers.find(region => departmentCode.value && region.codes.includes(departmentCode.value))
   if (!region) return null
   return {
@@ -41,8 +57,10 @@ const marker = computed(() => {
   <div
     class="shrink-0"
     role="img"
-    :aria-label="marker
-      ? `Localisation approximative du camp de base dans le département ${departmentCode}`
+    :aria-label="gpsMarker
+      ? `Localisation du camp de base ${locationLabel || ''}`
+      : marker
+        ? `Localisation approximative du camp de base dans le département ${departmentCode}`
       : 'Carte de France — localisation précise du camp de base à renseigner'"
   >
     <svg class="h-20 w-20" viewBox="0 0 100 90" fill="none" aria-hidden="true">
@@ -60,7 +78,7 @@ const marker = computed(() => {
         stroke-linejoin="round"
       />
       <template v-if="marker">
-        <circle :cx="marker.x" :cy="marker.y" r="6.5" class="fill-secondaryBrand-400/20" />
+        <circle :cx="marker.x" :cy="marker.y" r="6.5" :class="gpsMarker ? 'fill-secondaryBrand-400/25' : 'fill-secondaryBrand-400/15'" />
         <circle :cx="marker.x" :cy="marker.y" r="3.2" class="fill-secondaryBrand-300 stroke-brand-950" stroke-width="1.8" />
       </template>
     </svg>

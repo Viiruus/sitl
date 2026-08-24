@@ -62,6 +62,8 @@ export default defineEventHandler(async (event) => {
                   gender: guideProfile.gender ?? null,
                   bio: cleanOptionalString(guideProfile.bio),
                   baseLocation: cleanOptionalString(guideProfile.baseLocation),
+                  baseLatitude: guideProfile.baseLatitude ?? null,
+                  baseLongitude: guideProfile.baseLongitude ?? null,
                   serviceAreas: cleanStringList(guideProfile.serviceAreas),
                   instagramUrl: cleanOptionalString(guideProfile.instagramUrl),
                   googleBusinessUrl: cleanOptionalString(guideProfile.googleBusinessUrl),
@@ -76,6 +78,8 @@ export default defineEventHandler(async (event) => {
                   gender: guideProfile.gender ?? null,
                   bio: cleanOptionalString(guideProfile.bio),
                   baseLocation: cleanOptionalString(guideProfile.baseLocation),
+                  baseLatitude: guideProfile.baseLatitude ?? null,
+                  baseLongitude: guideProfile.baseLongitude ?? null,
                   serviceAreas: cleanStringList(guideProfile.serviceAreas),
                   instagramUrl: cleanOptionalString(guideProfile.instagramUrl),
                   googleBusinessUrl: cleanOptionalString(guideProfile.googleBusinessUrl),
@@ -96,4 +100,3 @@ export default defineEventHandler(async (event) => {
 
   return { user }
 })
-

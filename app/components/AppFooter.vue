@@ -1,15 +1,15 @@
 <template>
-  <footer class="bg-white">
+  <footer class="bg-brand-950">
     <div class="mx-auto max-w-7xl px-6 py-16 sm:py-20 lg:px-8">
       <div class="flex flex-col items-center text-center space-y-6">
-        <img class="h-16" src="~/assets/images/brigade-du-kiff_black-logo.png" alt="Brigade du Kiff" />
-        <p class="text-sm/6 text-balance text-gray-600">Grimpez dehors !</p>
+        <img class="h-16" src="~/assets/images/brigade-du-kiff_amber-logo.png" alt="Brigade du Kiff" />
+        <p class="text-sm/6 text-balance text-brand-100/80">Grimpez dehors !</p>
         <div class="flex justify-center gap-x-6">
           <a
             v-for="item in footerNavigation.social"
             :key="item.name"
             :href="item.href"
-            class="text-gray-600 hover:text-gray-800"
+            class="text-brand-100/80 transition hover:text-secondaryBrand-300"
             target="_blank"
             rel="noopener"
           >
@@ -17,15 +17,15 @@
             <component :is="item.icon" class="size-6" aria-hidden="true" />
           </a>
         </div>
-        <div class="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-gray-600">
-          <NuxtLink to="/mentions-legales" class="hover:text-gray-800">
+        <div class="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-brand-100/80">
+          <NuxtLink to="/mentions-legales" class="transition hover:text-secondaryBrand-300">
             Mentions légales
           </NuxtLink>
-          <NuxtLink to="/politique-de-confidentialite" class="hover:text-gray-800">
+          <NuxtLink to="/politique-de-confidentialite" class="transition hover:text-secondaryBrand-300">
             Politique de confidentialité
           </NuxtLink>
         </div>
-        <p class="pt-4 text-sm/6 text-gray-600">&copy; 2026 - Brigade du kiff.</p>
+        <p class="pt-4 text-sm/6 text-brand-100/70">&copy; 2026 - Brigade du kiff.</p>
       </div>
     </div>
   </footer>

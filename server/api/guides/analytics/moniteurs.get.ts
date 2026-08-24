@@ -18,11 +18,14 @@ const RESERVED_MONITEUR_PATHS = new Set([
 
 const formatDateParam = (date: Date) => date.toISOString().slice(0, 10)
 
-const parseDays = (value: unknown) => {
+type AnalyticsRange = 7 | 30 | 365
+
+const parseRange = (value: unknown): AnalyticsRange => {
   const raw = Array.isArray(value) ? value[0] : value
+
   const parsed = typeof raw === 'string' ? Number.parseInt(raw, 10) : Number(raw)
 
-  if (parsed === 7 || parsed === 30) return parsed
+  if (parsed === 7 || parsed === 30 || parsed === 365) return parsed
   return 30
 }
 
@@ -120,19 +123,20 @@ export default defineEventHandler(async (event) => {
   }
 
   const query = getQuery(event)
-  const days = parseDays(query.days)
+  const selectedRange = parseRange(query.range ?? query.days)
   const until = new Date()
   const since = new Date(until)
-  since.setUTCDate(since.getUTCDate() - (days - 1))
+  since.setUTCDate(since.getUTCDate() - (selectedRange - 1))
 
   const buildVercelAnalyticsParams = (includePathFilter: boolean) => {
     const params = new URLSearchParams({
       projectId,
-      since: formatDateParam(since),
-      until: formatDateParam(until),
       by: 'requestPath',
       limit: '100',
     })
+
+    params.set('since', formatDateParam(since))
+    params.set('until', formatDateParam(until))
 
     if (includePathFilter) {
       params.set('filter', "startswith(requestPath, '/moniteurs/')")
@@ -242,7 +246,8 @@ export default defineEventHandler(async (event) => {
     configured: true,
     usedServerPathFilter,
     range: {
-      days,
+      preset: 'days',
+      days: selectedRange,
       since: formatDateParam(since),
       until: formatDateParam(until),
     },

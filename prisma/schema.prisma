@@ -239,6 +239,8 @@ model GuideProfile {
   bio                     String?
   gender                  GuideGender?
   baseLocation            String? // "Massif des Bauges"
+  baseLatitude            Float?
+  baseLongitude           Float?
   serviceAreas            Json?
   instagramUrl            String?
   googleBusinessUrl       String?

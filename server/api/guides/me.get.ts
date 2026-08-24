@@ -19,10 +19,13 @@ const mapGuide = (user: any) => ({
   whatsappOptIn: user.whatsappOptIn,
   firstName: user.firstName,
   lastName: user.lastName,
+  department: user.department,
   fullName: [user.firstName, user.lastName].filter(Boolean).join(' ') || 'Moniteur',
   slug: buildGuideSlug(user.firstName, user.lastName, user.id),
   gender: user.guideProfile?.gender || null,
   baseLocation: user.guideProfile?.baseLocation || null,
+  baseLatitude: user.guideProfile?.baseLatitude ?? null,
+  baseLongitude: user.guideProfile?.baseLongitude ?? null,
   serviceAreas: Array.isArray(user.guideProfile?.serviceAreas)
     ? user.guideProfile.serviceAreas.filter((value: unknown) => typeof value === 'string' && value.trim().length > 0)
     : [],

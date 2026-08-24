@@ -18,27 +18,6 @@ const profileImageSrcset = (moniteur: any) => buildStoredSrcset(moniteur?.profil
 
 const locationLabelFor = (moniteur: any) => moniteur?.baseLocation || 'Localisation à venir'
 
-const disciplineLabels: Record<string, string> = {
-  GRANDE_VOIE: 'Grande voie',
-  FALAISE: 'Falaise',
-  BLOC: 'Bloc',
-  TRAD: 'Terrain d’aventure',
-  VIA_FERRATA: 'Via ferrata',
-}
-
-const disciplineIcons: Record<string, string> = {
-  GRANDE_VOIE: '/images/grande-voie-white.png',
-  FALAISE: '/images/couenne-white.png',
-  BLOC: '/images/bloc-white.png',
-  TRAD: '/images/trad-white.png',
-  VIA_FERRATA: '/images/via-ferrata-white.svg',
-}
-
-const disciplines = computed(() =>
-  Array.from(new Set(Array.isArray(props.moniteur?.disciplines) ? props.moniteur.disciplines : []))
-    .filter((discipline): discipline is string => typeof discipline === 'string' && Boolean(disciplineIcons[discipline])),
-)
-
 const nextStageDate = computed(() => {
   const stage = props.moniteur?.nextStage
   if (!stage?.dateDebut) return null
@@ -51,7 +30,7 @@ const nextStageDate = computed(() => {
     :to="`/moniteurs/${moniteur.slug}`"
     class="group flex h-full flex-col overflow-hidden rounded-2xl bg-white/[0.035] p-4 ring-1 ring-white/10 transition hover:-translate-y-1 hover:bg-white/[0.07] focus:outline-none focus-visible:ring-2 focus-visible:ring-secondaryBrand-400"
   >
-    <div class="relative aspect-[4/3] overflow-hidden rounded-xl outline-1 -outline-offset-1 outline-white/10">
+    <div class="relative aspect-square overflow-hidden rounded-xl outline-1 -outline-offset-1 outline-white/10">
       <img
         class="absolute inset-0 h-full w-full object-cover"
         :src="profileImageFor(moniteur)"
@@ -76,24 +55,12 @@ const nextStageDate = computed(() => {
             <span class="line-clamp-2"><span class="sr-only">Camp de base : </span>{{ locationLabelFor(moniteur) }}</span>
           </div>
         </div>
-        <GuideFranceLocator :department="moniteur.department" />
-      </div>
-
-      <div v-if="disciplines.length" class="mt-4 border-t border-white/10 pt-4">
-        <p class="text-[10px] font-semibold uppercase tracking-[0.28em] text-brand-200/55">
-          Activités proposées
-        </p>
-        <div class="mt-3 flex flex-wrap gap-2">
-          <span
-            v-for="discipline in disciplines"
-            :key="discipline"
-            class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/[0.06] ring-1 ring-white/10"
-            :title="disciplineLabels[discipline]"
-          >
-            <img :src="disciplineIcons[discipline]" alt="" class="h-6 w-6 object-contain" />
-            <span class="sr-only">{{ disciplineLabels[discipline] }}</span>
-          </span>
-        </div>
+        <GuideFranceLocator
+          :department="moniteur.department"
+          :latitude="moniteur.baseLatitude"
+          :longitude="moniteur.baseLongitude"
+          :location-label="locationLabelFor(moniteur)"
+        />
       </div>
 
       <div class="mt-auto pt-4">

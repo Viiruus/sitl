@@ -15,7 +15,8 @@ const downloadPending = ref(false)
 
 const CANVAS_SIZE = 280
 const SVG_PIXEL_SIZE = 8
-const QR_COLOR = '#ffcf00'
+const QR_COLOR = '#ffffff'
+const QR_BACKGROUND_COLOR = '#082f49'
 
 const buildQrSvgMarkup = () => {
   try {
@@ -24,7 +25,7 @@ const buildQrSvgMarkup = () => {
       ecc: 'M',
       border: 2,
       pixelSize: SVG_PIXEL_SIZE,
-      whiteColor: 'transparent',
+      whiteColor: QR_BACKGROUND_COLOR,
       blackColor: QR_COLOR,
     })
   } catch {
@@ -135,7 +136,7 @@ const downloadQrCode = async () => {
         </p>
       </div>
 
-      <div class="self-center rounded-[2rem] bg-white/5 p-4 shadow-2xl shadow-black/30 ring-1 ring-white/10">
+      <div class="self-center rounded-[2rem] bg-brand-950 p-4 shadow-2xl shadow-black/30 ring-1 ring-white/10">
         <img
           v-if="qrSvgDataUrl"
           :src="qrSvgDataUrl"

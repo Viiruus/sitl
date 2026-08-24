@@ -38,6 +38,8 @@ export const adminUserSchema = z.object({
     gender: z.enum(['male', 'female']).optional().nullable(),
     bio: optionalText,
     baseLocation: optionalShortText,
+    baseLatitude: z.number().min(-90).max(90).optional().nullable(),
+    baseLongitude: z.number().min(-180).max(180).optional().nullable(),
     serviceAreas: optionalList,
     instagramUrl: optionalText,
     googleBusinessUrl: optionalText,
@@ -48,7 +50,17 @@ export const adminUserSchema = z.object({
     profileImageVariants: z.unknown().optional().nullable(),
     isPublic: z.boolean().default(false),
   }).optional().nullable(),
+}).superRefine((body, context) => {
+  if (!body.guideProfile) return
+  const hasLatitude = body.guideProfile.baseLatitude != null
+  const hasLongitude = body.guideProfile.baseLongitude != null
+  if (hasLatitude !== hasLongitude) {
+    context.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ['guideProfile', 'baseLatitude'],
+      message: 'La latitude et la longitude doivent être renseignées ensemble.',
+    })
+  }
 })
 
 export type AdminUserInput = z.infer<typeof adminUserSchema>
-

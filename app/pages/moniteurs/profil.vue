@@ -35,6 +35,8 @@ const form = reactive({
   whatsappOptIn: true,
   gender: '',
   baseLocation: '',
+  baseLatitude: null as number | null,
+  baseLongitude: null as number | null,
   serviceAreasText: '',
   bio: '',
   stageTermsAndConditions: '',
@@ -57,6 +59,8 @@ watch(
     form.whatsappOptIn = Boolean(value.whatsappOptIn)
     form.gender = value.gender || ''
     form.baseLocation = value.baseLocation || ''
+    form.baseLatitude = typeof value.baseLatitude === 'number' ? value.baseLatitude : null
+    form.baseLongitude = typeof value.baseLongitude === 'number' ? value.baseLongitude : null
     form.serviceAreasText = Array.isArray(value.serviceAreas) ? value.serviceAreas.join('\n') : ''
     form.bio = value.bio || ''
     form.stageTermsAndConditions = value.stageTermsAndConditions
@@ -80,6 +84,15 @@ const success = ref<string | null>(null)
 const error = ref<string | null>(null)
 const uploadError = ref<string | null>(null)
 const uploadingPhoto = ref(false)
+const baseLocationSearching = ref(false)
+const baseLocationSearchError = ref<string | null>(null)
+const baseLocationSuggestions = ref<Array<{
+  id: string
+  label: string
+  latitude: number
+  longitude: number
+}>>([])
+const selectedBaseLocationLabel = ref<string | null>(null)
 const isClient = ref(false)
 const { uploadGuideImage } = useGuideImageUpload()
 const stageTermsGlobalVariableExamples = GUIDE_STAGE_TERMS_GLOBAL_VARIABLES.slice(0, 8)
@@ -118,6 +131,67 @@ const resetStageTermsToDefault = () => {
     guideName: currentGuideName,
     professionalCardNumber: form.professionalCardNumber || null,
   })
+}
+
+const hasBaseCoordinates = computed(() =>
+  typeof form.baseLatitude === 'number' &&
+  Number.isFinite(form.baseLatitude) &&
+  typeof form.baseLongitude === 'number' &&
+  Number.isFinite(form.baseLongitude),
+)
+
+const handleBaseLocationInput = () => {
+  form.baseLatitude = null
+  form.baseLongitude = null
+  selectedBaseLocationLabel.value = null
+  baseLocationSuggestions.value = []
+  baseLocationSearchError.value = null
+}
+
+const searchBaseLocation = async () => {
+  const query = form.baseLocation.trim()
+  baseLocationSearchError.value = null
+  baseLocationSuggestions.value = []
+  selectedBaseLocationLabel.value = null
+
+  if (query.length < 2) {
+    baseLocationSearchError.value = 'Renseigne un camp de base plus précis.'
+    return
+  }
+
+  baseLocationSearching.value = true
+  try {
+    const response = await $fetch<{
+      suggestions: Array<{
+        id: string
+        label: string
+        latitude: number
+        longitude: number
+      }>
+    }>('/api/guides/base-location-suggestions', {
+      query: { q: query },
+    })
+    baseLocationSuggestions.value = response.suggestions
+    if (!response.suggestions.length) {
+      baseLocationSearchError.value = 'Aucun lieu trouvé. Ajoute une commune ou un département.'
+    }
+  } catch (e: any) {
+    baseLocationSearchError.value = e?.data?.message || 'Impossible de rechercher ce lieu.'
+  } finally {
+    baseLocationSearching.value = false
+  }
+}
+
+const selectBaseLocation = (suggestion: {
+  label: string
+  latitude: number
+  longitude: number
+}) => {
+  form.baseLatitude = suggestion.latitude
+  form.baseLongitude = suggestion.longitude
+  selectedBaseLocationLabel.value = suggestion.label
+  baseLocationSuggestions.value = []
+  baseLocationSearchError.value = null
 }
 
 const saveProfile = async () => {
@@ -241,7 +315,82 @@ const logout = async () => {
 
             <div class="space-y-2">
               <label class="text-sm text-brand-100/80">Camp de base</label>
-              <input v-model="form.baseLocation" type="text" class="w-full rounded-xl border border-brand-800 bg-brand-900/80 px-3 py-2 text-white focus:border-secondaryBrand-400 focus:outline-none" />
+              <div class="flex flex-col gap-2 sm:flex-row">
+                <input
+                  v-model="form.baseLocation"
+                  type="text"
+                  class="w-full rounded-xl border border-brand-800 bg-brand-900/80 px-3 py-2 text-white focus:border-secondaryBrand-400 focus:outline-none"
+                  placeholder="Ex. Massif des Bauges, Savoie"
+                  @input="handleBaseLocationInput"
+                  @keydown.enter.prevent="searchBaseLocation"
+                />
+                <button
+                  type="button"
+                  class="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl border border-secondaryBrand-300/40 bg-secondaryBrand-400/10 px-4 py-2 text-sm font-semibold text-secondaryBrand-200 transition hover:bg-secondaryBrand-400/20 disabled:cursor-not-allowed disabled:opacity-50"
+                  :disabled="baseLocationSearching || form.baseLocation.trim().length < 2"
+                  @click="searchBaseLocation"
+                >
+                  <span v-if="baseLocationSearching" class="size-4 animate-spin rounded-full border-2 border-secondaryBrand-200 border-t-transparent" />
+                  <svg v-else class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                    <circle cx="11" cy="11" r="7" />
+                    <path stroke-linecap="round" d="m16 16 4 4" />
+                  </svg>
+                  Rechercher ce lieu
+                </button>
+              </div>
+              <p class="text-xs text-brand-200/70">
+                Saisis un massif, une ville ou un village, puis choisis la proposition correspondante.
+              </p>
+
+              <div v-if="baseLocationSuggestions.length" class="overflow-hidden rounded-xl border border-white/10 bg-brand-950/70">
+                <button
+                  v-for="suggestion in baseLocationSuggestions"
+                  :key="suggestion.id"
+                  type="button"
+                  class="flex w-full items-start gap-3 border-b border-white/10 px-4 py-3 text-left text-sm text-brand-100/85 transition last:border-b-0 hover:bg-white/5 hover:text-white"
+                  @click="selectBaseLocation(suggestion)"
+                >
+                  <svg class="mt-0.5 size-4 shrink-0 text-secondaryBrand-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 21c-4-4-6-7-6-10a6 6 0 0 1 12 0c0 3-2 6-6 10Z" />
+                    <circle cx="12" cy="11" r="2.3" />
+                  </svg>
+                  <span>{{ suggestion.label }}</span>
+                </button>
+              </div>
+
+              <p v-if="baseLocationSearchError" class="text-xs text-red-300">
+                {{ baseLocationSearchError }}
+              </p>
+
+              <div v-if="hasBaseCoordinates" class="flex items-center justify-between gap-4 rounded-xl border border-secondaryBrand-300/20 bg-secondaryBrand-400/10 px-4 py-3">
+                <div class="min-w-0">
+                  <p class="text-xs font-semibold text-secondaryBrand-200">Localisation sélectionnée</p>
+                  <p class="mt-1 line-clamp-2 text-xs text-brand-100/70">
+                    {{ selectedBaseLocationLabel || form.baseLocation }}
+                  </p>
+                  <p class="mt-1 text-[10px] text-brand-200/55">
+                    {{ form.baseLatitude?.toFixed(5) }}, {{ form.baseLongitude?.toFixed(5) }}
+                  </p>
+                </div>
+                <GuideFranceLocator
+                  :department="guide?.department"
+                  :latitude="form.baseLatitude"
+                  :longitude="form.baseLongitude"
+                  :location-label="form.baseLocation"
+                />
+              </div>
+
+              <p class="text-[10px] text-brand-200/50">
+                Géocodage :
+                <a
+                  href="https://www.openstreetmap.org/copyright"
+                  target="_blank"
+                  rel="noopener"
+                  class="underline underline-offset-2 hover:text-brand-100"
+                >
+                  données © contributeurs OpenStreetMap
+                </a>.
+              </p>
             </div>
 
             <div class="space-y-2">

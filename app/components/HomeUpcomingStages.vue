@@ -11,8 +11,8 @@ const upcomingStages = computed(() => data.value?.aventures ?? [])
 </script>
 
 <template>
-  <section id="stages" class="bg-[#f7f7f5] py-20 text-[#242424] sm:py-28">
-    <div class="w-full px-4 sm:px-6 lg:px-8">
+  <section id="stages" class="bg-white py-20 text-[#242424] sm:py-28">
+    <div class="mx-auto w-full max-w-[90rem] px-4 sm:px-6 lg:px-8">
       <div class="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p class="text-sm font-semibold uppercase tracking-[0.35em] text-secondaryBrand-600">
@@ -40,13 +40,15 @@ const upcomingStages = computed(() => data.value?.aventures ?? [])
       <div v-else-if="!upcomingStages.length" class="mt-12 rounded-3xl border border-black/10 bg-white p-8 text-[#6b6b6b]">
         Encore aucune date publiée. Reviens très vite !
       </div>
-      <div v-else class="mt-12 grid grid-cols-[repeat(auto-fill,minmax(min(100%,28rem),1fr))] gap-6">
+      <div v-else class="mt-12 grid grid-cols-1 gap-6 lg:grid-cols-2 lg:gap-8">
         <StageCard
           v-for="stage in upcomingStages"
           :key="stage.id"
           :stage="stage"
           :session="stage.nextSession"
           heading-level="h3"
+          :with-border="false"
+          image-sizes="(min-width: 1536px) 680px, (min-width: 1024px) calc(50vw - 3rem), 100vw"
         />
       </div>
 

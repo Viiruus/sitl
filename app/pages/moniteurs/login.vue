@@ -150,6 +150,17 @@ const submitOnboarding = async () => {
 const logout = async () => {
   await clear()
   await fetch()
+  needsOnboarding.value = false
+  guideFirstName.value = ''
+  guideLastName.value = ''
+  phoneNumber.value = ''
+  code.value = ''
+  codeSent.value = false
+  otpToken.value = null
+  cguAccepted.value = false
+  associationMembershipAccepted.value = false
+  error.value = null
+  success.value = 'Tu es maintenant déconnecté·e.'
 }
 </script>
 
@@ -350,9 +361,9 @@ const logout = async () => {
             </span>
           </button>
           <button
-            v-if="loggedIn && user?.role !== 'GUIDE'"
+            v-if="loggedIn"
             type="button"
-            class="text-xs text-brand-400 underline"
+            class="w-full rounded-xl border border-white/20 px-4 py-2.5 text-sm font-medium text-brand-100/80 transition hover:border-white/35 hover:bg-white/5 hover:text-white"
             @click="logout"
           >
             Se déconnecter du compte actuel

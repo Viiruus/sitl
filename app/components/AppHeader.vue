@@ -2,13 +2,13 @@
   <header
     class="inset-x-0 top-0 z-50 transition-[background-color,box-shadow] duration-300"
     :class="isScrolled
-      ? 'fixed bg-white shadow-lg shadow-brand-950/10 ring-1 ring-black/5'
+      ? 'fixed bg-brand-950 shadow-lg shadow-black/20'
       : 'absolute bg-transparent'"
   >
-    <div class="mx-auto max-w-7xl">
+    <div class="mx-auto w-full max-w-[90rem]">
       <div
-        class="px-6 transition-[padding] duration-300 lg:px-8"
-        :class="isScrolled ? 'py-3' : 'pt-10 pb-3'"
+        class="px-4 transition-[padding] duration-300 sm:px-6 lg:px-8"
+        :class="isScrolled || props.compact ? 'py-6' : 'py-8'"
       >
         <nav class="flex items-center justify-between lg:justify-start" aria-label="Global">
           <NuxtLink to="/" class="-m-1.5 p-1.5">
@@ -17,8 +17,7 @@
           </NuxtLink>
           <button
             type="button"
-            class="-m-2.5 rounded-md p-2.5 transition-colors lg:hidden"
-            :class="isScrolled ? 'text-brand-950' : 'text-gray-200'"
+            class="-m-2.5 rounded-md p-2.5 text-white transition-colors hover:text-secondaryBrand-200 lg:hidden"
             @click="mobileMenuOpen = true"
           >
             <span class="sr-only">Open main menu</span>
@@ -29,8 +28,7 @@
               v-for="item in navigation"
               :key="item.name"
               :to="item.href"
-              class="text-sm/6 font-semibold transition-colors"
-              :class="isScrolled ? 'text-brand-950 hover:text-secondaryBrand-600' : 'text-white hover:text-secondaryBrand-200'"
+              class="text-sm/6 font-semibold text-white transition-colors hover:text-secondaryBrand-200"
             >
               {{ item.name }}
             </NuxtLink>
@@ -57,7 +55,7 @@
     </div>
     <Dialog class="lg:hidden" @close="mobileMenuOpen = false" :open="mobileMenuOpen">
       <div class="fixed inset-0 z-50" />
-      <DialogPanel class="fixed inset-y-0 right-0 z-50 w-full overflow-y-auto bg-brand-900 p-6 sm:max-w-sm sm:ring-1 sm:ring-gray-100/10">
+      <DialogPanel class="fixed inset-y-0 right-0 z-50 w-full overflow-y-auto bg-brand-950 p-6 sm:max-w-sm sm:ring-1 sm:ring-gray-100/10">
         <div class="flex items-center justify-between">
           <NuxtLink to="/" class="-m-1.5 p-1.5">
             <span class="sr-only">Brigade du Kiff</span>
@@ -112,6 +110,12 @@ import { ref, computed, onBeforeUnmount, onMounted } from 'vue'
 import { Dialog, DialogPanel } from '@headlessui/vue'
 import { Bars3Icon, XMarkIcon } from '@heroicons/vue/24/outline'
 import AuthModal from './AuthModal.vue'
+
+const props = withDefaults(defineProps<{
+  compact?: boolean
+}>(), {
+  compact: false,
+})
 
 const navigation = [
   { name: 'Les stages', href: '/stages-escalade' },

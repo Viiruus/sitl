@@ -43,8 +43,8 @@ useSeoMeta(() => ({
 
 <template>
   <div class="min-h-screen bg-white">
-    <div class="h-28 bg-brand-950 sm:h-32">
-      <AppHeader />
+    <div class="h-[5.5rem] bg-brand-950">
+      <AppHeader compact />
     </div>
     <main>
       <MoniteursArticleDocument

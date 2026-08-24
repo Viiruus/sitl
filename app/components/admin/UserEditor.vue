@@ -13,7 +13,7 @@ const form = reactive<any>({
   typesOfClimbing: '', climbsMainly: '', environments: '', autonomy: '', frequency: '', gradeLevel: '',
   preferredClimbingStyle: '', climbingGoal: '', boulderingLocations: '', boulderingGrade: '', belayDevices: '',
   multiAutonomy: '', tradProtections: '', tradMovingBelay: '', tripStyles: '',
-  guideGender: '', guideBio: '', baseLocation: '', serviceAreas: '', instagramUrl: '', googleBusinessUrl: '',
+  guideGender: '', guideBio: '', baseLocation: '', baseLatitude: '', baseLongitude: '', serviceAreas: '', instagramUrl: '', googleBusinessUrl: '',
   googlePlaceId: '', professionalCardNumber: '', stageTermsAndConditions: '', guideProfileImageUrl: '',
   profileImageVariants: '', isPublic: false,
 })
@@ -42,6 +42,8 @@ const load = async () => {
     form.guideGender = guide.gender || ''
     form.guideBio = guide.bio || ''
     form.baseLocation = guide.baseLocation || ''
+    form.baseLatitude = guide.baseLatitude ?? ''
+    form.baseLongitude = guide.baseLongitude ?? ''
     form.serviceAreas = toText(guide.serviceAreas)
     form.instagramUrl = guide.instagramUrl || ''
     form.googleBusinessUrl = guide.googleBusinessUrl || ''
@@ -72,6 +74,8 @@ const payload = () => ({
   onboarded: form.onboarded, onboardingStep: Number(form.onboardingStep || 0),
   guideProfile: form.role === 'GUIDE' ? {
     gender: form.guideGender || null, bio: form.guideBio || null, baseLocation: form.baseLocation || null,
+    baseLatitude: form.baseLatitude === '' ? null : Number(form.baseLatitude),
+    baseLongitude: form.baseLongitude === '' ? null : Number(form.baseLongitude),
     serviceAreas: toList(form.serviceAreas), instagramUrl: form.instagramUrl || null,
     googleBusinessUrl: form.googleBusinessUrl || null, googlePlaceId: form.googlePlaceId || null,
     professionalCardNumber: form.professionalCardNumber || null, stageTermsAndConditions: form.stageTermsAndConditions || null,
@@ -141,6 +145,8 @@ const inputClass = 'w-full rounded-xl border border-slate-300 bg-white px-3 py-2
       <div class="mt-5 grid gap-4 md:grid-cols-2">
         <label class="text-sm text-slate-700">Genre<select v-model="form.guideGender" :class="inputClass" class="mt-2"><option value="">Non renseigné</option><option value="male">Homme</option><option value="female">Femme</option></select></label>
         <label class="text-sm text-slate-700">Camp de base<input v-model="form.baseLocation" :class="inputClass" class="mt-2" /></label>
+        <label class="text-sm text-slate-700">Latitude du camp de base<input v-model="form.baseLatitude" type="number" min="-90" max="90" step="any" :class="inputClass" class="mt-2" /></label>
+        <label class="text-sm text-slate-700">Longitude du camp de base<input v-model="form.baseLongitude" type="number" min="-180" max="180" step="any" :class="inputClass" class="mt-2" /></label>
         <label class="text-sm text-slate-700">Zones desservies<textarea v-model="form.serviceAreas" rows="3" :class="inputClass" class="mt-2" /></label>
         <label class="text-sm text-slate-700">N° carte professionnelle<input v-model="form.professionalCardNumber" :class="inputClass" class="mt-2" /></label>
         <label class="text-sm text-slate-700">Instagram<input v-model="form.instagramUrl" :class="inputClass" class="mt-2" /></label>

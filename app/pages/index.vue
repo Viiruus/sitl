@@ -30,11 +30,11 @@
               Grimpez dehors !
             </h1>
             <p class="mx-auto mt-6 max-w-2xl text-lg font-medium text-pretty text-white/85 drop-shadow sm:text-xl/8">
-              Vivez vos aventures verticales avec nos moniteurs locaux passionnés.
+              Vos aventures verticales commencent ici, avec notre collectif de moniteur·ices d'escalade.
             </p>
           </div>
 
-          <div class="mx-auto mt-12 max-w-6xl sm:mt-16">
+          <div class="mx-auto mt-12 max-w-3xl sm:mt-16">
             <HomeStageSearch />
           </div>
         </div>

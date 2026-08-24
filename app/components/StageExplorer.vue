@@ -9,7 +9,7 @@ const { data, pending, error } = await useFetch('/api/aventures')
 const { loggedIn, user, fetch: fetchUserSession } = useUserSession()
 const { openModal } = useAuthModal()
 
-const selectedDiscipline = ref<string | null>(null)
+const selectedDisciplines = ref<string[]>([])
 const selectedRegion = ref<string | null>(null)
 const dateRangeStart = ref('')
 const dateRangeEnd = ref('')
@@ -26,6 +26,25 @@ const normalizeDisciplineFilter = (value?: string | null) => {
   if (!value) return null
   const normalized = value.toUpperCase()
   return disciplineQueryAliases[normalized] ?? normalized
+}
+
+const disciplineIconMap: Record<string, string> = {
+  GRANDE_VOIE: '/images/grande-voie-white.png',
+  FALAISE: '/images/couenne-white.png',
+  BLOC: '/images/bloc-white.png',
+  TRAD: '/images/trad-white.png',
+  VIA_FERRATA: '/images/via-ferrata-white.svg',
+}
+
+const iconPathForDiscipline = (value?: string | null) => {
+  if (!value) return disciplineIconMap.GRANDE_VOIE
+  return disciplineIconMap[value] ?? disciplineIconMap.GRANDE_VOIE
+}
+
+const toggleDiscipline = (value: string) => {
+  selectedDisciplines.value = selectedDisciplines.value.includes(value)
+    ? selectedDisciplines.value.filter(discipline => discipline !== value)
+    : [...selectedDisciplines.value, value]
 }
 
 const disciplineLabels: Record<string, string> = {
@@ -79,23 +98,15 @@ watch(regionOptions, (options) => {
   }
 })
 
-const disciplineIconMap: Record<string, string> = {
-  GRANDE_VOIE: '/images/grande-voie-white.png',
-  FALAISE: '/images/couenne-white.png',
-  BLOC: '/images/bloc-white.png',
-  TRAD: '/images/trad-white.png',
-  VIA_FERRATA: '/images/via-ferrata-white.svg',
-}
-
-const iconPathForDiscipline = (value?: string | null) => {
-  if (!value) return disciplineIconMap.GRANDE_VOIE
-  return disciplineIconMap[value] ?? disciplineIconMap.GRANDE_VOIE
-}
-
 const initialQueryDiscipline = route.query.discipline
-if (typeof initialQueryDiscipline === 'string') {
-  selectedDiscipline.value = normalizeDisciplineFilter(initialQueryDiscipline)
-}
+const initialQueryDisciplines = Array.isArray(initialQueryDiscipline)
+  ? initialQueryDiscipline
+  : typeof initialQueryDiscipline === 'string'
+    ? initialQueryDiscipline.split(',')
+    : []
+selectedDisciplines.value = initialQueryDisciplines
+  .map(value => normalizeDisciplineFilter(value))
+  .filter((value): value is string => Boolean(value))
 
 const initialQueryRegion = route.query.region
 if (typeof initialQueryRegion === 'string') {
@@ -172,9 +183,9 @@ const filteredAventures = computed(() => {
       return false
     })
 
-  if (selectedDiscipline.value) {
+  if (selectedDisciplines.value.length) {
     adventures = adventures.filter(
-      (aventure) => aventure.discipline === selectedDiscipline.value
+      (aventure) => selectedDisciplines.value.includes(aventure.discipline)
     )
   }
 
@@ -252,7 +263,7 @@ const mapLegend = [
 ]
 
 const currentNotificationCriteria = computed(() => ({
-  discipline: selectedDiscipline.value,
+  disciplines: [...selectedDisciplines.value],
   region: selectedRegion.value,
   dateStart: dateRangeStart.value || null,
   dateEnd: dateRangeEnd.value || null,
@@ -275,7 +286,11 @@ const storePendingStageNotification = () => {
 
 const applyNotificationCriteria = (criteria: any) => {
   if (!criteria || typeof criteria !== 'object') return
-  selectedDiscipline.value = typeof criteria.discipline === 'string' ? criteria.discipline : null
+  selectedDisciplines.value = Array.isArray(criteria.disciplines)
+    ? criteria.disciplines.filter((discipline: unknown): discipline is string => typeof discipline === 'string')
+    : typeof criteria.discipline === 'string'
+      ? [criteria.discipline]
+      : []
   selectedRegion.value = typeof criteria.region === 'string' ? criteria.region : null
   dateRangeStart.value = typeof criteria.dateStart === 'string' ? criteria.dateStart : ''
   dateRangeEnd.value = typeof criteria.dateEnd === 'string' ? criteria.dateEnd : ''
@@ -294,16 +309,24 @@ const subscribeToStageNotifications = async (options: { fromPending?: boolean } 
   notificationLoading.value = true
 
   try {
-    const res: any = await $fetch('/api/stage-notification-subscriptions', {
-      method: 'POST',
-      body: currentNotificationCriteria.value,
-    })
+    const disciplines = selectedDisciplines.value.length ? selectedDisciplines.value : [null]
+    const responses: any[] = await Promise.all(
+      disciplines.map(discipline => $fetch('/api/stage-notification-subscriptions', {
+        method: 'POST',
+        body: {
+          discipline,
+          region: selectedRegion.value,
+          dateStart: dateRangeStart.value || null,
+          dateEnd: dateRangeEnd.value || null,
+        },
+      })),
+    )
 
     if (typeof window !== 'undefined') {
       window.localStorage.removeItem(pendingStageNotificationKey)
     }
 
-    notificationSuccess.value = res?.already
+    notificationSuccess.value = responses.every(response => response?.already)
       ? 'Tu es déjà inscrit·e à ces notifications.'
       : 'C’est noté, tu seras prévenu·e sur WhatsApp.'
     if (options.fromPending) {
@@ -379,110 +402,109 @@ onMounted(async () => {
 
       <div v-else class="space-y-4">
         <section class="mb-3">
-          <div class="rounded-2xl border border-white/15 bg-brand-900/50 p-2.5 shadow-lg shadow-black/30 backdrop-blur">
-            <div class="grid gap-2 lg:grid-cols-3 lg:items-stretch">
-              <div class="flex h-full flex-col gap-2 rounded-xl border border-white/10 bg-brand-950/35 p-2.5">
-                <div class="flex flex-wrap items-center justify-between gap-2">
-                  <p class="text-[11px] uppercase tracking-[0.25em] text-brand-200/70">Activité</p>
+          <div class="grid overflow-hidden rounded-2xl bg-white/95 p-2 text-left shadow-2xl shadow-black/30 backdrop-blur lg:grid-cols-[1.6fr_1.2fr_0.9fr] lg:items-stretch">
+            <div class="flex min-w-0 items-center gap-3 border-b border-gray-200 px-3 py-2.5 lg:border-r lg:border-b-0 lg:px-4">
+              <svg class="size-6 shrink-0 text-secondaryBrand-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="m3 19 6.5-10 3.5 5 2.5-4L21 19H3Z" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M5 19h14" />
+              </svg>
+              <div class="min-w-0 flex-1">
+                <div class="flex items-center justify-between gap-2">
+                  <span class="text-xs font-semibold text-brand-950">Activités</span>
                   <button
-                    v-if="selectedDiscipline"
+                    v-if="selectedDisciplines.length"
                     type="button"
-                    class="rounded-full border border-secondaryBrand-300 px-2 py-0.5 text-[9px] font-semibold uppercase tracking-[0.2em] text-secondaryBrand-100 transition hover:bg-secondaryBrand-500/20"
-                    @click="selectedDiscipline = null"
+                    class="text-[10px] font-semibold text-secondaryBrand-600 transition hover:text-secondaryBrand-500"
+                    @click="selectedDisciplines = []"
                   >
-                    Réinitialiser
+                    Effacer
                   </button>
                 </div>
-                <div class="flex flex-wrap gap-1.5">
+                <div class="mt-1.5 flex flex-wrap gap-1.5">
                   <button
                     v-for="option in disciplineOptions"
                     :key="option.value"
                     type="button"
-                    class="group flex items-center gap-1.5 rounded-lg border px-2 py-1 text-[11px] transition"
-                    :class="selectedDiscipline === option.value
-                      ? 'border-secondaryBrand-400 bg-secondaryBrand-500/20 text-white'
-                      : 'border-brand-800 bg-brand-900/80 text-brand-100'"
-                    @click="selectedDiscipline = option.value"
+                    class="group inline-flex items-center gap-2 rounded-lg border px-2.5 py-1 text-xs font-medium transition"
+                    :class="selectedDisciplines.includes(option.value)
+                      ? 'border-secondaryBrand-400 bg-secondaryBrand-50 text-brand-950 shadow-sm'
+                      : 'border-gray-200 bg-gray-50 text-gray-600 hover:border-secondaryBrand-400 hover:bg-secondaryBrand-50'"
+                    :aria-pressed="selectedDisciplines.includes(option.value)"
+                    @click="toggleDiscipline(option.value)"
                   >
-                    <span class="flex h-6 w-6 items-center justify-center rounded-md bg-secondaryBrand-400/80 transition duration-300 ease-out group-hover:scale-105 group-hover:shadow-lg group-hover:shadow-secondaryBrand-500/40">
+                    <span class="flex size-7 shrink-0 items-center justify-center rounded-full bg-secondaryBrand-400">
                       <img
                         :src="iconPathForDiscipline(option.value)"
-                        :alt="option.label"
-                        class="h-4 w-4 object-contain"
+                        alt=""
+                        class="size-[18px] object-contain"
                         loading="lazy"
                       />
                     </span>
-                    <span class="font-medium leading-tight">{{ option.label }}</span>
+                    {{ option.label }}
                   </button>
                 </div>
               </div>
+            </div>
 
-              <div class="flex h-full flex-col gap-2 rounded-xl border border-white/10 bg-brand-950/35 p-2.5">
-                <div class="flex flex-wrap items-center justify-between gap-2">
-                  <p class="text-[11px] uppercase tracking-[0.25em] text-brand-200/70">Dates</p>
+            <div class="flex min-w-0 items-center gap-3 border-b border-gray-200 px-3 py-2.5 lg:border-r lg:border-b-0 lg:px-4">
+              <svg class="size-6 shrink-0 text-secondaryBrand-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
+                <rect x="3" y="5" width="18" height="16" rx="2" />
+                <path stroke-linecap="round" d="M8 3v4M16 3v4M3 10h18" />
+              </svg>
+              <div class="min-w-0 flex-1">
+                <div class="flex items-center justify-between gap-2">
+                  <span class="text-xs font-semibold text-brand-950">Dates</span>
                   <button
                     v-if="hasDateRangeFilter"
                     type="button"
-                    class="rounded-full border border-secondaryBrand-300 px-2 py-0.5 text-[9px] font-semibold uppercase tracking-[0.2em] text-secondaryBrand-100 transition hover:bg-secondaryBrand-500/20"
+                    class="text-[10px] font-semibold text-secondaryBrand-600 transition hover:text-secondaryBrand-500"
                     @click="resetDateRange"
                   >
-                    Réinitialiser
+                    Effacer
                   </button>
                 </div>
-                <div class="grid gap-1.5 sm:grid-cols-2">
-                  <label>
-                    <span class="sr-only">Début</span>
+                <div class="mt-1 grid min-w-0 grid-cols-[1fr_auto_1fr] items-center gap-2">
+                  <label class="min-w-0">
+                    <span class="sr-only">Date de début</span>
                     <input
                       v-model="dateRangeStart"
                       type="date"
-                      class="date-filter-input w-full rounded-lg border border-white/15 bg-brand-950/70 px-2.5 py-1.5 text-xs text-white outline-none transition focus:border-secondaryBrand-300"
+                      class="date-filter-input w-full min-w-0 bg-transparent text-sm text-gray-600 outline-none"
                     />
                   </label>
-                  <label>
-                    <span class="sr-only">Fin</span>
+                  <span class="text-xs text-gray-300">—</span>
+                  <label class="min-w-0">
+                    <span class="sr-only">Date de fin</span>
                     <input
                       v-model="dateRangeEnd"
                       type="date"
                       :min="dateRangeStart || undefined"
-                      class="date-filter-input w-full rounded-lg border border-white/15 bg-brand-950/70 px-2.5 py-1.5 text-xs text-white outline-none transition focus:border-secondaryBrand-300"
+                      class="date-filter-input w-full min-w-0 bg-transparent text-sm text-gray-600 outline-none"
                     />
                   </label>
                 </div>
               </div>
+            </div>
 
-              <div class="flex h-full flex-col gap-2 rounded-xl border border-white/10 bg-brand-950/35 p-2.5">
-                <div class="flex flex-wrap items-center justify-between gap-2">
-                  <p class="text-[11px] uppercase tracking-[0.25em] text-brand-200/70">Région</p>
-                  <button
-                    v-if="selectedRegion"
-                    type="button"
-                    class="rounded-full border border-secondaryBrand-300 px-2 py-0.5 text-[9px] font-semibold uppercase tracking-[0.2em] text-secondaryBrand-100 transition hover:bg-secondaryBrand-500/20"
-                    @click="selectedRegion = null"
-                  >
-                    Réinitialiser
-                  </button>
-                </div>
+            <div class="flex min-w-0 items-center gap-3 border-b border-gray-200 px-3 py-2.5 lg:border-r lg:border-b-0 lg:px-4">
+              <svg class="size-6 shrink-0 text-secondaryBrand-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 21c-4-4-6-7-6-10a6 6 0 0 1 12 0c0 3-2 6-6 10Z" />
+                <circle cx="12" cy="11" r="2.3" />
+              </svg>
+              <label class="min-w-0 flex-1">
+                <span class="block text-xs font-semibold text-brand-950">Région</span>
                 <select
                   v-model="selectedRegion"
-                  class="w-full rounded-lg border border-white/15 bg-brand-950/70 px-2.5 py-1.5 text-xs text-white outline-none transition focus:border-secondaryBrand-300"
+                  class="mt-1 w-full cursor-pointer appearance-none bg-transparent pr-4 text-sm text-gray-600 outline-none"
                 >
                   <option :value="null">Toutes les régions</option>
-                  <option
-                    v-for="option in regionOptions"
-                    :key="option.value"
-                    :value="option.value"
-                  >
+                  <option v-for="option in regionOptions" :key="option.value" :value="option.value">
                     {{ option.label }}
                   </option>
                 </select>
-                <p v-if="!regionOptions.length" class="text-xs text-brand-200/70">
-                  Les régions apparaîtront dès que les stages auront des coordonnées GPS.
-                </p>
-              </div>
+              </label>
             </div>
-            <p v-if="!disciplineOptions.length" class="mt-3 text-xs text-brand-200/70">
-              Les activités apparaîtront dès que des aventures seront publiées.
-            </p>
+
           </div>
 
           <div class="mt-3 mb-8 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
@@ -536,7 +558,7 @@ onMounted(async () => {
           </div>
         </section>
 
-        <div v-if="activeView === 'map'" class="space-y-5">
+        <div id="stage-results" v-if="activeView === 'map'" class="scroll-mt-28 space-y-5">
           <div class="rounded-3xl border border-white/10 bg-white/5 p-5 shadow-2xl shadow-black/30 backdrop-blur">
             <div class="flex flex-wrap items-start justify-between gap-4">
               <div class="space-y-2">
@@ -577,7 +599,7 @@ onMounted(async () => {
           </div>
         </div>
 
-        <div v-else class="grid grid-cols-[repeat(auto-fill,minmax(min(100%,28rem),1fr))] gap-6">
+        <div id="stage-results" v-else class="scroll-mt-28 grid grid-cols-[repeat(auto-fill,minmax(min(100%,28rem),1fr))] gap-6">
           <StageCard
             v-for="a in filteredAventures"
             :key="a.id"
@@ -606,8 +628,8 @@ onMounted(async () => {
 }
 :deep(.date-filter-input::-webkit-calendar-picker-indicator) {
   cursor: pointer;
-  filter: invert(1);
-  opacity: 0.9;
+  filter: none;
+  opacity: 0.65;
 }
 </style>
 
@@ -619,7 +641,7 @@ onMounted(async () => {
 }
 :global(.date-filter-input::-webkit-calendar-picker-indicator) {
   cursor: pointer;
-  filter: invert(1);
-  opacity: 0.9;
+  filter: none;
+  opacity: 0.65;
 }
 </style>
