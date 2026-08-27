@@ -44,7 +44,7 @@
           />
         </div>
 
-        <div class="mx-auto max-w-7xl px-6 lg:px-8">
+        <div class="mx-auto w-full max-w-[90rem] px-4 sm:px-6 lg:px-8">
           <!-- Titre + Guide côte à côte -->
           <div
             class="grid items-start gap-8 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1.4fr)]"
@@ -210,7 +210,7 @@
 
       <!-- MAIN + TABS -->
       <main class="bg-brand-950 pb-24">
-        <div class="mx-auto max-w-7xl px-6 lg:px-8">
+        <div class="mx-auto w-full max-w-[90rem] px-4 sm:px-6 lg:px-8">
           <!-- Onglets -->
           <div class="mb-6 border-b border-white/10 pb-2">
             <nav class="flex gap-2 overflow-x-auto no-scrollbar text-xs">
@@ -900,7 +900,7 @@
 
       <!-- AUTRES AVENTURES -->
       <section v-if="filteredOtherStages.length" class="bg-brand-900 py-16">
-        <div class="mx-auto max-w-7xl px-6 lg:px-8 space-y-8">
+        <div class="mx-auto w-full max-w-[90rem] space-y-8 px-4 sm:px-6 lg:px-8">
           <div class="flex flex-wrap items-center justify-between gap-3">
             <h2 class="text-2xl font-semibold text-white">
               Autres aventures qui peuvent te plaire
