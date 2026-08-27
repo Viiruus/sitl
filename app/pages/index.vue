@@ -7,15 +7,15 @@
         <picture class="absolute inset-0 -z-20 block size-full">
           <source
             type="image/webp"
-            srcset="/images/optimized/brigade-du-kiff-falaise-escalade-480.webp 480w, /images/optimized/brigade-du-kiff-falaise-escalade-768.webp 768w, /images/optimized/brigade-du-kiff-falaise-escalade-1024.webp 1024w, /images/optimized/brigade-du-kiff-falaise-escalade-1440.webp 1440w, /images/optimized/brigade-du-kiff-falaise-escalade-1600.webp 1600w"
+            srcset="/images/optimized/brigade-du-kiff-falaise-escalade-hd-480.webp 480w, /images/optimized/brigade-du-kiff-falaise-escalade-hd-768.webp 768w, /images/optimized/brigade-du-kiff-falaise-escalade-hd-1024.webp 1024w, /images/optimized/brigade-du-kiff-falaise-escalade-hd-1440.webp 1440w, /images/optimized/brigade-du-kiff-falaise-escalade-hd-1600.webp 1600w, /images/optimized/brigade-du-kiff-falaise-escalade-hd-1920.webp 1920w, /images/optimized/brigade-du-kiff-falaise-escalade-hd-2560.webp 2560w, /images/optimized/brigade-du-kiff-falaise-escalade-hd-3200.webp 3200w"
             sizes="100vw"
           />
           <img
-            src="/images/brigade-du-kiff_falaise_escalade.jpeg"
+            src="/images/brigade-du-kiff-falaise-escalade-hd.jpg"
             alt=""
             class="size-full object-cover"
-            width="1600"
-            height="900"
+            width="3200"
+            height="1800"
             fetchpriority="high"
             loading="eager"
             decoding="async"

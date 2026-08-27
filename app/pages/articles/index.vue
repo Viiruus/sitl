@@ -32,13 +32,13 @@ useSeoMeta({
       <AppHeader compact />
       <div class="mx-auto w-full max-w-[90rem] px-4 pb-20 pt-40 sm:px-6 lg:px-8 lg:pb-24">
         <p class="text-sm font-semibold uppercase tracking-[0.35em] text-secondaryBrand-200">
-          Les récits de la Brigade
+          Récits de nos aventures
         </p>
         <h1 class="mt-4 max-w-4xl text-5xl font-semibold tracking-tight text-pretty sm:text-7xl">
           Carnet vertical
         </h1>
         <p class="mt-6 max-w-2xl text-lg/8 text-brand-100/80">
-          Histoires de cordées, conseils de terrain et aventures racontées par les moniteurs de la Brigade.
+          Histoires de cordées, conseils de terrain, réflexions philosophiques… racontés par les moniteur•ices du collectif.
         </p>
       </div>
     </div>
