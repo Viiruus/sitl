@@ -8,6 +8,7 @@ const props = defineProps<{
   coverImageVariants?: ArticleImageVariant[] | null
   content: string
   authorName: string
+  authorProfileUrl?: string | null
   authorImageUrl?: string | null
   date?: string | Date | null
 }>()
@@ -51,7 +52,14 @@ const renderedContent = computed(() => renderArticleMarkdown(props.content))
           {{ authorName.slice(0, 1).toUpperCase() }}
         </div>
         <div class="font-sans text-sm leading-5">
-          <p class="font-medium text-[#242424]">{{ authorName }}</p>
+          <NuxtLink
+            v-if="authorProfileUrl"
+            :to="authorProfileUrl"
+            class="font-medium text-[#242424] underline decoration-transparent underline-offset-4 transition hover:decoration-[#f59e0b] focus-visible:rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f59e0b]"
+          >
+            {{ authorName }}
+          </NuxtLink>
+          <p v-else class="font-medium text-[#242424]">{{ authorName }}</p>
           <p v-if="formattedDate" class="text-[#6b6b6b]">{{ formattedDate }}</p>
           <p v-else class="text-[#6b6b6b]">Brouillon</p>
         </div>
@@ -142,6 +150,32 @@ const renderedContent = computed(() => renderArticleMarkdown(props.content))
   border-left: 3px solid #242424;
   padding-left: 1.5rem;
   font-style: italic;
+}
+
+.article-body :deep(blockquote:has(a[href^="/moniteurs/"])) {
+  border: 1px solid #fde68a;
+  border-left: 4px solid #f59e0b;
+  border-radius: 1rem;
+  background: #fffbeb;
+  padding: 1.25rem 1.5rem;
+  box-shadow: 0 12px 30px rgb(120 53 15 / 8%);
+  font-family: sohne, "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-style: normal;
+}
+
+.article-body :deep(blockquote:has(a[href^="/moniteurs/"]) p) {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+.article-body :deep(blockquote:has(a[href^="/moniteurs/"]) p + p) {
+  margin-top: 0.55rem;
+}
+
+.article-body :deep(blockquote:has(a[href^="/moniteurs/"]) a) {
+  font-weight: 700;
+  text-decoration-color: #f59e0b;
 }
 
 .article-body :deep(ul),

@@ -30,7 +30,7 @@ useSeoMeta({
   <div class="min-h-screen bg-[#f7f7f5] text-[#242424]">
     <div class="bg-brand-950 text-white">
       <AppHeader compact />
-      <div class="w-full px-4 pb-20 pt-40 sm:px-6 lg:px-8 lg:pb-24">
+      <div class="mx-auto w-full max-w-[90rem] px-4 pb-20 pt-40 sm:px-6 lg:px-8 lg:pb-24">
         <p class="text-sm font-semibold uppercase tracking-[0.35em] text-secondaryBrand-200">
           Les récits de la Brigade
         </p>
@@ -43,7 +43,7 @@ useSeoMeta({
       </div>
     </div>
 
-    <main class="w-full px-4 py-20 sm:px-6 sm:py-28 lg:px-8">
+    <main class="mx-auto w-full max-w-[90rem] px-4 py-20 sm:px-6 sm:py-28 lg:px-8">
       <div v-if="pending" class="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
         <div v-for="index in 6" :key="index" class="h-[30rem] animate-pulse rounded-3xl bg-black/5" />
       </div>

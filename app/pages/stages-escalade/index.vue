@@ -32,7 +32,7 @@ useSeoMeta({
     <AppHeader />
 
     <div class="relative isolate overflow-hidden bg-brand-950 pt-32">
-      <div class="w-full px-4 sm:px-6 lg:px-8">
+      <div class="mx-auto w-full max-w-[90rem] px-4 sm:px-6 lg:px-8">
         <picture class="absolute inset-0 -z-10 block size-full">
           <source
             type="image/webp"

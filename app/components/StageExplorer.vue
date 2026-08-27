@@ -389,7 +389,7 @@ onMounted(async () => {
 <template>
   <section id="stages" class="w-full bg-brand-950">
     <div
-      class="w-full space-y-6 px-4 py-10 pb-14 sm:px-6 lg:px-8"
+      class="mx-auto w-full max-w-[90rem] space-y-6 px-4 py-10 pb-14 sm:px-6 lg:px-8"
     >
 
       <div v-if="pending" class="text-sm text-brand-100/70">

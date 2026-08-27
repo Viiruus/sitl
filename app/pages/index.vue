@@ -7,15 +7,15 @@
         <picture class="absolute inset-0 -z-20 block size-full">
           <source
             type="image/webp"
-            srcset="/images/optimized/falaise-calanques2-480.webp 480w, /images/optimized/falaise-calanques2-768.webp 768w, /images/optimized/falaise-calanques2-1024.webp 1024w, /images/optimized/falaise-calanques2-1440.webp 1440w, /images/optimized/falaise-calanques2-1920.webp 1920w"
+            srcset="/images/optimized/brigade-du-kiff-falaise-escalade-480.webp 480w, /images/optimized/brigade-du-kiff-falaise-escalade-768.webp 768w, /images/optimized/brigade-du-kiff-falaise-escalade-1024.webp 1024w, /images/optimized/brigade-du-kiff-falaise-escalade-1440.webp 1440w, /images/optimized/brigade-du-kiff-falaise-escalade-1600.webp 1600w"
             sizes="100vw"
           />
           <img
-            src="/images/falaise-Calanques2.jpg"
+            src="/images/brigade-du-kiff_falaise_escalade.jpeg"
             alt=""
             class="size-full object-cover"
-            width="4000"
-            height="1848"
+            width="1600"
+            height="900"
             fetchpriority="high"
             loading="eager"
             decoding="async"

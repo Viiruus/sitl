@@ -1,4 +1,5 @@
 import { articleContentToMarkdown } from '~~/shared/utils/article-content'
+import { buildGuideSlug } from '~~/shared/utils/guide-slug'
 import { prisma } from '../../utils/prisma'
 import { sanitizePublicImageUrl, sanitizePublicImageVariants } from '../../utils/public-image'
 
@@ -22,9 +23,10 @@ export default defineEventHandler(async (event) => {
       updatedAt: true,
       author: {
         select: {
+          id: true,
           firstName: true,
           lastName: true,
-          guideProfile: { select: { profileImageUrl: true, profileImageVariants: true } },
+          guideProfile: { select: { profileImageUrl: true, profileImageVariants: true, isPublic: true } },
         },
       },
     },
@@ -42,6 +44,9 @@ export default defineEventHandler(async (event) => {
       coverImageVariants: sanitizePublicImageVariants(article.coverImageVariants, { allowInline: true }),
       author: {
         name: [article.author.firstName, article.author.lastName].filter(Boolean).join(' ').trim() || 'La Brigade du kiff',
+        profileUrl: article.author.guideProfile?.isPublic
+          ? `/moniteurs/${buildGuideSlug(article.author.firstName, article.author.lastName, article.author.id)}`
+          : null,
         profileImageUrl: sanitizePublicImageUrl(article.author.guideProfile?.profileImageUrl, { allowInline: true }),
         profileImageVariants: sanitizePublicImageVariants(article.author.guideProfile?.profileImageVariants, { allowInline: true }),
       },

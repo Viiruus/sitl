@@ -53,6 +53,7 @@ useSeoMeta(() => ({
         :cover-image-variants="article.coverImageVariants"
         :content="article.content"
         :author-name="article.author.name"
+        :author-profile-url="article.author.profileUrl"
         :author-image-url="article.author.profileImageUrl"
         :date="article.publishedAt"
       />

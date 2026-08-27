@@ -36,7 +36,7 @@ export function markdownContainsText(markdown: string) {
 export function articleMarkdownExcerpt(content: unknown, maxLength = 180) {
   const markdown = articleContentToMarkdown(content)
   const plainText = markdown
-    .replace(/!\[([^\]]*)\]\([^)]*\)/g, '$1')
+    .replace(/!\[[^\]]*\]\([^)]*\)/g, ' ')
     .replace(/\[([^\]]+)\]\([^)]*\)/g, '$1')
     .replace(/```[\s\S]*?```/g, ' ')
     .replace(/[`*_>#~|]/g, ' ')

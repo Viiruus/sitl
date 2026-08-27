@@ -39,7 +39,7 @@ useSeoMeta({
   <div class="min-h-screen bg-[#f7f7f5] text-[#242424]">
     <div class="bg-brand-950 text-white">
       <AppHeader />
-      <div class="w-full px-4 pb-20 pt-40 sm:px-6 lg:px-8 lg:pb-24">
+      <div class="mx-auto w-full max-w-[90rem] px-4 pb-20 pt-40 sm:px-6 lg:px-8 lg:pb-24">
         <p class="text-sm font-semibold uppercase tracking-[0.35em] text-secondaryBrand-200">
           Ils font partie de l’aventure
         </p>
@@ -52,7 +52,7 @@ useSeoMeta({
       </div>
     </div>
 
-    <main class="w-full px-4 py-20 sm:px-6 sm:py-28 lg:px-8">
+    <main class="mx-auto w-full max-w-[90rem] px-4 py-20 sm:px-6 sm:py-28 lg:px-8">
       <ul role="list" class="grid items-start gap-8 sm:grid-cols-2 lg:grid-cols-3">
         <li v-for="partner in partners" :key="partner.name">
           <article class="group max-w-[340px] overflow-hidden rounded-[14px] border border-[#e6e6e6] bg-white shadow-[0_2px_10px_rgba(0,0,0,0.06)] transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgba(0,0,0,0.10)]">
