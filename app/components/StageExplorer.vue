@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { formatSessionRangeLabel } from '~~/shared/utils/aventure-schedule'
+import { resolveStoredImageSrc } from '~/composables/useStoredImageVariants'
+import { formatDurationDays, formatSessionRangeLabel } from '~~/shared/utils/aventure-schedule'
 import { getPublicFutureSessionThresholdMs } from '~~/shared/utils/public-stage-sessions'
 import { getStageRegionForCoordinates } from '~~/shared/utils/stage-region'
 
@@ -36,10 +37,26 @@ const disciplineIconMap: Record<string, string> = {
   VIA_FERRATA: '/images/via-ferrata-white.svg',
 }
 
+const disciplineCoverImageMap: Record<string, string> = {
+  GRANDE_VOIE: '/images/escalade-grande-voie-calanques.jpg',
+  FALAISE: '/images/falaise-escalade-beaufortain.jpg',
+  BLOC: '/images/bloc-Pays-Basque-Mondarrain.jpg',
+  TRAD: '/images/falaise-Calanques2.jpg',
+  VIA_FERRATA: '/images/rappel-Calanques.jpg',
+}
+
 const iconPathForDiscipline = (value?: string | null) => {
   if (!value) return disciplineIconMap.GRANDE_VOIE
   return disciplineIconMap[value] ?? disciplineIconMap.GRANDE_VOIE
 }
+
+const coverImageForStage = (stage: any) =>
+  resolveStoredImageSrc(stage?.coverImageUrl, stage?.coverImageVariants)
+  || disciplineCoverImageMap[stage?.discipline]
+  || disciplineCoverImageMap.GRANDE_VOIE
+
+const guideImageForStage = (stage: any) =>
+  resolveStoredImageSrc(stage?.guideImageUrl, stage?.guideImageVariants)
 
 const toggleDiscipline = (value: string) => {
   selectedDisciplines.value = selectedDisciplines.value.includes(value)
@@ -240,12 +257,18 @@ const mapStages = computed(() =>
       id: stage.id,
       slug: stage.slug,
       title: stage.titre,
+      subtitle: stage.sousTitre,
       discipline: stage.discipline,
       latitude: stage.latitude,
       longitude: stage.longitude,
       locationLabel: stage.lieuLabel,
+      durationLabel: formatDurationDays(stage.jours),
       sessionLabel: getDisplaySession(stage) ? formatSessionRange(getDisplaySession(stage)) : 'Date à confirmer',
       priceLabel: formatMapPrice(stage.prixParPersonne),
+      coverImageUrl: coverImageForStage(stage),
+      guideName: stage.guideName,
+      guideImageUrl: guideImageForStage(stage),
+      isSoldOut: stage.estComplet,
       url: `/stages-escalade/${stage.slug}`,
     })),
 )
@@ -255,11 +278,11 @@ const stagesWithoutCoordinatesCount = computed(
 )
 
 const mapLegend = [
-  { value: 'FALAISE', label: 'Falaise', letter: 'F', color: 'bg-[#d65245]' },
-  { value: 'GRANDE_VOIE', label: 'Grande voie', letter: 'G', color: 'bg-[#b86b2f]' },
-  { value: 'BLOC', label: 'Bloc', letter: 'B', color: 'bg-[#4f9fcf]' },
-  { value: 'TRAD', label: 'Terrain d\'aventure', letter: 'T', color: 'bg-[#202020]' },
-  { value: 'VIA_FERRATA', label: 'Via ferrata', letter: 'V', color: 'bg-[#6b8e23]' },
+  { value: 'FALAISE', label: 'Falaise', icon: disciplineIconMap.FALAISE, color: 'bg-[#d65245]' },
+  { value: 'GRANDE_VOIE', label: 'Grande voie', icon: disciplineIconMap.GRANDE_VOIE, color: 'bg-[#b86b2f]' },
+  { value: 'BLOC', label: 'Bloc', icon: disciplineIconMap.BLOC, color: 'bg-[#4f9fcf]' },
+  { value: 'TRAD', label: 'Terrain d\'aventure', icon: disciplineIconMap.TRAD, color: 'bg-[#202020]' },
+  { value: 'VIA_FERRATA', label: 'Via ferrata', icon: disciplineIconMap.VIA_FERRATA, color: 'bg-[#6b8e23]' },
 ]
 
 const currentNotificationCriteria = computed(() => ({
@@ -574,7 +597,7 @@ onMounted(async () => {
                     class="inline-flex h-6 w-6 items-center justify-center rounded-full text-[11px] font-extrabold text-white"
                     :class="item.color"
                   >
-                    {{ item.letter }}
+                    <img :src="item.icon" alt="" class="h-4 w-4 object-contain" aria-hidden="true">
                   </span>
                   {{ item.label }}
                 </span>

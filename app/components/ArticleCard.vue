@@ -3,9 +3,11 @@ const props = withDefaults(defineProps<{
   article: any
   imageSizes?: string
   headingLevel?: 'h2' | 'h3'
+  flushAuthor?: boolean
 }>(), {
   imageSizes: '(min-width: 768px) 33vw, 100vw',
   headingLevel: 'h3',
+  flushAuthor: false,
 })
 
 const formatDate = (date: string | Date) => new Intl.DateTimeFormat('fr-FR', {
@@ -31,17 +33,24 @@ const formatDate = (date: string | Date) => new Intl.DateTimeFormat('fr-FR', {
         decoding="async"
       >
     </div>
-    <div class="flex flex-1 flex-col p-6 sm:p-7">
-      <p class="text-xs font-semibold uppercase tracking-[0.18em] text-secondaryBrand-600">
-        {{ formatDate(article.publishedAt) }}
-      </p>
-      <component :is="headingLevel" class="mt-3 text-2xl font-semibold leading-tight tracking-tight">
-        {{ article.title }}
-      </component>
-      <p class="mt-4 line-clamp-3 text-sm/6 text-[#6b6b6b]">
-        {{ article.excerpt }}
-      </p>
-      <div class="mt-6 flex items-center gap-3 border-t border-black/10 pt-5">
+    <div class="flex flex-1 flex-col">
+      <div class="flex-1 p-6 sm:p-7">
+        <p class="text-xs font-semibold uppercase tracking-[0.18em] text-secondaryBrand-600">
+          {{ formatDate(article.publishedAt) }}
+        </p>
+        <component :is="headingLevel" class="mt-3 text-2xl font-semibold leading-tight tracking-tight">
+          {{ article.title }}
+        </component>
+        <p class="mt-4 line-clamp-3 text-sm/6 text-[#6b6b6b]">
+          {{ article.excerpt }}
+        </p>
+      </div>
+      <div
+        class="flex items-center gap-3 border-t border-black/10"
+        :class="flushAuthor
+          ? 'px-6 py-5 sm:px-7'
+          : 'mx-6 mb-6 pt-5 sm:mx-7 sm:mb-7'"
+      >
         <img
           v-if="article.author.profileImageUrl"
           :src="resolveStoredImageSrc(article.author.profileImageUrl, article.author.profileImageVariants) || article.author.profileImageUrl"

@@ -6,11 +6,20 @@ const { data, pending, error } = await useFetch('/api/articles', {
 })
 const articles = computed<any[]>(() => data.value?.articles ?? [])
 const runtimeConfig = useRuntimeConfig()
+const seoTitle = 'Carnet vertical : récits et conseils d’escalade'
+const seoDescription = 'Explore les récits de cordée, conseils de terrain et aventures en falaise, grande voie ou montagne racontés par les moniteurs de la Brigade du Kiff.'
 const canonicalUrl = computed(() => {
   try {
     return new URL('/articles', resolvePublicSiteUrl(runtimeConfig.public.publicUrl)).toString()
   } catch {
     return '/articles'
+  }
+})
+const socialImageUrl = computed(() => {
+  try {
+    return new URL('/images/brigade-du-kiff-falaise-escalade-hd.jpg', resolvePublicSiteUrl(runtimeConfig.public.publicUrl)).toString()
+  } catch {
+    return '/images/brigade-du-kiff-falaise-escalade-hd.jpg'
   }
 })
 
@@ -20,8 +29,20 @@ useHead(() => ({
 }))
 
 useSeoMeta({
-  title: 'Carnet vertical | Les récits des moniteurs de la Brigade du kiff',
-  description: 'Découvre les récits, conseils et aventures verticales des moniteurs de la Brigade du kiff.',
+  title: seoTitle,
+  description: seoDescription,
+  ogTitle: seoTitle,
+  ogDescription: seoDescription,
+  ogImage: () => socialImageUrl.value,
+  ogImageAlt: 'Escalade en falaise avec la Brigade du Kiff',
+  ogSiteName: 'Brigade du Kiff',
+  ogType: 'website',
+  ogUrl: () => canonicalUrl.value,
+  twitterCard: 'summary_large_image',
+  twitterTitle: seoTitle,
+  twitterDescription: seoDescription,
+  twitterImage: () => socialImageUrl.value,
+  twitterImageAlt: 'Escalade en falaise avec la Brigade du Kiff',
   robots: 'index, follow, max-image-preview:large',
 })
 </script>
@@ -59,6 +80,7 @@ useSeoMeta({
             :article="article"
             image-sizes="(min-width: 1280px) 33vw, (min-width: 768px) 50vw, 100vw"
             heading-level="h2"
+            flush-author
           />
         </li>
       </ul>

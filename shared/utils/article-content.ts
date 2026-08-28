@@ -46,3 +46,52 @@ export function articleMarkdownExcerpt(content: unknown, maxLength = 180) {
   if (plainText.length <= maxLength) return plainText
   return `${plainText.slice(0, maxLength).replace(/\s+\S*$/, '').trim()}…`
 }
+
+const markdownBlockToPlainText = (block: string) => block
+  .replace(/```[\s\S]*?```/g, ' ')
+  .replace(/!\[[^\]]*\]\([^)]*\)/g, ' ')
+  .replace(/\[([^\]]+)\]\([^)]*\)/g, '$1')
+  .replace(/<[^>]+>/g, ' ')
+  .replace(/[`*_>#~|]/g, ' ')
+  .replace(/^\s*[-+]\s+/gm, '')
+  .replace(/\s+/g, ' ')
+  .trim()
+
+const truncateSeoDescription = (value: string, maxLength: number) => {
+  if (value.length <= maxLength) return value
+
+  const candidate = value.slice(0, maxLength).trim()
+  if (/[.!?…]$/.test(candidate)) return candidate
+
+  const shortened = value.slice(0, Math.max(1, maxLength - 1))
+  const sentenceEnd = Math.max(
+    shortened.lastIndexOf('. '),
+    shortened.lastIndexOf('! '),
+    shortened.lastIndexOf('? '),
+  )
+  if (sentenceEnd >= Math.floor(maxLength * 0.65)) {
+    return shortened.slice(0, sentenceEnd + 1).trim()
+  }
+
+  return `${shortened.replace(/\s+\S*$/, '').trim()}…`
+}
+
+/** Builds a search-friendly summary while ignoring Markdown images and introductory metadata. */
+export function articleSeoDescription(content: unknown, maxLength = 180) {
+  const markdown = articleContentToMarkdown(content)
+  const narrativeParagraphs = markdown
+    .split(/\n\s*\n/)
+    .map(raw => ({
+      raw: raw.trim(),
+      text: markdownBlockToPlainText(raw),
+    }))
+    .filter(({ raw, text }) => {
+      if (!text || /^#{1,6}\s/.test(raw) || /^!\[[^\]]*\]\([^)]*\)$/.test(raw)) return false
+      // Article introductions sometimes begin with a bold date and location.
+      if (/^\*\*[^*]+\*\*$/.test(raw) && text.length < 80) return false
+      return true
+    })
+    .map(({ text }) => text)
+
+  return truncateSeoDescription(narrativeParagraphs.join(' '), maxLength)
+}
