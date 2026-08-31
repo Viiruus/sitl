@@ -66,18 +66,9 @@ export async function sendClimberSubscriptionOkViaWhatsapp(input: {
       {
         type: 'body',
         parameters: [
-          {
-            type: 'text',
-            text: input.stageTitle,
-          },
-          {
-            type: 'text',
-            text: input.stageLocalization,
-          },
-          {
-            type: 'text',
-            text: input.stageDate,
-          },
+          buildNamedTextParameter('stage_title', input.stageTitle),
+          buildNamedTextParameter('stage_localization', input.stageLocalization),
+          buildNamedTextParameter('stage_date', input.stageDate),
         ],
       },
       {
