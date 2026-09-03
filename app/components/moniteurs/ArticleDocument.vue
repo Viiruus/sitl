@@ -205,6 +205,28 @@ const renderedContent = computed(() => renderArticleMarkdown(props.content))
   object-fit: cover;
 }
 
+.article-body :deep(.article-image) {
+  width: calc(100% + 8rem);
+  margin: 3rem -4rem;
+}
+
+.article-body :deep(.article-image img) {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+}
+
+.article-body :deep(.article-image figcaption) {
+  margin-top: 0.75rem;
+  padding: 0 0.25rem;
+  color: #6b6b6b;
+  font-family: sohne, "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 0.875rem;
+  font-style: italic;
+  line-height: 1.5;
+  text-align: center;
+}
+
 .article-body :deep(hr) {
   width: 7rem;
   margin: 3.5rem auto;
@@ -241,6 +263,12 @@ const renderedContent = computed(() => renderArticleMarkdown(props.content))
 
 @media (max-width: 767px) {
   .article-body :deep(img) {
+    width: calc(100% + 1rem);
+    margin-right: -0.5rem;
+    margin-left: -0.5rem;
+  }
+
+  .article-body :deep(.article-image) {
     width: calc(100% + 1rem);
     margin-right: -0.5rem;
     margin-left: -0.5rem;

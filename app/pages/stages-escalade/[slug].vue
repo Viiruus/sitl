@@ -136,49 +136,46 @@
               <NuxtLink
                 v-if="guideFullName"
                 :to="guideProfileLink || '#'"
-                class="block space-y-3 rounded-3xl bg-brand-950/85 p-5 ring-1 ring-secondaryBrand-400/40 shadow-xl shadow-black/40 transition hover:ring-secondaryBrand-300/70 focus:outline-none focus-visible:ring-2 focus-visible:ring-secondaryBrand-300"
+                class="block overflow-hidden rounded-3xl bg-brand-950/85 p-5 ring-1 ring-secondaryBrand-400/40 shadow-xl shadow-black/40 transition hover:ring-secondaryBrand-300/70 focus:outline-none focus-visible:ring-2 focus-visible:ring-secondaryBrand-300"
               >
-                <p class="text-[11px] font-semibold uppercase tracking-[0.3em] text-secondaryBrand-200">
-                  {{ guideRoleLabelCapitalized }} de l’aventure
-                </p>
-                <div class="flex items-center gap-4">
-                  <div
-                    class="h-20 w-20 flex-shrink-0 overflow-hidden rounded-full border-2 border-secondaryBrand-400 bg-brand-900"
-                  >
-                    <img
-                      v-if="guideImage"
-                      :src="guideImage"
-                      :srcset="guideImageSrcset"
-                      :alt="guideFullName"
-                      class="size-full object-cover"
-                      sizes="80px"
-                      loading="lazy"
-                      decoding="async"
-                    />
-                  </div>
-                  <div class="space-y-1">
-                    <p class="text-sm font-semibold text-white">
-                      {{ guideFullName }}
+                <div class="flex items-stretch justify-between gap-4">
+                  <div class="min-w-0 space-y-3">
+                    <p class="text-[11px] font-semibold uppercase tracking-[0.3em] text-secondaryBrand-200">
+                      {{ guideRoleLabelCapitalized }} du stage
                     </p>
-                    <p v-if="guideBaseLocation" class="text-xs text-brand-200">
-                      {{ guideBasedLabel }} {{ guideBaseLocation }}
-                    </p>
+                    <div class="flex min-w-0 items-center gap-4">
+                      <div
+                        class="h-20 w-20 flex-shrink-0 overflow-hidden rounded-full border-2 border-secondaryBrand-400 bg-brand-900"
+                      >
+                        <img
+                          v-if="guideImage"
+                          :src="guideImage"
+                          :srcset="guideImageSrcset"
+                          :alt="guideFullName"
+                          class="size-full object-cover"
+                          sizes="80px"
+                          loading="lazy"
+                          decoding="async"
+                        />
+                      </div>
+                      <div class="min-w-0 space-y-1">
+                        <p class="text-sm font-semibold text-white">
+                          {{ guideFullName }}
+                        </p>
+                        <p v-if="guideBaseLocation" class="text-xs text-brand-200">
+                          {{ guideBasedLabel }} {{ guideBaseLocation }}
+                        </p>
+                      </div>
+                    </div>
                   </div>
+                  <GuideFranceLocator
+                    class="w-20 self-stretch sm:w-24 [&>svg]:h-full [&>svg]:w-full"
+                    :department="guide?.department"
+                    :latitude="guide?.profile?.baseLatitude"
+                    :longitude="guide?.profile?.baseLongitude"
+                    :location-label="guideBaseLocation"
+                  />
                 </div>
-                <p
-                  v-if="guideBioShort"
-                  class="text-xs text-brand-100/90"
-                >
-                  {{ guideBioShort }}
-                </p>
-                <p
-                  v-else
-                  class="text-xs text-brand-100/80"
-                >
-                  {{ guideRoleLabelCapitalized }} d’escalade passionné·e de belles lignes, de grande voie
-                  et d’ambiances conviviales, aux manettes de ta prochaine aventure.
-                </p>
-
               </NuxtLink>
 
               <div
@@ -1581,12 +1578,6 @@ const guideBaseLocation = computed(
     stage.value?.lieuLabel ||
     null,
 )
-
-const guideBioShort = computed(() => {
-  const bio = guide.value?.profile?.bio || ''
-  if (!bio) return ''
-  return bio.length > 220 ? bio.slice(0, 220).trimEnd() + '…' : bio
-})
 
 const guideInstagramUrl = computed(
   () => guide.value?.profile?.instagramUrl || null,

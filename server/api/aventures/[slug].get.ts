@@ -29,11 +29,14 @@ export default defineEventHandler(async (event) => {
           firstName: true,
           lastName: true,
           phoneNumber: true,
+          department: true,
           guideProfile: {
             select: {
               gender: true,
               bio: true,
               baseLocation: true,
+              baseLatitude: true,
+              baseLongitude: true,
               instagramUrl: true,
               profileImageUrl: true,
               profileImageVariants: true,
@@ -134,6 +137,7 @@ const mapGuide = (a: any) => {
     slug: buildGuideSlug(a.guide.firstName, a.guide.lastName, a.guide.id),
     fullName: [a.guide.firstName, a.guide.lastName].filter(Boolean).join(' ') || null,
     phoneNumber: a.guide.phoneNumber || null,
+    department: a.guide.department || null,
     gender: gp?.gender || null,
     professionalCardNumber: gp?.professionalCardNumber || null,
     profile: gp
@@ -141,6 +145,8 @@ const mapGuide = (a: any) => {
           gender: gp.gender || null,
           bio: gp.bio,
           baseLocation: gp.baseLocation,
+          baseLatitude: gp.baseLatitude ?? null,
+          baseLongitude: gp.baseLongitude ?? null,
           instagramUrl: gp.instagramUrl,
           professionalCardNumber: gp.professionalCardNumber,
           stageTermsAndConditions: gp.stageTermsAndConditions,

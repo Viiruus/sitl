@@ -22,6 +22,13 @@ const safeUrl = (value: string, allowMail = false) => {
   return null
 }
 
+const renderImage = ({ href, title, text }: Tokens.Image) => {
+  const url = safeUrl(href)
+  if (!url) return ''
+  const titleAttribute = title ? ` title="${escapeHtml(title)}"` : ''
+  return `<img src="${escapeHtml(url)}" alt="${escapeHtml(text)}"${titleAttribute} loading="lazy">`
+}
+
 const renderer: RendererObject = {
   html({ text }: Tokens.HTML | Tokens.Tag) {
     return escapeHtml(text)
@@ -34,11 +41,21 @@ const renderer: RendererObject = {
     const externalAttributes = /^https?:/i.test(url) ? ' target="_blank" rel="noopener noreferrer"' : ''
     return `<a href="${escapeHtml(url)}"${titleAttribute}${externalAttributes}>${label}</a>`
   },
-  image({ href, title, text }: Tokens.Image) {
-    const url = safeUrl(href)
-    if (!url) return ''
-    const titleAttribute = title ? ` title="${escapeHtml(title)}"` : ''
-    return `<img src="${escapeHtml(url)}" alt="${escapeHtml(text)}"${titleAttribute} loading="lazy">`
+  paragraph({ tokens }: Tokens.Paragraph) {
+    if (tokens.length === 1 && tokens[0]?.type === 'image') {
+      const imageToken = tokens[0] as Tokens.Image
+      const image = renderImage(imageToken)
+      if (!image) return ''
+      const caption = imageToken.text.trim()
+      const figcaption = caption
+        ? `<figcaption>${escapeHtml(caption)}</figcaption>`
+        : ''
+      return `<figure class="article-image">${image}${figcaption}</figure>\n`
+    }
+    return `<p>${this.parser.parseInline(tokens)}</p>\n`
+  },
+  image(token: Tokens.Image) {
+    return renderImage(token)
   },
 }
 
