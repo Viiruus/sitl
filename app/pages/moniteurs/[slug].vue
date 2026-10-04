@@ -146,10 +146,10 @@
                 </div>
                 <div class="mt-5 rounded-2xl bg-[#25D366]/10 p-5">
                   <p class="text-xs font-semibold uppercase tracking-[0.3em] text-[#8cf1b4]">
-                    Coaching & sur-mesure
+                    Accompagnement personnalisé
                   </p>
                   <p class="mt-3 text-sm leading-6 text-brand-100/80">
-                    Échange avec {{ moniteurContactFirstName }} pour préparer une planification d'entrainements, une sortie privée ou un projet sur mesure.
+                    Une sortie privée, un projet d’escalade ou un programme d’entraînement ? Échange avec {{ moniteurContactFirstName }} pour construire un accompagnement sur mesure, adapté à tes envies, à ton niveau et à tes objectifs.
                   </p>
                   <button
                     type="button"
