@@ -1,5 +1,6 @@
 import { escaladeDepartments, escaladeDepartmentEntries } from '../data/escalade-departments'
 import type { EscaladeDepartmentCode } from '../data/escalade-departments'
+import { escaladeMassifs } from '../data/escalade-massifs'
 
 const DISCIPLINE_HUBS: Record<string, string> = {
   GRANDE_VOIE: '/disciplines/grande-voie',
@@ -49,22 +50,52 @@ const baseAreaPatterns = escaladeDepartmentEntries.flatMap(([code, department]) 
   code, pattern: new RegExp(`(?:^|[^a-z0-9])${normalizeArea(area)}(?=$|[^a-z0-9])`),
 })))
 
+const massifPatterns = escaladeMassifs.map(massif => ({
+  departments: massif.departments,
+  pattern: new RegExp(`(?:^|[^a-z0-9])${normalizeArea(massif.name)}(?=$|[^a-z0-9])`),
+}))
+
+const guideLocationDepartmentsFor = (location: unknown) => {
+  const departments = new Set<EscaladeDepartmentCode>()
+  if (typeof location !== 'string') return departments
+  const normalized = normalizeArea(location)
+  const explicitCode = departmentCodeFor(location)
+  const namedDepartments = namedDepartmentsFor(normalized)
+  if (explicitCode && explicitCode in escaladeDepartments) {
+    departments.add(explicitCode as EscaladeDepartmentCode)
+  }
+
+  // A precise department, city or local sector takes precedence over the
+  // wider massif: "Bauges (Savoie)" and "Presles, Vercors" stay local.
+  for (const [code, department] of escaladeDepartmentEntries) {
+    if (namedDepartments.has(normalizeArea(department.name)) || cityPatterns[code].some(pattern => pattern.test(normalized))) {
+      departments.add(code)
+    }
+  }
+  for (const { code, pattern } of baseAreaPatterns) {
+    if (pattern.test(normalized)) departments.add(code)
+  }
+  if (departments.size) return departments
+  if (explicitCode) return departments
+
+  // These department names contain massif names but have no landing page.
+  const massifLocation = normalized.replace(/\b(?:pyrenees orientales|alpes maritimes)\b/g, ' ')
+  for (const { departments: massifDepartments, pattern } of massifPatterns) {
+    if (pattern.test(massifLocation)) {
+      for (const code of massifDepartments) departments.add(code)
+    }
+  }
+  return departments
+}
+
 export const guideServesDepartment = (
   guide: { department?: string | null; serviceAreas?: unknown; baseLocation?: string | null },
   departmentCode: EscaladeDepartmentCode,
 ) => {
   if (departmentCodeFor(guide.department) === departmentCode) return true
-  if (locationMatchesDepartment(guide.baseLocation, departmentCode)) return true
-  if (typeof guide.baseLocation === 'string') {
-    const base = normalizeArea(guide.baseLocation)
-    const areaDepartments = new Set(baseAreaPatterns.filter(({ pattern }) => pattern.test(base)).map(({ code }) => code))
-    if (areaDepartments.size === 1 && areaDepartments.has(departmentCode)) return true
-  }
+  if (guideLocationDepartmentsFor(guide.baseLocation).has(departmentCode)) return true
   if (!Array.isArray(guide.serviceAreas)) return false
-  // A shared massif such as the Bauges alone does not imply coverage of both departments.
-  return guide.serviceAreas.some(area => typeof area === 'string' && (
-    locationMatchesDepartment(area, departmentCode) || localServiceAreas[departmentCode].has(normalizeArea(area))
-  ))
+  return guide.serviceAreas.some(area => guideLocationDepartmentsFor(area).has(departmentCode))
 }
 
 // A stage's destination is independent of its guide's home department. Prefer
