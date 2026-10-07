@@ -50,9 +50,22 @@
                       </svg>
                       Camp de base
                     </p>
-                    <p class="mt-1 text-base font-medium text-white/92">
-                      {{ locationLabel }}
-                    </p>
+                    <div class="mt-1 flex flex-col items-start gap-2">
+                      <p class="text-base font-medium text-white/92">
+                        {{ locationLabel }}
+                      </p>
+                      <NuxtLink
+                        v-for="department in baseDepartmentLinks"
+                        :key="department.code"
+                        :to="department.path"
+                        class="inline-flex items-center gap-1.5 rounded-sm text-xs font-semibold text-secondaryBrand-200 underline-offset-4 transition hover:text-secondaryBrand-100 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-secondaryBrand-300"
+                      >
+                        {{ department.label }}
+                        <svg class="h-3.5 w-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14m-5-5 5 5-5 5" />
+                        </svg>
+                      </NuxtLink>
+                    </div>
                   </div>
                 </div>
                 <div class="mt-6 max-w-xl text-sm/7 text-gray-300 sm:text-base/8">
@@ -473,7 +486,8 @@ import { buildStoredSrcset, normalizeStoredVariants, resolveStoredImageSrc } fro
 import { formatDurationDays, formatSessionRangeLabel } from '~~/shared/utils/aventure-schedule'
 import { getGuideRoleDativeLabel, getGuideRoleLabel, getGuideRoleLabelWithArticle, getGuideRoleReferenceLabel } from '~~/shared/utils/guide-gender'
 import { getPublicFutureSessionThresholdMs } from '~~/shared/utils/public-stage-sessions'
-import { disciplineHubPath } from '~~/shared/utils/seo-hubs'
+import { disciplineHubPath, guideServesDepartment } from '~~/shared/utils/seo-hubs'
+import { escaladeDepartmentEntries } from '~~/shared/data/escalade-departments'
 import { resolvePublicSiteUrl } from '~~/shared/utils/site-url'
 
 const route = useRoute()
@@ -602,6 +616,13 @@ const moniteurRoleReference = computed(() => getGuideRoleReferenceLabel(moniteur
 const moniteurRoleDative = computed(() => getGuideRoleDativeLabel(moniteurGender.value))
 const moniteurLocalLabel = computed(() => `${moniteurRoleLabelCapitalized.value} local${moniteurGender.value === 'female' ? 'e' : ''}`)
 const locationLabel = computed(() => moniteur.value?.baseLocation || moniteur.value?.department || 'France')
+const baseDepartmentLinks = computed(() => {
+  const guide = moniteur.value
+  if (!guide) return []
+  return escaladeDepartmentEntries
+    .filter(([code]) => guideServesDepartment({ baseLocation: guide.baseLocation, department: guide.department }, code))
+    .map(([code, department]) => ({ code, label: `Escalade ${department.location}`, path: `/escalade/${department.slug}` }))
+})
 const serviceAreas = computed(() =>
   Array.isArray(moniteur.value?.serviceAreas)
     ? moniteur.value.serviceAreas.filter((value: unknown): value is string => typeof value === 'string' && value.trim().length > 0)

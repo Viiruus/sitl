@@ -1,6 +1,7 @@
 // server/api/aventures/[slug].get.ts
 import { prisma } from '../../utils/prisma'
 import { sanitizePublicImageUrl, sanitizePublicImageVariants } from '../../utils/public-image'
+import { resolveStageDepartmentLinks } from '../../utils/stage-department-links'
 import { buildGuideSlug } from '~~/shared/utils/guide-slug'
 import {
   getPublicFutureSessionThreshold,
@@ -122,8 +123,10 @@ export default defineEventHandler(async (event) => {
     },
   })
 
+  const departmentLinks = await resolveStageDepartmentLinks(aventure)
+
   return {
-    aventure: mapDetailAventure(aventure, bookedSessionIds),
+    aventure: { ...mapDetailAventure(aventure, bookedSessionIds), departmentLinks },
     autres: autres.map(mapListAventure),
   }
 })

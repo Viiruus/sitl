@@ -5,8 +5,10 @@ import { formatSessionRangeLabel } from '~~/shared/utils/aventure-schedule'
 const props = withDefaults(defineProps<{
   moniteur: any
   imageSizes?: string
+  emptyStageLabel?: string
 }>(), {
   imageSizes: '(min-width: 1280px) 25vw, (min-width: 1024px) 33vw, 50vw',
+  emptyStageLabel: 'Prochain stage bientôt annoncé',
 })
 
 const fallbackImage = '/images/escalade-grande-voie-calanques.jpg'
@@ -80,7 +82,7 @@ const nextStageDate = computed(() => {
             <rect x="3" y="5" width="18" height="16" rx="2" />
             <path d="M8 3v4M16 3v4M3 10h18" />
           </svg>
-          Prochain stage bientôt annoncé
+          {{ emptyStageLabel }}
         </div>
       </div>
     </div>

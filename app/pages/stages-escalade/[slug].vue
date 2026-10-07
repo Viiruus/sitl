@@ -51,7 +51,7 @@
           >
             <!-- Titre + tags -->
             <div class="space-y-6">
-              <div class="flex items-center gap-3 text-xs">
+              <div class="flex items-start gap-3 text-xs">
                 <component
                   :is="stageDisciplineHubPath ? 'NuxtLink' : 'span'"
                   :to="stageDisciplineHubPath || undefined"
@@ -63,28 +63,43 @@
                     class="h-8 w-8 object-contain"
                   />
                 </component>
-                <span
-                  class="inline-flex min-w-0 items-center gap-1.5 rounded-full bg-brand-900/70 px-3 py-1 text-[11px] font-medium text-brand-100"
-                >
-                  <svg
-                    class="h-3.5 w-3.5 text-secondaryBrand-200"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="1.5"
+                <div class="flex min-w-0 flex-col items-start gap-2">
+                  <span
+                    class="inline-flex min-w-0 items-center gap-1.5 rounded-full bg-brand-900/70 px-3 py-1 text-[11px] font-medium text-brand-100"
                   >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      d="M12 21c-4-4-6-7-6-10a6 6 0 0 1 12 0c0 3-2 6-6 10Z"
-                    />
-                    <circle cx="12" cy="11" r="2.3" />
-                  </svg>
-                  <span class="text-sm max-w-[60vw] sm:max-w-none truncate whitespace-nowrap block">
-                    {{ stage.lieuLabel }}
-                    <span v-if="stage.region" class="ml-1">· {{ stage.region }}</span>
+                    <svg
+                      class="h-3.5 w-3.5 shrink-0 text-secondaryBrand-200"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.5"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        d="M12 21c-4-4-6-7-6-10a6 6 0 0 1 12 0c0 3-2 6-6 10Z"
+                      />
+                      <circle cx="12" cy="11" r="2.3" />
+                    </svg>
+                    <span class="text-sm max-w-[60vw] sm:max-w-none truncate whitespace-nowrap block">
+                      {{ stage.lieuLabel }}
+                      <span v-if="stage.region" class="ml-1">· {{ stage.region }}</span>
+                    </span>
                   </span>
-                </span>
+                  <div v-if="stage.departmentLinks?.length" class="flex flex-wrap gap-x-4 gap-y-2">
+                    <NuxtLink
+                      v-for="department in stage.departmentLinks"
+                      :key="department.code"
+                      :to="department.path"
+                      class="inline-flex items-center gap-1.5 rounded-sm text-xs font-semibold text-secondaryBrand-200 underline-offset-4 transition hover:text-secondaryBrand-100 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-secondaryBrand-300"
+                    >
+                      {{ department.label }}
+                      <svg class="h-3.5 w-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14m-5-5 5 5-5 5" />
+                      </svg>
+                    </NuxtLink>
+                  </div>
+                </div>
               </div>
 
               <div class="space-y-3">

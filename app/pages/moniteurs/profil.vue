@@ -402,7 +402,8 @@ const logout = async () => {
                 placeholder="Une zone par ligne ou séparée par des virgules&#10;Ex: Bauges&#10;Annecy&#10;Chambéry"
               ></textarea>
               <p class="text-xs text-brand-200/70">
-                Ces zones seront affichées sur ta page publique et utilisées dans le balisage SEO local.
+                Ces zones sont affichées sur ton profil et permettent de te retrouver sur les pages locales.
+                Renseigne les départements et les villes où tu encadres, même si ton camp de base est ailleurs.
               </p>
             </div>
 

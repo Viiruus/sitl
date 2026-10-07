@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { ensureLeafletLoaded } from '~/utils/leaflet'
 
 type StageMapItem = {
   id: number | string
@@ -29,47 +30,6 @@ const loadError = ref<string | null>(null)
 let leaflet: any = null
 let map: any = null
 let markersLayer: any = null
-
-const LEAFLET_SCRIPT_ID = 'bdk-leaflet-script'
-const LEAFLET_STYLE_ID = 'bdk-leaflet-style'
-const LEAFLET_JS_URL = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js'
-const LEAFLET_CSS_URL = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css'
-
-const ensureLeafletLoaded = async () => {
-  if (typeof window === 'undefined') return null
-  if ((window as any).L) return (window as any).L
-
-  if (!document.getElementById(LEAFLET_STYLE_ID)) {
-    const link = document.createElement('link')
-    link.id = LEAFLET_STYLE_ID
-    link.rel = 'stylesheet'
-    link.href = LEAFLET_CSS_URL
-    document.head.appendChild(link)
-  }
-
-  await new Promise<void>((resolve, reject) => {
-    const existingScript = document.getElementById(LEAFLET_SCRIPT_ID) as HTMLScriptElement | null
-    if (existingScript) {
-      if ((window as any).L) {
-        resolve()
-        return
-      }
-      existingScript.addEventListener('load', () => resolve(), { once: true })
-      existingScript.addEventListener('error', () => reject(new Error('Impossible de charger Leaflet.')), { once: true })
-      return
-    }
-
-    const script = document.createElement('script')
-    script.id = LEAFLET_SCRIPT_ID
-    script.src = LEAFLET_JS_URL
-    script.async = true
-    script.onload = () => resolve()
-    script.onerror = () => reject(new Error('Impossible de charger Leaflet.'))
-    document.head.appendChild(script)
-  })
-
-  return (window as any).L || null
-}
 
 const disciplineTheme: Record<string, { color: string; label: string; icon: string }> = {
   FALAISE: { color: '#d65245', label: 'Falaise', icon: '/images/couenne-white.png' },
@@ -200,6 +160,7 @@ const renderMarkers = async () => {
   })
 
   await nextTick()
+  if (!map) return
   if (stages.length === 1) {
     const [stage] = stages
     map.setView([stage.latitude, stage.longitude], 10)
@@ -216,7 +177,7 @@ onMounted(async () => {
     loadError.value = 'Impossible de charger la carte interactive pour le moment.'
     return
   }
-  if (!leaflet) return
+  if (!leaflet || !mapEl.value) return
 
   map = leaflet.map(mapEl.value, {
     scrollWheelZoom: true,

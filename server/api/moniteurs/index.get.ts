@@ -90,6 +90,11 @@ export default defineEventHandler(async () => {
           baseLatitude: guide.guideProfile?.baseLatitude ?? null,
           baseLongitude: guide.guideProfile?.baseLongitude ?? null,
           department: guide.department || null,
+          serviceAreas: Array.isArray(guide.guideProfile?.serviceAreas)
+            ? guide.guideProfile.serviceAreas
+              .filter((value: unknown): value is string => typeof value === 'string' && value.trim().length > 0)
+              .map(value => value.trim())
+            : [],
           disciplines: Array.from(new Set(disciplines.filter(value => value.length > 0))),
           publishedStageCount: guide.aventures?.length ?? 0,
           upcomingStageCount: (guide.aventures ?? []).filter(

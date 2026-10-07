@@ -66,6 +66,19 @@
           </div>
         </div>
       </div>
+      <section class="mt-24 border-t border-white/10 pt-10" aria-labelledby="grimper-localement-title">
+        <h2 id="grimper-localement-title" class="text-2xl font-semibold text-white sm:text-3xl">Grimper près de chez toi</h2>
+        <p class="mt-4 max-w-2xl text-base leading-7 text-brand-100/80">Retrouve les moniteurs, les stages et les lieux de grimpe par département.</p>
+        <nav class="mt-6" aria-label="Escalade par département">
+          <ul class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <li v-for="department in departmentLinks" :key="department.slug">
+              <NuxtLink :to="`/escalade/${department.slug}`" class="flex items-center justify-between gap-3 rounded-xl border border-white/10 px-5 py-4 text-sm font-semibold text-secondaryBrand-200 transition hover:bg-white/5 hover:text-white">
+                {{ department.name }} <span aria-hidden="true">→</span>
+              </NuxtLink>
+            </li>
+          </ul>
+        </nav>
+      </section>
     </div>
 
     <!-- Footer réutilisable -->
@@ -75,6 +88,10 @@
 
 <script setup lang="ts">
 import { resolvePublicSiteUrl } from '~~/shared/utils/site-url'
+import { escaladeDepartmentEntries } from '~~/shared/data/escalade-departments'
+
+const departmentLinks = escaladeDepartmentEntries.map(([, department]) => department)
+  .sort((a, b) => a.name.localeCompare(b.name, 'fr'))
 
 const runtimeConfig = useRuntimeConfig()
 const canonicalUrl = computed(() => {

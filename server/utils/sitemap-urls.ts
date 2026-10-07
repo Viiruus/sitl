@@ -1,6 +1,7 @@
 import { buildGuideSlug } from "~~/shared/utils/guide-slug"
 import { getPublicFutureSessionThreshold } from "~~/shared/utils/public-stage-sessions"
 import { sanitizePublicImageUrl } from "./public-image"
+import { escaladeDepartmentEntries } from "~~/shared/data/escalade-departments"
 
 type SitemapUrl = {
   loc: string
@@ -49,12 +50,12 @@ export function getStaticSitemapUrls(): SitemapUrl[] {
       changefreq: "weekly",
       priority: 0.8,
     },
-    {
-      loc: "/departements/savoie",
+    ...escaladeDepartmentEntries.map(([, department]): SitemapUrl => ({
+      loc: `/escalade/${department.slug}`,
       lastmod,
       changefreq: "weekly",
       priority: 0.8,
-    },
+    })),
   ]
 }
 

@@ -61,8 +61,10 @@ export default defineNuxtConfig({
   },
   nitro: {
     compressPublicAssets: true,
+    serverAssets: [{ baseName: 'department-maps', dir: '../public/maps/departments' }],
   },
   routeRules: {
+    '/departements/savoie': { redirect: { to: '/escalade/savoie', statusCode: 301 } },
     '/_nuxt/**': { headers: { 'cache-control': 'public, max-age=31536000, immutable' } },
     '/_ipx/**': { headers: { 'cache-control': 'public, max-age=31536000, immutable' } },
     '/images/**': { headers: { 'cache-control': 'public, max-age=31536000, immutable' } },
@@ -84,6 +86,7 @@ export default defineNuxtConfig({
   sitemap: {
     sources: ['/api/__sitemap__/static', '/api/__sitemap__/moniteurs', '/api/__sitemap__/stages'],
     exclude: [
+      '/departements/savoie',
       '/escalade-grande-voie',
       '/escalade-sportive-couenne-falaise',
       '/aventures-escalade',

@@ -45,7 +45,7 @@
                 Voir tous les stages grande voie
               </NuxtLink>
               <NuxtLink
-                to="/departements/savoie"
+                to="/escalade/savoie"
                 class="inline-flex items-center gap-2 text-sm font-semibold text-secondaryBrand-200 hover:text-white"
               >
                 Explorer aussi la Savoie
