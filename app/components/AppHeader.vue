@@ -122,6 +122,7 @@ const navigation = [
   { name: 'La Brigade', href: '/la-brigade' },
   { name: 'Carnet vertical', href: '/articles' },
   { name: 'Partenaires', href: '/partenaires' },
+  { name: 'Manifeste', href: '/manifeste' },
 ]
 
 const { loggedIn, user } = useUserSession()
