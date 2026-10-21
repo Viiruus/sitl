@@ -30,7 +30,7 @@ const nextStageDate = computed(() => {
 <template>
   <NuxtLink
     :to="`/moniteurs/${moniteur.slug}`"
-    class="group flex h-full flex-col overflow-hidden rounded-2xl bg-white/[0.035] p-4 ring-1 ring-white/10 transition hover:-translate-y-1 hover:bg-white/[0.07] focus:outline-none focus-visible:ring-2 focus-visible:ring-secondaryBrand-400"
+    class="group relative flex h-full flex-col overflow-hidden rounded-2xl bg-white/[0.035] p-4 ring-1 ring-white/10 transition hover:-translate-y-1 hover:bg-white/[0.07] focus:outline-none focus-visible:ring-2 focus-visible:ring-secondaryBrand-400"
   >
     <div class="relative aspect-square overflow-hidden rounded-xl outline-1 -outline-offset-1 outline-white/10">
       <img
