@@ -13,6 +13,7 @@ const navLinks = computed(() => [
   { label: 'Profil moniteur·ice', to: '/moniteurs/profil' },
   { label: 'Mes aventures', to: '/moniteurs/aventures' },
   { label: 'Mes articles', to: '/moniteurs/articles' },
+  { label: 'Avantages partenaires', to: '/moniteurs/avantages-partenaires' },
   { label: 'Grimpeur·euse·s inscrit·e·s', to: '/moniteurs/grimpeurs' },
   { label: 'Pages moniteurs les plus vues', to: '/moniteurs/analytics' },
   ...(props.guide?.isAdmin ? [{ label: 'Administration', to: '/admin' }] : []),
