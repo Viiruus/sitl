@@ -12,6 +12,17 @@ const partners = [
       'Et ce n’est pas tout : 4c+ propose également un service complet de ressemelage de chaussons ainsi que des réparations techniques pour donner une seconde vie à votre matériel.',
     ],
   },
+  {
+    name: 'Koalagrimpe',
+    websiteUrl: 'https://koalagrimpe.com/',
+    logoUrl: '/images/partenaires/koalagrimpe.jpeg',
+    logoAlt: 'Koalagrimpe - Escalade et VTT dans la vallée de Chamonix',
+    description: [
+      'Venez vous initier à l’escalade et au VTT de manière fun et ludique. Koalagrimpe est le spécialiste des débutants et des enfants dans la vallée de Chamonix !',
+      'Koalagrimpe est animée par des moniteurs d’expérience diplômés d’état spécialistes des enfants.',
+      'Passionnés d’escalade et de VTT, l’équipe vous propose dès le printemps et jusqu’à l’automne une approche de l’escalade et du VTT très ludique accessible à tous à partir de 4 ans.',
+    ],
+  },
 ]
 
 const runtimeConfig = useRuntimeConfig()
