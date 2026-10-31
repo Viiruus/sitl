@@ -36,7 +36,6 @@ const convictions = [
 ]
 
 const reasons = [
-  'Parce que l’escalade est le miroir de nos propres vies.',
   'Parce que l’escalade est un prétexte pour partager des aventures humaines.',
   'Parce que l’escalade est un jeu et le rocher son terrain.',
 ]
