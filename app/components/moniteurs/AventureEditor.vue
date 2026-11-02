@@ -5,6 +5,9 @@ import {
   isManagedGuideImageUrl,
 } from '~~/shared/constants/guide-image-upload'
 import { formatDurationDays, isHalfDayStep } from '~~/shared/utils/aventure-schedule'
+import BrigadeImagePicker from './BrigadeImagePicker.vue'
+import BrigadeImageShareDialog from './BrigadeImageShareDialog.vue'
+import type { BrigadeBankImage, BrigadeImageToShare } from '~~/shared/utils/brigade-image-bank'
 
 type StoredImageVariant = {
   url: string
@@ -156,6 +159,29 @@ const galleryImages = reactive<{ url: string; alt: string; variants: StoredImage
 const galleryUploadStates = reactive<Record<number, { loading: boolean; error: string | null }>>({})
 const { uploadGuideImage } = useGuideImageUpload()
 
+const imageBankTarget = ref<'cover' | (typeof galleryImages)[number] | null>(null)
+const imagesToShare = ref<BrigadeImageToShare[]>([])
+const galleryUploading = computed(() => Object.values(galleryUploadStates).some(state => state.loading))
+const selectBrigadeImage = (image: BrigadeBankImage) => {
+  if (imageBankTarget.value === 'cover') {
+    form.coverImageUrl = image.url
+    coverImageVariants.value = normalizeVariants(image.variants)
+    coverUploadError.value = null
+  } else if (imageBankTarget.value && galleryImages.includes(imageBankTarget.value)) {
+    imageBankTarget.value.url = image.url
+    imageBankTarget.value.alt = image.alt
+    imageBankTarget.value.variants = normalizeVariants(image.variants)
+    const index = galleryImages.indexOf(imageBankTarget.value)
+    if (galleryUploadStates[index]) galleryUploadStates[index].error = null
+  }
+  imageBankTarget.value = null
+  successMessage.value = 'Image de la Brigade ajoutée à ton aventure.'
+}
+const imageShared = (folder: string) => {
+  imagesToShare.value.shift()
+  successMessage.value = `Image partagée avec la Brigade dans le dossier « ${folder} ».`
+}
+
 onMounted(() => {
   isClient.value = true
 })
@@ -289,6 +315,8 @@ const addGalleryImage = () => {
 }
 
 const removeGalleryImage = (index: number) => {
+  if (galleryUploading.value) return
+  for (const key of Object.keys(galleryUploadStates)) delete galleryUploadStates[Number(key)]
   if (galleryImages.length === 1) {
     galleryImages[0] = { url: '', alt: '', variants: [] }
     return
@@ -471,6 +499,7 @@ const validatePublish = () => {
 }
 
 const saveDraft = async () => {
+  if (uploadingCover.value || galleryUploading.value) return
   errorMessage.value = null
   successMessage.value = null
   saving.value = true
@@ -495,6 +524,7 @@ const saveDraft = async () => {
 }
 
 const publishAdventure = async () => {
+  if (uploadingCover.value || galleryUploading.value) return
   errorMessage.value = null
   successMessage.value = null
   if (!validatePublish()) {
@@ -546,6 +576,7 @@ const uploadCoverImage = async (event: Event) => {
     form.coverImageUrl = response.url
     coverImageVariants.value = normalizeVariants(response.variants || [])
     successMessage.value = 'Image de couverture mise à jour.'
+    imagesToShare.value.push({ url: response.url, variants: normalizeVariants(response.variants || []) })
   } catch (error: any) {
     coverUploadError.value = error?.data?.message || 'Échec du téléversement.'
   } finally {
@@ -558,6 +589,7 @@ const uploadGalleryImage = async (event: Event, index: number) => {
   const target = event.target as HTMLInputElement
   const file = target.files?.[0]
   if (!file) return
+  const image = galleryImages[index]
   galleryUploadStates[index] = galleryUploadStates[index] || { loading: false, error: null }
   galleryUploadStates[index].error = null
   const fileError = validateUploadFile(file, 'gallery')
@@ -572,9 +604,10 @@ const uploadGalleryImage = async (event: Event, index: number) => {
       file,
       kind: 'gallery',
     })
-    galleryImages[index].url = response.url
-    galleryImages[index].variants = normalizeVariants(response.variants || [])
+    image.url = response.url
+    image.variants = normalizeVariants(response.variants || [])
     successMessage.value = 'Photo ajoutée à la galerie.'
+    imagesToShare.value.push({ url: response.url, variants: image.variants, alt: image.alt })
   } catch (error: any) {
     galleryUploadStates[index].error = error?.data?.message || 'Échec du téléversement.'
   } finally {
@@ -608,7 +641,7 @@ const uploadGalleryImage = async (event: Event, index: number) => {
         <button
           type="button"
           class="inline-flex items-center gap-2 rounded-2xl bg-secondaryBrand-500/90 px-5 py-2.5 text-sm font-semibold text-brand-950 shadow-lg shadow-secondaryBrand-900/30 transition hover:bg-secondaryBrand-400 disabled:opacity-50"
-          :disabled="saving || publishing"
+          :disabled="saving || publishing || uploadingCover || galleryUploading"
           @click="saveDraft"
         >
           <span v-if="saving" class="h-4 w-4 animate-spin rounded-full border-2 border-brand-900 border-t-transparent" />
@@ -854,20 +887,25 @@ const uploadGalleryImage = async (event: Event, index: number) => {
               Assure-toi d’utiliser une photo dont tu détiens les droits, ou une photo libre de droits autorisée pour un usage commercial.
             </p>
             <div v-if="isClient" class="space-y-2">
-              <label class="inline-flex cursor-pointer items-center gap-3 rounded-full border border-white/20 px-4 py-2 text-sm font-semibold text-white/80 transition hover:bg-white/5">
-                <span v-if="!uploadingCover">Téléverser une image</span>
-                <span v-else class="inline-flex items-center gap-2">
-                  <span class="h-3 w-3 animate-spin rounded-full border-2 border-white border-t-transparent"></span>
-                  Upload en cours…
-                </span>
-                <input
-                  type="file"
-                  class="sr-only"
-                  accept="image/png,image/jpeg,image/webp"
-                  :disabled="uploadingCover"
-                  @change="uploadCoverImage"
-                />
-              </label>
+              <div class="flex flex-wrap items-center gap-3">
+                <label class="inline-flex cursor-pointer items-center gap-3 rounded-full border border-white/20 px-4 py-2 text-sm font-semibold text-white/80 transition hover:bg-white/5">
+                  <span v-if="!uploadingCover">Téléverser une image</span>
+                  <span v-else class="inline-flex items-center gap-2">
+                    <span class="h-3 w-3 animate-spin rounded-full border-2 border-white border-t-transparent"></span>
+                    Upload en cours…
+                  </span>
+                  <input
+                    type="file"
+                    class="sr-only"
+                    accept="image/png,image/jpeg,image/webp"
+                    :disabled="uploadingCover"
+                    @change="uploadCoverImage"
+                  />
+                </label>
+                <button type="button" :disabled="uploadingCover" class="rounded-full border border-secondaryBrand-300/70 px-4 py-2 text-sm font-semibold text-secondaryBrand-100 transition hover:bg-secondaryBrand-500/10 disabled:opacity-50" @click="imageBankTarget = 'cover'">
+                  Utiliser une image de la Brigade
+                </button>
+              </div>
               <p v-if="coverUploadError" class="text-xs text-red-400">
                 {{ coverUploadError }}
               </p>
@@ -970,6 +1008,7 @@ const uploadGalleryImage = async (event: Event, index: number) => {
               <button
                 type="button"
                 class="text-[10px] font-semibold text-red-200/80 hover:text-red-100"
+                :disabled="galleryUploading"
                 @click="removeProgrammeDay(index)"
               >
                 Retirer
@@ -1181,7 +1220,7 @@ const uploadGalleryImage = async (event: Event, index: number) => {
                   placeholder="https://…"
                   class="w-full rounded-xl border border-white/10 bg-brand-900/80 px-3 py-2 text-white focus:border-secondaryBrand-400 focus:outline-none"
                 />
-                <div v-if="isClient" class="flex items-center gap-3 text-xs text-brand-200/70">
+                <div v-if="isClient" class="flex flex-wrap items-center gap-3 text-xs text-brand-200/70">
                   <label class="inline-flex cursor-pointer items-center gap-2 rounded-full border border-white/20 px-3 py-1.5 text-xs font-semibold text-white/80 transition hover:bg-white/5">
                     <span v-if="!galleryUploadStates[index]?.loading">Téléverser une image</span>
                     <span v-else class="inline-flex items-center gap-2">
@@ -1196,6 +1235,9 @@ const uploadGalleryImage = async (event: Event, index: number) => {
                       @change="(event) => uploadGalleryImage(event, index)"
                     />
                   </label>
+                  <button type="button" :disabled="galleryUploadStates[index]?.loading" class="rounded-full border border-secondaryBrand-300/70 px-3 py-1.5 text-xs font-semibold text-secondaryBrand-100 transition hover:bg-secondaryBrand-500/10 disabled:opacity-50" @click="imageBankTarget = image">
+                    Utiliser une image de la Brigade
+                  </button>
                   <span v-if="galleryUploadStates[index]?.error" class="text-red-300">
                     {{ galleryUploadStates[index]?.error }}
                   </span>
@@ -1235,7 +1277,7 @@ const uploadGalleryImage = async (event: Event, index: number) => {
         <button
           type="submit"
           class="inline-flex items-center gap-2 rounded-2xl bg-secondaryBrand-500/90 px-6 py-3 text-sm font-semibold text-brand-950 shadow-lg shadow-secondaryBrand-900/30 transition hover:bg-secondaryBrand-400 disabled:opacity-50"
-          :disabled="saving || publishing"
+          :disabled="saving || publishing || uploadingCover || galleryUploading"
         >
           <span v-if="saving" class="h-4 w-4 animate-spin rounded-full border-2 border-brand-900 border-t-transparent" />
           <span>Enregistrer</span>
@@ -1245,5 +1287,7 @@ const uploadGalleryImage = async (event: Event, index: number) => {
       <p v-if="successMessage" class="text-sm text-secondaryBrand-200">{{ successMessage }}</p>
       <p v-if="errorMessage" class="text-sm text-red-400">{{ errorMessage }}</p>
     </form>
+    <BrigadeImagePicker v-if="imageBankTarget" @select="selectBrigadeImage" @close="imageBankTarget = null" />
+    <BrigadeImageShareDialog v-if="imagesToShare.length && !imageBankTarget" :key="imagesToShare[0].url" :image="imagesToShare[0]" :suggested-folder="form.lieuLabel" @close="imagesToShare.shift()" @shared="imageShared" />
   </div>
 </template>

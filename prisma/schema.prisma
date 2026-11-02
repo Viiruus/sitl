@@ -168,6 +168,8 @@ model User {
   guideContactRequestsSent            GuideContactRequest[]           @relation("GuideContactRequestsSent")
   guideContactRequestsReceived        GuideContactRequest[]           @relation("GuideContactRequestsReceived")
   whatsappMessagesReceived            GuideWhatsAppMessage[]
+  brigadeImageFoldersCreated          BrigadeImageFolder[]
+  brigadeImagesUploaded               BrigadeImage[]
   stageNotificationSubscriptions      StageNotificationSubscription[] @relation("StageNotificationSubscriptions")
   guideStageNotificationSubscriptions StageNotificationSubscription[] @relation("GuideStageNotificationSubscriptions")
 
@@ -480,6 +482,39 @@ model AventureImage {
   createdAt DateTime @default(now())
 
   @@index([aventureId])
+}
+
+model BrigadeImageFolder {
+  id      Int    @id @default(autoincrement())
+  name    String
+  nameKey String @unique
+
+  createdById Int?
+  createdBy   User? @relation(fields: [createdById], references: [id], onDelete: SetNull)
+  images      BrigadeImage[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model BrigadeImage {
+  id       Int    @id @default(autoincrement())
+  url      String @unique
+  alt      String @default("")
+  variants Json?
+
+  folderId Int
+  folder   BrigadeImageFolder @relation(fields: [folderId], references: [id], onDelete: Restrict)
+
+  uploadedById Int?
+  uploadedBy   User? @relation(fields: [uploadedById], references: [id], onDelete: SetNull)
+  credit       String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([folderId, createdAt, id])
+  @@index([uploadedById])
 }
 
 model AventureSession {
