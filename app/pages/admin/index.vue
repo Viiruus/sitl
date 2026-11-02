@@ -10,7 +10,7 @@ const cards = computed(() => [
 </script>
 
 <template>
-  <AdminAdminShell title="Vue d’ensemble" eyebrow="Pilotage">
+  <AdminShell title="Vue d’ensemble" eyebrow="Pilotage">
     <div v-if="pending" class="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
       <div v-for="n in 5" :key="n" class="h-32 animate-pulse rounded-3xl border border-slate-200 bg-white shadow-sm" />
     </div>
@@ -29,5 +29,5 @@ const cards = computed(() => [
       <NuxtLink to="/admin/utilisateurs/nouveau" class="rounded-3xl bg-amber-400 p-7 font-bold text-slate-950 shadow-lg shadow-amber-500/10 transition hover:bg-amber-300">Créer un compte →</NuxtLink>
       <NuxtLink to="/admin/stages/nouveau" class="admin-panel rounded-3xl p-7 font-bold text-slate-900 transition hover:border-sky-400/40">Créer un stage →</NuxtLink>
     </div>
-  </AdminAdminShell>
+  </AdminShell>
 </template>

@@ -15,6 +15,7 @@ export const buildGuideContactMessagePreview = (message: string) => {
 }
 
 export async function sendGuideContactRequestViaWhatsapp(input: {
+  guideId: number
   phoneNumber: string
   guideFirstName?: string | null
   climberName: string
@@ -45,6 +46,7 @@ export async function sendGuideContactRequestViaWhatsapp(input: {
       },
     ],
     logLabel: 'whatsapp-guide-contact',
+    guideMessage: { guideId: input.guideId, kind: 'CONTACT_REQUEST' },
   })
 }
 

@@ -72,6 +72,7 @@ export default defineEventHandler(async (event) => {
         },
       ],
       logLabel: 'whatsapp-guide-welcome',
+      guideMessage: { guideId: user.id, kind: 'WELCOME' },
     })
 
     if (!result.ok) {

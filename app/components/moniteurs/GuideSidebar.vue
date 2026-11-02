@@ -12,6 +12,7 @@ const navLinks = computed(() => [
   { label: 'Tableau de bord', to: '/moniteurs' },
   { label: 'Profil moniteur·ice', to: '/moniteurs/profil' },
   { label: 'Mes aventures', to: '/moniteurs/aventures' },
+  { label: 'Mes messages', to: '/moniteurs/messages' },
   { label: 'Mes articles', to: '/moniteurs/articles' },
   { label: 'Avantages partenaires', to: '/moniteurs/avantages-partenaires' },
   { label: 'Grimpeur·euse·s inscrit·e·s', to: '/moniteurs/grimpeurs' },

@@ -167,6 +167,7 @@ model User {
   whatsappOtpChallenges               WhatsAppOtpChallenge[]
   guideContactRequestsSent            GuideContactRequest[]           @relation("GuideContactRequestsSent")
   guideContactRequestsReceived        GuideContactRequest[]           @relation("GuideContactRequestsReceived")
+  whatsappMessagesReceived            GuideWhatsAppMessage[]
   stageNotificationSubscriptions      StageNotificationSubscription[] @relation("StageNotificationSubscriptions")
   guideStageNotificationSubscriptions StageNotificationSubscription[] @relation("GuideStageNotificationSubscriptions")
 
@@ -309,6 +310,33 @@ model GuideContactRequest {
 
   @@index([guideId, createdAt])
   @@index([climberId, createdAt])
+}
+
+model GuideWhatsAppMessage {
+  id Int @id @default(autoincrement())
+
+  guideId Int?
+  guide   User? @relation(fields: [guideId], references: [id], onDelete: SetNull)
+
+  guideNameSnapshot String
+  phoneNumber       String
+  kind              String
+  templateName      String
+  language          String
+  components        Json
+
+  messageId     String? @unique
+  status        String  @default("pending")
+  failureReason String?
+  sentAt        DateTime?
+  statusAt      DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([guideId, createdAt])
+  @@index([createdAt, id])
+  @@index([kind, status])
 }
 
 model Aventure {

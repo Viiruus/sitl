@@ -125,6 +125,7 @@ export default defineEventHandler(async (event) => {
 
     try {
       const result = await sendGuideStageDatePropositionViaWhatsapp({
+        guideId: aventure.guide.id,
         phoneNumber: normalizedGuidePhone,
         stageTitle: aventure.titre,
         stageLocalization: aventure.lieuLabel || 'Lieu à confirmer',

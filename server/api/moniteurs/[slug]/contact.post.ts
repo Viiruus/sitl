@@ -156,6 +156,7 @@ export default defineEventHandler(async (event) => {
   })
 
   const sendResult = await sendGuideContactRequestViaWhatsapp({
+    guideId: guide.id,
     phoneNumber: normalizedGuidePhone,
     guideFirstName: guide.firstName,
     climberName,

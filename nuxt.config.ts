@@ -64,6 +64,7 @@ export default defineNuxtConfig({
     serverAssets: [{ baseName: 'department-maps', dir: '../public/maps/departments' }],
   },
   routeRules: {
+    '/admin/messages-whatsapp': { robots: false, headers: { 'X-Robots-Tag': 'noindex, nofollow', 'Cache-Control': 'private, no-store' } },
     '/departements/savoie': { redirect: { to: '/escalade/savoie', statusCode: 301 } },
     '/_nuxt/**': { headers: { 'cache-control': 'public, max-age=31536000, immutable' } },
     '/_ipx/**': { headers: { 'cache-control': 'public, max-age=31536000, immutable' } },
@@ -77,6 +78,7 @@ export default defineNuxtConfig({
     '/moniteurs': { headers: { 'X-Robots-Tag': 'noindex, nofollow' } },
     '/moniteurs/login': { headers: { 'X-Robots-Tag': 'noindex, nofollow' } },
     '/moniteurs/profil': { headers: { 'X-Robots-Tag': 'noindex, nofollow' } },
+    '/moniteurs/messages': { robots: false, headers: { 'X-Robots-Tag': 'noindex, nofollow', 'Cache-Control': 'private, no-store' } },
     '/moniteurs/grimpeurs': { robots: false, headers: { 'X-Robots-Tag': 'noindex, nofollow' } },
     '/moniteurs/analytics': { robots: false, headers: { 'X-Robots-Tag': 'noindex, nofollow' } },
     '/moniteurs/avantages-partenaires': { robots: false, headers: { 'X-Robots-Tag': 'noindex, nofollow', 'Cache-Control': 'private, no-store' } },
@@ -87,6 +89,8 @@ export default defineNuxtConfig({
   sitemap: {
     sources: ['/api/__sitemap__/static', '/api/__sitemap__/moniteurs', '/api/__sitemap__/stages'],
     exclude: [
+      '/admin/messages-whatsapp',
+      '/admin/messages-whatsapp/',
       '/departements/savoie',
       '/escalade-grande-voie',
       '/escalade-sportive-couenne-falaise',
@@ -104,6 +108,8 @@ export default defineNuxtConfig({
       '/moniteurs/profil',
       '/moniteurs/grimpeurs',
       '/moniteurs/grimpeurs/',
+      '/moniteurs/messages',
+      '/moniteurs/messages/',
       '/moniteurs/analytics',
       '/moniteurs/analytics/',
       '/moniteurs/avantages-partenaires',
@@ -115,6 +121,7 @@ export default defineNuxtConfig({
   },
   robots: {
     disallow: [
+      '/admin/messages-whatsapp',
       '/escalade-grande-voie',
       '/escalade-sportive-couenne-falaise',
       '/login',
@@ -126,6 +133,7 @@ export default defineNuxtConfig({
       '/moniteurs/profil',
       '/moniteurs/grimpeurs',
       '/moniteurs/analytics',
+      '/moniteurs/messages',
       '/moniteurs/avantages-partenaires',
       '/moniteurs/cgu',
       '/moniteurs/aventures/',
@@ -147,7 +155,10 @@ export default defineNuxtConfig({
         lang: 'fr',
       },
       link: [
-        { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' },
+        { rel: 'icon', type: 'image/x-icon', sizes: '16x16 32x32 48x48 64x64', href: '/favicon.ico?v=bdk-dark' },
+        { rel: 'icon', type: 'image/png', sizes: '512x512', href: '/favicon.png?v=bdk-dark' },
+        { rel: 'icon', type: 'image/svg+xml', sizes: 'any', href: '/favicon.svg?v=bdk-dark' },
+        { rel: 'apple-touch-icon', sizes: '180x180', href: '/apple-touch-icon.png?v=bdk-dark' },
       ],
     },
   },

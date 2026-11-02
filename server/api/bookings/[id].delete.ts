@@ -110,6 +110,7 @@ export default defineEventHandler(async (event) => {
 
     try {
       const result = await sendGuideClimberStageCancelationViaWhatsapp({
+        guideId: guide.id,
         phoneNumber: normalizedGuidePhone,
         stageTitle,
         stageLocalization,

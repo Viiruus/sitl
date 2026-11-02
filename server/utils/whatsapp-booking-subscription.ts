@@ -22,6 +22,7 @@ export const formatBookingStageDate = (start?: string | Date | null, end?: strin
   formatSessionRangeLabel(start, end)
 
 export async function sendGuideNewSubscriptionViaWhatsapp(input: {
+  guideId: number
   phoneNumber: string
   stageTitle: string
   stageLocalization: string
@@ -48,6 +49,7 @@ export async function sendGuideNewSubscriptionViaWhatsapp(input: {
       },
     ],
     logLabel: 'whatsapp-guide-new-subscription',
+    guideMessage: { guideId: input.guideId, kind: 'NEW_SUBSCRIPTION' },
   })
 }
 
@@ -88,6 +90,7 @@ export async function sendClimberSubscriptionOkViaWhatsapp(input: {
 }
 
 export async function sendGuideClimberStageCancelationViaWhatsapp(input: {
+  guideId: number
   phoneNumber: string
   stageTitle: string
   stageLocalization: string
@@ -114,10 +117,12 @@ export async function sendGuideClimberStageCancelationViaWhatsapp(input: {
       },
     ],
     logLabel: 'whatsapp-guide-climber-stage-cancelation',
+    guideMessage: { guideId: input.guideId, kind: 'CANCELLATION' },
   })
 }
 
 export async function sendGuideStageDatePropositionViaWhatsapp(input: {
+  guideId: number
   phoneNumber: string
   stageTitle: string
   stageLocalization: string
@@ -162,5 +167,6 @@ export async function sendGuideStageDatePropositionViaWhatsapp(input: {
       },
     ],
     logLabel: 'whatsapp-guide-stage-date-proposition',
+    guideMessage: { guideId: input.guideId, kind: 'DATE_SUGGESTION' },
   })
 }

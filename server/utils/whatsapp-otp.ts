@@ -1,4 +1,6 @@
 import crypto from 'node:crypto'
+import { recordGuideWhatsAppSend } from './guide-whatsapp-history'
+import type { GuideWhatsAppMessageKind } from '~~/shared/utils/guide-whatsapp-messages'
 import {
   normalizePhoneNumber,
   normalizeWhatsAppPhoneNumber,
@@ -7,7 +9,7 @@ import {
 const OTP_TTL_MS = 10 * 60 * 1000 // 10 minutes
 const OTP_MAX_ATTEMPTS = 5
 
-type WhatsAppOtpSendResult =
+export type WhatsAppOtpSendResult =
   | { ok: true; messageId: string | null; raw: any }
   | {
       ok: false
@@ -17,12 +19,13 @@ type WhatsAppOtpSendResult =
       raw?: any
     }
 
-type WhatsAppTemplateSendInput = {
+export type WhatsAppTemplateSendInput = {
   phone: string
   templateName: string
   language?: string | null
   components?: any[]
   logLabel?: string
+  guideMessage?: { guideId: number; kind: GuideWhatsAppMessageKind }
 }
 
 function secret() {
@@ -294,6 +297,9 @@ async function sendTemplateRequest(input: WhatsAppTemplateSendInput): Promise<Wh
 }
 
 export async function sendTemplateViaWhatsapp(input: WhatsAppTemplateSendInput): Promise<WhatsAppOtpSendResult> {
+  if (input.guideMessage) {
+    return recordGuideWhatsAppSend(input, () => sendTemplateRequest(input))
+  }
   return sendTemplateRequest(input)
 }
 

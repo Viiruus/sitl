@@ -167,6 +167,7 @@ export default defineEventHandler(async (event) => {
   if (normalizedGuidePhone && normalizedClimberPhone && dbSession.aventure.guide?.whatsappOptIn) {
     notificationJobs.push(
       sendGuideNewSubscriptionViaWhatsapp({
+        guideId: dbSession.aventure.guide.id,
         phoneNumber: normalizedGuidePhone,
         stageTitle,
         stageLocalization,

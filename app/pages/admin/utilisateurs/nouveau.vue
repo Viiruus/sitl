@@ -1,2 +1,2 @@
-<template><AdminAdminShell title="Créer un compte" eyebrow="Utilisateurs"><AdminUserEditor mode="create" /></AdminAdminShell></template>
+<template><AdminShell title="Créer un compte" eyebrow="Utilisateurs"><AdminUserEditor mode="create" /></AdminShell></template>
 

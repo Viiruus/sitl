@@ -19,7 +19,7 @@ const remove = async (user: any) => {
 </script>
 
 <template>
-  <AdminAdminShell title="Moniteurs & grimpeurs">
+  <AdminShell title="Moniteurs & grimpeurs">
     <template #actions><NuxtLink to="/admin/utilisateurs/nouveau" class="rounded-full bg-amber-400 px-5 py-2.5 text-sm font-bold text-slate-950 shadow-lg shadow-amber-500/10 hover:bg-amber-300">Créer un compte</NuxtLink></template>
     <div class="admin-panel mb-6 grid gap-3 rounded-2xl p-4 sm:grid-cols-[1fr_220px]">
       <input v-model="search" type="search" placeholder="Nom, email ou téléphone…" class="rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-900 shadow-sm outline-none placeholder:text-slate-400 focus:border-amber-500 focus:ring-2 focus:ring-amber-200" />
@@ -40,5 +40,5 @@ const remove = async (user: any) => {
       </div>
       <p v-if="!data?.users.length" class="p-8 text-center text-slate-600">Aucun compte trouvé.</p>
     </div>
-  </AdminAdminShell>
+  </AdminShell>
 </template>

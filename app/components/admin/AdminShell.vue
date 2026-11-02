@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import {
+  ArrowLeftIcon,
   ArrowLeftStartOnRectangleIcon,
+  ChatBubbleLeftRightIcon,
   HomeIcon,
   MapIcon,
   Squares2X2Icon,
@@ -18,6 +20,7 @@ const links = [
   { label: 'Moniteurs & grimpeurs', to: '/admin/utilisateurs', icon: UsersIcon },
   { label: 'Stages & sessions', to: '/admin/stages', icon: MapIcon },
   { label: 'Réservations', to: '/admin/reservations', icon: TicketIcon },
+  { label: 'Messages WhatsApp', to: '/admin/messages-whatsapp', icon: ChatBubbleLeftRightIcon },
 ]
 
 const adminName = computed(() => [user.value?.firstName, user.value?.lastName].filter(Boolean).join(' ') || user.value?.email || 'Administrateur')
@@ -35,6 +38,15 @@ const logout = async () => {
 
 <template>
   <div class="admin-shell min-h-screen text-slate-900">
+    <div class="sticky top-0 z-40 border-b border-slate-700/60 bg-[#0b1728] px-5 py-3 sm:px-8 lg:hidden">
+      <NuxtLink
+        to="/moniteurs"
+        class="inline-flex items-center gap-2 rounded-lg text-sm font-semibold text-amber-300 transition hover:text-amber-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-amber-300"
+      >
+        <ArrowLeftIcon class="size-4 shrink-0" aria-hidden="true" />
+        Retour au back-office moniteur
+      </NuxtLink>
+    </div>
     <div class="flex min-h-screen flex-col lg:flex-row">
       <aside class="admin-sidebar border-b border-slate-700/60 p-5 lg:sticky lg:top-0 lg:flex lg:h-screen lg:w-72 lg:shrink-0 lg:flex-col lg:border-b-0 lg:border-r lg:p-6">
         <div class="flex items-center justify-between gap-4">
@@ -50,7 +62,15 @@ const logout = async () => {
           </NuxtLink>
         </div>
 
-        <div class="mt-7 border-t border-white/10 pt-6 lg:mt-10">
+        <NuxtLink
+          to="/moniteurs"
+          class="mt-6 hidden items-center gap-3 rounded-xl border border-amber-300/30 px-3.5 py-3 text-sm font-semibold text-amber-300 transition hover:bg-white/[0.06] hover:text-amber-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-amber-300 lg:flex"
+        >
+          <ArrowLeftIcon class="size-5 shrink-0" aria-hidden="true" />
+          Retour au back-office moniteur
+        </NuxtLink>
+
+        <div class="mt-7 border-t border-white/10 pt-6">
           <p class="px-3 text-[10px] font-bold uppercase tracking-[0.28em] text-slate-500">Navigation</p>
           <nav class="mt-3 grid gap-1.5">
             <NuxtLink
