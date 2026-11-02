@@ -101,16 +101,16 @@ const downloadQrCode = async () => {
 </script>
 
 <template>
-  <section class="rounded-3xl bg-white/5 p-8 ring-1 ring-white/10">
+  <section class="rounded-3xl bg-white p-8 ring-1 ring-slate-200">
     <div class="flex flex-col gap-8 xl:flex-row xl:items-center xl:justify-between">
       <div class="max-w-xl">
-        <p class="text-sm uppercase tracking-[0.3em] text-secondaryBrand-300">
+        <p class="text-sm uppercase tracking-[0.3em] text-amber-700">
           Profil public
         </p>
-        <h2 class="mt-3 text-2xl font-semibold text-white">
+        <h2 class="mt-3 text-2xl font-semibold text-slate-900">
           QR code du profil
         </h2>
-        <p class="mt-3 text-sm text-brand-100/80">
+        <p class="mt-3 text-sm text-slate-600">
           Affiche ce QR code pour envoyer directement vers la page publique de {{ guideName || 'ce profil' }}.
         </p>
         <div class="mt-6 flex flex-wrap gap-3">
@@ -118,25 +118,25 @@ const downloadQrCode = async () => {
             :to="profileUrl"
             target="_blank"
             rel="noopener"
-            class="inline-flex items-center justify-center rounded-full bg-secondaryBrand-400 px-5 py-3 text-sm font-semibold text-brand-950 transition hover:bg-secondaryBrand-300"
+            class="inline-flex items-center justify-center rounded-full bg-amber-400 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-amber-300"
           >
             Voir le profil
           </NuxtLink>
           <button
             type="button"
-            class="inline-flex items-center justify-center rounded-full border border-white/15 px-5 py-3 text-sm font-semibold text-white transition hover:border-white/30 hover:bg-white/5 disabled:cursor-not-allowed disabled:opacity-60"
+            class="inline-flex items-center justify-center rounded-full border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-900 transition hover:border-slate-200 hover:bg-white disabled:cursor-not-allowed disabled:opacity-60"
             :disabled="downloadPending"
             @click="downloadQrCode"
           >
             {{ downloadPending ? 'Preparation...' : 'Telecharger le QR code' }}
           </button>
         </div>
-        <p class="mt-4 break-all text-xs text-brand-200/60">
+        <p class="mt-4 break-all text-xs text-slate-500">
           {{ profileUrl }}
         </p>
       </div>
 
-      <div class="self-center rounded-[2rem] bg-brand-950 p-4 shadow-2xl shadow-black/30 ring-1 ring-white/10">
+      <div class="self-center rounded-[2rem] bg-slate-50 p-4 shadow-2xl shadow-black/30 ring-1 ring-slate-200">
         <img
           v-if="qrSvgDataUrl"
           :src="qrSvgDataUrl"
@@ -146,7 +146,7 @@ const downloadQrCode = async () => {
       </div>
     </div>
 
-    <p v-if="qrError" class="mt-4 text-sm text-red-300">
+    <p v-if="qrError" class="mt-4 text-sm text-red-700">
       {{ qrError }}
     </p>
   </section>

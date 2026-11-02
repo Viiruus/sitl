@@ -221,22 +221,22 @@ const save = async () => {
   <div>
     <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
       <div>
-        <p class="text-xs font-semibold uppercase tracking-[0.28em] text-secondaryBrand-300">Éditeur Markdown</p>
-        <h1 class="mt-1 text-2xl font-semibold text-white sm:text-3xl">
+        <p class="text-xs font-semibold uppercase tracking-[0.28em] text-amber-700">Éditeur Markdown</p>
+        <h1 class="mt-1 text-2xl font-semibold text-slate-900 sm:text-3xl">
           {{ mode === 'create' ? 'Écrire un article' : 'Modifier l’article' }}
         </h1>
       </div>
       <div class="flex flex-wrap gap-3">
         <button
           type="button"
-          class="rounded-full border border-white/20 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-white/10"
+          class="rounded-full border border-slate-200 px-5 py-2.5 text-sm font-semibold text-slate-900 transition hover:bg-slate-100"
           @click="previewOpen = !previewOpen"
         >
           {{ previewOpen ? 'Revenir au Markdown' : 'Voir l’aperçu' }}
         </button>
         <button
           type="button"
-          class="rounded-full bg-secondaryBrand-400 px-5 py-2.5 text-sm font-semibold text-brand-950 transition hover:bg-secondaryBrand-300 disabled:cursor-not-allowed disabled:opacity-50"
+          class="rounded-full bg-amber-400 px-5 py-2.5 text-sm font-semibold text-slate-950 transition hover:bg-amber-300 disabled:cursor-not-allowed disabled:opacity-50"
           :disabled="saving || uploadingCover || uploadingInline"
           @click="save"
         >
@@ -245,10 +245,10 @@ const save = async () => {
       </div>
     </div>
 
-    <p v-if="errorMessage" class="mb-5 rounded-xl bg-red-950/60 px-4 py-3 text-sm text-red-100 ring-1 ring-red-400/30">
+    <p v-if="errorMessage" class="mb-5 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700 ring-1 ring-red-200">
       {{ errorMessage }}
     </p>
-    <p v-if="successMessage" class="mb-5 rounded-xl bg-emerald-950/60 px-4 py-3 text-sm text-emerald-100 ring-1 ring-emerald-400/30">
+    <p v-if="successMessage" class="mb-5 rounded-xl bg-emerald-50 px-4 py-3 text-sm text-emerald-700 ring-1 ring-emerald-200">
       {{ successMessage }}
     </p>
 
@@ -280,7 +280,7 @@ const save = async () => {
         <div class="mt-10">
           <div v-if="form.coverImageUrl" class="group relative">
             <img :src="form.coverImageUrl" :alt="form.title" class="aspect-[16/9] w-full object-cover">
-            <label class="absolute inset-x-4 bottom-4 flex cursor-pointer justify-center rounded-full bg-white/95 px-4 py-2 text-sm font-semibold shadow-lg transition hover:bg-white">
+            <label class="absolute inset-x-4 bottom-4 flex cursor-pointer justify-center rounded-full bg-slate-100 px-4 py-2 text-sm font-semibold shadow-lg transition hover:bg-white">
               {{ uploadingCover ? 'Téléversement…' : 'Changer la photo d’en-tête' }}
               <input type="file" accept="image/jpeg,image/png,image/webp" class="sr-only" :disabled="uploadingCover" @change="uploadCover">
             </label>
@@ -303,7 +303,7 @@ const save = async () => {
             <button type="button" class="markdown-tool" title="Ajouter un lien" @mousedown.prevent="insertLink">Lien</button>
             <button
               type="button"
-              class="ml-auto rounded-lg bg-[#1a8917] px-3 py-2 font-semibold text-white transition hover:bg-[#156d12] disabled:opacity-40"
+              class="ml-auto rounded-lg bg-[#1a8917] px-3 py-2 font-semibold text-slate-900 transition hover:bg-[#156d12] disabled:opacity-40"
               :disabled="uploadingInline"
               @mousedown.prevent="requestInlineImage"
             >
@@ -374,10 +374,10 @@ const save = async () => {
   flex-wrap: wrap;
   align-items: center;
   gap: 0.35rem;
-  border-bottom: 1px solid #3f3f3f;
-  background: #111111 !important;
+  border-bottom: 1px solid #e2e8f0;
+  background: #f8fafc;
   padding: 0.6rem 0.75rem;
-  color: #ffffff !important;
+  color: #0f172a;
 }
 
 .selection-label {
@@ -386,7 +386,7 @@ const save = async () => {
   font-size: 0.72rem;
   font-weight: 600;
   letter-spacing: 0.05em;
-  color: #d4d4d4 !important;
+  color: #64748b;
   text-transform: uppercase;
 }
 
@@ -394,25 +394,25 @@ const save = async () => {
   position: relative;
   z-index: 1;
   cursor: pointer;
-  border: 1px solid #525252;
+  border: 1px solid #cbd5e1;
   border-radius: 9999px;
-  background: #262626 !important;
+  background: #ffffff;
   padding: 0.4rem 0.75rem;
   font-family: ui-sans-serif, system-ui, sans-serif;
   font-size: 0.82rem;
-  color: #ffffff !important;
+  color: #334155;
   pointer-events: auto;
   transition: background-color 150ms ease, border-color 150ms ease;
 }
 
 .selection-action:hover {
-  border-color: #a3a3a3;
-  background: #404040 !important;
+  border-color: #94a3b8;
+  background: #f1f5f9;
 }
 
 .selection-photo {
   margin-left: auto;
   border-color: #f2b94b;
-  color: #f8cf78 !important;
+  color: #92400e;
 }
 </style>

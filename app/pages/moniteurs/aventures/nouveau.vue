@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import GuideShell from '~/components/moniteurs/GuideShell.vue'
 definePageMeta({
   middleware: 'guide-auth',
 })
@@ -28,15 +29,9 @@ const handleCreated = (slug: string) => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-brand-950 text-white">
-    <div class="mx-auto flex min-h-screen max-w-7xl flex-col gap-8 px-6 py-12 lg:flex-row lg:gap-12">
-      <MoniteursGuideSidebar :guide="guide" :current-path="route.path" @logout="logout" />
-
-      <main class="flex-1">
-        <div class="rounded-3xl bg-white/5 p-8 ring-1 ring-white/10">
-          <MoniteursAventureEditor mode="create" @created="handleCreated" />
-        </div>
-      </main>
+  <GuideShell :guide="guide" :current-path="route.path" @logout="logout">
+    <div class="rounded-3xl bg-white p-8 ring-1 ring-slate-200">
+      <MoniteursAventureEditor mode="create" @created="handleCreated" />
     </div>
-  </div>
+  </GuideShell>
 </template>

@@ -621,30 +621,30 @@ const uploadGalleryImage = async (event: Event, index: number) => {
   <div>
     <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
       <div>
-        <p class="text-xs uppercase tracking-[0.3em] text-secondaryBrand-300">
+        <p class="text-xs uppercase tracking-[0.3em] text-amber-700">
           {{ mode === 'create' ? 'Création d’une aventure' : 'Éditeur d’aventure' }}
         </p>
         <h1 class="text-3xl font-semibold">
           {{ form.titre || 'Nouvelle aventure' }}
         </h1>
-        <p class="text-sm text-brand-100/70">
+        <p class="text-sm text-slate-600">
           Complète toutes les infos pour rendre ton stage irrésistible.
         </p>
       </div>
       <div class="flex flex-col items-start gap-3 sm:items-end">
         <span
           class="inline-flex items-center rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-wide"
-          :class="isPublished ? 'border-secondaryBrand-400 text-secondaryBrand-200' : 'border-yellow-400/60 text-yellow-200'"
+          :class="isPublished ? 'border-amber-200 text-amber-700' : 'border-amber-200 text-amber-700'"
         >
           {{ isPublished ? 'Publié' : 'Brouillon' }}
         </span>
         <button
           type="button"
-          class="inline-flex items-center gap-2 rounded-2xl bg-secondaryBrand-500/90 px-5 py-2.5 text-sm font-semibold text-brand-950 shadow-lg shadow-secondaryBrand-900/30 transition hover:bg-secondaryBrand-400 disabled:opacity-50"
+          class="inline-flex items-center gap-2 rounded-2xl bg-amber-400 px-5 py-2.5 text-sm font-semibold text-slate-950 shadow-lg shadow-amber-500/10 transition hover:bg-amber-300 disabled:opacity-50"
           :disabled="saving || publishing || uploadingCover || galleryUploading"
           @click="saveDraft"
         >
-          <span v-if="saving" class="h-4 w-4 animate-spin rounded-full border-2 border-brand-900 border-t-transparent" />
+          <span v-if="saving" class="h-4 w-4 animate-spin rounded-full border-2 border-slate-200 border-t-transparent" />
           <span>Enregistrer</span>
         </button>
       </div>
@@ -653,7 +653,7 @@ const uploadGalleryImage = async (event: Event, index: number) => {
     <form class="mt-8 space-y-8" @submit.prevent="saveDraft">
       <div
         v-if="hasLegacyInlineMedia"
-        class="rounded-2xl border border-yellow-400/30 bg-yellow-400/10 p-4 text-sm text-yellow-100"
+        class="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-700"
       >
         Cette aventure contient encore des images anciennes stockées inline.
         Elles ne sont plus renvoyées à l’enregistrement pour éviter l’erreur 413.
@@ -663,23 +663,23 @@ const uploadGalleryImage = async (event: Event, index: number) => {
         </span>
       </div>
 
-      <section class="space-y-4 rounded-2xl bg-brand-900/50 p-6 ring-1 ring-white/5">
+      <section class="space-y-4 rounded-2xl bg-slate-50 p-6 ring-1 ring-slate-200">
         <h2 class="text-xl font-semibold">Informations principales</h2>
         <div class="grid gap-4 md:grid-cols-2">
           <div class="space-y-2">
-            <label class="text-xs uppercase tracking-[0.3em] text-brand-200/70">Titre</label>
+            <label class="text-xs uppercase tracking-[0.3em] text-slate-500">Titre</label>
             <input
               v-model="form.titre"
               type="text"
               placeholder="Ex: Grande voie au Verdon"
-              class="w-full rounded-xl border border-white/10 bg-brand-900/80 px-3 py-2 text-white focus:border-secondaryBrand-400 focus:outline-none"
+              class="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-900 focus:border-amber-200 focus:outline-none"
             />
           </div>
           <div class="space-y-2">
-            <label class="text-xs uppercase tracking-[0.3em] text-brand-200/70">Discipline</label>
+            <label class="text-xs uppercase tracking-[0.3em] text-slate-500">Discipline</label>
             <select
               v-model="form.discipline"
-              class="w-full rounded-xl border border-white/10 bg-brand-900/80 px-3 py-2 text-white focus:border-secondaryBrand-400 focus:outline-none"
+              class="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-900 focus:border-amber-200 focus:outline-none"
             >
               <option value="FALAISE">Falaise</option>
               <option value="GRANDE_VOIE">Grande voie</option>
@@ -692,29 +692,29 @@ const uploadGalleryImage = async (event: Event, index: number) => {
 
         <div class="grid gap-4 md:grid-cols-2">
           <div class="space-y-2">
-            <label class="text-xs uppercase tracking-[0.3em] text-brand-200/70">Lieu</label>
+            <label class="text-xs uppercase tracking-[0.3em] text-slate-500">Lieu</label>
             <input
               v-model="form.lieuLabel"
               type="text"
               placeholder="Ex: Presles, Vercors"
-              class="w-full rounded-xl border border-white/10 bg-brand-900/80 px-3 py-2 text-white focus:border-secondaryBrand-400 focus:outline-none"
+              class="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-900 focus:border-amber-200 focus:outline-none"
             />
           </div>
           <div class="space-y-2">
-            <label class="text-xs uppercase tracking-[0.3em] text-brand-200/70">Prix par personne (€)</label>
+            <label class="text-xs uppercase tracking-[0.3em] text-slate-500">Prix par personne (€)</label>
             <input
               v-model="form.prixParPersonne"
               min="0"
               type="number"
               placeholder="Ex: 220"
-              class="w-full rounded-xl border border-white/10 bg-brand-900/80 px-3 py-2 text-white focus:border-secondaryBrand-400 focus:outline-none"
+              class="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-900 focus:border-amber-200 focus:outline-none"
             />
           </div>
         </div>
 
         <div class="grid gap-4 md:grid-cols-3">
           <div class="space-y-2">
-            <label class="text-xs uppercase tracking-[0.3em] text-brand-200/70">Durée (jours)</label>
+            <label class="text-xs uppercase tracking-[0.3em] text-slate-500">Durée (jours)</label>
             <input
               v-model="form.jours"
               min="0.5"
@@ -723,64 +723,64 @@ const uploadGalleryImage = async (event: Event, index: number) => {
               step="0.5"
               inputmode="decimal"
               placeholder="Ex: 2.5"
-              class="w-full rounded-xl border border-white/10 bg-brand-900/80 px-3 py-2 text-white focus:border-secondaryBrand-400 focus:outline-none"
+              class="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-900 focus:border-amber-200 focus:outline-none"
             />
-            <p class="text-xs text-brand-200/60">
+            <p class="text-xs text-slate-500">
               Tu peux saisir des demi-journées, par exemple {{ formatDurationDays(2.5) }}.
             </p>
           </div>
           <div class="space-y-2">
-            <label class="text-xs uppercase tracking-[0.3em] text-brand-200/70">Participants minimum</label>
+            <label class="text-xs uppercase tracking-[0.3em] text-slate-500">Participants minimum</label>
             <input
               v-model="form.placesMin"
               min="0"
               max="20"
               type="number"
               placeholder="Ex: 4"
-              class="w-full rounded-xl border border-white/10 bg-brand-900/80 px-3 py-2 text-white focus:border-secondaryBrand-400 focus:outline-none"
+              class="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-900 focus:border-amber-200 focus:outline-none"
             />
-            <p class="text-xs text-brand-200/60">
+            <p class="text-xs text-slate-500">
               Indique 0 si le stage peut partir sans minimum.
             </p>
           </div>
           <div class="space-y-2">
-            <label class="text-xs uppercase tracking-[0.3em] text-brand-200/70">Places max</label>
+            <label class="text-xs uppercase tracking-[0.3em] text-slate-500">Places max</label>
             <input
               v-model="form.placesMax"
               min="1"
               max="20"
               type="number"
               placeholder="Ex: 6"
-              class="w-full rounded-xl border border-white/10 bg-brand-900/80 px-3 py-2 text-white focus:border-secondaryBrand-400 focus:outline-none"
+              class="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-900 focus:border-amber-200 focus:outline-none"
             />
           </div>
         </div>
 
         <div class="grid gap-4 md:grid-cols-2">
           <div class="space-y-2">
-            <label class="text-xs uppercase tracking-[0.3em] text-brand-200/70">Latitude GPS</label>
+            <label class="text-xs uppercase tracking-[0.3em] text-slate-500">Latitude GPS</label>
             <input
               v-model="form.latitude"
               type="number"
               step="any"
               inputmode="decimal"
               placeholder="Ex: 44.9142"
-              class="w-full rounded-xl border border-white/10 bg-brand-900/80 px-3 py-2 text-white focus:border-secondaryBrand-400 focus:outline-none"
+              class="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-900 focus:border-amber-200 focus:outline-none"
             />
           </div>
           <div class="space-y-2">
-            <label class="text-xs uppercase tracking-[0.3em] text-brand-200/70">Longitude GPS</label>
+            <label class="text-xs uppercase tracking-[0.3em] text-slate-500">Longitude GPS</label>
             <input
               v-model="form.longitude"
               type="number"
               step="any"
               inputmode="decimal"
               placeholder="Ex: 5.3431"
-              class="w-full rounded-xl border border-white/10 bg-brand-900/80 px-3 py-2 text-white focus:border-secondaryBrand-400 focus:outline-none"
+              class="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-900 focus:border-amber-200 focus:outline-none"
             />
           </div>
         </div>
-        <div class="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/10 bg-brand-950/40 px-4 py-3 text-sm text-brand-100/80">
+        <div class="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
           <p>
             Ajoute un vrai point GPS pour activer la carte, améliorer le lien Google Maps et enrichir le référencement local.
           </p>
@@ -789,71 +789,71 @@ const uploadGalleryImage = async (event: Event, index: number) => {
             :href="googleMapsEditorLink"
             target="_blank"
             rel="noopener"
-            class="inline-flex items-center gap-2 rounded-full border border-secondaryBrand-400/40 px-3 py-1.5 text-xs font-semibold text-secondaryBrand-200 transition hover:border-secondaryBrand-300 hover:text-secondaryBrand-100"
+            class="inline-flex items-center gap-2 rounded-full border border-amber-200 px-3 py-1.5 text-xs font-semibold text-amber-700 transition hover:border-amber-200 hover:text-amber-700"
           >
             Ouvrir dans Google Maps
           </a>
         </div>
       </section>
 
-      <section class="space-y-4 rounded-2xl bg-brand-900/50 p-6 ring-1 ring-white/5">
+      <section class="space-y-4 rounded-2xl bg-slate-50 p-6 ring-1 ring-slate-200">
         <h2 class="text-xl font-semibold">Présentation</h2>
         <div class="grid gap-4 md:grid-cols-2">
           <div class="space-y-2">
-            <div class="flex flex-wrap items-center gap-2 text-xs uppercase tracking-[0.3em] text-brand-200/70">
+            <div class="flex flex-wrap items-center gap-2 text-xs uppercase tracking-[0.3em] text-slate-500">
               <label>Sous-titre</label>
-              <span class="text-[10px] text-secondaryBrand-200">Requis pour publier</span>
+              <span class="text-[10px] text-amber-700">Requis pour publier</span>
             </div>
             <input
               v-model="form.sousTitre"
               type="text"
               placeholder="Ex: Deux jours pour progresser en grande voie"
-              class="w-full rounded-xl border border-white/10 bg-brand-900/80 px-3 py-2 text-white focus:border-secondaryBrand-400 focus:outline-none"
+              class="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-900 focus:border-amber-200 focus:outline-none"
             />
           </div>
           <div class="space-y-2">
-            <label class="text-xs uppercase tracking-[0.3em] text-brand-200/70">Transport</label>
+            <label class="text-xs uppercase tracking-[0.3em] text-slate-500">Transport</label>
             <input
               v-model="form.transportLabel"
               type="text"
               placeholder="Ex: Covoiturage depuis Grenoble"
-              class="w-full rounded-xl border border-white/10 bg-brand-900/80 px-3 py-2 text-white focus:border-secondaryBrand-400 focus:outline-none"
+              class="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-900 focus:border-amber-200 focus:outline-none"
             />
           </div>
         </div>
 
         <div class="grid gap-4 md:grid-cols-2">
           <div class="space-y-2">
-            <div class="flex flex-wrap items-center gap-2 text-xs uppercase tracking-[0.3em] text-brand-200/70">
+            <div class="flex flex-wrap items-center gap-2 text-xs uppercase tracking-[0.3em] text-slate-500">
               <label>Niveau minimum</label>
-              <span class="text-[10px] text-secondaryBrand-200">Requis pour publier</span>
+              <span class="text-[10px] text-amber-700">Requis pour publier</span>
             </div>
             <input
               v-model="form.niveauMinimum"
               type="text"
               placeholder="Ex: 5c en tête"
-              class="w-full rounded-xl border border-white/10 bg-brand-900/80 px-3 py-2 text-white focus:border-secondaryBrand-400 focus:outline-none"
+              class="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-900 focus:border-amber-200 focus:outline-none"
             />
           </div>
           <div class="grid gap-4 sm:grid-cols-2">
             <div class="space-y-2">
-              <label class="text-xs uppercase tracking-[0.3em] text-brand-200/70">Âge min</label>
+              <label class="text-xs uppercase tracking-[0.3em] text-slate-500">Âge min</label>
               <input
                 v-model="form.ageMin"
                 type="number"
                 min="0"
                 placeholder="Ex: 14"
-                class="w-full rounded-xl border border-white/10 bg-brand-900/80 px-3 py-2 text-white focus:border-secondaryBrand-400 focus:outline-none"
+                class="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-900 focus:border-amber-200 focus:outline-none"
               />
             </div>
             <div class="space-y-2">
-              <label class="text-xs uppercase tracking-[0.3em] text-brand-200/70">Âge max</label>
+              <label class="text-xs uppercase tracking-[0.3em] text-slate-500">Âge max</label>
               <input
                 v-model="form.ageMax"
                 type="number"
                 min="0"
                 placeholder="Ex: 65"
-                class="w-full rounded-xl border border-white/10 bg-brand-900/80 px-3 py-2 text-white focus:border-secondaryBrand-400 focus:outline-none"
+                class="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-900 focus:border-amber-200 focus:outline-none"
               />
             </div>
           </div>
@@ -861,37 +861,37 @@ const uploadGalleryImage = async (event: Event, index: number) => {
 
         <div class="grid gap-6 lg:grid-cols-2">
           <div class="space-y-2">
-            <label class="text-xs uppercase tracking-[0.3em] text-brand-200/70">Autonomie</label>
+            <label class="text-xs uppercase tracking-[0.3em] text-slate-500">Autonomie</label>
             <input
               v-model="form.autonomieMini"
               type="text"
               placeholder="Ex: Assurage en tête + manip' haut de voie"
-              class="w-full rounded-xl border border-white/10 bg-brand-900/80 px-3 py-2 text-white focus:border-secondaryBrand-400 focus:outline-none"
+              class="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-900 focus:border-amber-200 focus:outline-none"
             />
           </div>
           <div class="space-y-3">
-            <div class="flex flex-wrap items-center gap-2 text-xs uppercase tracking-[0.3em] text-brand-200/70">
+            <div class="flex flex-wrap items-center gap-2 text-xs uppercase tracking-[0.3em] text-slate-500">
               <label>Cover image URL</label>
-              <span class="text-[10px] text-secondaryBrand-200">Requis pour publier</span>
+              <span class="text-[10px] text-amber-700">Requis pour publier</span>
             </div>
             <input
               v-model="form.coverImageUrl"
               type="text"
               placeholder="https://…"
-              class="w-full rounded-xl border border-white/10 bg-brand-900/80 px-3 py-2 text-white focus:border-secondaryBrand-400 focus:outline-none"
+              class="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-900 focus:border-amber-200 focus:outline-none"
             />
-            <p class="text-xs text-brand-200/70">
+            <p class="text-xs text-slate-500">
               Colle l’URL d’une photo ou téléverse une image JPG/PNG/WebP (max 4,5 Mo). Les variantes optimisées sont générées automatiquement.
             </p>
-            <p class="rounded-xl border border-amber-300/20 bg-amber-500/10 px-3 py-2 text-xs text-amber-100">
+            <p class="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-700">
               Assure-toi d’utiliser une photo dont tu détiens les droits, ou une photo libre de droits autorisée pour un usage commercial.
             </p>
             <div v-if="isClient" class="space-y-2">
               <div class="flex flex-wrap items-center gap-3">
-                <label class="inline-flex cursor-pointer items-center gap-3 rounded-full border border-white/20 px-4 py-2 text-sm font-semibold text-white/80 transition hover:bg-white/5">
+                <label class="inline-flex cursor-pointer items-center gap-3 rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-900 transition hover:bg-white">
                   <span v-if="!uploadingCover">Téléverser une image</span>
                   <span v-else class="inline-flex items-center gap-2">
-                    <span class="h-3 w-3 animate-spin rounded-full border-2 border-white border-t-transparent"></span>
+                    <span class="h-3 w-3 animate-spin rounded-full border-2 border-slate-200 border-t-transparent"></span>
                     Upload en cours…
                   </span>
                   <input
@@ -902,27 +902,27 @@ const uploadGalleryImage = async (event: Event, index: number) => {
                     @change="uploadCoverImage"
                   />
                 </label>
-                <button type="button" :disabled="uploadingCover" class="rounded-full border border-secondaryBrand-300/70 px-4 py-2 text-sm font-semibold text-secondaryBrand-100 transition hover:bg-secondaryBrand-500/10 disabled:opacity-50" @click="imageBankTarget = 'cover'">
+                <button type="button" :disabled="uploadingCover" class="rounded-full border border-amber-200 px-4 py-2 text-sm font-semibold text-amber-700 transition hover:bg-amber-50 disabled:opacity-50" @click="imageBankTarget = 'cover'">
                   Utiliser une image de la Brigade
                 </button>
               </div>
-              <p v-if="coverUploadError" class="text-xs text-red-400">
+              <p v-if="coverUploadError" class="text-xs text-red-700">
                 {{ coverUploadError }}
               </p>
             </div>
-            <p v-else class="text-xs text-brand-200/60">
+            <p v-else class="text-xs text-slate-500">
               Téléversement disponible après chargement complet de la page.
             </p>
             <div class="space-y-2">
-              <p class="text-xs uppercase tracking-[0.3em] text-brand-200/70">Aperçu</p>
-              <div class="relative aspect-video overflow-hidden rounded-2xl border border-white/10 bg-brand-900/60">
+              <p class="text-xs uppercase tracking-[0.3em] text-slate-500">Aperçu</p>
+              <div class="relative aspect-video overflow-hidden rounded-2xl border border-slate-200 bg-slate-50">
                 <img
                   v-if="form.coverImageUrl"
                   :src="form.coverImageUrl"
                   alt="Image de couverture"
                   class="absolute inset-0 h-full w-full object-cover"
                 />
-                <div v-else class="absolute inset-0 flex items-center justify-center text-sm text-brand-300/70">
+                <div v-else class="absolute inset-0 flex items-center justify-center text-sm text-slate-500">
                   Aucune image
                 </div>
               </div>
@@ -931,33 +931,33 @@ const uploadGalleryImage = async (event: Event, index: number) => {
         </div>
       </section>
 
-      <section class="space-y-4 rounded-2xl bg-brand-900/50 p-6 ring-1 ring-white/5">
+      <section class="space-y-4 rounded-2xl bg-slate-50 p-6 ring-1 ring-slate-200">
         <h2 class="text-xl font-semibold">Descriptions</h2>
         <div class="space-y-2">
-          <div class="flex flex-wrap items-center gap-2 text-xs uppercase tracking-[0.3em] text-brand-200/70">
+          <div class="flex flex-wrap items-center gap-2 text-xs uppercase tracking-[0.3em] text-slate-500">
             <label>Description courte</label>
-            <span class="text-[10px] text-secondaryBrand-200">Requis pour publier</span>
+            <span class="text-[10px] text-amber-700">Requis pour publier</span>
           </div>
           <textarea
             v-model="form.descriptionCourte"
             rows="3"
             placeholder="Résumé en quelques phrases : ambiance, niveau, objectifs…"
-            class="w-full rounded-2xl border border-white/10 bg-brand-900/80 px-3 py-2 text-white focus:border-secondaryBrand-400 focus:outline-none"
+            class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-900 focus:border-amber-200 focus:outline-none"
           />
         </div>
         <div class="space-y-2">
-          <label class="text-xs uppercase tracking-[0.3em] text-brand-200/70">Description longue</label>
+          <label class="text-xs uppercase tracking-[0.3em] text-slate-500">Description longue</label>
           <textarea
             v-model="form.descriptionLongue"
             rows="6"
             placeholder="Décris le déroulé, les spots, le rythme des journées, etc."
-            class="w-full rounded-2xl border border-white/10 bg-brand-900/80 px-3 py-2 text-white focus:border-secondaryBrand-400 focus:outline-none"
+            class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-900 focus:border-amber-200 focus:outline-none"
           />
         </div>
         <div class="space-y-2">
-          <div class="flex items-center justify-between text-xs uppercase tracking-[0.3em] text-brand-200/70">
+          <div class="flex items-center justify-between text-xs uppercase tracking-[0.3em] text-slate-500">
             <span>Objectifs</span>
-            <button type="button" class="text-[10px] font-semibold text-secondaryBrand-300" @click="addListItem(form.objectifs)">
+            <button type="button" class="text-[10px] font-semibold text-amber-700" @click="addListItem(form.objectifs)">
               + Ajouter
             </button>
           </div>
@@ -971,26 +971,26 @@ const uploadGalleryImage = async (event: Event, index: number) => {
                 v-model="form.objectifs[index]"
                 type="text"
                 placeholder="Ex: Gagner en autonomie dans les manips de relais"
-                class="w-full rounded-xl border border-white/10 bg-brand-900/80 px-3 py-2 text-white focus:border-secondaryBrand-400 focus:outline-none"
+                class="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-900 focus:border-amber-200 focus:outline-none"
                 @blur="resetListIfEmpty(form.objectifs)"
               />
-              <button type="button" class="text-xs text-brand-300 hover:text-red-300" @click="removeListItem(form.objectifs, index)">×</button>
+              <button type="button" class="text-xs text-slate-500 hover:text-red-700" @click="removeListItem(form.objectifs, index)">×</button>
             </div>
           </div>
         </div>
       </section>
 
-      <section class="space-y-4 rounded-2xl bg-brand-900/50 p-6 ring-1 ring-white/5">
+      <section class="space-y-4 rounded-2xl bg-slate-50 p-6 ring-1 ring-slate-200">
         <div class="flex flex-wrap items-center justify-between gap-3">
           <div>
             <h2 class="text-xl font-semibold">Programme jour par jour</h2>
-            <p class="text-sm text-brand-100/70">
+            <p class="text-sm text-slate-600">
               Optionnel. Décris le déroulé pour aider les grimpeur·euse·s à se projeter.
             </p>
           </div>
           <button
             type="button"
-            class="inline-flex items-center gap-2 rounded-full border border-secondaryBrand-300/70 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-secondaryBrand-100 transition hover:border-secondaryBrand-200"
+            class="inline-flex items-center gap-2 rounded-full border border-amber-200 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-amber-700 transition hover:border-amber-200"
             @click="addProgrammeDay"
           >
             + Ajouter une journée
@@ -1001,13 +1001,13 @@ const uploadGalleryImage = async (event: Event, index: number) => {
           <div
             v-for="(jour, index) in form.programmeJours"
             :key="`programme-${index}`"
-            class="space-y-3 rounded-2xl bg-brand-900/70 p-4 ring-1 ring-white/5"
+            class="space-y-3 rounded-2xl bg-slate-50 p-4 ring-1 ring-slate-200"
           >
-            <div class="flex items-center justify-between text-xs uppercase tracking-[0.3em] text-brand-200/70">
+            <div class="flex items-center justify-between text-xs uppercase tracking-[0.3em] text-slate-500">
               <span>Jour {{ index + 1 }}</span>
               <button
                 type="button"
-                class="text-[10px] font-semibold text-red-200/80 hover:text-red-100"
+                class="text-[10px] font-semibold text-red-700 hover:text-red-700"
                 :disabled="galleryUploading"
                 @click="removeProgrammeDay(index)"
               >
@@ -1016,30 +1016,30 @@ const uploadGalleryImage = async (event: Event, index: number) => {
             </div>
             <div class="grid gap-3 md:grid-cols-2">
               <div class="space-y-2">
-                <label class="text-[11px] uppercase tracking-[0.3em] text-brand-200/70">Titre</label>
+                <label class="text-[11px] uppercase tracking-[0.3em] text-slate-500">Titre</label>
                 <input
                   v-model="jour.titre"
                   type="text"
-                  class="w-full rounded-xl border border-white/10 bg-brand-900/80 px-3 py-2 text-white focus:border-secondaryBrand-400 focus:outline-none"
+                  class="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-900 focus:border-amber-200 focus:outline-none"
                   placeholder="Ex: Approche & premières voies"
                 />
               </div>
               <div class="space-y-2">
-                <label class="text-[11px] uppercase tracking-[0.3em] text-brand-200/70">Lieu</label>
+                <label class="text-[11px] uppercase tracking-[0.3em] text-slate-500">Lieu</label>
                 <input
                   v-model="jour.lieuLabel"
                   type="text"
-                  class="w-full rounded-xl border border-white/10 bg-brand-900/80 px-3 py-2 text-white focus:border-secondaryBrand-400 focus:outline-none"
+                  class="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-900 focus:border-amber-200 focus:outline-none"
                   placeholder="Ex: Presles"
                 />
               </div>
             </div>
             <div class="space-y-2">
-              <label class="text-[11px] uppercase tracking-[0.3em] text-brand-200/70">Description</label>
+              <label class="text-[11px] uppercase tracking-[0.3em] text-slate-500">Description</label>
               <textarea
                 v-model="jour.description"
                 rows="3"
-                class="w-full rounded-2xl border border-white/10 bg-brand-900/80 px-3 py-2 text-white focus:border-secondaryBrand-400 focus:outline-none"
+                class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-900 focus:border-amber-200 focus:outline-none"
                 placeholder="Ex: Échauffement, choix des voies, coaching technique."
               />
             </div>
@@ -1047,15 +1047,15 @@ const uploadGalleryImage = async (event: Event, index: number) => {
         </div>
       </section>
 
-      <section class="space-y-4 rounded-2xl bg-brand-900/50 p-6 ring-1 ring-white/5">
+      <section class="space-y-4 rounded-2xl bg-slate-50 p-6 ring-1 ring-slate-200">
         <h2 class="text-xl font-semibold">Pré-requis & équipement</h2>
 
         <div class="grid gap-4 md:grid-cols-2">
           <div class="space-y-3">
-            <div class="flex items-center justify-between text-xs uppercase tracking-[0.3em] text-brand-200/70">
+            <div class="flex items-center justify-between text-xs uppercase tracking-[0.3em] text-slate-500">
               <span>Équipement requis</span>
-              <span class="text-[10px] uppercase tracking-[0.3em] text-secondaryBrand-200">Requis pour publier</span>
-              <button type="button" class="text-[10px] font-semibold text-secondaryBrand-300" @click="addListItem(form.equipementRequis)">
+              <span class="text-[10px] uppercase tracking-[0.3em] text-amber-700">Requis pour publier</span>
+              <button type="button" class="text-[10px] font-semibold text-amber-700" @click="addListItem(form.equipementRequis)">
                 + Ajouter
               </button>
             </div>
@@ -1069,18 +1069,18 @@ const uploadGalleryImage = async (event: Event, index: number) => {
                   v-model="form.equipementRequis[index]"
                   type="text"
                   placeholder="Ex: Chaussons, baudrier, casque"
-                  class="w-full rounded-xl border border-white/10 bg-brand-900/80 px-3 py-2 text-white focus:border-secondaryBrand-400 focus:outline-none"
+                  class="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-900 focus:border-amber-200 focus:outline-none"
                   @blur="resetListIfEmpty(form.equipementRequis)"
                 />
-                <button type="button" class="text-xs text-brand-300 hover:text-red-300" @click="removeListItem(form.equipementRequis, index)">×</button>
+                <button type="button" class="text-xs text-slate-500 hover:text-red-700" @click="removeListItem(form.equipementRequis, index)">×</button>
               </div>
             </div>
           </div>
 
           <div class="space-y-3">
-            <div class="flex items-center justify-between text-xs uppercase tracking-[0.3em] text-brand-200/70">
+            <div class="flex items-center justify-between text-xs uppercase tracking-[0.3em] text-slate-500">
               <span>Équipement fourni</span>
-              <button type="button" class="text-[10px] font-semibold text-secondaryBrand-300" @click="addListItem(form.equipementFourni)">
+              <button type="button" class="text-[10px] font-semibold text-amber-700" @click="addListItem(form.equipementFourni)">
                 + Ajouter
               </button>
             </div>
@@ -1094,19 +1094,19 @@ const uploadGalleryImage = async (event: Event, index: number) => {
                   v-model="form.equipementFourni[index]"
                   type="text"
                   placeholder="Ex: Corde, dégaines, matériel collectif"
-                  class="w-full rounded-xl border border-white/10 bg-brand-900/80 px-3 py-2 text-white focus:border-secondaryBrand-400 focus:outline-none"
+                  class="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-900 focus:border-amber-200 focus:outline-none"
                   @blur="resetListIfEmpty(form.equipementFourni)"
                 />
-                <button type="button" class="text-xs text-brand-300 hover:text-red-300" @click="removeListItem(form.equipementFourni, index)">×</button>
+                <button type="button" class="text-xs text-slate-500 hover:text-red-700" @click="removeListItem(form.equipementFourni, index)">×</button>
               </div>
             </div>
           </div>
         </div>
 
         <div class="space-y-3">
-          <div class="flex items-center justify-between text-xs uppercase tracking-[0.3em] text-brand-200/70">
+          <div class="flex items-center justify-between text-xs uppercase tracking-[0.3em] text-slate-500">
             <span>Pré-requis</span>
-            <button type="button" class="text-[10px] font-semibold text-secondaryBrand-300" @click="addListItem(form.prerequis)">
+            <button type="button" class="text-[10px] font-semibold text-amber-700" @click="addListItem(form.prerequis)">
               + Ajouter
             </button>
           </div>
@@ -1120,78 +1120,78 @@ const uploadGalleryImage = async (event: Event, index: number) => {
                 v-model="form.prerequis[index]"
                 type="text"
                 placeholder="Ex: Être à l’aise en 5c"
-                class="w-full rounded-xl border border-white/10 bg-brand-900/80 px-3 py-2 text-white focus:border-secondaryBrand-400 focus:outline-none"
+                class="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-900 focus:border-amber-200 focus:outline-none"
                 @blur="resetListIfEmpty(form.prerequis)"
               />
-              <button type="button" class="text-xs text-brand-300 hover:text-red-300" @click="removeListItem(form.prerequis, index)">×</button>
+              <button type="button" class="text-xs text-slate-500 hover:text-red-700" @click="removeListItem(form.prerequis, index)">×</button>
             </div>
           </div>
         </div>
       </section>
 
-      <section class="space-y-4 rounded-2xl bg-brand-900/50 p-6 ring-1 ring-white/5">
+      <section class="space-y-4 rounded-2xl bg-slate-50 p-6 ring-1 ring-slate-200">
         <h2 class="text-xl font-semibold">Vie sur place</h2>
         <div class="grid gap-4 md:grid-cols-2">
           <div class="space-y-2">
-            <label class="text-xs uppercase tracking-[0.3em] text-brand-200/70">Hébergement / détails</label>
+            <label class="text-xs uppercase tracking-[0.3em] text-slate-500">Hébergement / détails</label>
           <textarea
             v-model="form.hebergementDetails"
             rows="3"
             placeholder="Ex: Gîte partagé à 5 min des falaises"
-            class="w-full rounded-2xl border border-white/10 bg-brand-900/80 px-3 py-2 text-white focus:border-secondaryBrand-400 focus:outline-none"
+            class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-900 focus:border-amber-200 focus:outline-none"
           />
         </div>
         <div class="space-y-2">
-          <label class="text-xs uppercase tracking-[0.3em] text-brand-200/70">Repas / restauration</label>
+          <label class="text-xs uppercase tracking-[0.3em] text-slate-500">Repas / restauration</label>
           <textarea
             v-model="form.repasLabel"
             rows="3"
             placeholder="Ex: Pique-nique le midi, resto le soir"
-            class="w-full rounded-2xl border border-white/10 bg-brand-900/80 px-3 py-2 text-white focus:border-secondaryBrand-400 focus:outline-none"
+            class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-900 focus:border-amber-200 focus:outline-none"
           />
         </div>
         </div>
         <div class="space-y-2">
-          <div class="flex flex-wrap items-center gap-2 text-xs uppercase tracking-[0.3em] text-brand-200/70">
+          <div class="flex flex-wrap items-center gap-2 text-xs uppercase tracking-[0.3em] text-slate-500">
             <label>Inclus</label>
-            <span class="text-[10px] text-secondaryBrand-200">Requis pour publier</span>
+            <span class="text-[10px] text-amber-700">Requis pour publier</span>
           </div>
           <textarea
             v-model="form.inclus"
             rows="3"
             placeholder="Ex: Encadrement + matériel collectif"
-            class="w-full rounded-2xl border border-white/10 bg-brand-900/80 px-3 py-2 text-white focus:border-secondaryBrand-400 focus:outline-none"
+            class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-900 focus:border-amber-200 focus:outline-none"
           />
         </div>
         <div class="space-y-2">
-          <div class="flex flex-wrap items-center gap-2 text-xs uppercase tracking-[0.3em] text-brand-200/70">
+          <div class="flex flex-wrap items-center gap-2 text-xs uppercase tracking-[0.3em] text-slate-500">
             <label>Non inclus</label>
-            <span class="text-[10px] text-secondaryBrand-200">Requis pour publier</span>
+            <span class="text-[10px] text-amber-700">Requis pour publier</span>
           </div>
           <textarea
             v-model="form.nonInclus"
             rows="3"
             placeholder="Ex: Transport, hébergement, repas"
-            class="w-full rounded-2xl border border-white/10 bg-brand-900/80 px-3 py-2 text-white focus:border-secondaryBrand-400 focus:outline-none"
+            class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-900 focus:border-amber-200 focus:outline-none"
           />
         </div>
       </section>
 
-      <section class="space-y-4 rounded-2xl bg-brand-900/50 p-6 ring-1 ring-white/5">
+      <section class="space-y-4 rounded-2xl bg-slate-50 p-6 ring-1 ring-slate-200">
         <div class="flex flex-wrap items-center justify-between gap-3">
           <div>
             <h2 class="text-xl font-semibold">Photos de l’aventure</h2>
-            <p class="text-sm text-brand-100/70">Ajoute quelques images pour illustrer le stage.</p>
+            <p class="text-sm text-slate-600">Ajoute quelques images pour illustrer le stage.</p>
           </div>
           <button
             type="button"
-            class="inline-flex items-center gap-2 rounded-full border border-secondaryBrand-300/70 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-secondaryBrand-100 transition hover:border-secondaryBrand-200"
+            class="inline-flex items-center gap-2 rounded-full border border-amber-200 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-amber-700 transition hover:border-amber-200"
             @click="addGalleryImage"
           >
             + Ajouter une photo
           </button>
         </div>
-        <p class="rounded-xl border border-amber-300/20 bg-amber-500/10 px-3 py-2 text-xs text-amber-100">
+        <p class="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-700">
           Ajoute uniquement des photos dont tu détiens les droits, ou des photos libres de droits autorisées pour un usage commercial.
         </p>
 
@@ -1199,13 +1199,13 @@ const uploadGalleryImage = async (event: Event, index: number) => {
           <div
             v-for="(image, index) in galleryImages"
             :key="`gallery-${index}`"
-            class="space-y-3 rounded-2xl bg-brand-900/70 p-4 ring-1 ring-white/5"
+            class="space-y-3 rounded-2xl bg-slate-50 p-4 ring-1 ring-slate-200"
           >
-            <div class="flex items-center justify-between text-xs uppercase tracking-[0.3em] text-brand-200/70">
+            <div class="flex items-center justify-between text-xs uppercase tracking-[0.3em] text-slate-500">
               <span>Photo {{ index + 1 }}</span>
               <button
                 type="button"
-                class="text-[10px] font-semibold text-red-200/80 hover:text-red-100"
+                class="text-[10px] font-semibold text-red-700 hover:text-red-700"
                 @click="removeGalleryImage(index)"
               >
                 Retirer
@@ -1213,18 +1213,18 @@ const uploadGalleryImage = async (event: Event, index: number) => {
             </div>
             <div class="grid gap-3 md:grid-cols-[2fr_1fr] md:items-start">
               <div class="space-y-2">
-                <label class="text-[11px] uppercase tracking-[0.3em] text-brand-200/70">URL de l’image</label>
+                <label class="text-[11px] uppercase tracking-[0.3em] text-slate-500">URL de l’image</label>
                 <input
                   v-model="image.url"
                   type="text"
                   placeholder="https://…"
-                  class="w-full rounded-xl border border-white/10 bg-brand-900/80 px-3 py-2 text-white focus:border-secondaryBrand-400 focus:outline-none"
+                  class="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-900 focus:border-amber-200 focus:outline-none"
                 />
-                <div v-if="isClient" class="flex flex-wrap items-center gap-3 text-xs text-brand-200/70">
-                  <label class="inline-flex cursor-pointer items-center gap-2 rounded-full border border-white/20 px-3 py-1.5 text-xs font-semibold text-white/80 transition hover:bg-white/5">
+                <div v-if="isClient" class="flex flex-wrap items-center gap-3 text-xs text-slate-500">
+                  <label class="inline-flex cursor-pointer items-center gap-2 rounded-full border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-900 transition hover:bg-white">
                     <span v-if="!galleryUploadStates[index]?.loading">Téléverser une image</span>
                     <span v-else class="inline-flex items-center gap-2">
-                      <span class="h-3 w-3 animate-spin rounded-full border-2 border-white border-t-transparent"></span>
+                      <span class="h-3 w-3 animate-spin rounded-full border-2 border-slate-200 border-t-transparent"></span>
                       Upload…
                     </span>
                     <input
@@ -1235,36 +1235,36 @@ const uploadGalleryImage = async (event: Event, index: number) => {
                       @change="(event) => uploadGalleryImage(event, index)"
                     />
                   </label>
-                  <button type="button" :disabled="galleryUploadStates[index]?.loading" class="rounded-full border border-secondaryBrand-300/70 px-3 py-1.5 text-xs font-semibold text-secondaryBrand-100 transition hover:bg-secondaryBrand-500/10 disabled:opacity-50" @click="imageBankTarget = image">
+                  <button type="button" :disabled="galleryUploadStates[index]?.loading" class="rounded-full border border-amber-200 px-3 py-1.5 text-xs font-semibold text-amber-700 transition hover:bg-amber-50 disabled:opacity-50" @click="imageBankTarget = image">
                     Utiliser une image de la Brigade
                   </button>
-                  <span v-if="galleryUploadStates[index]?.error" class="text-red-300">
+                  <span v-if="galleryUploadStates[index]?.error" class="text-red-700">
                     {{ galleryUploadStates[index]?.error }}
                   </span>
                 </div>
-                <p class="text-xs text-brand-200/60">
+                <p class="text-xs text-slate-500">
                   Upload JPG/PNG/WebP, 4,5 Mo max par image.
                 </p>
               </div>
               <div class="space-y-2">
-                <label class="text-[11px] uppercase tracking-[0.3em] text-brand-200/70">Texte alternatif</label>
+                <label class="text-[11px] uppercase tracking-[0.3em] text-slate-500">Texte alternatif</label>
                 <input
                   v-model="image.alt"
                   type="text"
-                  class="w-full rounded-xl border border-white/10 bg-brand-900/80 px-3 py-2 text-white focus:border-secondaryBrand-400 focus:outline-none"
+                  class="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-900 focus:border-amber-200 focus:outline-none"
                   placeholder="Ex: Voie en dalle au coucher du soleil"
                 />
               </div>
             </div>
-            <div class="rounded-2xl border border-white/10 bg-brand-900/60 p-3">
-              <div class="aspect-video overflow-hidden rounded-xl bg-brand-900/40">
+            <div class="rounded-2xl border border-slate-200 bg-slate-50 p-3">
+              <div class="aspect-video overflow-hidden rounded-xl bg-slate-50">
                 <img
                   v-if="image.url"
                   :src="image.url"
                   class="h-full w-full object-cover"
                   alt="Aperçu"
                 />
-                <div v-else class="flex h-full items-center justify-center text-sm text-brand-300/70">
+                <div v-else class="flex h-full items-center justify-center text-sm text-slate-500">
                   Aucun visuel
                 </div>
               </div>
@@ -1276,16 +1276,16 @@ const uploadGalleryImage = async (event: Event, index: number) => {
       <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-6">
         <button
           type="submit"
-          class="inline-flex items-center gap-2 rounded-2xl bg-secondaryBrand-500/90 px-6 py-3 text-sm font-semibold text-brand-950 shadow-lg shadow-secondaryBrand-900/30 transition hover:bg-secondaryBrand-400 disabled:opacity-50"
+          class="inline-flex items-center gap-2 rounded-2xl bg-amber-400 px-6 py-3 text-sm font-semibold text-slate-950 shadow-lg shadow-amber-500/10 transition hover:bg-amber-300 disabled:opacity-50"
           :disabled="saving || publishing || uploadingCover || galleryUploading"
         >
-          <span v-if="saving" class="h-4 w-4 animate-spin rounded-full border-2 border-brand-900 border-t-transparent" />
+          <span v-if="saving" class="h-4 w-4 animate-spin rounded-full border-2 border-slate-200 border-t-transparent" />
           <span>Enregistrer</span>
         </button>
       </div>
 
-      <p v-if="successMessage" class="text-sm text-secondaryBrand-200">{{ successMessage }}</p>
-      <p v-if="errorMessage" class="text-sm text-red-400">{{ errorMessage }}</p>
+      <p v-if="successMessage" class="text-sm text-amber-700">{{ successMessage }}</p>
+      <p v-if="errorMessage" class="text-sm text-red-700">{{ errorMessage }}</p>
     </form>
     <BrigadeImagePicker v-if="imageBankTarget" @select="selectBrigadeImage" @close="imageBankTarget = null" />
     <BrigadeImageShareDialog v-if="imagesToShare.length && !imageBankTarget" :key="imagesToShare[0].url" :image="imagesToShare[0]" :suggested-folder="form.lieuLabel" @close="imagesToShare.shift()" @shared="imageShared" />

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import GuideShell from '~/components/moniteurs/GuideShell.vue'
 definePageMeta({
   middleware: 'guide-auth',
 })
@@ -88,116 +89,110 @@ const logout = async () => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-brand-950 text-white">
-    <div class="mx-auto flex min-h-screen max-w-7xl flex-col gap-8 px-6 py-12 lg:flex-row lg:gap-12">
-      <MoniteursGuideSidebar :guide="guide" :current-path="route.path" @logout="logout" />
-
-      <main class="flex-1 space-y-8">
-        <div
-          v-if="guideNotice === 'guide-only'"
-          class="rounded-3xl border border-amber-400/40 bg-amber-500/10 p-6 text-amber-100/90"
+  <GuideShell :guide="guide" :current-path="route.path" @logout="logout">
+    <div
+      v-if="guideNotice === 'guide-only'"
+      class="rounded-3xl border border-amber-200 bg-amber-50 p-6 text-amber-700"
+    >
+      <div class="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <p class="text-xs uppercase tracking-[0.3em] text-amber-700">
+            Accès grimpeur·euse
+          </p>
+          <p class="mt-2 text-lg font-semibold">
+            Connecté·e en tant que moniteur·ice
+          </p>
+          <p class="mt-1 text-sm text-amber-700">
+            L’espace grimpeur·euse est réservé aux grimpeur·euse·s. Tu peux gérer ton compte depuis ce back-office moniteur·ice·s.
+          </p>
+        </div>
+        <button
+          type="button"
+          class="rounded-full border border-amber-200 px-4 py-2 text-xs font-semibold uppercase tracking-[0.3em] text-amber-700 transition hover:bg-amber-50"
+          @click="clearNotice"
         >
-          <div class="flex flex-wrap items-start justify-between gap-4">
-            <div>
-              <p class="text-xs uppercase tracking-[0.3em] text-amber-200/80">
-                Accès grimpeur·euse
-              </p>
-              <p class="mt-2 text-lg font-semibold">
-                Connecté·e en tant que moniteur·ice
-              </p>
-              <p class="mt-1 text-sm text-amber-100/80">
-                L’espace grimpeur·euse est réservé aux grimpeur·euse·s. Tu peux gérer ton compte depuis ce back-office moniteur·ice·s.
-              </p>
-            </div>
-            <button
-              type="button"
-              class="rounded-full border border-amber-300/60 px-4 py-2 text-xs font-semibold uppercase tracking-[0.3em] text-amber-100 transition hover:bg-amber-400/20"
-              @click="clearNotice"
-            >
-              J’ai compris
-            </button>
-          </div>
-        </div>
-
-        <div class="rounded-3xl bg-white/5 p-8 ring-1 ring-white/10">
-          <p class="text-sm uppercase tracking-[0.4em] text-secondaryBrand-300">
-            Tableau de bord moniteur·ice
-          </p>
-          <h1 class="mt-4 text-3xl font-semibold">
-            Salut {{ guide?.firstName || 'moniteur·ice' }} 👋
-          </h1>
-          <p class="mt-2 text-brand-100/80">
-            Prépare tes prochains stages, suis tes aventures et gère les inscriptions.
-          </p>
-          <div class="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            <div class="rounded-2xl bg-brand-900/60 p-5 ring-1 ring-white/10">
-              <p class="text-xs uppercase tracking-[0.3em] text-brand-200/70">
-                Aventures
-              </p>
-              <p class="mt-2 text-3xl font-semibold">
-                {{ guide?.aventuresPubliees ?? '—' }}
-              </p>
-              <p class="text-sm text-brand-200/70">
-                publiées
-              </p>
-            </div>
-            <div class="rounded-2xl bg-brand-900/60 p-5 ring-1 ring-white/10">
-              <p class="text-xs uppercase tracking-[0.3em] text-brand-200/70">
-                Sessions
-              </p>
-              <p class="mt-2 text-3xl font-semibold">
-                {{ guide?.prochainesSessions ?? '—' }}
-              </p>
-              <p class="text-sm text-brand-200/70">
-                planifiées
-              </p>
-            </div>
-            <div class="rounded-2xl bg-brand-900/60 p-5 ring-1 ring-white/10">
-              <p class="text-xs uppercase tracking-[0.3em] text-brand-200/70">
-                Profil
-              </p>
-              <p class="mt-2 text-3xl font-semibold">
-                {{ profileComplete ? 'Complet' : 'À compléter' }}
-              </p>
-              <div class="text-sm text-brand-200/70">
-                <template v-if="profileComplete">
-                  Ton profil est visible sur le site.
-                </template>
-                <template v-else>
-                  Pour être visible sur le site, renseigne au minimum :
-                  <span class="font-medium text-secondaryBrand-200">
-                    {{ missingProfileFields.map(formatFieldLabel).join(', ') }}
-                  </span>
-                </template>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div
-          v-if="!hasPublishedAdventure || !hasAnySession"
-          class="rounded-3xl bg-white/5 p-8 ring-1 ring-white/10"
-        >
-          <p class="text-sm uppercase tracking-[0.3em] text-secondaryBrand-300">
-            Prochaines étapes
-          </p>
-          <ul class="mt-4 space-y-4 text-brand-100/80">
-            <li v-if="!hasPublishedAdventure">
-              ✅ Crée ta 1ère aventure et publie-la depuis <NuxtLink class="text-secondaryBrand-200 underline" to="/moniteurs/aventures">Mes aventures</NuxtLink>.
-            </li>
-            <li v-if="!hasAnySession">
-              ✅ Planifie une session sur une aventure publiée.
-            </li>
-          </ul>
-        </div>
-
-        <MoniteursGuideProfileQrCard
-          v-if="guideProfileUrl"
-          :profile-url="guideProfileUrl"
-          :guide-name="guide?.fullName"
-          :file-name="guideQrFileName"
-        />
-      </main>
+          J’ai compris
+        </button>
+      </div>
     </div>
-  </div>
+
+    <div class="rounded-3xl bg-white p-8 ring-1 ring-slate-200">
+      <p class="text-sm uppercase tracking-[0.4em] text-amber-700">
+        Tableau de bord moniteur·ice
+      </p>
+      <h1 class="mt-4 text-3xl font-semibold">
+        Salut {{ guide?.firstName || 'moniteur·ice' }} 👋
+      </h1>
+      <p class="mt-2 text-slate-600">
+        Prépare tes prochains stages, suis tes aventures et gère les inscriptions.
+      </p>
+      <div class="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div class="rounded-2xl bg-slate-50 p-5 ring-1 ring-slate-200">
+          <p class="text-xs uppercase tracking-[0.3em] text-slate-500">
+            Aventures
+          </p>
+          <p class="mt-2 text-3xl font-semibold">
+            {{ guide?.aventuresPubliees ?? '—' }}
+          </p>
+          <p class="text-sm text-slate-500">
+            publiées
+          </p>
+        </div>
+        <div class="rounded-2xl bg-slate-50 p-5 ring-1 ring-slate-200">
+          <p class="text-xs uppercase tracking-[0.3em] text-slate-500">
+            Sessions
+          </p>
+          <p class="mt-2 text-3xl font-semibold">
+            {{ guide?.prochainesSessions ?? '—' }}
+          </p>
+          <p class="text-sm text-slate-500">
+            planifiées
+          </p>
+        </div>
+        <div class="rounded-2xl bg-slate-50 p-5 ring-1 ring-slate-200">
+          <p class="text-xs uppercase tracking-[0.3em] text-slate-500">
+            Profil
+          </p>
+          <p class="mt-2 text-3xl font-semibold">
+            {{ profileComplete ? 'Complet' : 'À compléter' }}
+          </p>
+          <div class="text-sm text-slate-500">
+            <template v-if="profileComplete">
+              Ton profil est visible sur le site.
+            </template>
+            <template v-else>
+              Pour être visible sur le site, renseigne au minimum :
+              <span class="font-medium text-amber-700">
+                {{ missingProfileFields.map(formatFieldLabel).join(', ') }}
+              </span>
+            </template>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div
+      v-if="!hasPublishedAdventure || !hasAnySession"
+      class="rounded-3xl bg-white p-8 ring-1 ring-slate-200"
+    >
+      <p class="text-sm uppercase tracking-[0.3em] text-amber-700">
+        Prochaines étapes
+      </p>
+      <ul class="mt-4 space-y-4 text-slate-600">
+        <li v-if="!hasPublishedAdventure">
+          ✅ Crée ta 1ère aventure et publie-la depuis <NuxtLink class="text-amber-700 underline" to="/moniteurs/aventures">Mes aventures</NuxtLink>.
+        </li>
+        <li v-if="!hasAnySession">
+          ✅ Planifie une session sur une aventure publiée.
+        </li>
+      </ul>
+    </div>
+
+    <MoniteursGuideProfileQrCard
+      v-if="guideProfileUrl"
+      :profile-url="guideProfileUrl"
+      :guide-name="guide?.fullName"
+      :file-name="guideQrFileName"
+    />
+  </GuideShell>
 </template>

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import GuideShell from '~/components/moniteurs/GuideShell.vue'
 definePageMeta({ middleware: 'guide-auth' })
 
 useSeoMeta({
@@ -32,12 +33,7 @@ const logout = async () => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-brand-950 text-white">
-    <div class="mx-auto flex min-h-screen max-w-[1500px] flex-col gap-8 px-6 py-12 lg:flex-row lg:gap-10">
-      <MoniteursGuideSidebar :guide="guide" :current-path="route.path" @logout="logout" />
-      <main class="min-w-0 flex-1">
-        <MoniteursArticleEditor v-if="article" mode="edit" :article="article" :guide="guide" @updated="refresh" />
-      </main>
-    </div>
-  </div>
+  <GuideShell :guide="guide" :current-path="route.path" @logout="logout">
+    <MoniteursArticleEditor v-if="article" mode="edit" :article="article" :guide="guide" @updated="refresh" />
+  </GuideShell>
 </template>

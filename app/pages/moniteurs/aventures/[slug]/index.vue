@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import GuideShell from '~/components/moniteurs/GuideShell.vue'
 const route = useRoute()
 const router = useRouter()
 const slug = computed(() => route.params.slug as string)
@@ -30,37 +31,31 @@ const logout = async () => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-brand-950 text-white">
-    <div class="mx-auto flex min-h-screen max-w-7xl flex-col gap-8 px-6 py-12 lg:flex-row lg:gap-12">
-      <MoniteursGuideSidebar :guide="guide" :current-path="route.path" @logout="logout" />
+  <GuideShell :guide="guide" :current-path="route.path" @logout="logout">
+    <div class="rounded-3xl bg-white p-8 ring-1 ring-slate-200">
+      <div class="flex justify-end">
+        <NuxtLink
+          to="/moniteurs/aventures"
+          class="inline-flex items-center rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 transition hover:border-amber-200 hover:text-slate-900"
+        >
+          ← Retour aux aventures
+        </NuxtLink>
+      </div>
 
-      <main class="flex-1">
-        <div class="rounded-3xl bg-white/5 p-8 ring-1 ring-white/10">
-          <div class="flex justify-end">
-            <NuxtLink
-              to="/moniteurs/aventures"
-              class="inline-flex items-center rounded-full border border-white/20 px-4 py-2 text-sm font-semibold text-brand-100/80 transition hover:border-secondaryBrand-400 hover:text-white"
-            >
-              ← Retour aux aventures
-            </NuxtLink>
-          </div>
+      <div v-if="pending" class="mt-6 space-y-4">
+        <div v-for="n in 4" :key="n" class="h-24 animate-pulse rounded-2xl bg-slate-100" />
+      </div>
 
-          <div v-if="pending" class="mt-6 space-y-4">
-            <div v-for="n in 4" :key="n" class="h-24 animate-pulse rounded-2xl bg-white/10" />
-          </div>
+      <div
+        v-else-if="fetchError"
+        class="mt-6 rounded-2xl border border-red-200 bg-red-50 p-6 text-sm text-red-700"
+      >
+        Impossible de charger l’aventure. {{ fetchError?.data?.message || fetchError?.statusMessage || '' }}
+      </div>
 
-          <div
-            v-else-if="fetchError"
-            class="mt-6 rounded-2xl border border-red-500/40 bg-red-500/10 p-6 text-sm text-red-100"
-          >
-            Impossible de charger l’aventure. {{ fetchError?.data?.message || fetchError?.statusMessage || '' }}
-          </div>
-
-          <div v-else class="mt-6">
-            <MoniteursAventureEditor mode="edit" :initial-data="aventure" />
-          </div>
-        </div>
-      </main>
+      <div v-else class="mt-6">
+        <MoniteursAventureEditor mode="edit" :initial-data="aventure" />
+      </div>
     </div>
-  </div>
+  </GuideShell>
 </template>

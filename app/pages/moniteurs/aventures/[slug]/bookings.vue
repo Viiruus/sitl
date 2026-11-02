@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import GuideShell from '~/components/moniteurs/GuideShell.vue'
 import {
   computeSessionEndFromDuration,
   formatDurationDays,
@@ -210,187 +211,181 @@ const deleteSession = async (group: { session: any; bookings: any[] }) => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-brand-950 text-white">
-    <div class="mx-auto flex min-h-screen max-w-7xl flex-col gap-8 px-6 py-12 lg:flex-row lg:gap-12">
-      <MoniteursGuideSidebar :guide="guide" :current-path="route.path" @logout="logout" />
-
-      <main class="flex-1">
-        <div class="rounded-3xl bg-white/5 p-8 ring-1 ring-white/10">
-          <div class="flex flex-col gap-3">
-            <div class="flex flex-wrap items-center justify-between gap-3">
-              <div>
-                <p class="text-sm uppercase tracking-[0.3em] text-secondaryBrand-300">Inscriptions par aventure</p>
-                <h1 class="text-3xl font-semibold">
-                  {{ aventure?.titre || 'Inscriptions' }}
-                </h1>
-                <p class="text-sm text-brand-100/70">Gère les réservations pour cette aventure.</p>
-              </div>
-              <NuxtLink
-                to="/moniteurs/aventures"
-                class="inline-flex items-center rounded-full border border-white/20 px-4 py-2 text-sm font-semibold text-brand-100/80 transition hover:border-secondaryBrand-400 hover:text-white"
-              >
-                ← Retour aux aventures
-              </NuxtLink>
-            </div>
+  <GuideShell :guide="guide" :current-path="route.path" @logout="logout">
+    <div class="rounded-3xl bg-white p-8 ring-1 ring-slate-200">
+      <div class="flex flex-col gap-3">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <p class="text-sm uppercase tracking-[0.3em] text-amber-700">Inscriptions par aventure</p>
+            <h1 class="text-3xl font-semibold">
+              {{ aventure?.titre || 'Inscriptions' }}
+            </h1>
+            <p class="text-sm text-slate-600">Gère les réservations pour cette aventure.</p>
           </div>
-
-          <div v-if="pending" class="mt-6 space-y-3">
-            <div v-for="n in 4" :key="n" class="h-20 animate-pulse rounded-2xl bg-white/5" />
-          </div>
-          <div v-else-if="error" class="mt-6 rounded-2xl border border-red-500/40 bg-red-500/10 p-6 text-sm text-red-100">
-            Impossible de charger les inscriptions.
-          </div>
-          <div v-else-if="!sessions.length" class="mt-6 rounded-2xl border border-dashed border-white/20 p-8 text-brand-100/70">
-            Aucune session planifiée pour cette aventure.
-          </div>
-          <div v-else class="mt-6 space-y-6">
-            <div v-if="sessionActionSuccess" class="rounded-2xl border border-green-500/30 bg-green-500/10 p-4 text-sm text-green-100">
-              {{ sessionActionSuccess }}
-            </div>
-            <div v-if="sessionActionError" class="rounded-2xl border border-red-500/40 bg-red-500/10 p-4 text-sm text-red-100">
-              {{ sessionActionError }}
-            </div>
-            <section
-              v-for="group in bookingsBySession"
-              :key="group.session.id"
-              class="rounded-2xl border border-white/10 bg-white/5 p-5"
-            >
-              <div class="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                  <p class="text-xs uppercase tracking-[0.3em] text-secondaryBrand-200">Session</p>
-                  <h2 class="text-lg font-semibold text-white">
-                    {{ formatPeriod(group.session.dateDebut, group.session.dateFin) }}
-                  </h2>
-                </div>
-                <div class="flex flex-wrap items-center gap-3 sm:justify-end">
-                  <span class="text-sm text-brand-200/80">
-                    {{ group.bookings.length }} réservation{{ group.bookings.length > 1 ? 's' : '' }}
-                  </span>
-                  <button
-                    type="button"
-                    class="inline-flex items-center justify-center rounded-full border border-secondaryBrand-300/40 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-secondaryBrand-100 transition hover:bg-secondaryBrand-400/10 disabled:cursor-not-allowed disabled:opacity-60"
-                    :disabled="deletingSessionIds[group.session.id] || savingSessionIds[group.session.id]"
-                    @click="openEditSession(group)"
-                  >
-                    Modifier la session
-                  </button>
-                  <button
-                    type="button"
-                    class="inline-flex items-center justify-center rounded-full border border-red-400/30 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-red-100 transition hover:bg-red-500/10 disabled:cursor-not-allowed disabled:opacity-60"
-                    :disabled="deletingSessionIds[group.session.id] || savingSessionIds[group.session.id] || group.bookings.length > 0"
-                    @click="deleteSession(group)"
-                  >
-                    <span
-                      v-if="deletingSessionIds[group.session.id]"
-                      class="mr-2 h-3.5 w-3.5 animate-spin rounded-full border-2 border-red-100 border-t-transparent"
-                    />
-                    Supprimer la session
-                  </button>
-                </div>
-              </div>
-              <div
-                v-if="editingSessionIds[group.session.id]"
-                class="mt-4 rounded-2xl border border-secondaryBrand-300/30 bg-brand-900/60 p-4"
-              >
-                <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-                  <div>
-                    <p class="text-sm font-semibold text-secondaryBrand-100">Modifier les dates</p>
-                    <p class="text-xs text-brand-200/70">
-                      Cette aventure dure {{ formatDurationDays(aventure?.jours || 1) }}. Les inscrits restent rattachés à cette session.
-                    </p>
-                  </div>
-                  <button
-                    type="button"
-                    class="text-xs uppercase tracking-[0.2em] text-brand-200/70 transition hover:text-white"
-                    @click="closeEditSession(group.session.id)"
-                  >
-                    Fermer
-                  </button>
-                </div>
-                <div class="mt-4 grid gap-3 sm:grid-cols-4">
-                  <div class="space-y-1">
-                    <label class="text-[11px] uppercase tracking-[0.3em] text-brand-200/70">Date début</label>
-                    <input
-                      :value="ensureEditingSessionForm(group).dateDebut"
-                      type="date"
-                      class="w-full rounded-xl border border-white/10 bg-brand-950/70 px-3 py-2 text-white focus:border-secondaryBrand-400 focus:outline-none"
-                      @input="updateEditingSessionDateRange(group, ($event.target as HTMLInputElement).value)"
-                    />
-                  </div>
-                  <div class="space-y-1">
-                    <label class="text-[11px] uppercase tracking-[0.3em] text-brand-200/70">Début</label>
-                    <select
-                      :value="ensureEditingSessionForm(group).demiJourneeDebut"
-                      class="w-full rounded-xl border border-white/10 bg-brand-950/70 px-3 py-2 text-white focus:border-secondaryBrand-400 focus:outline-none"
-                      @change="updateEditingSessionHalfDayRange(group, ($event.target as HTMLSelectElement).value as SessionHalfDay)"
-                    >
-                      <option value="AM">{{ SESSION_HALF_DAY_LABELS.AM }}</option>
-                      <option value="PM">{{ SESSION_HALF_DAY_LABELS.PM }}</option>
-                    </select>
-                  </div>
-                  <div class="space-y-1">
-                    <label class="text-[11px] uppercase tracking-[0.3em] text-brand-200/70">Date fin</label>
-                    <input
-                      :value="ensureEditingSessionForm(group).dateFin"
-                      type="date"
-                      readonly
-                      disabled
-                      class="w-full cursor-not-allowed rounded-xl border border-white/10 bg-brand-900/40 px-3 py-2 text-white/70"
-                    />
-                  </div>
-                  <div class="space-y-1">
-                    <label class="text-[11px] uppercase tracking-[0.3em] text-brand-200/70">Fin</label>
-                    <input
-                      :value="SESSION_HALF_DAY_LABELS[ensureEditingSessionForm(group).demiJourneeFin]"
-                      type="text"
-                      readonly
-                      disabled
-                      class="w-full cursor-not-allowed rounded-xl border border-white/10 bg-brand-900/40 px-3 py-2 text-white/70"
-                    />
-                  </div>
-                </div>
-                <div class="mt-4 flex flex-wrap items-center gap-3">
-                  <button
-                    type="button"
-                    class="inline-flex items-center gap-2 rounded-full bg-secondaryBrand-500/90 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-brand-950 shadow-lg shadow-secondaryBrand-900/30 transition hover:bg-secondaryBrand-400 disabled:opacity-50"
-                    :disabled="savingSessionIds[group.session.id] || deletingSessionIds[group.session.id]"
-                    @click="saveSession(group)"
-                  >
-                    <span
-                      v-if="savingSessionIds[group.session.id]"
-                      class="h-4 w-4 animate-spin rounded-full border-2 border-brand-900 border-t-transparent"
-                    />
-                    Enregistrer les dates
-                  </button>
-                  <p v-if="group.bookings.length" class="text-xs text-brand-200/70">
-                    {{ group.bookings.length }} inscrit{{ group.bookings.length > 1 ? 's' : '' }} conservé{{ group.bookings.length > 1 ? 's' : '' }} sur cette session.
-                  </p>
-                </div>
-              </div>
-              <div class="mt-4 space-y-3">
-                <div v-if="!group.bookings.length" class="rounded-xl border border-dashed border-white/20 bg-brand-900/40 p-4 text-sm text-brand-100/70">
-                  Aucune réservation sur cette session pour le moment.
-                </div>
-                <article
-                  v-for="booking in group.bookings"
-                  :key="booking.id"
-                  class="rounded-xl border border-white/10 bg-brand-900/60 p-4"
-                >
-                  <div>
-                    <p class="font-semibold">{{ booking.user.firstName }} {{ booking.user.lastName }}</p>
-                    <p class="text-xs text-brand-200/80">{{ booking.user.email }}</p>
-                    <p class="text-xs text-brand-100/80 mt-1">📞 {{ formatPhone(booking.user) }}</p>
-                  </div>
-                  <p class="text-sm text-brand-200/80">
-                    Participants : {{ booking.participants }} — Montant : {{ booking.montant }} €
-                  </p>
-                  <p class="text-xs text-brand-300/80">Réservation créée le {{ formatDate(booking.createdAt) }}</p>
-                </article>
-              </div>
-            </section>
-          </div>
+          <NuxtLink
+            to="/moniteurs/aventures"
+            class="inline-flex items-center rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 transition hover:border-amber-200 hover:text-slate-900"
+          >
+            ← Retour aux aventures
+          </NuxtLink>
         </div>
-      </main>
+      </div>
+
+      <div v-if="pending" class="mt-6 space-y-3">
+        <div v-for="n in 4" :key="n" class="h-20 animate-pulse rounded-2xl bg-slate-100" />
+      </div>
+      <div v-else-if="error" class="mt-6 rounded-2xl border border-red-200 bg-red-50 p-6 text-sm text-red-700">
+        Impossible de charger les inscriptions.
+      </div>
+      <div v-else-if="!sessions.length" class="mt-6 rounded-2xl border border-dashed border-slate-200 p-8 text-slate-600">
+        Aucune session planifiée pour cette aventure.
+      </div>
+      <div v-else class="mt-6 space-y-6">
+        <div v-if="sessionActionSuccess" class="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-700">
+          {{ sessionActionSuccess }}
+        </div>
+        <div v-if="sessionActionError" class="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+          {{ sessionActionError }}
+        </div>
+        <section
+          v-for="group in bookingsBySession"
+          :key="group.session.id"
+          class="rounded-2xl border border-slate-200 bg-white p-5"
+        >
+          <div class="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p class="text-xs uppercase tracking-[0.3em] text-amber-700">Session</p>
+              <h2 class="text-lg font-semibold text-slate-900">
+                {{ formatPeriod(group.session.dateDebut, group.session.dateFin) }}
+              </h2>
+            </div>
+            <div class="flex flex-wrap items-center gap-3 sm:justify-end">
+              <span class="text-sm text-slate-500">
+                {{ group.bookings.length }} réservation{{ group.bookings.length > 1 ? 's' : '' }}
+              </span>
+              <button
+                type="button"
+                class="inline-flex items-center justify-center rounded-full border border-amber-200 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-amber-700 transition hover:bg-amber-50 disabled:cursor-not-allowed disabled:opacity-60"
+                :disabled="deletingSessionIds[group.session.id] || savingSessionIds[group.session.id]"
+                @click="openEditSession(group)"
+              >
+                Modifier la session
+              </button>
+              <button
+                type="button"
+                class="inline-flex items-center justify-center rounded-full border border-red-200 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-red-700 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
+                :disabled="deletingSessionIds[group.session.id] || savingSessionIds[group.session.id] || group.bookings.length > 0"
+                @click="deleteSession(group)"
+              >
+                <span
+                  v-if="deletingSessionIds[group.session.id]"
+                  class="mr-2 h-3.5 w-3.5 animate-spin rounded-full border-2 border-red-200 border-t-transparent"
+                />
+                Supprimer la session
+              </button>
+            </div>
+          </div>
+          <div
+            v-if="editingSessionIds[group.session.id]"
+            class="mt-4 rounded-2xl border border-amber-200 bg-slate-50 p-4"
+          >
+            <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+              <div>
+                <p class="text-sm font-semibold text-amber-700">Modifier les dates</p>
+                <p class="text-xs text-slate-500">
+                  Cette aventure dure {{ formatDurationDays(aventure?.jours || 1) }}. Les inscrits restent rattachés à cette session.
+                </p>
+              </div>
+              <button
+                type="button"
+                class="text-xs uppercase tracking-[0.2em] text-slate-500 transition hover:text-slate-900"
+                @click="closeEditSession(group.session.id)"
+              >
+                Fermer
+              </button>
+            </div>
+            <div class="mt-4 grid gap-3 sm:grid-cols-4">
+              <div class="space-y-1">
+                <label class="text-[11px] uppercase tracking-[0.3em] text-slate-500">Date début</label>
+                <input
+                  :value="ensureEditingSessionForm(group).dateDebut"
+                  type="date"
+                  class="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-900 focus:border-amber-200 focus:outline-none"
+                  @input="updateEditingSessionDateRange(group, ($event.target as HTMLInputElement).value)"
+                />
+              </div>
+              <div class="space-y-1">
+                <label class="text-[11px] uppercase tracking-[0.3em] text-slate-500">Début</label>
+                <select
+                  :value="ensureEditingSessionForm(group).demiJourneeDebut"
+                  class="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-900 focus:border-amber-200 focus:outline-none"
+                  @change="updateEditingSessionHalfDayRange(group, ($event.target as HTMLSelectElement).value as SessionHalfDay)"
+                >
+                  <option value="AM">{{ SESSION_HALF_DAY_LABELS.AM }}</option>
+                  <option value="PM">{{ SESSION_HALF_DAY_LABELS.PM }}</option>
+                </select>
+              </div>
+              <div class="space-y-1">
+                <label class="text-[11px] uppercase tracking-[0.3em] text-slate-500">Date fin</label>
+                <input
+                  :value="ensureEditingSessionForm(group).dateFin"
+                  type="date"
+                  readonly
+                  disabled
+                  class="w-full cursor-not-allowed rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-900"
+                />
+              </div>
+              <div class="space-y-1">
+                <label class="text-[11px] uppercase tracking-[0.3em] text-slate-500">Fin</label>
+                <input
+                  :value="SESSION_HALF_DAY_LABELS[ensureEditingSessionForm(group).demiJourneeFin]"
+                  type="text"
+                  readonly
+                  disabled
+                  class="w-full cursor-not-allowed rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-900"
+                />
+              </div>
+            </div>
+            <div class="mt-4 flex flex-wrap items-center gap-3">
+              <button
+                type="button"
+                class="inline-flex items-center gap-2 rounded-full bg-amber-400 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-slate-950 shadow-lg shadow-amber-500/10 transition hover:bg-amber-300 disabled:opacity-50"
+                :disabled="savingSessionIds[group.session.id] || deletingSessionIds[group.session.id]"
+                @click="saveSession(group)"
+              >
+                <span
+                  v-if="savingSessionIds[group.session.id]"
+                  class="h-4 w-4 animate-spin rounded-full border-2 border-slate-200 border-t-transparent"
+                />
+                Enregistrer les dates
+              </button>
+              <p v-if="group.bookings.length" class="text-xs text-slate-500">
+                {{ group.bookings.length }} inscrit{{ group.bookings.length > 1 ? 's' : '' }} conservé{{ group.bookings.length > 1 ? 's' : '' }} sur cette session.
+              </p>
+            </div>
+          </div>
+          <div class="mt-4 space-y-3">
+            <div v-if="!group.bookings.length" class="rounded-xl border border-dashed border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
+              Aucune réservation sur cette session pour le moment.
+            </div>
+            <article
+              v-for="booking in group.bookings"
+              :key="booking.id"
+              class="rounded-xl border border-slate-200 bg-slate-50 p-4"
+            >
+              <div>
+                <p class="font-semibold">{{ booking.user.firstName }} {{ booking.user.lastName }}</p>
+                <p class="text-xs text-slate-500">{{ booking.user.email }}</p>
+                <p class="text-xs text-slate-600 mt-1">📞 {{ formatPhone(booking.user) }}</p>
+              </div>
+              <p class="text-sm text-slate-500">
+                Participants : {{ booking.participants }} — Montant : {{ booking.montant }} €
+              </p>
+              <p class="text-xs text-slate-500">Réservation créée le {{ formatDate(booking.createdAt) }}</p>
+            </article>
+          </div>
+        </section>
+      </div>
     </div>
-  </div>
+  </GuideShell>
 </template>
