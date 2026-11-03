@@ -68,4 +68,5 @@ export type AdminGuideWhatsAppMessage = {
   createdAt: string
   sentAt: string | null
   details: { label: string; value: string }[]
+  fullContactMessage: string | null
 }

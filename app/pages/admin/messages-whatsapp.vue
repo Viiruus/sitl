@@ -95,8 +95,8 @@ const inputClass = 'mt-1 w-full rounded-xl border border-slate-300 bg-white px-3
 
           <dl v-if="message.details.length" class="mt-5 grid gap-3 rounded-2xl bg-slate-50 p-4 text-sm sm:grid-cols-2">
             <div v-for="(detail, index) in message.details" :key="index" class="min-w-0" :class="detail.label === 'Message' ? 'sm:col-span-2' : ''">
-              <dt class="text-xs font-semibold text-slate-500">{{ detail.label }}</dt>
-              <dd class="mt-1 whitespace-pre-line break-words text-slate-900">{{ detail.value }}</dd>
+              <dt class="text-xs font-semibold text-slate-500">{{ detail.label === 'Message' && message.fullContactMessage ? 'Message complet' : detail.label }}</dt>
+              <dd class="mt-1 whitespace-pre-wrap break-words text-slate-900 [overflow-wrap:anywhere]">{{ detail.label === 'Message' ? message.fullContactMessage ?? detail.value : detail.value }}</dd>
             </div>
           </dl>
           <p v-if="message.failureReason" class="mt-4 whitespace-pre-line break-words rounded-xl bg-red-50 p-3 text-xs text-red-700">{{ message.failureReason }}</p>
@@ -106,6 +106,10 @@ const inputClass = 'mt-1 w-full rounded-xl border border-slate-300 bg-white px-3
               <div><dt class="inline font-semibold">Modèle : </dt><dd class="inline">{{ message.templateName }}</dd></div>
               <div><dt class="inline font-semibold">Langue : </dt><dd class="inline">{{ message.language }}</dd></div>
               <div v-if="message.messageId"><dt class="inline font-semibold">Identifiant WhatsApp : </dt><dd class="inline">{{ message.messageId }}</dd></div>
+              <div v-if="message.fullContactMessage && message.details.some(detail => detail.label === 'Message' && detail.value !== message.fullContactMessage)" class="pt-2">
+                <dt class="font-semibold">Extrait envoyé sur WhatsApp :</dt>
+                <dd class="mt-1 whitespace-pre-wrap [overflow-wrap:anywhere]">{{ message.details.find(detail => detail.label === 'Message')?.value }}</dd>
+              </div>
             </dl>
           </details>
         </article>

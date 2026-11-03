@@ -184,7 +184,7 @@ const contactRequestStatusLabel = (value?: string | null) => {
               </p>
             </div>
           </div>
-          <p class="mt-4 whitespace-pre-line text-sm text-slate-600">
+          <p class="mt-4 whitespace-pre-wrap break-words text-sm text-slate-600 [overflow-wrap:anywhere]">
             {{ request.message }}
           </p>
         </article>

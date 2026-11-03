@@ -37,12 +37,12 @@ before(async () => {
     CREATE TABLE GuideContactRequest (
       id INTEGER PRIMARY KEY, guideId INTEGER, climberId INTEGER,
       climberNameSnapshot TEXT, climberPhoneSnapshot TEXT, guidePhoneSnapshot TEXT,
-      templateName TEXT, messagePreview TEXT, messageId TEXT, messageStatus TEXT,
+      templateName TEXT, messagePreview TEXT, message TEXT, messageId TEXT, messageStatus TEXT,
       failureReason TEXT, sentAt DATETIME, createdAt DATETIME, updatedAt DATETIME
     );
     INSERT INTO GuideContactRequest VALUES (
       1, 2, 3, 'Léa Petit', '+33600000003', '+33600000002', 'guide_contact_request',
-      'Une sortie en famille ?', 'wamid.legacy', 'delivered', NULL,
+      'Une sortie en famille ?', 'Une sortie en famille ?\nNous aimerions découvrir la falaise ensemble.', 'wamid.legacy', 'delivered', NULL,
       '2026-10-31T10:00:00.000Z', '2026-10-31T10:00:00.000Z', '2026-10-31T10:01:00.000Z'
     );
   `)
@@ -68,6 +68,7 @@ before(async () => {
 
 beforeEach(async () => {
   await db.guideWhatsAppMessage.deleteMany()
+  await db.guideContactRequest.deleteMany({ where: { id: { not: 1 } } })
   providerCalls = 0
   currentUser = null
   globalThis.fetch = async () => {
@@ -124,6 +125,51 @@ test('all five guide notification types are recorded with recipient and provider
   }
   const suggestion = result.messages.find(message => message.kind === 'DATE_SUGGESTION')!
   assert.deepEqual(suggestion.details.find(detail => detail.label === 'Dates'), { label: 'Dates', value: bookingInput.stageDate })
+})
+
+test('admin shows the full contact request while preserving the WhatsApp excerpt', async () => {
+  const fullMessage = `Bonjour, nous aimerions organiser une sortie en famille.\n\n${'Voici les détails de notre projet 🧗. '.repeat(35)}\nDernière phrase à afficher intégralement.`
+  const preview = contact.buildGuideContactMessagePreview(fullMessage)
+  assert.equal(preview.length, 280)
+  await db.guideContactRequest.create({ data: {
+    guideId: 2, climberId: 3, message: fullMessage, messagePreview: preview,
+    climberNameSnapshot: 'Léa Petit', climberPhoneSnapshot: '+33600000003',
+    guidePhoneSnapshot: '+33600000002', messageId: 'wamid.test-1',
+  }, select: { id: true } })
+  await contact.sendGuideContactRequestViaWhatsapp({
+    guideId: 2, phoneNumber: '+33600000002', climberName: 'Léa Petit',
+    climberPhoneNumber: '+33600000003', messagePreview: preview,
+  })
+  const result = await admin.listAdminWhatsAppMessages(db, admin.adminWhatsAppQuerySchema.parse({ kind: 'CONTACT_REQUEST' }))
+  assert.equal(result.messages[0].fullContactMessage, fullMessage)
+  assert.equal(result.messages[0].details.find(detail => detail.label === 'Message')?.value, preview)
+  assert.equal(providerCalls, 1)
+
+  // Un envoi attribué à un autre moniteur ne doit pas récupérer cette demande.
+  await db.guideWhatsAppMessage.update({ where: { id: result.messages[0].id }, data: { guideId: 1 } })
+  const otherGuide = await admin.listAdminWhatsAppMessages(db, admin.adminWhatsAppQuerySchema.parse({}))
+  assert.equal(otherGuide.messages[0].fullContactMessage, null)
+})
+
+test('historical contacts recover their full text without changing the stored notification', async () => {
+  await db.guideWhatsAppMessage.create({ data: {
+    guideId: 2, guideNameSnapshot: legacy.guideNameSnapshot, phoneNumber: legacy.phoneNumber,
+    kind: 'CONTACT_REQUEST', templateName: legacy.templateName, language: 'fr',
+    components: JSON.parse(legacy.components), messageId: legacy.messageId, status: legacy.status,
+  } })
+  const result = await admin.listAdminWhatsAppMessages(db, admin.adminWhatsAppQuerySchema.parse({}))
+  assert.equal(result.messages[0].fullContactMessage, 'Une sortie en famille ?\nNous aimerions découvrir la falaise ensemble.')
+  assert.equal(result.messages[0].details.find(detail => detail.label === 'Message')?.value, 'Une sortie en famille ?')
+})
+
+test('contact history still displays the available excerpt if the original request is unavailable', async () => {
+  await contact.sendGuideContactRequestViaWhatsapp({
+    guideId: 2, phoneNumber: '+33600000002', climberName: 'Léa Petit',
+    climberPhoneNumber: '+33600000003', messagePreview: 'Message conservé dans la notification.',
+  })
+  const result = await admin.listAdminWhatsAppMessages(db, admin.adminWhatsAppQuerySchema.parse({}))
+  assert.equal(result.messages[0].fullContactMessage, null)
+  assert.equal(result.messages[0].details.find(detail => detail.label === 'Message')?.value, 'Message conservé dans la notification.')
 })
 
 test('authentication and climber confirmations are never recorded in guide history', async () => {
