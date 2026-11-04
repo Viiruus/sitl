@@ -3,14 +3,14 @@ import { ArrowRightIcon, ArrowUpRightIcon, CheckIcon } from '@heroicons/vue/24/o
 import { resolvePublicSiteUrl } from '~~/shared/utils/site-url'
 
 const runtimeConfig = useRuntimeConfig()
-const canonicalUrl = new URL('/clubs', resolvePublicSiteUrl(runtimeConfig.public.publicUrl)).toString()
+const canonicalUrl = new URL('/moniteurs-escalade-clubs-ffme-ffcam', resolvePublicSiteUrl(runtimeConfig.public.publicUrl)).toString()
 const shareImage = new URL('/images/optimized/emulation2-1440.webp', canonicalUrl).toString()
 
 useHead({ titleTemplate: '%s', link: [{ rel: 'canonical', href: canonicalUrl }] })
 useSeoMeta({
-  title: 'Escalade : les prestations pour les clubs | Brigade du kiff',
-  description: 'Encadrement, ouverture, formations et gestion EPI : les moniteurs de la Brigade du kiff accompagnent votre club en SAE et en site naturel. Construisons votre projet.',
-  ogTitle: 'Votre club. De nouveaux sommets. | Brigade du kiff',
+  title: 'Moniteurs d’escalade pour clubs FFME, FFCAM et FSGT | Brigade du kiff',
+  description: 'Encadrement, formations, ouverture et entretien de falaise : la Brigade du kiff accompagne les clubs FFME, FFCAM, FSGT et autres fédérations, en SAE et SNE.',
+  ogTitle: 'Des moniteurs au service de votre club | Brigade du kiff',
   ogDescription: 'En salle comme en falaise, des moniteurs diplômés d’État pour accompagner les projets de votre club.',
   ogUrl: canonicalUrl,
   ogImage: shareImage,
@@ -71,6 +71,16 @@ const indoorServices = [
 ]
 const outdoorServices = [
   {
+    title: 'Entretenir les falaises, ensemble',
+    text: 'Former vos adhérents à prendre soin des sites où ils grimpent, puis mettre ces apprentissages en pratique lors de journées d’entretien organisées avec votre club.',
+    featured: true,
+    points: [
+      'Comprendre le rôle du club dans le suivi et la préservation d’une falaise.',
+      'Apprendre à observer le site, entretenir les accès et les pieds de voies, repérer et signaler les anomalies.',
+      'Agir avec le gestionnaire du site, dans le respect des autorisations et de la biodiversité.',
+    ],
+  },
+  {
     title: 'La falaise, pour tous les niveaux',
     text: 'Initiation et perfectionnement en groupe, en couenne sur site sportif ou en terrain d’aventure. Travailler la technique, la lecture et les manipulations pour gagner en autonomie.',
   },
@@ -98,7 +108,7 @@ const outdoorServices = [
   },
   {
     title: 'Transmettre les bons gestes',
-    text: 'Ateliers non diplômants pour vos adhérents et bénévoles : entretien de falaise, équipement, assistance et manipulations de secours. Des contenus construits selon vos besoins et votre expérience.',
+    text: 'Ateliers non diplômants pour vos adhérents et bénévoles : équipement, assistance et manipulations de secours. Des contenus construits selon vos besoins et votre expérience.',
   },
 ]
 </script>
@@ -110,9 +120,9 @@ const outdoorServices = [
       <section class="overflow-hidden bg-brand-950 text-white" aria-labelledby="clubs-title">
         <div class="mx-auto grid max-w-[90rem] gap-10 px-6 pb-12 pt-36 sm:pt-40 lg:grid-cols-[1.05fr_1fr] lg:items-center lg:gap-14 lg:px-10 lg:pb-20">
           <div class="pb-2 lg:py-6">
-            <p class="eyebrow text-secondaryBrand-300">La Brigade aux côtés des clubs</p>
+            <p class="eyebrow text-secondaryBrand-300">La Brigade du kiff aux côtés des clubs</p>
             <h1 id="clubs-title" class="mt-6 text-5xl font-semibold leading-[1.04] tracking-tight sm:text-6xl xl:text-7xl">
-              Votre club.<br>De nouveaux <span class="text-secondaryBrand-400">sommets.</span>
+              Des moniteurs<br>au service de<br><span class="text-secondaryBrand-400">votre club.</span>
             </h1>
             <p class="mt-7 max-w-xl text-lg/8 text-brand-100">
               Faire progresser vos adhérents, former vos bénévoles, ouvrir de nouvelles voies.
@@ -137,7 +147,7 @@ const outdoorServices = [
           <div class="mx-auto flex max-w-[90rem] flex-wrap items-center gap-x-8 gap-y-3 px-6 py-6 text-sm lg:px-10">
             <p class="text-brand-200">Pour votre club, quelle que soit sa fédération</p>
             <ul class="flex flex-wrap gap-x-7 gap-y-2 font-semibold" aria-label="Clubs concernés">
-              <li>FFME</li><li>FFCAM</li><li class="font-normal text-brand-200">et autres fédérations</li>
+              <li>FFME</li><li>FFCAM</li><li>FSGT</li><li class="font-normal text-brand-200">et autres fédérations</li>
             </ul>
           </div>
         </div>
@@ -189,12 +199,10 @@ const outdoorServices = [
 
       <section id="sne" class="anchor-section bg-brand-950 text-white" aria-labelledby="sne-title">
         <div class="mx-auto max-w-[90rem] px-6 py-16 sm:py-24 lg:px-10">
-          <div class="grid items-end gap-8 lg:grid-cols-2 lg:gap-20">
-            <div>
-              <p class="eyebrow text-secondaryBrand-300">02 / Site Naturel d’Escalade</p>
-              <h2 id="sne-title" class="mt-5 text-4xl font-semibold leading-tight tracking-tight sm:text-5xl">SNE : emmenez<br>votre club <span class="text-secondaryBrand-400">dehors.</span></h2>
-            </div>
-            <p class="max-w-xl text-lg/8 text-brand-100">Du premier pas en falaise aux projets en terrain d’aventure, offrez à vos adhérents une expérience qui fait grandir la technique, l’autonomie et l’esprit de cordée.</p>
+          <p class="eyebrow text-secondaryBrand-300">02 / Site Naturel d’Escalade</p>
+          <div class="mt-5 grid items-start gap-6 lg:grid-cols-[0.85fr_1.15fr] lg:gap-16">
+            <h2 id="sne-title" class="text-4xl font-semibold leading-tight tracking-tight sm:text-5xl">SNE : emmenez<br>votre club <span class="text-secondaryBrand-400">dehors.</span></h2>
+            <p class="max-w-2xl text-lg/8 text-brand-100 lg:pt-1">Du premier pas en falaise aux projets en terrain d’aventure, offrez à vos adhérents une expérience qui fait grandir la technique, l’autonomie et l’esprit de cordée.</p>
           </div>
           <div class="mt-12 grid gap-10 lg:grid-cols-[0.85fr_1.15fr] lg:gap-16">
             <figure class="self-start">
@@ -206,10 +214,23 @@ const outdoorServices = [
                 class="h-auto w-full rounded-sm" loading="lazy" decoding="async"
               >
             </figure>
-            <div class="divide-y divide-white/20 border-t border-white/20">
-              <article v-for="service in outdoorServices" :key="service.title" class="py-7 first:pt-6">
+            <div class="divide-y divide-white/20">
+              <article
+                v-for="service in outdoorServices" :key="service.title"
+                :id="service.featured ? 'entretien-falaises' : undefined"
+                class="anchor-section py-7"
+                :class="service.featured ? 'rounded-2xl border border-secondaryBrand-300/40 bg-secondaryBrand-400/10 px-6 sm:px-7' : ''"
+              >
+                <p v-if="service.featured" class="eyebrow mb-3 text-secondaryBrand-300">Apprendre, puis agir avec votre club</p>
                 <h3 class="text-2xl font-semibold tracking-tight">{{ service.title }}</h3>
                 <p class="mt-3 text-base/7 text-brand-100">{{ service.text }}</p>
+                <ul v-if="service.points" class="mt-5 space-y-3 text-sm/7 text-brand-100">
+                  <li v-for="point in service.points" :key="point" class="flex gap-3">
+                    <CheckIcon class="mt-1 size-5 shrink-0 text-secondaryBrand-300" aria-hidden="true" />
+                    <span>{{ point }}</span>
+                  </li>
+                </ul>
+                <a v-if="service.featured" href="#votre-projet" class="text-link mt-6 text-secondaryBrand-300">Construire une journée d’entretien <ArrowRightIcon class="size-5 shrink-0" aria-hidden="true" /></a>
                 <dl v-if="service.training" class="mt-5 space-y-5 border-l-2 border-secondaryBrand-400 pl-4">
                   <div v-for="training in service.training" :key="training.federation">
                     <dt class="text-sm font-semibold text-secondaryBrand-300">{{ training.federation }}</dt>
@@ -233,7 +254,7 @@ const outdoorServices = [
             <h2 id="ensemble-title" class="mt-5 text-4xl font-semibold tracking-tight">On part de<br>votre réalité.</h2>
           </div>
           <div>
-            <p class="text-xl/9">Un besoin d’encadrement, une équipe de bénévoles à accompagner, un projet qui attend le bon déclic ? La Brigade intervient en complément de la vie de votre club.</p>
+            <p class="text-xl/9">Un besoin d’encadrement, une équipe de bénévoles à accompagner, un projet qui attend le bon déclic ? La Brigade du kiff intervient en complément de la vie de votre club.</p>
             <ul class="mt-7 grid gap-5 text-base/7 text-slate-600 sm:grid-cols-2">
               <li class="flex gap-3"><CheckIcon class="mt-1 size-5 shrink-0 text-brand-800" aria-hidden="true" />Des contenus adaptés à vos adhérents et à vos objectifs.</li>
               <li class="flex gap-3"><CheckIcon class="mt-1 size-5 shrink-0 text-brand-800" aria-hidden="true" />Des interventions ponctuelles ou des cycles réguliers.</li>
@@ -277,5 +298,6 @@ const outdoorServices = [
 .primary-link { @apply inline-flex items-center justify-center gap-3 rounded-sm bg-secondaryBrand-400 px-6 py-4 text-sm font-semibold text-brand-950 transition hover:bg-secondaryBrand-300; }
 .text-link { @apply inline-flex items-center gap-3 text-sm font-semibold; }
 .text-link:hover { @apply underline underline-offset-4; }
+#entretien-falaises + article { border-top-width: 0; }
 .clubs-page :is(a, button, summary):focus-visible { outline: 3px solid #d97706; outline-offset: 5px; }
 </style>

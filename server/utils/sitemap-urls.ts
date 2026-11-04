@@ -45,6 +45,12 @@ export function getStaticSitemapUrls(): SitemapUrl[] {
       priority: 0.7,
     },
     {
+      loc: "/moniteurs-escalade-clubs-ffme-ffcam",
+      lastmod,
+      changefreq: "weekly",
+      priority: 0.8,
+    },
+    {
       loc: "/manifeste",
       lastmod,
       changefreq: "weekly",

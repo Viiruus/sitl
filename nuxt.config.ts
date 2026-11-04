@@ -64,6 +64,9 @@ export default defineNuxtConfig({
     serverAssets: [{ baseName: 'department-maps', dir: '../public/maps/departments' }],
   },
   routeRules: {
+    '/clubs': { redirect: { to: '/moniteurs-escalade-clubs-ffme-ffcam', statusCode: 301 } },
+    '/prestations-clubs-escalade': { redirect: { to: '/moniteurs-escalade-clubs-ffme-ffcam', statusCode: 301 } },
+    '/prestations-clubs-escalade-ffme-ffcam': { redirect: { to: '/moniteurs-escalade-clubs-ffme-ffcam', statusCode: 301 } },
     '/admin/messages-whatsapp': { robots: false, headers: { 'X-Robots-Tag': 'noindex, nofollow', 'Cache-Control': 'private, no-store' } },
     '/departements/savoie': { redirect: { to: '/escalade/savoie', statusCode: 301 } },
     '/_nuxt/**': { headers: { 'cache-control': 'public, max-age=31536000, immutable' } },
