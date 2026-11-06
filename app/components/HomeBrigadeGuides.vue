@@ -8,24 +8,23 @@ const prioritizedMoniteurs = usePrioritizedRandomMoniteurs(
   moniteurs,
   'home-brigade-prioritized-moniteur-ids',
 )
-const featuredMoniteurs = computed(() => prioritizedMoniteurs.value.slice(0, 4))
 </script>
 
 <template>
-  <section class="bg-brand-950 py-20 text-white sm:py-28">
+  <section id="moniteurs" aria-labelledby="home-guides-title" class="scroll-mt-24 bg-brand-950 py-20 text-white sm:py-28">
     <div class="mx-auto w-full max-w-[90rem] px-4 sm:px-6 lg:px-8">
       <div class="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p class="text-sm font-semibold uppercase tracking-[0.35em] text-secondaryBrand-200">
             Le collectif
           </p>
-          <h2 class="mt-3 text-4xl font-semibold tracking-tight text-pretty sm:text-5xl">
+          <h2 id="home-guides-title" class="mt-3 text-4xl font-semibold tracking-tight text-pretty sm:text-5xl">
             Les moniteur·ices
           </h2>
         </div>
         <NuxtLink
           to="/la-brigade"
-          class="hidden w-fit items-center justify-center gap-2 rounded-full bg-secondaryBrand-500 px-5 py-3 text-sm font-semibold text-white transition hover:bg-secondaryBrand-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondaryBrand-400 sm:inline-flex"
+          class="inline-flex w-fit items-center justify-center gap-2 rounded-full bg-secondaryBrand-500 px-5 py-3 text-sm font-semibold text-white transition hover:bg-secondaryBrand-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondaryBrand-400"
         >
           Toute l'équipe
           <span aria-hidden="true">→</span>
@@ -38,35 +37,10 @@ const featuredMoniteurs = computed(() => prioritizedMoniteurs.value.slice(0, 4))
       <div v-else-if="error" class="mt-12 text-sm text-red-300">
         Impossible de charger les moniteurs pour le moment.
       </div>
-      <div v-else-if="!featuredMoniteurs.length" class="mt-12 rounded-3xl border border-white/10 bg-white/5 p-8 text-brand-100/80">
-        Les profils de la Brigade seront bientôt disponibles.
+      <div v-else-if="!prioritizedMoniteurs.length" class="mt-12 rounded-3xl border border-white/10 bg-white/5 p-8 text-brand-100/80">
+        Les profils de la Brigade du kiff seront bientôt disponibles.
       </div>
-      <ul
-        v-else
-        role="list"
-        class="mt-12 flex snap-x snap-mandatory gap-6 overflow-x-auto pb-4"
-      >
-        <li
-          v-for="moniteur in featuredMoniteurs"
-          :key="moniteur.id"
-          class="w-[82vw] max-w-sm shrink-0 snap-start sm:w-80 lg:w-[calc((100%-4.5rem)/4)] lg:max-w-none"
-        >
-          <GuideCard
-            :moniteur="moniteur"
-            image-sizes="(min-width: 1024px) 25vw, (min-width: 640px) 320px, 82vw"
-          />
-        </li>
-      </ul>
-
-      <div v-if="featuredMoniteurs.length" class="mt-8 flex justify-center sm:hidden">
-        <NuxtLink
-          to="/la-brigade"
-          class="inline-flex items-center justify-center gap-2 rounded-full border border-white/20 px-5 py-3 text-sm font-semibold text-white transition hover:border-white/40 hover:bg-white/5"
-        >
-          Toute l'équipe
-          <span aria-hidden="true">→</span>
-        </NuxtLink>
-      </div>
+      <BrigadeGuidesMap v-else :moniteurs="prioritizedMoniteurs" />
     </div>
   </section>
 </template>

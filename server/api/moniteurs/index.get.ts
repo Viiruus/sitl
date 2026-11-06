@@ -22,18 +22,27 @@ export default defineEventHandler(async () => {
           titre: true,
           discipline: true,
           disciplinesComplementaires: true,
+          lieuLabel: true,
+          jours: true,
+          placesMax: true,
+          prixParPersonne: true,
+          devise: true,
+          descriptionCourte: true,
+          niveauMinimum: true,
           sessions: {
             where: {
               dateDebut: { gte: publicFutureThreshold },
+              statut: 'OUVERT',
             },
             select: {
               dateDebut: true,
               dateFin: true,
+              placesReservees: true,
+              prixSpecifique: true,
             },
             orderBy: {
               dateDebut: "asc",
             },
-            take: 1,
           },
         },
       },
@@ -58,11 +67,22 @@ export default defineEventHandler(async () => {
           return null
         }
 
-        const nextStage = (guide.aventures ?? [])
+        const bookableStages = (guide.aventures ?? []).map(aventure => ({
+          ...aventure,
+          sessions: aventure.sessions.filter(session => session.placesReservees < aventure.placesMax),
+        })).filter(aventure => aventure.sessions.length > 0)
+        const nextStage = bookableStages
           .flatMap((aventure) =>
             (aventure.sessions ?? []).map((session) => ({
               slug: aventure.slug,
               titre: aventure.titre,
+              lieuLabel: aventure.lieuLabel,
+              jours: aventure.jours,
+              prixParPersonne: session.prixSpecifique ?? aventure.prixParPersonne,
+              devise: aventure.devise,
+              descriptionCourte: aventure.descriptionCourte,
+              niveauMinimum: aventure.niveauMinimum,
+              discipline: aventure.discipline,
               dateDebut: session.dateDebut,
               dateFin: session.dateFin,
             })),
@@ -97,9 +117,7 @@ export default defineEventHandler(async () => {
             : [],
           disciplines: Array.from(new Set(disciplines.filter(value => value.length > 0))),
           publishedStageCount: guide.aventures?.length ?? 0,
-          upcomingStageCount: (guide.aventures ?? []).filter(
-            aventure => (aventure.sessions ?? []).length > 0,
-          ).length,
+          upcomingStageCount: bookableStages.length,
           nextStage,
         }
       })
