@@ -1,4 +1,5 @@
 import { prisma } from '../../../../utils/prisma'
+import { getSalonBookingOffer } from '~~/shared/utils/salon-escalade-offer'
 
 export default defineEventHandler(async (event) => {
   const session = await getUserSession(event)
@@ -62,6 +63,7 @@ export default defineEventHandler(async (event) => {
       participants: b.participants,
       montant: b.montant,
       createdAt: b.createdAt,
+      salonOffer: getSalonBookingOffer(b.createdAt),
       session: {
         id: b.session.id,
         dateDebut: b.session.dateDebut,

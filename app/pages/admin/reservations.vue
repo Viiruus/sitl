@@ -68,6 +68,7 @@ const inputClass = 'w-full rounded-xl border border-slate-300 bg-white px-3 py-2
     <div v-else class="space-y-4">
       <article v-for="booking in data?.bookings" :key="booking.id" class="admin-panel rounded-2xl p-5 transition hover:border-sky-400/30">
         <div class="mb-4"><p class="font-semibold">#{{ booking.id }} · {{ personName(booking.user) }}</p><p class="text-sm text-slate-600">{{ booking.session.aventure.titre }} · créée le {{ new Intl.DateTimeFormat('fr-FR', { dateStyle: 'medium' }).format(new Date(booking.createdAt)) }}</p></div>
+        <BookingSalonOffer :offer="booking.salonOffer" class="mb-4" />
         <div v-if="forms[booking.id]" class="grid gap-3 lg:grid-cols-[1.5fr_1.3fr_1fr_.6fr_.7fr_auto] lg:items-end">
           <label class="text-xs text-slate-600">Session<select v-model.number="forms[booking.id].sessionId" :class="inputClass" class="mt-1"><option v-for="session in sessions" :key="session.id" :value="session.id">{{ sessionLabel(session) }}</option></select></label>
           <label class="text-xs text-slate-600">Grimpeur<select v-model.number="forms[booking.id].userId" :class="inputClass" class="mt-1"><option v-for="climber in climbers" :key="climber.id" :value="climber.id">{{ personName(climber) }}</option></select></label>

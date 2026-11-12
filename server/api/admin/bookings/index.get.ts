@@ -1,4 +1,5 @@
 import { requireAdmin } from '../../../utils/admin-auth'
+import { getSalonBookingOffer } from '~~/shared/utils/salon-escalade-offer'
 
 export default defineEventHandler(async (event) => {
   const { db } = await requireAdmin(event)
@@ -24,6 +25,6 @@ export default defineEventHandler(async (event) => {
       },
     },
   })
-  return { bookings }
+  return { bookings: bookings.map(booking => ({ ...booking, salonOffer: getSalonBookingOffer(booking.createdAt) })) }
 })
 

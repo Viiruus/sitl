@@ -382,6 +382,7 @@ const deleteSession = async (group: { session: any; bookings: any[] }) => {
                 Participants : {{ booking.participants }} — Montant : {{ booking.montant }} €
               </p>
               <p class="text-xs text-slate-500">Réservation créée le {{ formatDate(booking.createdAt) }}</p>
+              <BookingSalonOffer :offer="booking.salonOffer" />
             </article>
           </div>
         </section>
