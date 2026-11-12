@@ -32,7 +32,7 @@
             <p class="mx-auto mt-6 max-w-2xl text-lg font-medium text-pretty text-white/85 drop-shadow sm:text-xl/8">
               Vos aventures verticales commencent ici, avec notre collectif de moniteur·ices d'escalade.
             </p>
-            <a v-if="salonPhase !== 'ended'" href="#salon-escalade" class="mt-6 inline-flex max-w-full flex-wrap items-center justify-center gap-x-3 gap-y-1 rounded-2xl border border-amber-200/30 bg-brand-950/75 px-4 py-3 text-sm text-amber-100 backdrop-blur-sm transition hover:border-amber-200 hover:bg-brand-950 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-amber-300 sm:rounded-full">
+            <a v-if="salonPhase !== 'ended'" href="#salon-escalade" class="mt-6 inline-flex max-w-full flex-wrap items-center justify-center gap-x-3 gap-y-1 rounded-2xl border border-secondaryBrand-300 bg-brand-950/75 px-4 py-3 text-sm text-secondaryBrand-300 backdrop-blur-sm transition hover:bg-brand-950 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-secondaryBrand-300 sm:rounded-full">
               <span class="font-bold">Salon de l’Escalade · 15–17 janvier 2027</span>
               <span class="text-white">−20 % sur les stages <span aria-hidden="true">↘</span></span>
             </a>
