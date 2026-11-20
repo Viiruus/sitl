@@ -26,7 +26,7 @@ const parseRange = (value: unknown): AnalyticsRange => {
   const parsed = typeof raw === 'string' ? Number.parseInt(raw, 10) : Number(raw)
 
   if (parsed === 7 || parsed === 30 || parsed === 365) return parsed
-  return 30
+  return 7
 }
 
 const normalizeProfilePath = (value: unknown) => {
@@ -216,7 +216,7 @@ export default defineEventHandler(async (event) => {
 
   for (const row of rows) {
     const profilePath = normalizeProfilePath(row.requestPath)
-    if (!profilePath) continue
+    if (!profilePath || !guideBySlug.has(profilePath.slug)) continue
 
     const current = profileStatsBySlug.get(profilePath.slug) ?? {
       path: profilePath.path,

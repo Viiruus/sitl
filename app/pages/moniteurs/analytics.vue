@@ -16,7 +16,7 @@ const { clear, fetch } = useUserSession()
 
 type AnalyticsRange = '7' | '30' | '365'
 
-const selectedRange = ref<AnalyticsRange>('30')
+const selectedRange = ref<AnalyticsRange>('7')
 
 const { data: guideData } = await useFetch('/api/guides/me')
 const guide = computed(() => guideData.value?.guide ?? null)
@@ -223,9 +223,6 @@ const logout = async () => {
                   </NuxtLink>
                   <p class="mt-1 text-xs text-slate-500">
                     {{ item.path }}
-                    <span v-if="!item.knownGuide" class="ml-2 text-amber-700">
-                      Ancien slug ou moniteur introuvable
-                    </span>
                   </p>
                 </td>
                 <td class="whitespace-nowrap px-5 py-4 text-right text-sm font-semibold text-amber-700">
